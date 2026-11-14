@@ -1,0 +1,8 @@
+{
+  "_info": "Liste des sprites PokeAPI utilisés par le jeu. Uniquement des PNG fixes (jamais les dossiers animated/showdown). Lancer `npm run sprites` après modification.",
+  "front": [10, 13, 16, 19],
+  "back": [447],
+  "shiny": [10, 13, 16, 19],
+  "artwork": [447, 495, 115, 58, 151],
+  "items": []
+}
