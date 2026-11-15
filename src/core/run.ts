@@ -1,7 +1,7 @@
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
 import type { Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
-import { CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
+import { allCards, CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
@@ -176,7 +176,7 @@ export class Run {
 
   /** 3 cartes différentes à choisir. Chaque emplacement a 12 % de chances d'être une carte neutre. */
   cardChoices(kind: 'combat' | 'elite' | 'boss' | 'boutique', count = 3, neutralChance = kind === 'boutique' ? 0 : 0.12): string[] {
-    const own = rewardPool(this.character, this.unlocked);
+    const own = this.character === 'mew' ? mewPool(this.unlocked) : rewardPool(this.character, this.unlocked);
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
@@ -245,4 +245,13 @@ export function cardPrice(defId: string): number {
   const d = CARD_DEFS[defId];
   const base = d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50;
   return d.character === 'normal' ? Math.round(base * 1.2) : base; // cartes neutres un peu plus chères
+}
+
+/** Gène ancestral : Mew pioche ses récompenses parmi les cartes de tous les personnages
+ *  (sauf celles du Bébé Kangourex et les baisses de stats que seule la Contestation de Vipélierre rend utiles). */
+function mewPool(unlocked?: string[]): CardDef[] {
+  return allCards().filter((c) => c.character !== 'normal' && c.rarity !== 'depart'
+    && (!unlocked || unlocked.includes(c.id))
+    && !c.effects.some((e) => e.kind.startsWith('bebe-')
+      || (c.character === 'vipelierre' && e.kind === 'statut' && e.on === 'soi' && e.stacks < 0)));
 }

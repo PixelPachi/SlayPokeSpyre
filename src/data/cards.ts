@@ -1,6 +1,10 @@
 // Toutes les cartes du jeu. Ajouter une carte = ajouter une entrée ici (aucun code à écrire).
 // Règle du GDD : la plupart des cartes portent le nom d'une capacité que le Pokémon peut apprendre dans les jeux.
 import type { CardDef } from '../core/model';
+import { VIPELIERRE_CARDS } from './cards-vipelierre';
+import { KANGOUREX_CARDS } from './cards-kangourex';
+import { CANINOS_CARDS } from './cards-caninos';
+import { MEW_CARDS } from './cards-mew';
 import { RIOLU_CARDS } from './cards-riolu';
 import { NEUTRAL_CARDS } from './cards-neutres';
 
@@ -62,7 +66,7 @@ const CARDS: CardDef[] = [
   },
 ];
 
-CARDS.push(...RIOLU_CARDS, ...NEUTRAL_CARDS);
+CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS);
 
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 

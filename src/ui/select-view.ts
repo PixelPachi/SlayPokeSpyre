@@ -3,7 +3,7 @@ import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { allCards, cardDef, neutralPool } from '../data/cards';
 import type { SaveData } from '../core/save';
-import { characterLevel } from '../core/save';
+import { characterLevel, playableCharacters } from '../core/save';
 import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import { renderCard } from './card';
 import { relicCard, relicIcon } from './run-ui';
@@ -13,7 +13,6 @@ import { TYPE_COLORS } from './labels';
 import { asset, esc } from './util';
 
 const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
-const UNLOCKED: CharacterId[] = ['riolu'];
 const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
   riolu: 'illustrations/riolu.png',
   vipelierre: 'illustrations/vipelierre.png',
@@ -30,6 +29,7 @@ const UNLOCK_TEXT: Record<CharacterId, string> = {
 
 export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: CharacterId) => void): void {
   let current: CharacterId = 'riolu';
+  const UNLOCKED = playableCharacters(save);
 
   const draw = () => {
     const ch = CHARACTERS[current];

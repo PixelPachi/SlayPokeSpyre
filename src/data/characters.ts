@@ -21,9 +21,8 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
   kangourex: {
     id: 'kangourex', name: 'Kangourex', dex: [115], types: ['normal'], maxHp: 85,
     talent: { name: 'Instinct maternel', text: 'Le Bébé Kangourex apparaît au début de chaque combat.' },
-    // + 2 cartes de son type, à créer avec la mécanique du Bébé
     starterRelic: 'lait-meumeu',
-    starterDeck: ['ecras-face', 'ecras-face', 'ecras-face', 'ecras-face', 'abri', 'abri', 'abri', 'abri'],
+    starterDeck: ['ecras-face', 'ecras-face', 'ecras-face', 'ecras-face', 'abri', 'abri', 'abri', 'abri', 'kan-coup-main', 'kan-coup-double'],
   },
   caninos: {
     id: 'caninos', name: 'Caninos', dex: [58, 59], types: ['feu'], maxHp: 78,
@@ -34,6 +33,6 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
   mew: {
     id: 'mew', name: 'Mew', dex: [151], types: ['psy'], maxHp: 70,
     talent: { name: 'Gène ancestral', text: 'A accès aux cartes de tous les personnages.' },
-    starterDeck: [],
+    starterDeck: ['mew-ecras-face', 'mew-ecras-face', 'mew-ecras-face', 'mew-ecras-face', 'abri', 'abri', 'abri', 'abri', 'mew-morphing', 'mew-choc-mental'],
   },
 };

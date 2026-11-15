@@ -43,3 +43,12 @@ export function fitStage(stage: HTMLElement): void {
   window.addEventListener('resize', fit);
   fit();
 }
+
+/** Petit message qui s'affiche quelques secondes en haut de l'écran. */
+export function toast(text: string): void {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = text;
+  (document.querySelector('#stage') ?? document.body).appendChild(el);
+  setTimeout(() => el.remove(), 4500);
+}

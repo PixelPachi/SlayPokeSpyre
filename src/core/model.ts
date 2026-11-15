@@ -19,7 +19,12 @@ export type Statuses = Partial<Record<StatusId, number>>;
 export type Target = 'ennemi' | 'tous' | 'aleatoire' | 'soi';
 
 /** Talents (pouvoirs) : effets permanents pour tout le combat. */
-export type PowerId = 'plenitude' | 'lire-esprit';
+export type PowerId =
+  | 'plenitude' | 'lire-esprit' // Riolu
+  | 'champ-herbu' | 'racines' | 'zenith-plante' // Vipélierre
+  | 'amour-filial' | 'eveil' // Kangourex
+  | 'zenith' | 'braises' // Caninos
+  | 'souvenir' | 'telekinesie'; // Mew
 
 export type Effect =
   | {
@@ -29,6 +34,8 @@ export type Effect =
       facade?: boolean; // dégâts doublés si le lanceur a Brûlure, Poison ou Paralysie
       revanche?: boolean; // dégâts doublés si le lanceur a perdu des PV au dernier tour ennemi
       contreStatut?: boolean; // dégâts doublés si la cible a un statut (Poison, Brûlure, Paralysie, Peur, Confusion…)
+      parStatut?: StatusId; // + parStatutX dégâts par point de ce statut sur la cible
+      parStatutX?: number;
     }
   | { kind: 'protection'; amount: number }
   | { kind: 'statut'; status: StatusId; stacks: number; on: 'cible' | 'soi' | 'tous' }
@@ -45,7 +52,14 @@ export type Effect =
   | { kind: 'soin'; amount: number }
   | { kind: 'casse-protection' } // retire la Protection de la cible
   | { kind: 'metronome' } // joue l'effet d'une carte du personnage au hasard
-  | { kind: 'pouvoir'; power: PowerId; amount: number };
+  | { kind: 'pouvoir'; power: PowerId; amount: number }
+  | { kind: 'statut-mult'; status: StatusId; mult: number; on: 'cible' | 'tous' } // multiplie un statut déjà posé
+  | { kind: 'ajoute-carte'; from: 'tous' | 'neutre'; count: number } // ajoute des cartes au hasard dans la main (pour ce combat)
+  | { kind: 'bebe-attaque'; times: number } // le Bébé Kangourex attaque tout de suite
+  | { kind: 'bebe-puissance'; amount: number }
+  | { kind: 'bebe-soin'; amount: number } // soigne le Bébé (le ramène s'il est K.O.)
+  | { kind: 'bebe-pvmax'; amount: number }
+  | { kind: 'bebe-protection'; amount: number };
 
 export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable';
 

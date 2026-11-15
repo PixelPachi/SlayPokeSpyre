@@ -29,6 +29,15 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
 export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => string }> = {
   plenitude: { label: 'Plénitude', text: (n) => `Au début de chaque tour, gagne ${n} Aura.` },
   'lire-esprit': { label: 'Lire-Esprit', text: () => 'Si ton tour commence avec 30 Aura ou plus, tes cartes coûtent 0 PA pendant ce tour.' },
+  'champ-herbu': { label: 'Champ Herbu', text: (n) => `Au début de chaque tour, récupère ${n} PV.` },
+  racines: { label: 'Racines', text: (n) => `Au début de chaque tour, gagne ${n} Protection.` },
+  'zenith-plante': { label: 'Zénith', text: (n) => `Tes attaques Plante infligent ${n} dégâts de plus.` },
+  'amour-filial': { label: 'Amour Filial', text: (n) => `Le Bébé attaque ${n} fois de plus à la fin de chaque tour.` },
+  eveil: { label: 'Éveil', text: (n) => `Au début de chaque tour, le Bébé gagne ${n} Puissance.` },
+  zenith: { label: 'Zénith', text: (n) => `Tes attaques Feu infligent ${n} dégâts de plus.` },
+  braises: { label: 'Braises', text: (n) => `Au début de chaque tour, applique ${n} Brûlure à tous les ennemis.` },
+  souvenir: { label: 'Souvenir', text: (n) => `Au début de chaque tour, ajoute ${n} carte${n > 1 ? 's' : ''} de n'importe quel Pokémon au hasard dans ta main.` },
+  telekinesie: { label: 'Télékinésie', text: (n) => `Au début de chaque tour, pioche ${n} carte${n > 1 ? 's' : ''} de plus.` },
 };
 
 export const CATEGORY_LABELS: Record<CardDef['category'], string> = {
@@ -56,6 +65,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         if (e.revanche) parts.push('Double si tu as perdu des PV au dernier tour ennemi.');
         if (e.drain) parts.push('Récupère la moitié des dégâts infligés.');
         if (e.contreStatut) parts.push('Double si la cible a un statut.');
+        if (e.parStatut) parts.push(`+${e.parStatutX ?? 1} par ${STATUS_INFO[e.parStatut].label} sur la cible.`);
         break;
       }
       case 'degats-aura':
@@ -76,10 +86,20 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'copie': parts.push('Rejoue la dernière carte jouée.'); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
+      case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
+      case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main.`); break;
+      case 'bebe-attaque': parts.push(e.times > 1 ? `Le Bébé attaque ${e.times} fois.` : 'Le Bébé attaque.'); break;
+      case 'bebe-puissance': parts.push(`Le Bébé gagne <b>${e.amount}</b> Puissance.`); break;
+      case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
+      case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;
+      case 'bebe-protection': parts.push(`Le Bébé gagne <b>${e.amount}</b> Protection.`); break;
       case 'protection': parts.push(`Gagne <b>${e.amount}</b> Protection.`); break;
       case 'statut': {
         const s = STATUS_INFO[e.status].label;
-        if (e.on === 'soi') parts.push(e.status === 'attaque' || e.status === 'defense' ? `${s} ${signed(e.stacks)}.` : `Gagne ${e.stacks} ${s}.`);
+        if (e.on === 'soi' && (e.status === 'attaque' || e.status === 'defense')) {
+          // Contestation : les baisses de stats de Vipélierre deviennent des hausses
+          parts.push(d.character === 'vipelierre' && e.stacks < 0 ? `${s} ${signed(-e.stacks)} <i>(Contestation)</i>.` : `${s} ${signed(e.stacks)}.`);
+        } else if (e.on === 'soi') parts.push(`Gagne ${e.stacks} ${s}.`);
         else parts.push(`Applique <b>${e.stacks}</b> ${s}${e.on === 'tous' ? ' à tous les ennemis' : ''}.`);
         break;
       }

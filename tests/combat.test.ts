@@ -392,3 +392,93 @@ describe('cartes neutres', async () => {
     expect(rat.hp).toBe(294);
   });
 });
+
+describe('cartes de tous les personnages', async () => {
+  const { rewardPool, CARD_DEFS, cardDef } = await import('../src/data/cards');
+  const { UNLOCKS } = await import('../src/data/unlocks');
+  const { Run } = await import('../src/core/run');
+  const chars = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as const;
+
+  it('75 cartes de récompense par personnage, toutes débloquables et sans doublon de nom', () => {
+    for (const ch of chars) {
+      const pool = rewardPool(ch);
+      expect(pool, ch).toHaveLength(75);
+      const unlockIds = Object.values(UNLOCKS[ch]!).flat();
+      expect(new Set(unlockIds).size, ch).toBe(75);
+      for (const c of pool) expect(unlockIds, `${ch} ${c.id}`).toContain(c.id);
+      expect(new Set(pool.map((c) => c.name)).size, ch).toBe(75);
+    }
+  });
+
+  it('les decks de départ font 10 cartes qui existent', () => {
+    for (const ch of chars) {
+      expect(CHARACTERS[ch].starterDeck, ch).toHaveLength(10);
+      for (const id of CHARACTERS[ch].starterDeck) expect(CARD_DEFS[id], id).toBeDefined();
+    }
+  });
+
+  it('chaque carte se joue sans erreur (version normale et améliorée)', () => {
+    for (const ch of chars) {
+      for (const d of rewardPool(ch)) {
+        for (const up of [false, true]) {
+          const c = new Combat({ character: ch, deck: makeDeck(CHARACTERS[ch].starterDeck), enemies: ['rattata', 'rattata'], seed: d.id });
+          for (const e of c.enemies) e.hp = e.maxHp = 999;
+          c.player.energy = 9;
+          c.hand = [{ uid: 900, defId: d.id, upgraded: up }];
+          const def = cardDef(d.id, up);
+          expect(() => c.play(900, def.target === 'ennemi' ? c.enemies[0].uid : undefined), d.id).not.toThrow();
+        }
+      }
+    }
+  });
+
+  it('Mew pioche des cartes de tous les personnages', () => {
+    const run = new Run('MEW', 'mew');
+    const seen = new Set<string>();
+    for (let i = 0; i < 100; i++) for (const id of run.cardChoices('combat')) seen.add(CARD_DEFS[id].character);
+    expect(seen.size).toBeGreaterThanOrEqual(5);
+  });
+});
+
+describe('Bébé Kangourex', () => {
+  const mk = () => {
+    const c = new Combat({ character: 'kangourex', deck: makeDeck(CHARACTERS.kangourex.starterDeck), enemies: ['rattata'], seed: 'BEBE', relics: ['lait-meumeu'] });
+    c.enemies[0].hp = c.enemies[0].maxHp = 300;
+    return c;
+  };
+
+  it('apparaît avec 10 PV grâce au Lait Meumeu et attaque à la fin du tour', () => {
+    const c = mk();
+    expect(c.player.familiar).toMatchObject({ hp: 10, maxHp: 10, power: 3 });
+    const before = c.enemies[0].hp;
+    c.endPlayerTurn();
+    expect(c.enemies[0].hp).toBeLessThan(before);
+  });
+
+  it('s’il est K.O., Kangourex gagne Attaque +2', () => {
+    const c = mk();
+    c.endPlayerTurn();
+    // force le coup sur le Bébé
+    (c as unknown as { hitFamiliar: (n: number, e: string) => void }).hitFamiliar(50, 'normal');
+    expect(c.player.familiar!.hp).toBe(0);
+    expect(c.player.statuses.attaque).toBe(2);
+  });
+
+  it('Puissance augmente ses dégâts', () => {
+    const c = mk();
+    c.player.energy = 9;
+    c.hand = makeDeck(['kan-puissance', 'kan-coup-d-boule']).map((x, i) => ({ ...x, uid: 950 + i }));
+    c.play(950);
+    expect(c.player.familiar!.power).toBe(5);
+    const before = c.enemies[0].hp;
+    c.play(951, c.enemies[0].uid);
+    expect(before - c.enemies[0].hp).toBeGreaterThan(10);
+  });
+});
+
+it('le Bébé peut finir le combat à la fin du tour', () => {
+  const c = new Combat({ character: 'kangourex', deck: makeDeck(CHARACTERS.kangourex.starterDeck), enemies: ['rattata'], seed: 'FIN' });
+  c.enemies[0].hp = 1;
+  c.endPlayerTurn();
+  expect(c.phase).toBe('victoire');
+});

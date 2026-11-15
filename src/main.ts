@@ -6,8 +6,9 @@ import { CombatView } from './ui/combat-view';
 import { renderMap } from './ui/map-view';
 import { renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
-import { fitStage, installTooltips } from './ui/util';
-import { characterRelics, characterUnlocks, grantExp, loadSave } from './core/save';
+import { fitStage, installTooltips, toast } from './ui/util';
+import { CHARACTERS } from './data/characters';
+import { characterRelics, characterUnlocks, grantExp, loadSave, unlockCharacters } from './core/save';
 import { runExp } from './data/unlocks';
 
 const stage = document.getElementById('stage')!;
@@ -108,6 +109,8 @@ function endRun(run: Run, victory: boolean): void {
   const base = runExp(run.floor, run.elitesDefeated, run.bossesDefeated);
   const exp = run.relics.includes('oeuf-chance') ? Math.floor(base * 1.5) : base;
   const result = grantExp(save, run.character, exp);
+  const fresh = unlockCharacters(save, run.bossesDefeated, victory);
+  if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
   renderRunEnd(screen, run, victory, { exp, ...result, total: save.exp[run.character] ?? 0 }, menu, () => startRun(run.character));
 }
 

@@ -34,6 +34,17 @@ export interface PlayerState extends Fighter {
   freeTurn: boolean;
   /** PV perdus pendant le dernier tour ennemi (pour Représailles). */
   hpLostEnemyTurn: number;
+  /** Bébé Kangourex (familier), seulement pour Kangourex. */
+  familiar?: Familiar;
+}
+
+export interface Familiar {
+  hp: number;
+  maxHp: number;
+  power: number;
+  block: number;
+  /** Méga-Kangourex : le Bébé attaque 2 fois. */
+  mega: boolean;
 }
 
 export interface EnemyState extends Fighter {
@@ -45,7 +56,7 @@ export interface EnemyState extends Fighter {
 }
 
 /** Cible d'un événement : le joueur, ou l'uid d'un ennemi. */
-export type Who = 'player' | number;
+export type Who = 'player' | 'bebe' | number;
 
 export type CombatEvent =
   | { type: 'damage'; target: Who; amount: number; blocked: number; effectiveness: Effectiveness }
@@ -72,6 +83,9 @@ export interface CombatOptions {
   maxHp?: number;
   /** Objets tenus (ids de data/relics.ts). */
   relics?: string[];
+  /** PV max en plus pour le Bébé Kangourex (évolution). */
+  familiarBonus?: number;
+  mega?: boolean;
 }
 
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
@@ -105,6 +119,7 @@ export class Combat {
   private events: CombatEvent[] = [];
   private nextEnemyUid = 1;
   private cardAuraUsed = false;
+  private nextTempUid = 100000;
   private lastPlayed: CardDef | null = null;
   readonly relics: Set<string>;
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
@@ -121,6 +136,10 @@ export class Combat {
       powers: {}, freeTurn: false, hpLostEnemyTurn: 0,
     };
     this.relics = new Set(opts.relics ?? []);
+    if (ch.id === 'kangourex') {
+      const hp = 6 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
+      this.player.familiar = { hp, maxHp: hp, power: 3, block: 0, mega: !!opts.mega };
+    }
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
     this.drawPile = this.rng.shuffle([...opts.deck]);
     // Cartes Innées en haut de la pioche
@@ -152,6 +171,8 @@ export class Combat {
   /** Bonus fixes des objets sur une attaque. */
   private relicFlat(d: CardDef): number {
     let b = 0;
+    if (this.player.powers.zenith && d.pokeType === 'feu') b += this.player.powers.zenith;
+    if (this.player.powers['zenith-plante'] && d.pokeType === 'plante') b += this.player.powers['zenith-plante'];
     if (this.has('plaque-poing') && d.pokeType === 'combat') b += 2;
     if (this.has('plaque-fer') && d.pokeType === 'acier') b += 3;
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
@@ -244,6 +265,7 @@ export class Combat {
     const target = targetUid !== undefined ? this.enemy(targetUid) : undefined;
     const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
     if (hit?.contreStatut && target && hasAnyStatus(target)) base += hit.amount;
+    if (hit?.parStatut && target) base += (target.statuses[hit.parStatut] ?? 0) * (hit.parStatutX ?? 1);
     if (!target) {
       // Sans cible : bonus de type et statuts du joueur seulement
       let dmg = Math.max(0, base + this.relicFlat(d) + (this.player.statuses.attaque ?? 0));
@@ -314,6 +336,9 @@ export class Combat {
     }
     this.hand = this.hand.filter((c) => this.def(c).keywords?.includes('conservee'));
     if (this.has('restes') && this.player.hp < this.player.maxHp) this.relicFired('restes', () => this.healPlayer(2));
+    const fam = this.player.familiar;
+    if (fam && fam.hp > 0) this.familiarAttack((fam.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0));
+    if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
     this.tickDurations(this.player);
     this.phase = 'ennemi';
     this.player.freeTurn = false;
@@ -336,7 +361,15 @@ export class Combat {
       this.events.push({ type: 'enemy-move', uid, name: m.name });
       if (m.block) this.gainBlock(e, uid, m.block);
       if (m.damage !== undefined) {
+        // Le Bébé Kangourex peut être visé (3 chances sur 10)
+        const fam = this.player.familiar;
+        const atBaby = !!fam && fam.hp > 0 && this.rng.next() < 0.3;
         for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
+          if (atBaby && fam!.hp > 0) {
+            const { amount, effectiveness } = computeDamage(m.damage, e, BABY_FIGHTER, m.pokeType ?? 'normal');
+            this.hitFamiliar(amount, effectiveness);
+            continue;
+          }
           const { amount, effectiveness } = computeDamage(m.damage, e, this.player, m.pokeType ?? 'normal');
           this.dealDamage(this.player, 'player', amount, effectiveness);
         }
@@ -382,12 +415,19 @@ export class Combat {
     this.turn++;
     this.phase = 'joueur';
     this.attacksThisTurn = 0;
+    if (this.player.familiar) this.player.familiar.block = 0;
     this.player.block = 0;
     this.player.energy = this.player.maxEnergy;
     this.tickDots(this.player, 'player');
     if (this.player.hp <= 0) return this.checkEnd();
     const pw = this.player.powers;
     if (pw.plenitude) this.gainAura(pw.plenitude);
+    if (pw['champ-herbu']) this.healPlayer(pw['champ-herbu']);
+    if (pw.racines) this.gainBlock(this.player, 'player', pw.racines);
+    if (pw.eveil && this.player.familiar) this.player.familiar.power += pw.eveil;
+    if (pw.braises) for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'brulure', pw.braises);
+    if (pw.souvenir) this.resolve({ kind: 'ajoute-carte', from: 'tous', count: pw.souvenir }, cardDef('abri'), undefined);
+    if (pw.telekinesie) this.draw(pw.telekinesie);
     if (pw['lire-esprit'] && this.player.aura >= 30) {
       this.player.freeTurn = true;
       this.events.push({ type: 'player-move', name: 'Énergie illimitée !' });
@@ -454,7 +494,11 @@ export class Combat {
           const targets = this.targetsFor(d, target);
           if (!targets.length) break;
           const bonus = this.takeAura();
-          for (const t of targets) dealt += this.strike(t, (eff.contreStatut && hasAnyStatus(t) ? base * 2 : base) + bonus, d);
+          for (const t of targets) {
+            let b = eff.contreStatut && hasAnyStatus(t) ? base * 2 : base;
+            if (eff.parStatut) b += (t.statuses[eff.parStatut] ?? 0) * (eff.parStatutX ?? 1);
+            dealt += this.strike(t, b + bonus, d);
+          }
         }
         if (eff.drain) this.healPlayer(Math.floor(dealt / 2));
         return;
@@ -527,6 +571,56 @@ export class Combat {
         p.powers[eff.power] = (p.powers[eff.power] ?? 0) + eff.amount;
         this.events.push({ type: 'power', power: eff.power, amount: p.powers[eff.power]! });
         return;
+      case 'statut-mult': {
+        for (const t of eff.on === 'tous' ? this.aliveEnemies() : target ? [target] : []) {
+          const v = t.statuses[eff.status] ?? 0;
+          if (v > 0) this.addStatus(t, t.uid, eff.status, v * (eff.mult - 1));
+        }
+        return;
+      }
+      case 'ajoute-carte': {
+        const pool = Object.values(CARD_DEFS).filter((c) => c.rarity !== 'depart'
+          && (eff.from === 'neutre' ? c.character === 'normal' : true)
+          && !c.effects.some((e) => e.kind === 'ajoute-carte'));
+        for (let i = 0; i < eff.count && this.hand.length < MAX_HAND; i++) {
+          const pick = this.rng.pick(pool);
+          this.hand.push({ uid: this.nextTempUid++, defId: pick.id, upgraded: false });
+          this.events.push({ type: 'player-move', name: `Nouvelle carte : ${pick.name}` });
+        }
+        return;
+      }
+      case 'bebe-attaque':
+        this.familiarAttack(eff.times, target);
+        return;
+      case 'bebe-puissance':
+        if (p.familiar) {
+          p.familiar.power += eff.amount;
+          this.events.push({ type: 'status', target: 'bebe', status: 'attaque', stacks: eff.amount });
+        }
+        return;
+      case 'bebe-soin':
+        if (p.familiar) {
+          const f = p.familiar;
+          const heal = Math.min(eff.amount, f.maxHp - f.hp);
+          if (heal > 0) {
+            f.hp += heal;
+            this.events.push({ type: 'heal', target: 'bebe', amount: heal });
+          }
+        }
+        return;
+      case 'bebe-pvmax':
+        if (p.familiar) {
+          p.familiar.maxHp += eff.amount;
+          p.familiar.hp += eff.amount;
+          this.events.push({ type: 'heal', target: 'bebe', amount: eff.amount });
+        }
+        return;
+      case 'bebe-protection':
+        if (p.familiar && p.familiar.hp > 0) {
+          p.familiar.block += eff.amount;
+          this.events.push({ type: 'block', target: 'bebe', amount: eff.amount });
+        }
+        return;
       case 'copie': {
         const last = this.lastPlayed;
         if (!last) return;
@@ -543,6 +637,36 @@ export class Combat {
         for (const e of pick.effects) if (this.phase === 'joueur') this.resolve(e, pick, t);
         return;
       }
+    }
+  }
+
+  /** Le Bébé Kangourex attaque (Puissance + Attaque de sa mère, type Normal). */
+  private familiarAttack(times: number, target?: EnemyState): void {
+    const f = this.player.familiar;
+    if (!f || f.hp <= 0) return;
+    for (let i = 0; i < times; i++) {
+      const alive = this.aliveEnemies();
+      if (!alive.length) return;
+      const t = target && target.hp > 0 ? target : this.rng.pick(alive);
+      const baby = { ...BABY_FIGHTER, statuses: { attaque: this.player.statuses.attaque ?? 0 } };
+      const { amount, effectiveness } = computeDamage(f.power, baby, t, 'normal');
+      this.events.push({ type: 'player-move', name: 'Le Bébé attaque !' });
+      this.dealDamage(t, t.uid, amount, effectiveness);
+      this.checkEnd();
+    }
+  }
+
+  private hitFamiliar(amount: number, effectiveness: Effectiveness): void {
+    const f = this.player.familiar!;
+    const blocked = Math.min(f.block, amount);
+    f.block -= blocked;
+    const rest = Math.min(f.hp, amount - blocked);
+    f.hp -= rest;
+    this.events.push({ type: 'damage', target: 'bebe', amount: rest, blocked, effectiveness });
+    if (f.hp <= 0) {
+      this.events.push({ type: 'ko', target: 'bebe' });
+      // Kangourex enrage : Attaque +2 pour le combat
+      this.addStatus(this.player, 'player', 'attaque', 2);
     }
   }
 
@@ -667,6 +791,9 @@ export class Combat {
     else if (this.aliveEnemies().length === 0) this.phase = 'victoire';
   }
 }
+
+/** Le Bébé Kangourex comme combattant (type Normal), pour le calcul des dégâts. */
+const BABY_FIGHTER: Fighter = { name: 'Bébé', dex: 115, types: ['normal'], hp: 1, maxHp: 1, block: 0, statuses: {} };
 
 function hasAnyStatus(f: Fighter): boolean {
   const s = f.statuses;
