@@ -52,7 +52,7 @@ export function renderSelect(root: HTMLElement, onStart: (c: CharacterId) => voi
             </button>`;
           }).join('')}
         </div>
-        <div class="version">Prototype — jalon 1 : combat</div>
+        <div class="version">Prototype — acte 1 : Forêt de Jade</div>
       </div>`;
   };
 

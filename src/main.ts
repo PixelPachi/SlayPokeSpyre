@@ -1,9 +1,10 @@
 import './ui/style.css';
-import { makeDeck } from './core/combat';
-import { Rng, randomSeed } from './core/rng';
-import { CHARACTERS } from './data/characters';
-import { ENCOUNTERS_FORET_DE_JADE } from './data/enemies';
+import type { CharacterId } from './core/model';
+import { randomSeed } from './core/rng';
+import { BOSS_ROW, Run } from './core/run';
 import { CombatView } from './ui/combat-view';
+import { renderMap } from './ui/map-view';
+import { renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips } from './ui/util';
 
@@ -14,38 +15,71 @@ installTooltips(stage);
 
 let view: CombatView | null = null;
 
-function menu(): void {
+function clear(): void {
   view?.destroy();
   view = null;
-  renderSelect(screen, (id) => startRun(id === 'riolu' ? id : 'riolu'));
+  screen.onclick = null;
 }
 
-/** Prototype du jalon 1 : une suite de combats dans la Forêt de Jade, PV conservés. */
-function startRun(character: 'riolu'): void {
-  const seed = new URLSearchParams(location.search).get('seed') ?? randomSeed();
-  const rng = new Rng(seed);
-  const deck = makeDeck(CHARACTERS[character].starterDeck);
-  let fight = 0;
-  let hp: number | undefined;
+function menu(): void {
+  clear();
+  renderSelect(screen, (id) => startRun(id));
+}
 
-  const next = () => {
-    view?.destroy();
-    fight++;
-    view = new CombatView(
-      screen,
-      { seed: `${seed}-${fight}`, enemies: rng.pick(ENCOUNTERS_FORET_DE_JADE), deck, hp, label: `Forêt de Jade · combat ${fight}` },
-      (r) => {
-        if (r.hp < 0) return menu();
-        if (r.victory) {
-          hp = r.hp;
-          next();
-        } else {
-          startRun(character);
-        }
-      },
-    );
-  };
-  next();
+function startRun(character: CharacterId): void {
+  const params = new URLSearchParams(location.search);
+  const run = new Run(params.get('seed') ?? randomSeed(), character);
+  showMap(run);
+}
+
+function showMap(run: Run): void {
+  clear();
+  renderMap(screen, run, (row, col) => {
+    run.moveTo(row, col);
+    if (row === BOSS_ROW) return fight(run, 'boss');
+    const node = run.nodeAt(row, col)!;
+    const back = () => showMap(run);
+    clear();
+    switch (node.type) {
+      case 'combat':
+      case 'elite':
+        return fight(run, node.type);
+      case 'centre':
+        return renderCentre(screen, run, back);
+      case 'boutique':
+        return renderShop(screen, run, back);
+      case 'evenement':
+        return renderEvent(screen, run, back);
+      case 'tresor':
+        return renderTreasure(screen, run, back);
+      case 'boss':
+        return fight(run, 'boss');
+    }
+  });
+}
+
+function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
+  clear();
+  const labels = { combat: 'Combat', elite: 'Pokémon dominant', boss: 'Gardien' };
+  view = new CombatView(
+    screen,
+    run,
+    { seed: `${run.seed}-${run.floor}`, enemies: run.encounter(type), label: labels[type] },
+    (r) => {
+      clear();
+      run.hp = r.hp;
+      if (!r.victory) return renderRunEnd(screen, run, false, menu, () => startRun(run.character));
+      if (type === 'boss') {
+        run.money += run.moneyReward('boss', r.shinies);
+        return renderRunEnd(screen, run, true, menu, () => startRun(run.character));
+      }
+      renderReward(
+        screen, run,
+        { money: run.moneyReward(type, r.shinies), cards: run.cardChoices(type), title: type === 'elite' ? 'Pokémon dominant vaincu !' : 'Victoire !', label: labels[type] },
+        () => showMap(run),
+      );
+    },
+  );
 }
 
 menu();

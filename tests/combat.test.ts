@@ -107,3 +107,46 @@ describe('combat', () => {
     expect(c.phase).toBe('victoire');
   });
 });
+
+describe('carte de l’acte', async () => {
+  const { generateMap, Run, MAP_ROWS } = await import('../src/core/run');
+  const { Rng } = await import('../src/core/rng');
+
+  it('respecte les règles de génération sur 50 cartes', () => {
+    for (let s = 0; s < 50; s++) {
+      const map = generateMap(new Rng(`MAP${s}`));
+      expect(map).toHaveLength(MAP_ROWS);
+      expect(new Set(map[0].map((n) => n.col)).size).toBeGreaterThanOrEqual(2);
+      for (const row of map) {
+        for (const n of row) {
+          if (n.row === 0) expect(n.type).toBe('combat');
+          if (n.row === 8) expect(n.type).toBe('tresor');
+          if (n.row === MAP_ROWS - 1) expect(n.type).toBe('centre');
+          if (n.row < 5) expect(['elite', 'centre']).not.toContain(n.type);
+          if (n.row < MAP_ROWS - 1) {
+            expect(n.next.length).toBeGreaterThan(0);
+            for (const c of n.next) {
+              const child = map[n.row + 1].find((x) => x.col === c);
+              expect(child).toBeDefined();
+              if (['centre', 'boutique', 'elite'].includes(n.type) && n.row + 1 < MAP_ROWS - 1) expect(child!.type).not.toBe(n.type);
+            }
+          }
+          // chaque nœud (sauf l'étage 1) a un parent
+          if (n.row > 0) expect(map[n.row - 1].some((p) => p.next.includes(n.col))).toBe(true);
+        }
+        // aucun chemin ne se croise
+        for (const a of row) for (const b of row) for (const x of a.next) for (const y of b.next) {
+          if (a.col < b.col) expect(x <= y).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('propose 3 cartes différentes en récompense', () => {
+    const run = new Run('REWARD', 'riolu');
+    for (let i = 0; i < 20; i++) {
+      const c = run.cardChoices('combat');
+      expect(new Set(c).size).toBe(3);
+    }
+  });
+});

@@ -30,6 +30,8 @@ export function installTooltips(stage: HTMLElement): void {
     tip.style.top = `${y}px`;
   });
   stage.addEventListener('mouseleave', () => tip.classList.remove('show'));
+  // Un clic change souvent d'écran : on cache l'infobulle pour qu'elle ne reste pas affichée
+  stage.addEventListener('click', () => tip.classList.remove('show'), true);
 }
 
 /** Garde la scène 1280×720 à la taille de la fenêtre, sans déformer. */

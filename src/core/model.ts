@@ -25,7 +25,8 @@ export type Effect =
   | { kind: 'pioche'; amount: number }
   | { kind: 'pa'; amount: number }
   | { kind: 'perte-pv'; amount: number } // se blesse soi-même (donne de l'Aura à Riolu)
-  | { kind: 'aura'; amount: number };
+  | { kind: 'aura'; amount: number }
+  | { kind: 'aura-mult'; amount: number }; // multiplie l'Aura actuelle
 
 export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable';
 

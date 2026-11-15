@@ -1,0 +1,118 @@
+// Carte de l'acte, façon Slay the Spire : on monte de nœud en nœud jusqu'au gardien.
+import { BOSS_ROW, MAP_COLS, MAP_ROWS, type MapNode, type NodeType, type Run } from '../core/run';
+import { ENEMY_DEFS } from '../data/enemies';
+import { BOSS_FORET_DE_JADE } from '../data/enemies';
+import { openDeckOverlay, topbar } from './run-ui';
+import { asset } from './util';
+
+const ROW_H = 92;
+const COL_W = 104;
+const LEFT = 330; // marge à gauche (légende)
+const BOTTOM = 90;
+const BOSS_GAP = 170;
+const HEIGHT = BOTTOM + (MAP_ROWS - 1) * ROW_H + BOSS_GAP + 150;
+
+export const NODE_INFO: Record<NodeType, { label: string; text: string }> = {
+  combat: { label: 'Combat', text: 'Des Pokémon sauvages de la zone.' },
+  evenement: { label: 'Événement', text: 'Une rencontre mystère, avec des choix.' },
+  centre: { label: 'Centre Pokémon', text: 'Soigner 30 % des PV max, ou améliorer une carte.' },
+  boutique: { label: 'Poké Mart', text: 'Acheter des cartes, oublier une carte.' },
+  elite: { label: 'Pokémon dominant', text: 'Un ennemi très fort, de meilleures récompenses.' },
+  tresor: { label: 'Trésor', text: 'Une Poké Ball pleine de surprises.' },
+  boss: { label: 'Gardien', text: 'Le boss de la zone.' },
+};
+
+const pos = (n: { row: number; col: number; dx?: number; dy?: number }) => ({
+  x: LEFT + n.col * COL_W + (n.dx ?? 0),
+  y: HEIGHT - BOTTOM - n.row * ROW_H + (n.dy ?? 0),
+});
+const BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (MAP_ROWS - 1) * ROW_H - BOSS_GAP };
+
+export function nodeIcon(type: NodeType): string {
+  switch (type) {
+    case 'combat':
+      return '<svg viewBox="0 0 40 40"><path d="M8 34c2-10 2-16 0-24 4 6 6 14 6 24zM16 34c1-12 3-20 8-28-2 9-3 18-2 28zM24 34c2-8 5-14 10-18-4 6-6 12-5 18z" fill="#7ad04e" stroke="#1d3b12" stroke-width="2" stroke-linejoin="round"/></svg>';
+    case 'evenement':
+      return '<svg viewBox="0 0 40 40"><text x="20" y="31" text-anchor="middle" font-size="30" font-weight="900" fill="#f5d36b" stroke="#3b2a05" stroke-width="2" font-family="Nunito, sans-serif">?</text></svg>';
+    case 'centre':
+      return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#fff" stroke="#3a0d0d" stroke-width="2.5"/><path d="M5 20a15 15 0 0 1 30 0z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5"/><path d="M17 11h6v6h6v6h-6v6h-6v-6h-6v-6h6z" fill="#fff" stroke="#3a0d0d" stroke-width="2"/></svg>';
+    case 'boutique':
+      return '<svg viewBox="0 0 40 40"><rect x="6" y="13" width="28" height="21" rx="3" fill="#4a8df0" stroke="#0e2147" stroke-width="2.5"/><path d="M13 13v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#0e2147" stroke-width="2.5"/><text x="20" y="29" text-anchor="middle" font-size="11" font-weight="900" fill="#fff" font-family="Nunito, sans-serif">PM</text></svg>';
+    case 'elite':
+      return '<svg viewBox="0 0 40 40"><path d="M6 10l7 6 7-10 7 10 7-6-3 22H9z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5" stroke-linejoin="round"/><circle cx="15" cy="23" r="2.5" fill="#fff"/><circle cx="25" cy="23" r="2.5" fill="#fff"/></svg>';
+    case 'tresor':
+      return `<img src="${asset('sprites/items/poke-ball.png')}" alt="">`;
+    case 'boss':
+      return `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[BOSS_FORET_DE_JADE[0]].dex}.png`)}" alt="">`;
+  }
+}
+
+export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void): void {
+  const avail = run.available();
+  const isAvail = (n: MapNode) => avail !== 'boss' && avail.some((a) => a.row === n.row && a.col === n.col);
+  const visited = (r: number, c: number) => run.visited.includes(`${r}-${c}`);
+  const current = run.pos;
+
+  // Chemins
+  const lines: string[] = [];
+  for (const row of run.map) {
+    for (const n of row) {
+      const a = pos(n);
+      const targets = n.row === MAP_ROWS - 1 ? [BOSS_POS] : n.next.map((c) => pos(run.nodeAt(n.row + 1, c)!));
+      const nextCols = n.row === MAP_ROWS - 1 ? [-1] : n.next;
+      targets.forEach((b, i) => {
+        const walked = visited(n.row, n.col) && (n.row === MAP_ROWS - 1 ? visited(BOSS_ROW, 0) : visited(n.row + 1, nextCols[i]));
+        const fromHere = current && current.row === n.row && current.col === n.col;
+        lines.push(`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="path ${walked ? 'walked' : ''} ${fromHere ? 'open' : ''}"/>`);
+      });
+    }
+  }
+
+  const nodes = run.map.flat().map((n) => {
+    const p = pos(n);
+    const cls = [
+      'map-node', `node-${n.type}`,
+      isAvail(n) ? 'available' : '',
+      visited(n.row, n.col) ? 'visited' : '',
+      current && current.row === n.row && current.col === n.col ? 'current' : '',
+    ].join(' ');
+    return `<button class="${cls}" style="left:${p.x}px;top:${p.y}px" data-row="${n.row}" data-col="${n.col}"
+              data-tip="<b>${NODE_INFO[n.type].label}</b><br>${NODE_INFO[n.type].text}">${nodeIcon(n.type)}</button>`;
+  });
+  const bossAvail = avail === 'boss';
+  nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
+      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien : ${ENEMY_DEFS[BOSS_FORET_DE_JADE[0]].name}</b><br>Le boss de la Forêt de Jade.">${nodeIcon('boss')}</button>`);
+
+  root.innerHTML = `
+    <div class="map-screen">
+      ${topbar(run, 'Forêt de Jade · acte 1')}
+      <div class="map-scroll">
+        <div class="map-canvas" style="height:${HEIGHT}px">
+          <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien de la Forêt de Jade</div>
+          <svg class="map-lines" width="1280" height="${HEIGHT}">${lines.join('')}</svg>
+          ${nodes.join('')}
+        </div>
+      </div>
+      <div class="map-legend">
+        <h3>Tour du Temps</h3>
+        <p>Acte 1 · Forêt de Jade</p>
+        ${(['combat', 'evenement', 'centre', 'boutique', 'elite', 'tresor'] as NodeType[])
+          .map((t) => `<div class="legend-row"><span class="legend-icon node-${t}">${nodeIcon(t)}</span>${NODE_INFO[t].label}</div>`).join('')}
+        <p class="legend-hint">Clique sur un nœud qui brille pour avancer.</p>
+      </div>
+    </div>`;
+
+  // Défilement : montrer l'étage actuel
+  const scroll = root.querySelector<HTMLElement>('.map-scroll')!;
+  const focusY = current ? pos({ row: Math.min(current.row, MAP_ROWS - 1), col: 0 }).y : HEIGHT;
+  scroll.scrollTop = Math.max(0, focusY - scroll.clientHeight + 160);
+
+  root.onclick = (ev) => {
+    const t = ev.target as HTMLElement;
+    if (t.closest('.tb-deck')) return openDeckOverlay(root, { title: 'Ton deck' }, run);
+    const b = t.closest<HTMLElement>('.map-node.available');
+    if (!b) return;
+    root.onclick = null;
+    onPick(Number(b.dataset.row), Number(b.dataset.col));
+  };
+}

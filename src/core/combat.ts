@@ -152,7 +152,8 @@ export class Combat {
     const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
     if (!hit) return null;
     const target = targetUid !== undefined ? this.enemy(targetUid) : undefined;
-    const base = hit.amount + this.player.aura;
+    const mult = d.effects.find((e): e is Extract<Effect, { kind: 'aura-mult' }> => e.kind === 'aura-mult');
+    const base = hit.amount + this.player.aura * (mult ? mult.amount : 1);
     if (!target) {
       // Sans cible : bonus de type et statuts du joueur seulement
       let dmg = Math.max(0, base + (this.player.statuses.attaque ?? 0));
@@ -340,6 +341,9 @@ export class Combat {
         return false;
       case 'aura':
         this.gainAura(eff.amount);
+        return false;
+      case 'aura-mult':
+        this.gainAura(this.player.aura * (eff.amount - 1));
         return false;
     }
   }

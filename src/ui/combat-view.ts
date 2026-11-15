@@ -2,7 +2,10 @@
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, StatusId } from '../core/model';
 import { TYPE_LABELS, type PokeType } from '../core/types';
-import { CATEGORY_LABELS, STATUS_INFO, TYPE_COLORS, cardText } from './labels';
+import type { Run } from '../core/run';
+import { renderCard } from './card';
+import { STATUS_INFO, TYPE_COLORS, cardText } from './labels';
+import { openDeckOverlay, topbar } from './run-ui';
 import { asset, esc, sleep } from './util';
 
 const ENEMY_STEP_MS = 700;
@@ -10,6 +13,8 @@ const ENEMY_STEP_MS = 700;
 export interface CombatResult {
   victory: boolean;
   hp: number;
+  /** Ennemis chromatiques vaincus (Pokédollars doublés). */
+  shinies: number;
 }
 
 export class CombatView {
@@ -23,10 +28,12 @@ export class CombatView {
 
   constructor(
     private root: HTMLElement,
-    private opts: { seed: string; enemies: string[]; deck: Card[]; hp?: number; label: string },
+    private run: Run,
+    private opts: { seed: string; enemies: string[]; label: string },
     private onEnd: (r: CombatResult) => void,
   ) {
-    this.combat = new Combat({ character: 'riolu', deck: opts.deck, enemies: opts.enemies, seed: opts.seed, hp: opts.hp });
+    this.combat = new Combat({ character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed, hp: run.hp });
+    this.combat.player.maxHp = run.maxHp;
     this.combat.drainEvents();
     root.innerHTML = '<div class="combat"></div><div class="fx-layer"></div>';
     this.el = root.querySelector('.combat')!;
@@ -50,13 +57,7 @@ export class CombatView {
     const targeting = !!selCard && c.needsTarget(selCard);
 
     this.el.innerHTML = `
-      <div class="topbar">
-        <span class="tb-name">${esc(p.name)}</span>
-        <span class="tb-hp" data-tip="Points de vie">PV ${p.hp}/${p.maxHp}</span>
-        <span class="tb-zone">${esc(this.opts.label)}</span>
-        <span class="tb-turn">Tour ${c.turn}</span>
-        <span class="tb-seed" data-tip="Même graine = même combat">Graine ${esc(this.opts.seed)}</span>
-      </div>
+      ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
       <div class="field">
         <div class="trees"></div>
         <div class="fighter player" data-who="player">
@@ -150,7 +151,8 @@ export class CombatView {
     } else if (m.intent === 'handicap' && m.playerStatus) {
       tip += ` : t'applique ${m.playerStatus.stacks} ${STATUS_INFO[m.playerStatus.status].label}`;
     } else if (m.intent === 'boost') {
-      tip += ' : se renforce';
+      const parts = [m.selfStatus ? `${STATUS_INFO[m.selfStatus.status].label} +${m.selfStatus.stacks}` : '', m.block ? `${m.block} Protection` : ''].filter(Boolean);
+      tip += ` : se renforce (${parts.join(', ')})`;
     }
     const color = m.pokeType ? TYPE_COLORS[m.pokeType] : '#888';
     return `
@@ -168,21 +170,15 @@ export class CombatView {
       : c.aliveEnemies().length === 1 ? c.aliveEnemies()[0].uid : undefined;
     const dmg = c.previewCardDamage(card, target);
     const mid = (n - 1) / 2;
-    const rot = (i - mid) * 4;
-    const lift = Math.abs(i - mid) * 6;
-    return `
-      <div class="card ${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} rarity-${d.rarity}"
-           data-uid="${card.uid}" style="--rot:${rot}deg;--lift:${lift}px;--tc:${TYPE_COLORS[d.pokeType]}">
-        <div class="card-inner">
-          <div class="card-cost ${d.cost > c.player.energy ? 'too-much' : ''}">${d.cost}</div>
-          <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
-          <div class="card-name">${esc(d.name)}</div>
-          <div class="card-art">${CATEGORY_ART[d.category]}</div>
-          <div class="card-cat">${CATEGORY_LABELS[d.category]}${c.player.types.includes(d.pokeType) && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
-          <div class="card-text"><span>${cardText(d, dmg, base && base.kind === 'degats' ? base.amount : null)}</span></div>
-          <div class="card-key">${i < 9 ? i + 1 : i === 9 ? 0 : ''}</div>
-        </div>
-      </div>`;
+    return renderCard(d, {
+      uid: card.uid,
+      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''}`,
+      style: `--rot:${(i - mid) * 4}deg;--lift:${Math.abs(i - mid) * 6}px`,
+      text: cardText(d, dmg, base && base.kind === 'degats' ? base.amount : null),
+      key: i < 9 ? String(i + 1) : i === 9 ? '0' : '',
+      stab: c.player.types.includes(d.pokeType),
+      costTooHigh: d.cost > c.player.energy,
+    });
   }
 
   private endOverlay(): string {
@@ -191,9 +187,8 @@ export class CombatView {
       <div class="overlay">
         <div class="panel">
           <h2>${win ? 'Victoire !' : 'K.O.…'}</h2>
-          <p>${win ? `Riolu a gagné le combat avec ${this.combat.player.hp} PV restants.` : 'Riolu est tombé au combat. La run est perdue.'}</p>
-          <button class="btn primary next">${win ? 'Combat suivant' : 'Recommencer'}</button>
-          <button class="btn menu">Menu principal</button>
+          <p>${win ? `${esc(this.combat.player.name)} remporte le combat avec ${this.combat.player.hp} PV.` : `${esc(this.combat.player.name)} est tombé au combat. La run est terminée.`}</p>
+          <button class="btn primary next">${win ? 'Continuer' : 'Voir le bilan'}</button>
         </div>
       </div>`;
   }
@@ -296,8 +291,10 @@ export class CombatView {
     }
     this.selected = null;
     this.hoverEnemy = null;
+    const isAttack = this.combat.def(card).category === 'attaque';
     this.combat.play(uid, targetUid);
     this.refresh();
+    if (isAttack) this.whoEl('player')?.classList.add('lunge'); // petit pas en avant vers les ennemis
   }
 
   private select(uid: number): void {
@@ -469,8 +466,14 @@ export class CombatView {
     this.el.addEventListener('click', (ev) => {
       const t = ev.target as HTMLElement;
       if (t.closest('.end-turn')) return void this.endTurn();
-      if (t.closest('.next')) return this.onEnd({ victory: this.combat.phase === 'victoire', hp: this.combat.player.hp });
-      if (t.closest('.menu')) return this.onEnd({ victory: false, hp: -1 });
+      if (t.closest('.next')) {
+        return this.onEnd({
+          victory: this.combat.phase === 'victoire',
+          hp: this.combat.player.hp,
+          shinies: this.combat.enemies.filter((e) => e.shiny).length,
+        });
+      }
+      if (t.closest('.tb-deck')) return openDeckOverlay(this.root, { title: 'Ton deck' }, this.run);
       if (this.busy) return;
       const cardEl = t.closest<HTMLElement>('.card');
       if (cardEl && !cardEl.classList.contains('dragging')) return this.select(Number(cardEl.dataset.uid));
@@ -508,11 +511,3 @@ const INTENT_ICONS: Record<string, string> = {
   boost: '<svg viewBox="0 0 24 24"><path d="M12 3l8 9h-5v9H9v-9H4z" fill="#ff9b4a" stroke="#1b1b1b" stroke-width="1.5"/></svg>',
   inconnu: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#777" stroke="#1b1b1b" stroke-width="1.5"/><text x="12" y="17" font-size="13" text-anchor="middle" fill="#fff">?</text></svg>',
 };
-
-const CATEGORY_ART: Record<string, string> = {
-  attaque: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(255,255,255,.18)"/><path d="M18 40l18-18 6 6-18 18z" fill="#fff" opacity=".9"/><path d="M38 14l12 12-4 4-12-12z" fill="#fff"/><path d="M14 44l6 6-4 2-4-4z" fill="#fff"/></svg>',
-  technique: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(255,255,255,.18)"/><path d="M32 12l16 6v11c0 10-7 18-16 22-9-4-16-12-16-22V18z" fill="#fff" opacity=".9"/></svg>',
-  talent: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(255,255,255,.18)"/><path d="M32 12l5 13h14l-11 8 4 14-12-9-12 9 4-14-11-8h14z" fill="#fff" opacity=".9"/></svg>',
-  statut: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(0,0,0,.25)"/></svg>',
-};
-

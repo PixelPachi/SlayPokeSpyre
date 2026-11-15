@@ -1,0 +1,182 @@
+// Écrans des nœuds hors combat : récompenses, Centre Pokémon, Poké Mart, événement, trésor, fin de run.
+import type { Run } from '../core/run';
+import { cardPrice } from '../core/run';
+import { cardDef } from '../data/cards';
+import { CHARACTERS } from '../data/characters';
+import { EVENTS, type GameEvent } from '../data/events';
+import { renderCard } from './card';
+import { openDeckOverlay, topbar } from './run-ui';
+import { asset, esc } from './util';
+
+type Done = () => void;
+
+function shell(run: Run, label: string, body: string, cls = ''): string {
+  return `<div class="node-screen ${cls}">${topbar(run, label)}<div class="node-body">${body}</div></div>`;
+}
+
+function bindDeck(root: HTMLElement, run: Run): void {
+  root.querySelector('.tb-deck')?.addEventListener('click', () => openDeckOverlay(root, { title: 'Ton deck' }, run));
+}
+
+/** Récompenses après un combat : Pokédollars puis 1 carte parmi 3 (ou passer). */
+export function renderReward(root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string }, done: Done): void {
+  run.money += o.money;
+  root.innerHTML = shell(run, o.label, `
+    <h1 class="node-title">${esc(o.title)}</h1>
+    <div class="reward-money">+${o.money} ₽</div>
+    <p class="node-sub">Choisis une capacité à apprendre :</p>
+    <div class="card-row">${o.cards.map((id) => renderCard(cardDef(id), { classes: 'pickable', style: '', uid: undefined }).replace('class="card', `data-id="${id}" class="card`)).join('')}</div>
+    <button class="btn skip">Passer</button>`, 'reward');
+  bindDeck(root, run);
+  root.querySelector('.card-row')!.addEventListener('click', (ev) => {
+    const c = (ev.target as HTMLElement).closest<HTMLElement>('.card');
+    if (!c) return;
+    run.addCard(c.dataset.id!);
+    done();
+  });
+  root.querySelector('.skip')!.addEventListener('click', done);
+}
+
+/** Centre Pokémon : soigner 30 % des PV max OU améliorer une carte. */
+export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
+  const heal = Math.floor(run.maxHp * 0.3);
+  const upgradable = run.deck.filter((c) => !c.upgraded);
+  root.innerHTML = shell(run, 'Centre Pokémon', `
+    <h1 class="node-title">Centre Pokémon</h1>
+    <p class="node-sub">« Bonjour ! Bienvenue au Centre Pokémon de la Tour du Temps. »</p>
+    <div class="choice-row">
+      <button class="choice heal"><b>Se soigner</b><span>Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)</span></button>
+      <button class="choice upgrade" ${upgradable.length ? '' : 'disabled'}><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
+    </div>`, 'centre');
+  bindDeck(root, run);
+  root.querySelector('.heal')!.addEventListener('click', () => {
+    run.heal(heal);
+    done();
+  });
+  root.querySelector('.upgrade')!.addEventListener('click', () =>
+    openDeckOverlay(root, {
+      title: 'Choisis la carte à améliorer', cards: upgradable, upgradePreview: true, cancelLabel: 'Retour',
+      onPick: (uid) => {
+        run.upgradeCard(uid);
+        done();
+      },
+    }, run));
+}
+
+/** Poké Mart : 5 cartes du personnage + oublier une carte. */
+export function renderShop(root: HTMLElement, run: Run, done: Done): void {
+  const offers = run.cardChoices('boutique', 5).map((id) => ({ id, price: cardPrice(id), sold: false }));
+  const sale = run.rng.int(0, offers.length - 1);
+  offers[sale].price = Math.floor(offers[sale].price / 2);
+  let removed = false;
+
+  const draw = () => {
+    const removeCost = 75 + 25 * run.removals;
+    root.innerHTML = shell(run, 'Poké Mart', `
+      <h1 class="node-title">Poké Mart</h1>
+      <p class="node-sub">« Des capacités toutes neuves, venues de toutes les régions ! »</p>
+      <div class="card-row shop">
+        ${offers.map((o, i) => `
+          <div class="shop-item ${o.sold ? 'sold' : ''} ${run.money < o.price ? 'poor' : ''}" data-i="${i}">
+            ${renderCard(cardDef(o.id))}
+            <div class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}${i === sale && !o.sold ? ' <span class="sale">-50 %</span>' : ''}</div>
+          </div>`).join('')}
+      </div>
+      <div class="shop-actions">
+        <button class="choice remove" ${removed || run.money < removeCost ? 'disabled' : ''}>
+          <b>Oublier une capacité</b><span>${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
+        </button>
+        <button class="btn leave">Quitter la boutique</button>
+      </div>`, 'shop-screen');
+    bindDeck(root, run);
+    root.querySelectorAll<HTMLElement>('.shop-item').forEach((el) =>
+      el.addEventListener('click', () => {
+        const o = offers[Number(el.dataset.i)];
+        if (o.sold || run.money < o.price) return;
+        run.money -= o.price;
+        run.addCard(o.id);
+        o.sold = true;
+        draw();
+      }));
+    root.querySelector('.remove')!.addEventListener('click', () =>
+      openDeckOverlay(root, {
+        title: 'Quelle capacité oublier ?', cancelLabel: 'Retour',
+        onPick: (uid) => {
+          run.money -= removeCost;
+          run.removals++;
+          run.removeCard(uid);
+          removed = true;
+          draw();
+        },
+      }, run));
+    root.querySelector('.leave')!.addEventListener('click', done);
+  };
+  draw();
+}
+
+/** Événement mystère. */
+export function renderEvent(root: HTMLElement, run: Run, done: Done): void {
+  const ev: GameEvent = run.rng.pick(EVENTS);
+  const showResult = (text: string) => {
+    root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p><button class="btn primary leave">Continuer</button>`;
+    root.querySelector('.leave')!.addEventListener('click', done);
+    root.querySelector('.tb-hp')!.textContent = `PV ${run.hp}/${run.maxHp}`;
+    root.querySelector('.tb-money')!.textContent = `${run.money} ₽`;
+    root.querySelector('.tb-deck')!.textContent = `Deck ${run.deck.length}`;
+  };
+  root.innerHTML = shell(run, 'Événement', `
+    <div class="event-panel">
+      <img class="event-img" src="${asset(ev.image)}" alt="">
+      <h1 class="node-title">${esc(ev.title)}</h1>
+      <p class="event-text">${esc(ev.text)}</p>
+      <div class="event-choices">
+        ${ev.choices.map((c, i) => {
+          const ok = c.available?.(run) ?? true;
+          return `<button class="choice" data-i="${i}" ${ok ? '' : 'disabled'}><b>${esc(c.label)}</b><span>${esc(c.detail)}</span></button>`;
+        }).join('')}
+      </div>
+    </div>`, 'event');
+  bindDeck(root, run);
+  root.querySelectorAll<HTMLElement>('.event-choices .choice').forEach((b) =>
+    b.addEventListener('click', () => {
+      const r = ev.choices[Number(b.dataset.i)].apply(run);
+      if (typeof r === 'string') return showResult(r);
+      const cards = r.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded) : run.deck;
+      openDeckOverlay(root, {
+        title: r.text, cards, upgradePreview: r.pick === 'ameliorer', cancelLabel: 'Annuler',
+        onPick: (uid) => {
+          const name = cardDef(run.deck.find((c) => c.uid === uid)!.defId).name;
+          if (r.pick === 'ameliorer') run.upgradeCard(uid);
+          else run.removeCard(uid);
+          showResult(r.pick === 'ameliorer' ? `${name} est améliorée !` : `Tu as oublié ${name}.`);
+        },
+        onCancel: () => showResult('Tu renonces et reprends ta route.'),
+      }, run);
+    }));
+}
+
+/** Trésor : en attendant les objets tenus, des Pokédollars et une carte au choix. */
+export function renderTreasure(root: HTMLElement, run: Run, done: Done): void {
+  renderReward(root, run, { money: run.rng.int(50, 80), cards: run.cardChoices('elite'), title: 'Une Poké Ball scintillante !', label: 'Trésor' }, done);
+}
+
+/** Fin de run : défaite ou gardien vaincu. */
+export function renderRunEnd(root: HTMLElement, run: Run, victory: boolean, onMenu: Done, onRetry: Done): void {
+  const name = CHARACTERS[run.character].name;
+  root.innerHTML = `
+    <div class="run-end ${victory ? 'win' : 'lose'}">
+      <h1>${victory ? 'Acte 1 terminé !' : 'Fin de la run'}</h1>
+      <p>${victory
+        ? `${esc(name)} a vaincu le gardien de la Forêt de Jade. La suite de la Tour du Temps arrive dans une prochaine version.`
+        : `${esc(name)} est tombé à l'étage ${run.floor} de la Tour du Temps.`}</p>
+      <div class="run-stats">
+        <div><b>${run.floor}</b><span>étage atteint</span></div>
+        <div><b>${run.deck.length}</b><span>cartes dans le deck</span></div>
+        <div><b>${run.money} ₽</b><span>Pokédollars</span></div>
+      </div>
+      <button class="btn primary retry">Nouvelle run</button>
+      <button class="btn menu">Menu principal</button>
+    </div>`;
+  root.querySelector('.retry')!.addEventListener('click', onRetry);
+  root.querySelector('.menu')!.addEventListener('click', onMenu);
+}

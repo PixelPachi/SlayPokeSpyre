@@ -34,11 +34,32 @@ const ENEMIES: EnemyDef[] = [
       { id: 'mimi-queue', name: 'Mimi-Queue', weight: 30, intent: 'handicap', playerStatus: { status: 'peur', stacks: 1 } },
     ],
   },
+
+  // ——— Élite ———
+  {
+    id: 'rattatac', name: 'Rattatac', dex: 20, types: ['normal'], hp: [44, 48],
+    moves: [
+      { id: 'morsure', name: 'Morsure', weight: 35, intent: 'attaque', pokeType: 'tenebres', damage: 11 },
+      { id: 'vive-attaque', name: 'Vive-Attaque', weight: 35, intent: 'attaque', pokeType: 'normal', damage: 4, hits: 3 },
+      { id: 'puissance', name: 'Puissance', weight: 30, intent: 'boost', selfStatus: { status: 'attaque', stacks: 3 }, block: 8 },
+    ],
+  },
+
+  // ——— Gardien de la Forêt de Jade ———
+  {
+    id: 'dardargnan', name: 'Dardargnan', dex: 15, types: ['insecte', 'poison'], hp: [86, 86],
+    moves: [
+      { id: 'double-dard', name: 'Double Dard', weight: 30, intent: 'attaque', pokeType: 'insecte', damage: 6, hits: 2 },
+      { id: 'dard-venin', name: 'Dard-Venin', weight: 30, intent: 'attaque', pokeType: 'poison', damage: 7, playerStatus: { status: 'poison', stacks: 3 } },
+      { id: 'furie', name: 'Furie', weight: 20, intent: 'attaque', pokeType: 'normal', damage: 3, hits: 4 },
+      { id: 'hate', name: 'Hâte', weight: 20, intent: 'boost', selfStatus: { status: 'attaque', stacks: 2 }, block: 12 },
+    ],
+  },
 ];
 
 export const ENEMY_DEFS: Record<string, EnemyDef> = Object.fromEntries(ENEMIES.map((e) => [e.id, e]));
 
-/** Rencontres possibles en combat normal dans la Forêt de Jade. */
+/** Rencontres de la Forêt de Jade. */
 export const ENCOUNTERS_FORET_DE_JADE: string[][] = [
   ['chenipan', 'aspicot'],
   ['roucool'],
@@ -46,3 +67,5 @@ export const ENCOUNTERS_FORET_DE_JADE: string[][] = [
   ['chenipan', 'rattata'],
   ['aspicot', 'aspicot'],
 ];
+export const ELITES_FORET_DE_JADE: string[][] = [['rattatac']];
+export const BOSS_FORET_DE_JADE: string[] = ['dardargnan'];

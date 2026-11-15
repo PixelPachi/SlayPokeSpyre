@@ -54,6 +54,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
       case 'perte-pv': parts.push(`Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
+      case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }
   for (const k of d.keywords ?? []) parts.push(`<i>${KEYWORD_LABELS[k]}.</i>`);
