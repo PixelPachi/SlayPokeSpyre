@@ -29,7 +29,7 @@ Ambiances (le jeu ajoute les particules assorties) : Mont Sélénite **nuit de p
 | `public/backgrounds/mont-selenite.jpg` | Mont Sélénite (Kanto) | L'intérieur d'une grotte aux parois rocheuses, petits cristaux lunaires qui brillent, fragments de météorite, lumière bleue et violette. | ☑ |
 | `public/backgrounds/puits-ramoloss.jpg` | Puits Ramoloss (Johto) | Le fond d'un vieux puits humide en pierre, flaques d'eau qui reflètent la lumière, échelle de bois, ambiance calme et fraîche. | ☐ |
 | `public/backgrounds/mont-chimnee.jpg` | Mont Chimnée (Hoenn) | Le sommet d'un volcan, sol de roche sombre, coulées de lave lumineuses, cendres qui tombent comme de la neige, ciel orangé. | ☐ |
-| `public/backgrounds/mont-couronne.jpg` | Mont Couronné (Sinnoh) | Une grande caverne de montagne aux colonnes de pierre naturelles, lumière froide qui tombe d'une ouverture, roche grise et bleutée. | ☐ |
+| `public/backgrounds/mont-couronne.jpg` | Mont Couronné (Sinnoh) | Une grande caverne de montagne aux colonnes de pierre naturelles, lumière froide qui tombe d'une ouverture, roche grise et bleutée. | ☑ |
 | `public/backgrounds/grotte-electrolithe.jpg` | Grotte Électrolithe (Unys) | Une grotte remplie de pierres électriques flottantes qui crépitent de bleu, petits arcs électriques, sol rocheux sombre. | ☐ |
 
 ## Acte 3 — les hauteurs

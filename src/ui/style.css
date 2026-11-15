@@ -772,3 +772,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes evo-glow { 50% { filter: drop-shadow(0 0 14px #fff) brightness(1.25); } }
 .act-evo .evo-arrow { font-size: 34px; color: #ffe08a; }
 .act-evo p { margin: 0; font-size: 18px; text-align: left; }
+
+/* Pas de plateforme sous les combattants : ils se tiennent directement sur le décor */
+.fighter .platform { display: none; }
+.enemy.hovered .sprite.front { filter: drop-shadow(0 0 10px rgba(255, 215, 94, 0.95)); }
+.enemy.hovered .sprite.front.primal { filter: brightness(0.6) saturate(1.6) hue-rotate(-12deg) drop-shadow(0 0 12px #ffd75e); }
