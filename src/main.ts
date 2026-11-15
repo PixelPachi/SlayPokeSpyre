@@ -1,10 +1,10 @@
 import './ui/style.css';
 import type { CharacterId } from './core/model';
 import { randomSeed } from './core/rng';
-import { BOSS_ROW, Run } from './core/run';
+import { BOSS_ROW, LAST_ACT, Run } from './core/run';
 import { CombatView } from './ui/combat-view';
 import { renderMap } from './ui/map-view';
-import { renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
+import { renderActIntro, renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
@@ -44,6 +44,9 @@ function menu(): void {
 function startRun(character: CharacterId): void {
   const params = new URLSearchParams(location.search);
   const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character), characterRelics(save, character));
+  // Pour tester : ?acte=2 commence directement à l'acte 2
+  const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
+  while (run.act < startAct) run.nextAct();
   showMap(run);
 }
 
@@ -88,8 +91,20 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'boss') {
         run.bossesDefeated++;
-        run.money += run.moneyReward('boss', r.shinies);
-        return endRun(run, true);
+        const last = run.act >= LAST_ACT;
+        return renderReward(
+          screen, run,
+          {
+            money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), label: labels.boss,
+            title: `Gardien de ${run.zone.name} vaincu !`, relic: run.rollRelics(1)[0],
+          },
+          () => {
+            if (last) return endRun(run, true);
+            run.nextAct();
+            clear();
+            renderActIntro(screen, run, () => showMap(run));
+          },
+        );
       }
       renderReward(
         screen, run,

@@ -20,7 +20,9 @@ Puis ajouter la description de la zone ci-dessous. Chaque forêt a sa propre sai
 | `public/backgrounds/foret-de-vestigion.png` | Forêt de Vestigion (Sinnoh) | **Hiver enneigé.** Une forêt ancienne et immense sous la neige, branches chargées de neige, flocons qui tombent, sol blanc, lumière froide et bleutée, vieux manoir à peine visible au loin. | ☐ |
 | `public/backgrounds/foret-d-empoigne.png` | Forêt d'Empoigne (Unys) | **Automne flamboyant.** Une forêt aux feuillages rouges et orange vifs traversée par une rivière, feuilles rouges qui tombent et flottent sur l'eau, rochers moussus, petit pont de bois, lumière chaude de l'après-midi. | ☐ |
 
-## Acte 2 — le cœur de la tour (à venir dans le jeu)
+## Acte 2 — le cœur de la tour
+
+Ambiances (le jeu ajoute les particules assorties) : Mont Sélénite **nuit de pleine lune** (cristaux), Puits Ramoloss **saison des pluies** (gouttes), Mont Chimnée **été caniculaire** (cendres), Mont Couronné **brume d'altitude** (poussière), Grotte Électrolithe **nuit d'orage** (étincelles).
 
 | Fichier | Zone (région) | Description à ajouter au prompt | Fait |
 | --- | --- | --- | --- |

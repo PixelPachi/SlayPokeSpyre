@@ -152,6 +152,16 @@ img.sprite, .roster img { image-rendering: pixelated; }
     radial-gradient(circle at 98% 36%, var(--t) 0 70px, transparent 71px);
 }
 .scene.has-bg .trees { display: none; }
+/* Décor de secours des grottes et montagnes : stalactites au plafond, rochers au fond */
+.scene.cave .trees {
+  opacity: 0.55;
+  background:
+    conic-gradient(from 160deg at 6% 0, transparent 0 40deg, var(--t) 40deg 0) 0 0 / 120px 130px repeat-x,
+    conic-gradient(from 165deg at 50% 0, transparent 0 30deg, var(--t) 30deg 0) 60px 0 / 170px 90px repeat-x,
+    radial-gradient(ellipse at 15% 75%, var(--t) 0 120px, transparent 121px),
+    radial-gradient(ellipse at 85% 72%, var(--t) 0 150px, transparent 151px),
+    radial-gradient(ellipse at 50% 80%, var(--t) 0 90px, transparent 91px);
+}
 
 .fighter { position: absolute; display: flex; flex-direction: column; align-items: center; }
 .fighter .platform {
@@ -634,3 +644,21 @@ img.sprite, .roster img { image-rendering: pixelated; }
   background: #2b2236ee; border: 2px solid #ffd27a; border-radius: 12px; color: #fff; font-weight: 800;
   box-shadow: 0 6px 20px #0008; animation: toast-in .35s ease-out; pointer-events: none; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, -12px); } }
+
+/* ——— Passage d'acte ——— */
+.act-intro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  text-align: center; color: #fff; background: radial-gradient(ellipse at 50% 30%, var(--sky), var(--shade) 75%); animation: act-in .8s ease-out; }
+.act-intro .act-num { font-size: 22px; letter-spacing: 6px; text-transform: uppercase; color: #ffd27a; margin: 0; }
+.act-intro h1 { font-size: 56px; margin: 0 0 10px; text-shadow: 0 4px 18px #000a; }
+.act-intro .act-zone { font-size: 22px; margin: 0; }
+.act-intro .act-zone small { opacity: .8; font-size: 16px; }
+.act-intro .act-heal { opacity: .85; margin: 14px 0 22px; }
+@keyframes act-in { from { opacity: 0; transform: scale(1.04); } }
+/* Particules de l'acte 2 */
+.weather-cristaux i { width: calc(6px * var(--s)); height: calc(6px * var(--s)); background: #c9b8ff; transform: rotate(45deg); box-shadow: 0 0 10px #a990ff; animation-name: drift; }
+.weather-gouttes i { width: 2px; height: calc(16px * var(--s)); border-radius: 2px; background: linear-gradient(#bfe8ff00, #bfe8ffcc); animation-name: drip; animation-timing-function: ease-in; }
+@keyframes drip { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: .9; } 100% { transform: translateY(720px); opacity: .6; } }
+.weather-cendres i { width: calc(6px * var(--s)); height: calc(6px * var(--s)); border-radius: 40%; background: #8c8580; box-shadow: 0 0 4px #ff7a3a55; }
+.weather-poussiere i { width: calc(4px * var(--s)); height: calc(4px * var(--s)); border-radius: 50%; background: #e6ecf5aa; animation-name: drift; }
+.weather-etincelles i { width: calc(3px * var(--s)); height: calc(12px * var(--s)); background: #9fe3ff; box-shadow: 0 0 8px #5ccfff, 0 0 2px #fff; animation-name: spark; }
+@keyframes spark { 0%, 100% { transform: translate(0, 200px) rotate(20deg); opacity: 0; } 45% { opacity: 0; } 50% { transform: translate(10px, 260px) rotate(-30deg); opacity: 1; } 55% { opacity: 0; } }

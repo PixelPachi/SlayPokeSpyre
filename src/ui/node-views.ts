@@ -252,9 +252,9 @@ export function renderRunEnd(
   const pct = next ? Math.round(((xp.total - cur) / (next - cur)) * 100) : 100;
   root.innerHTML = `
     <div class="run-end ${victory ? 'win' : 'lose'}">
-      <h1>${victory ? 'Acte 1 terminé !' : 'Fin de la run'}</h1>
+      <h1>${victory ? `Acte ${run.act} terminé !` : 'Fin de la run'}</h1>
       <p>${victory
-        ? `${esc(name)} a vaincu le gardien de la zone ${esc(run.zone.name)}. La suite de la Tour du Temps arrive dans une prochaine version.`
+        ? `${esc(name)} a vaincu le gardien de la zone ${esc(run.zone.name)}. La suite de la Tour du Temps (acte ${run.act + 1} et le sommet) arrive dans une prochaine version.`
         : `${esc(name)} est tombé à l'étage ${run.floor} de la Tour du Temps.`}</p>
       <div class="run-stats">
         <div><b>${run.floor}</b><span>étage atteint</span></div>
@@ -281,4 +281,20 @@ export function renderRunEnd(
     </div>`;
   root.querySelector('.retry')!.addEventListener('click', onRetry);
   root.querySelector('.menu')!.addEventListener('click', onMenu);
+}
+
+const ACT_TITLES: Record<number, string> = { 1: 'La base de la tour', 2: 'Le cœur de la tour', 3: 'Les hauteurs' };
+
+/** Écran de passage d'un acte à l'autre. */
+export function renderActIntro(root: HTMLElement, run: Run, done: Done): void {
+  const z = run.zone;
+  root.innerHTML = `
+    <div class="act-intro" style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]}">
+      <p class="act-num">Acte ${run.act}</p>
+      <h1>${esc(ACT_TITLES[run.act] ?? '')}</h1>
+      <p class="act-zone">Une faille temporelle mène à <b>${esc(z.name)}</b><br><small>${esc(z.region)} · ${esc(z.season)}</small></p>
+      <p class="act-heal">${esc(CHARACTERS[run.character].name)} reprend son souffle : PV restaurés (${run.hp}/${run.maxHp}).</p>
+      <button class="btn primary go">Continuer l'ascension</button>
+    </div>`;
+  root.querySelector('.go')!.addEventListener('click', done);
 }

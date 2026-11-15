@@ -1,5 +1,6 @@
 // Ennemis et rencontres. Acte 1 — Forêt de Jade (Kanto).
 import type { EnemyDef } from '../core/model';
+import { ACT2_ENEMIES } from './enemies-acte2';
 
 const ENEMIES: EnemyDef[] = [
   {
@@ -229,4 +230,4 @@ const ENEMIES: EnemyDef[] = [
   },
 ];
 
-export const ENEMY_DEFS: Record<string, EnemyDef> = Object.fromEntries(ENEMIES.map((e) => [e.id, e]));
+export const ENEMY_DEFS: Record<string, EnemyDef> = Object.fromEntries([...ENEMIES, ...ACT2_ENEMIES].map((e) => [e.id, e]));

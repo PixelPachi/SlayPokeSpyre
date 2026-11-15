@@ -482,3 +482,46 @@ it('le Bébé peut finir le combat à la fin du tour', () => {
   c.endPlayerTurn();
   expect(c.phase).toBe('victoire');
 });
+
+describe('acte 2', async () => {
+  const { Run, LAST_ACT } = await import('../src/core/run');
+  const { ZONES, zonesOfAct } = await import('../src/data/zones');
+  const { ENEMY_DEFS } = await import('../src/data/enemies');
+
+  it('5 zones, une par région, avec des ennemis qui existent', () => {
+    const z2 = zonesOfAct(2);
+    expect(z2).toHaveLength(5);
+    expect(new Set(z2.map((z) => z.region)).size).toBe(5);
+    for (const z of ZONES) {
+      for (const id of [...z.encounters.flat(), ...z.elites.flat(), z.boss]) expect(ENEMY_DEFS[id], `${z.id} ${id}`).toBeDefined();
+    }
+  });
+
+  it('après le gardien, on passe à l’acte 2 avec une nouvelle carte et les PV restaurés', () => {
+    expect(LAST_ACT).toBeGreaterThanOrEqual(2);
+    const run = new Run('ACTE2', 'riolu');
+    run.moveTo(15, 0);
+    run.hp = 10;
+    expect(run.floor).toBe(16);
+    run.nextAct();
+    expect(run.act).toBe(2);
+    expect(run.zone.act).toBe(2);
+    expect(run.hp).toBe(run.maxHp);
+    expect(run.pos).toBeNull();
+    expect(run.floor).toBe(16);
+    expect(run.available()).toEqual(run.map[0]);
+    expect(run.encounter('boss')).toEqual([run.zone.boss]);
+  });
+
+  it('chaque gardien de l’acte 2 se combat sans erreur', () => {
+    for (const z of zonesOfAct(2)) {
+      const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: [z.boss], seed: z.id });
+      for (let t = 0; t < 5 && c.phase !== 'defaite'; t++) {
+        c.endPlayerTurn();
+        for (const e of c.aliveEnemies()) c.enemyAct(e.uid);
+        c.endEnemyTurn();
+      }
+      expect(['joueur', 'defaite']).toContain(c.phase);
+    }
+  });
+});

@@ -23,6 +23,8 @@ export const MAP_ROWS = 15;
 export const MAP_COLS = 7;
 const PATHS = 6;
 export const BOSS_ROW = MAP_ROWS;
+/** Dernier acte disponible dans cette version (l'acte 3 et le sommet arriveront ensuite). */
+export const LAST_ACT = 2;
 
 /** Parts du GDD (le trésor et le Centre Pokémon d'avant-boss sont placés à part). */
 const WEIGHTS: [NodeType, number][] = [
@@ -117,8 +119,19 @@ export class Run {
     this.map = generateMap(this.rng);
   }
 
+  /** Étage de la tour, compté depuis la base (16 étages par acte, gardien compris). */
   get floor(): number {
-    return this.pos ? this.pos.row + 1 : 0;
+    return (this.act - 1) * (MAP_ROWS + 1) + (this.pos ? this.pos.row + 1 : 0);
+  }
+
+  /** Passe à l'acte suivant : nouvelle zone, nouvelle carte, PV restaurés. */
+  nextAct(): void {
+    this.act++;
+    this.zone = this.rng.pick(zonesOfAct(this.act));
+    this.map = generateMap(this.rng);
+    this.pos = null;
+    this.visited = [];
+    this.hp = this.maxHp;
   }
 
   nodeAt(row: number, col: number): MapNode | undefined {

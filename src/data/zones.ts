@@ -19,7 +19,8 @@ export interface ZoneDef {
   /** Saison ou ambiance du décor, pour que les zones ne se ressemblent pas. */
   season: string;
   /** Particules animées par-dessus le fond. */
-  weather: 'pollen' | 'petales' | 'feuilles-rouges' | 'feuilles-or' | 'neige';
+  weather: 'pollen' | 'petales' | 'feuilles-rouges' | 'feuilles-or' | 'neige'
+    | 'cristaux' | 'gouttes' | 'cendres' | 'poussiere' | 'etincelles';
 }
 
 export const ZONES: ZoneDef[] = [
@@ -57,6 +58,43 @@ export const ZONES: ZoneDef[] = [
     elites: [['couverdure']], boss: 'brutapode',
     background: 'backgrounds/foret-d-empoigne.png', palette: ['#ff9a5a', '#a1471f', '#3a1508'], mood: 'insecte',
     season: 'Automne flamboyant', weather: 'feuilles-rouges',
+  },
+
+  // ——— Acte 2 : le cœur de la tour (grottes et montagnes) ———
+  {
+    id: 'mont-selenite', name: 'Mont Sélénite', region: 'Kanto', act: 2,
+    encounters: [['nosferapti', 'nosferapti'], ['racaillou', 'paras'], ['melofee'], ['nosferapti', 'racaillou'], ['paras', 'paras', 'nosferapti']],
+    elites: [['nosferalto']], boss: 'melodelfe',
+    background: 'backgrounds/mont-selenite.png', palette: ['#3b3570', '#6b6a8a', '#120f26'], mood: 'fee',
+    season: 'Nuit de pleine lune', weather: 'cristaux',
+  },
+  {
+    id: 'puits-ramoloss', name: 'Puits Ramoloss', region: 'Johto', act: 2,
+    encounters: [['ramoloss'], ['ptitard', 'smogo'], ['ptitard', 'ptitard'], ['smogo', 'ramoloss'], ['ptitard', 'smogo', 'ptitard']],
+    elites: [['flagadoss']], boss: 'roigada',
+    background: 'backgrounds/puits-ramoloss.png', palette: ['#5d7f86', '#3d5157', '#11201f'], mood: 'eau',
+    season: 'Saison des pluies', weather: 'gouttes',
+  },
+  {
+    id: 'mont-chimnee', name: 'Mont Chimnée', region: 'Hoenn', act: 2,
+    encounters: [['chamallot'], ['spoink', 'spinda'], ['chamallot', 'spoink'], ['spinda', 'spinda'], ['spoink', 'spoink', 'chamallot']],
+    elites: [['chartor']], boss: 'camerupt',
+    background: 'backgrounds/mont-chimnee.png', palette: ['#ff8a4a', '#4a2a22', '#1a0805'], mood: 'feu',
+    season: 'Été caniculaire', weather: 'cendres',
+  },
+  {
+    id: 'mont-couronne', name: 'Mont Couronné', region: 'Sinnoh', act: 2,
+    encounters: [['machoc', 'moufouette'], ['kranidos'], ['dinoclier', 'machoc'], ['moufouette', 'kranidos'], ['machoc', 'machoc', 'moufouette']],
+    elites: [['bastiodon']], boss: 'charkos',
+    background: 'backgrounds/mont-couronne.png', palette: ['#9fb0c4', '#5c6675', '#1a2029'], mood: 'roche',
+    season: "Brume d'altitude", weather: 'poussiere',
+  },
+  {
+    id: 'grotte-electrolithe', name: 'Grotte Électrolithe', region: 'Unys', act: 2,
+    encounters: [['statitik', 'statitik'], ['anchwatt', 'grindur'], ['rototaupe'], ['statitik', 'anchwatt'], ['statitik', 'statitik', 'anchwatt']],
+    elites: [['mygavolt']], boss: 'ohmassacre',
+    background: 'backgrounds/grotte-electrolithe.png', palette: ['#2a3a6a', '#2b2b3d', '#0b0d1a'], mood: 'electrik',
+    season: "Nuit d'orage", weather: 'etincelles',
   },
 ];
 
