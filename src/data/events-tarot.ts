@@ -149,8 +149,8 @@ export const TAROT_EVENTS: GameEvent[] = [
     ],
   },
   {
-    id: 'tarot-chariot', title: 'VII — Le Chariot', image: '', tarot: true, sprite: 'sprites/pokemon/front/128.png',
-    text: 'Un Tauros fou furieux tire un chariot à travers les étages. Monter à bord, c’est aller vite… et haut.',
+    id: 'tarot-chariot', title: 'VII — Le Chariot', image: 'tarot/le-chariot.webp', tarot: true,
+    text: 'Lucario, en armure, mène un chariot tiré par deux Tauros à travers les étages. « Monte ! On va vite… et haut. »',
     choices: [
       {
         label: 'Sauter à bord', detail: 'Perd 8 PV, améliore 2 cartes au hasard',
@@ -263,7 +263,7 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-diable', title: 'XV — Le Diable', image: 'tarot/le-diable.webp', tarot: true,
-    text: 'Une silhouette cornue t’offre un pacte. Tout est à vendre… il suffit de donner un peu de toi-même.',
+    text: 'Darkrai plane au-dessus d’un autel où Malosse et un petit Pokémon sont enchaînés. « Tout est à vendre… il suffit de me donner un peu de toi-même. »',
     choices: [
       { label: 'Vendre ta vigueur', detail: '−6 PV max, gagne une carte rare', apply: (r) => (loseMax(r, 6), `Le pacte est scellé : tu apprends ${addRandomCard(r, 'boss')}.`) },
       {
