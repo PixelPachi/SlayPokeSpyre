@@ -84,7 +84,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       }
       case 'pioche': parts.push(`Pioche <b>${e.amount}</b> carte${e.amount > 1 ? 's' : ''}.`); break;
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
-      case 'perte-pv': parts.push(`Perd <b>${e.amount}</b> PV.`); break;
+      case 'perte-pv': parts.push(d.character === 'riolu' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+${e.amount} Aura)</span>.` : `Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
