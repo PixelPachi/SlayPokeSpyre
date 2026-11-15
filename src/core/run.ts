@@ -24,7 +24,7 @@ export const MAP_COLS = 7;
 const PATHS = 6;
 export const BOSS_ROW = MAP_ROWS;
 /** Dernier acte disponible dans cette version (l'acte 3 et le sommet arriveront ensuite). */
-export const LAST_ACT = 2;
+export const LAST_ACT = 3;
 
 /** Parts du GDD (le trésor et le Centre Pokémon d'avant-boss sont placés à part). */
 const WEIGHTS: [NodeType, number][] = [

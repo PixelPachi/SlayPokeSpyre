@@ -254,7 +254,7 @@ export function renderRunEnd(
     <div class="run-end ${victory ? 'win' : 'lose'}">
       <h1>${victory ? `Acte ${run.act} terminé !` : 'Fin de la run'}</h1>
       <p>${victory
-        ? `${esc(name)} a vaincu le gardien de la zone ${esc(run.zone.name)}. La suite de la Tour du Temps (acte ${run.act + 1} et le sommet) arrive dans une prochaine version.`
+        ? `${esc(name)} a vaincu le gardien de la zone ${esc(run.zone.name)}. ${run.act >= 3 ? 'Le sommet de la Tour du Temps et Dialga Primal arrivent dans une prochaine version.' : `La suite de la Tour du Temps (acte ${run.act + 1} et le sommet) arrive dans une prochaine version.`}`
         : `${esc(name)} est tombé à l'étage ${run.floor} de la Tour du Temps.`}</p>
       <div class="run-stats">
         <div><b>${run.floor}</b><span>étage atteint</span></div>

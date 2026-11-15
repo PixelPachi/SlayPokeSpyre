@@ -20,7 +20,8 @@ export interface ZoneDef {
   season: string;
   /** Particules animées par-dessus le fond. */
   weather: 'pollen' | 'petales' | 'feuilles-rouges' | 'feuilles-or' | 'neige'
-    | 'cristaux' | 'gouttes' | 'cendres' | 'poussiere' | 'etincelles';
+    | 'cristaux' | 'gouttes' | 'cendres' | 'poussiere' | 'etincelles'
+    | 'braises' | 'blizzard' | 'vent' | 'orage';
 }
 
 export const ZONES: ZoneDef[] = [
@@ -95,6 +96,43 @@ export const ZONES: ZoneDef[] = [
     elites: [['mygavolt']], boss: 'ohmassacre',
     background: 'backgrounds/grotte-electrolithe.png', palette: ['#2a3a6a', '#2b2b3d', '#0b0d1a'], mood: 'electrik',
     season: "Nuit d'orage", weather: 'etincelles',
+  },
+
+  // ——— Acte 3 : les hauteurs (sommets et lieux légendaires) ———
+  {
+    id: 'route-victoire', name: 'Route Victoire', region: 'Kanto', act: 3,
+    encounters: [['onix'], ['machopeur', 'ossatueur'], ['gravalanch', 'gravalanch'], ['machopeur', 'gravalanch'], ['ossatueur', 'onix']],
+    elites: [['mackogneur']], boss: 'dracolosse',
+    background: 'backgrounds/route-victoire.png', palette: ['#a8743a', '#5a4030', '#1c120c'], mood: 'combat',
+    season: 'Nuit aux flambeaux', weather: 'braises',
+  },
+  {
+    id: 'mont-argente', name: 'Mont Argenté', region: 'Johto', act: 3,
+    encounters: [['donphan'], ['farfuret', 'feuforeve'], ['ursaring'], ['farfuret', 'farfuret'], ['feuforeve', 'donphan']],
+    elites: [['ymphect']], boss: 'tyranocif',
+    background: 'backgrounds/mont-argente.png', palette: ['#e8eef4', '#aab6c2', '#2a3340'], mood: 'glace',
+    season: 'Hiver éternel', weather: 'blizzard',
+  },
+  {
+    id: 'pilier-celeste', name: 'Pilier Céleste', region: 'Hoenn', act: 3,
+    encounters: [['kaorine'], ['altaria', 'draby'], ['branette', 'branette'], ['kaorine', 'branette'], ['draby', 'draby', 'altaria']],
+    elites: [['drattak']], boss: 'rayquaza',
+    background: 'backgrounds/pilier-celeste.png', palette: ['#ffd9a8', '#8a8f9a', '#26304a'], mood: 'dragon',
+    season: 'Aube au-dessus des nuages', weather: 'vent',
+  },
+  {
+    id: 'mont-abrupt', name: 'Mont Abrupt', region: 'Sinnoh', act: 3,
+    encounters: [['magmar'], ['grolem'], ['rhinocorne', 'smogogo'], ['magmar', 'smogogo'], ['rhinocorne', 'magmar']],
+    elites: [['maganon']], boss: 'heatran',
+    background: 'backgrounds/mont-abrupt.png', palette: ['#c2412a', '#4a2620', '#160806'], mood: 'feu',
+    season: 'Crépuscule de magma', weather: 'cendres',
+  },
+  {
+    id: 'tour-dragospire', name: 'Tour Dragospire', region: 'Unys', act: 3,
+    encounters: [['gringolem'], ['drakkarmin'], ['incisache', 'polarhume'], ['polarhume', 'polarhume'], ['gringolem', 'incisache']],
+    elites: [['tranchodon']], boss: 'zekrom',
+    background: 'backgrounds/tour-dragospire.png', palette: ['#5a6a8a', '#7d8494', '#141a28'], mood: 'dragon',
+    season: "Tempête de neige et d'éclairs", weather: 'orage',
   },
 ];
 

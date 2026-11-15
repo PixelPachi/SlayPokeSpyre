@@ -698,3 +698,22 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .weather-etincelles i { width: calc(3px * var(--s)); height: calc(12px * var(--s)); background: #9fe3ff; box-shadow: 0 0 8px #5ccfff, 0 0 2px #fff; animation-name: spark; }
 @keyframes spark { 0%, 100% { transform: translate(0, 200px) rotate(20deg); opacity: 0; } 45% { opacity: 0; } 50% { transform: translate(10px, 260px) rotate(-30deg); opacity: 1; } 55% { opacity: 0; } }
 .card-name.long { font-size: 12px; -webkit-text-stroke-width: 2.5px; }
+
+/* Particules de l'acte 3 */
+.weather-braises i { top: auto; bottom: -20px; width: calc(5px * var(--s)); height: calc(5px * var(--s)); border-radius: 50%; background: #ffb347; box-shadow: 0 0 8px #ff7a1a; animation-name: rise; }
+@keyframes rise { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(30px, -560px); opacity: 0; } }
+.weather-blizzard i { width: calc(6px * var(--s)); height: calc(6px * var(--s)); border-radius: 50%; background: #fff; opacity: .9; animation-name: gust; animation-duration: 3s !important; }
+@keyframes gust { 0% { transform: translate(200px, 0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(-420px, 720px); opacity: 0; } }
+.weather-vent i { top: calc(var(--s) * 40%); width: calc(90px * var(--s)); height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, #ffffffaa, transparent); animation-name: streak; }
+@keyframes streak { 0% { transform: translateX(-200px); opacity: 0; } 20% { opacity: .8; } 100% { transform: translateX(900px); opacity: 0; } }
+.weather-orage i { width: calc(6px * var(--s)); height: calc(6px * var(--s)); border-radius: 50%; background: #e8f0ff; animation-name: gust; animation-duration: 5s !important; }
+.lightning { position: absolute; inset: 0; pointer-events: none; background: #eaf2ff; opacity: 0; animation: flash 9s infinite; }
+@keyframes flash { 0%, 91%, 95%, 100% { opacity: 0; } 92% { opacity: .55; } 93% { opacity: .1; } 94% { opacity: .4; } }
+/* Décor de secours des sommets : montagnes lointaines */
+.scene.peaks .trees {
+  opacity: 0.5;
+  background:
+    conic-gradient(from 150deg at 18% 38%, transparent 0 0, var(--t) 0 60deg, transparent 60deg) 0 0 / 100% 100% no-repeat,
+    conic-gradient(from 145deg at 55% 30%, transparent 0 0, var(--t) 0 70deg, transparent 70deg) 0 0 / 100% 100% no-repeat,
+    conic-gradient(from 155deg at 86% 42%, transparent 0 0, var(--t) 0 50deg, transparent 50deg) 0 0 / 100% 100% no-repeat;
+}

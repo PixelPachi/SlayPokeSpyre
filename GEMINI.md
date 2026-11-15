@@ -32,7 +32,9 @@ Ambiances (le jeu ajoute les particules assorties) : Mont Sélénite **nuit de p
 | `public/backgrounds/mont-couronne.png` | Mont Couronné (Sinnoh) | Une grande caverne de montagne aux colonnes de pierre naturelles, lumière froide qui tombe d'une ouverture, roche grise et bleutée. | ☐ |
 | `public/backgrounds/grotte-electrolithe.png` | Grotte Électrolithe (Unys) | Une grotte remplie de pierres électriques flottantes qui crépitent de bleu, petits arcs électriques, sol rocheux sombre. | ☐ |
 
-## Acte 3 — les hauteurs (à venir dans le jeu)
+## Acte 3 — les hauteurs
+
+Ambiances (le jeu ajoute les particules assorties) : Route Victoire **nuit aux flambeaux** (braises), Mont Argenté **hiver éternel** (blizzard), Pilier Céleste **aube au-dessus des nuages** (vent), Mont Abrupt **crépuscule de magma** (cendres), Tour Dragospire **tempête de neige et d'éclairs** (neige et éclairs).
 
 | Fichier | Zone (région) | Description à ajouter au prompt | Fait |
 | --- | --- | --- | --- |

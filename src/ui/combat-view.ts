@@ -44,10 +44,11 @@ export class CombatView {
     const z = run.zone;
     root.style.setProperty('--ground', z.palette[1]);
     root.innerHTML = `
-      <div class="scene ${z.act >= 2 ? 'cave' : ''} ${BG_LOADED.get(z.background) ? 'has-bg' : ''}"
+      <div class="scene ${z.act === 2 ? 'cave' : z.act >= 3 ? 'peaks' : ''} ${BG_LOADED.get(z.background) ? 'has-bg' : ''}"
            style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]};--bg:url('${asset(z.background)}')">
         <div class="trees"></div>
         <div class="weather weather-${z.weather}">${weatherParticles(z.weather)}</div>
+        ${z.weather === 'orage' ? '<div class="lightning"></div>' : ''}
       </div>
       <div class="combat"></div><div class="fx-layer"></div>`;
     this.el = root.querySelector('.combat')!;
@@ -576,7 +577,7 @@ const INTENT_ICONS: Record<string, string> = {
 
 /** Particules de saison : pollen, pétales, feuilles d'automne ou neige. Positions fixes (même rendu à chaque fois). */
 function weatherParticles(kind: string): string {
-  const count = kind === 'neige' || kind === 'cendres' ? 46 : kind === 'gouttes' ? 40 : kind === 'pollen' || kind === 'poussiere' ? 26 : 22;
+  const count = kind === 'blizzard' ? 70 : kind === 'neige' || kind === 'cendres' || kind === 'orage' ? 46 : kind === 'gouttes' ? 40 : kind === 'pollen' || kind === 'poussiere' || kind === 'braises' ? 26 : 22;
   let out = '';
   for (let i = 0; i < count; i++) {
     const x = (i * 37 + 11) % 100;
