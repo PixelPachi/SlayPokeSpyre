@@ -83,6 +83,12 @@ const CARDS: CardDef[] = [
     upgrade: { effects: [{ kind: 'degats', amount: 12 }, { kind: 'statut', status: 'paralysie', stacks: 2, on: 'cible' }] },
   },
   {
+    id: 'mach-punch', name: 'Mach Punch', character: 'riolu', pokeType: 'combat', category: 'attaque',
+    rarity: 'commune', cost: 1, target: 'ennemi',
+    effects: [{ kind: 'degats', amount: 6 }, { kind: 'pioche', amount: 1 }],
+    upgrade: { effects: [{ kind: 'degats', amount: 9 }, { kind: 'pioche', amount: 1 }] },
+  },
+  {
     id: 'pisto-poing', name: 'Pisto-Poing', character: 'riolu', pokeType: 'acier', category: 'attaque',
     rarity: 'commune', cost: 1, target: 'ennemi',
     effects: [{ kind: 'degats', amount: 7 }],
@@ -124,6 +130,12 @@ const CARDS: CardDef[] = [
     rarity: 'rare', cost: 2, target: 'ennemi',
     effects: [{ kind: 'degats', amount: 20 }],
     upgrade: { effects: [{ kind: 'degats', amount: 27 }] },
+  },
+  {
+    id: 'ultimawashi', name: 'Ultimawashi', character: 'riolu', pokeType: 'normal', category: 'attaque',
+    rarity: 'rare', cost: 3, target: 'ennemi',
+    effects: [{ kind: 'degats', amount: 30 }],
+    upgrade: { effects: [{ kind: 'degats', amount: 38 }] },
   },
   {
     id: 'machination', name: 'Machination', character: 'riolu', pokeType: 'tenebres', category: 'technique',
