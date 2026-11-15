@@ -576,3 +576,11 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .relic-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; text-align: left; }
 .relic-grid .relic-card { max-width: none; height: 100%; }
 .collect-relic.locked .relic-card { filter: grayscale(1) brightness(0.55); }
+
+/* ——— Marché Kecleon ——— */
+.kecleon-head { display: flex; align-items: center; gap: 18px; }
+.kecleon { width: 128px; height: 128px; image-rendering: pixelated; margin: -20px -10px; }
+.kecleon-head.shiny .kecleon { filter: drop-shadow(0 0 10px #ffe36e); }
+.shiny-note { color: #ffe36e; }
+.map-node .kecleon-icon { transform: scale(1.5); }
+.legend-icon .kecleon-icon { transform: scale(1.5); }

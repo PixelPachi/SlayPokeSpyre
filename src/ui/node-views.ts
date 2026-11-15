@@ -1,4 +1,4 @@
-// Écrans des nœuds hors combat : récompenses, Centre Pokémon, Poké Mart, événement, trésor, fin de run.
+// Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
 import { cardDef } from '../data/cards';
@@ -6,6 +6,7 @@ import { LEVEL_EXP, MAX_LEVEL } from '../data/unlocks';
 import { CHARACTERS } from '../data/characters';
 import { EVENTS, type GameEvent } from '../data/events';
 import { renderCard } from './card';
+import { SHINY_CHANCE } from '../core/combat';
 import { CHARACTER_COLORS } from './labels';
 import { openDeckOverlay, relicCard, topbar } from './run-ui';
 import { relicPrice } from '../data/relics';
@@ -85,10 +86,13 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
     }, run));
 }
 
-/** Poké Mart : 5 cartes du personnage + oublier une carte. */
+/** Marché Kecleon : 5 cartes du personnage, 2 objets tenus, oublier une carte.
+ *  Kecleon peut être chromatique (même chance que les ennemis) : tous les prix sont alors divisés par deux. */
 export function renderShop(root: HTMLElement, run: Run, done: Done): void {
-  const offers = run.cardChoices('boutique', 5).map((id) => ({ id, price: cardPrice(id), sold: false }));
-  const items = run.rollRelics(2).map((id) => ({ id, price: relicPrice(id), sold: false }));
+  const shiny = run.rng.next() < SHINY_CHANCE;
+  const price = (p: number) => (shiny ? Math.floor(p / 2) : p);
+  const offers = run.cardChoices('boutique', 5).map((id) => ({ id, price: price(cardPrice(id)), sold: false }));
+  const items = run.rollRelics(2).map((id) => ({ id, price: price(relicPrice(id)), sold: false }));
   let pickedItem: number | null = null;
   const sale = run.rng.int(0, offers.length - 1);
   offers[sale].price = Math.floor(offers[sale].price / 2);
@@ -96,10 +100,17 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
   let picked: number | null = null;
 
   const draw = () => {
-    const removeCost = 75 + 25 * run.removals;
-    root.innerHTML = shell(run, 'Poké Mart', `
-      <h1 class="node-title">Poké Mart</h1>
-      <p class="node-sub">« Des capacités toutes neuves, venues de toutes les régions ! »</p>
+    const removeCost = price(75 + 25 * run.removals);
+    root.innerHTML = shell(run, 'Marché Kecleon', `
+      <div class="kecleon-head ${shiny ? 'shiny' : ''}">
+        <img class="kecleon" src="${asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`)}" alt="Kecleon">
+        <div>
+          <h1 class="node-title">Marché Kecleon</h1>
+          <p class="node-sub">${shiny
+            ? '<b class="shiny-note">★ Kecleon chromatique ! Tous les prix sont divisés par deux.</b>'
+            : '« Bienvenue ! Des capacités et des objets venus de toutes les régions ! »'}</p>
+        </div>
+      </div>
       <div class="card-row shop">
         ${offers.map((o, i) => `
           <div class="shop-item ${o.sold ? 'sold' : ''} ${run.money < o.price ? 'poor' : ''} ${picked === i ? 'picked' : ''}" data-i="${i}">
@@ -117,7 +128,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
         <button class="choice remove" ${removed || run.money < removeCost ? 'disabled' : ''}>
           <b>Oublier une capacité</b><span>${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
         </button>
-        <button class="btn leave">Quitter la boutique</button>
+        <button class="btn leave">Quitter le marché</button>
       </div>`, 'shop-screen');
     bindDeck(root, run);
     // Un premier clic choisit la carte, le bouton « Acheter » confirme (pas d'achat par erreur)

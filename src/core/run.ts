@@ -90,7 +90,7 @@ export class Run {
   /** Nœud actuel (null avant le premier étage ; row = BOSS_ROW pour le gardien). */
   pos: { row: number; col: number } | null = null;
   visited: string[] = [];
-  removals = 0; // nombre de cartes oubliées au Poké Mart (le prix monte)
+  removals = 0; // nombre de cartes oubliées au Marché Kecleon (le prix monte)
   elitesDefeated = 0;
   bossesDefeated = 0;
   /** Objets tenus (le premier est l'objet de départ). */

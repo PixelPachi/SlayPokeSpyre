@@ -16,7 +16,7 @@ export const NODE_INFO: Record<NodeType, { label: string; text: string }> = {
   combat: { label: 'Combat', text: 'Des Pokémon sauvages de la zone.' },
   evenement: { label: 'Événement', text: 'Une rencontre mystère, avec des choix.' },
   centre: { label: 'Centre Pokémon', text: 'Soigner 30 % des PV max, ou améliorer une carte.' },
-  boutique: { label: 'Poké Mart', text: 'Acheter des cartes, oublier une carte.' },
+  boutique: { label: 'Marché Kecleon', text: 'Acheter des cartes et des objets, oublier une carte. Si Kecleon est chromatique, tout est à moitié prix !' },
   elite: { label: 'Pokémon dominant', text: 'Un ennemi très fort, de meilleures récompenses.' },
   tresor: { label: 'Trésor', text: 'Une Poké Ball pleine de surprises.' },
   boss: { label: 'Gardien', text: 'Le boss de la zone.' },
@@ -37,7 +37,7 @@ export function nodeIcon(type: NodeType): string {
     case 'centre':
       return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#fff" stroke="#3a0d0d" stroke-width="2.5"/><path d="M5 20a15 15 0 0 1 30 0z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5"/><path d="M17 11h6v6h6v6h-6v6h-6v-6h-6v-6h6z" fill="#fff" stroke="#3a0d0d" stroke-width="2"/></svg>';
     case 'boutique':
-      return '<svg viewBox="0 0 40 40"><rect x="6" y="13" width="28" height="21" rx="3" fill="#4a8df0" stroke="#0e2147" stroke-width="2.5"/><path d="M13 13v-3a7 7 0 0 1 14 0v3" fill="none" stroke="#0e2147" stroke-width="2.5"/><text x="20" y="29" text-anchor="middle" font-size="11" font-weight="900" fill="#fff" font-family="Nunito, sans-serif">PM</text></svg>';
+      return `<img class="kecleon-icon" src="${asset('sprites/pokemon/front/352.png')}" alt="">`;
     case 'elite':
       return '<svg viewBox="0 0 40 40"><path d="M6 10l7 6 7-10 7 10 7-6-3 22H9z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5" stroke-linejoin="round"/><circle cx="15" cy="23" r="2.5" fill="#fff"/><circle cx="25" cy="23" r="2.5" fill="#fff"/></svg>';
     case 'tresor':

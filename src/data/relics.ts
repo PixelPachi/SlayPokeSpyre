@@ -83,7 +83,7 @@ export function relicDef(id: string): RelicDef {
   return r;
 }
 
-/** Prix au Poké Mart. */
+/** Prix au Marché Kecleon. */
 export function relicPrice(id: string): number {
   const r = RELIC_DEFS[id].rarity;
   return r === 'rare' ? 300 : r === 'peu-commun' ? 250 : 150;

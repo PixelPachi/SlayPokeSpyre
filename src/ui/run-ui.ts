@@ -13,7 +13,7 @@ export function topbar(run: Run, label: string, hp = run.hp): string {
     <div class="topbar">
       <span class="tb-name">${esc(CHARACTERS[run.character].name)}</span>
       <span class="tb-hp" data-tip="Points de vie">PV ${hp}/${run.maxHp}</span>
-      <span class="tb-money" data-tip="Pokédollars : à dépenser au Poké Mart">${run.money} ₽</span>
+      <span class="tb-money" data-tip="Pokédollars : à dépenser au Marché Kecleon">${run.money} ₽</span>
       <span class="tb-zone">${esc(label)}</span>
       <span class="tb-floor" data-tip="Étage de la Tour du Temps">Étage ${run.floor}</span>
       <button class="tb-deck" data-tip="Voir ton deck">Deck ${run.deck.length}</button>
