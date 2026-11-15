@@ -330,11 +330,14 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.has-frame .card-inner { background: none; box-shadow: none; }
 /* Cadre Gemini : l'image dépasse un peu de la carte (bouts du bandeau) ; zones calées sur ce cadre */
 .card.has-frame .card-inner::before {
-  content: ''; position: absolute; left: -12.7px; top: -0.3px; width: 173.9px; height: 210.6px; z-index: 0;
+  content: ''; position: absolute; left: -12.7px; top: -0.3px; width: 173.9px; height: 210.6px; z-index: 1;
   background: var(--frame) 0 0 / 100% 100% no-repeat; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55)); pointer-events: none;
 }
-.card.has-frame .card-inner > * { z-index: 1; }
-.card.has-frame .card-window { left: 16.5px; right: 16.5px; top: 23px; height: 84px; }
+.card.has-frame .card-inner > * { z-index: 2; }
+/* L'illustration passe SOUS le cadre (fenêtre découpée) : elle ne déborde jamais */
+.card.has-frame .card-window { z-index: 0; }
+.card.has-frame .card-art { clip-path: none; }
+.card.has-frame .card-window { left: 18px; right: 15px; top: 22px; height: 88px; clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%); }
 .card.has-frame .card-banner { top: 5px; height: 18px; left: 6px; right: -2px; }
 .card.has-frame .card-cat { top: 105px; }
 .card.has-frame .card-text { left: 13px; right: 13px; top: 130px; bottom: 11px; }
