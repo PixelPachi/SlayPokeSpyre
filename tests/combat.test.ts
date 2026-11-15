@@ -607,3 +607,23 @@ describe('évolutions et Méga-Évolution', async () => {
     expect(c.player.familiar!.mega).toBe(true);
   });
 });
+
+describe('arcanes majeurs', async () => {
+  const { TAROT_EVENTS } = await import('../src/data/events-tarot');
+  const { Run } = await import('../src/core/run');
+  it('22 arcanes, chaque choix s’applique sans erreur', () => {
+    expect(TAROT_EVENTS).toHaveLength(22);
+    for (const ev of TAROT_EVENTS) {
+      ev.choices.forEach((c, i) => {
+        const run = new Run(`T-${ev.id}-${i}`, 'riolu');
+        run.money = 200;
+        const before = run.maxHp;
+        const r = c.apply(run);
+        expect(typeof r === 'string' || ['retirer', 'ameliorer', 'dupliquer', 'transformer'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
+        expect(run.hp, ev.id).toBeGreaterThan(0);
+        expect(run.hp, ev.id).toBeLessThanOrEqual(run.maxHp);
+        if (ev.id === 'tarot-diable' && i < 3) expect(run.maxHp).toBeLessThan(before);
+      });
+    }
+  });
+});

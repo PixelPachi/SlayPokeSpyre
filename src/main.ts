@@ -48,6 +48,8 @@ function startRun(character: CharacterId): void {
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
+  // Pour tester : ?evenement=tarot-diable ouvre directement cet événement
+  if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!); }
   showMap(run);
 }
 

@@ -5,7 +5,8 @@ import { cardDef } from '../data/cards';
 import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
-import { EVENTS, type GameEvent } from '../data/events';
+import { EVENTS, type EventPick, type GameEvent } from '../data/events';
+import { TAROT_EVENTS } from '../data/events-tarot';
 import { renderCard } from './card';
 import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
@@ -184,43 +185,75 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
 }
 
 /** Événement mystère. */
-export function renderEvent(root: HTMLElement, run: Run, done: Done): void {
-  const ev: GameEvent = run.rng.pick(EVENTS);
-  const showResult = (text: string) => {
-    root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p><button class="btn primary leave">Continuer</button>`;
-    root.querySelector('.leave')!.addEventListener('click', done);
+export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: string): void {
+  // Un événement sur deux environ est un arcane majeur ; jamais deux fois le même dans une run
+  const fresh = (list: GameEvent[]) => list.filter((e) => !run.seenEvents.includes(e.id));
+  const tarot = fresh(TAROT_EVENTS), classic = fresh(EVENTS);
+  const pool = tarot.length && (run.rng.next() < 0.6 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
+  const ev: GameEvent = [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forcedId) ?? run.rng.pick(pool);
+  run.seenEvents.push(ev.id);
+  const refreshBar = () => {
     root.querySelector('.tb-hp')!.textContent = `PV ${run.hp}/${run.maxHp}`;
     root.querySelector('.tb-money')!.textContent = `${run.money} ₽`;
     root.querySelector('.tb-deck')!.textContent = `Deck ${run.deck.length}`;
   };
+  const showResult = (text: string) => {
+    root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p><button class="btn primary leave">Continuer</button>`;
+    root.querySelector('.leave')!.addEventListener('click', done);
+    refreshBar();
+  };
+  const art = ev.tarot
+    ? (ev.image
+      ? `<img class="tarot-card" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
+      : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
+    : `<img class="event-img" src="${asset(ev.image)}" alt="">`;
   root.innerHTML = shell(run, 'Événement', `
-    <div class="event-panel">
-      <img class="event-img" src="${asset(ev.image)}" alt="">
-      <h1 class="node-title">${esc(ev.title)}</h1>
-      <p class="event-text">${esc(ev.text)}</p>
-      <div class="event-choices">
-        ${ev.choices.map((c, i) => {
-          const ok = c.available?.(run) ?? true;
-          return `<button class="choice" data-i="${i}" ${ok ? '' : 'disabled'}><b>${esc(c.label)}</b><span>${esc(c.detail)}</span></button>`;
-        }).join('')}
+    <div class="event-panel ${ev.tarot ? 'tarot' : ''}">
+      ${art}
+      <div class="event-side">
+        <h1 class="node-title">${esc(ev.title)}</h1>
+        <p class="event-text">${esc(ev.text)}</p>
+        <div class="event-choices">
+          ${ev.choices.map((c, i) => {
+            const ok = c.available?.(run) ?? true;
+            return `<button class="choice" data-i="${i}" ${ok ? '' : 'disabled'}><b>${esc(c.label)}</b><span>${esc(c.detail)}</span></button>`;
+          }).join('')}
+        </div>
       </div>
     </div>`, 'event');
   bindDeck(root, run);
+  const results: string[] = [];
+  const doPick = (p: EventPick, left: number) => {
+    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded) : run.deck;
+    if (!cards.length) return showResult([...results, 'Aucune carte ne convient.'].join(' '));
+    openDeckOverlay(root, {
+      title: p.text, cards, upgradePreview: p.pick === 'ameliorer', cancelLabel: 'Annuler',
+      onPick: (uid) => {
+        const card = run.deck.find((c) => c.uid === uid)!;
+        const name = cardDef(card.defId).name;
+        if (p.pick === 'ameliorer') { run.upgradeCard(uid); results.push(`${name} est améliorée !`); }
+        else if (p.pick === 'retirer') { run.removeCard(uid); results.push(`Tu as oublié ${name}.`); }
+        else if (p.pick === 'dupliquer') { run.addCard(card.defId, card.upgraded); results.push(`${name} est dupliquée.`); }
+        else {
+          run.removeCard(uid);
+          const id = run.cardChoices('combat', 1)[0];
+          run.addCard(id);
+          results.push(`${name} devient ${cardDef(id).name} !`);
+        }
+        refreshBar();
+        if (left > 1) return doPick({ ...p, text: `Encore ${left - 1} carte${left - 1 > 1 ? 's' : ''} : ${p.text}` }, left - 1);
+        if (p.then) return doPick({ pick: p.then, text: p.then === 'ameliorer' ? 'Puis, quelle carte renaît plus forte ?' : 'Choisis une carte.' }, 1);
+        showResult(results.join(' '));
+      },
+      onCancel: () => showResult(results.length ? results.join(' ') : 'Tu renonces et reprends ta route.'),
+    }, run);
+  };
   root.querySelectorAll<HTMLElement>('.event-choices .choice').forEach((b) =>
     b.addEventListener('click', () => {
       const r = ev.choices[Number(b.dataset.i)].apply(run);
+      refreshBar();
       if (typeof r === 'string') return showResult(r);
-      const cards = r.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded) : run.deck;
-      openDeckOverlay(root, {
-        title: r.text, cards, upgradePreview: r.pick === 'ameliorer', cancelLabel: 'Annuler',
-        onPick: (uid) => {
-          const name = cardDef(run.deck.find((c) => c.uid === uid)!.defId).name;
-          if (r.pick === 'ameliorer') run.upgradeCard(uid);
-          else run.removeCard(uid);
-          showResult(r.pick === 'ameliorer' ? `${name} est améliorée !` : `Tu as oublié ${name}.`);
-        },
-        onCancel: () => showResult('Tu renonces et reprends ta route.'),
-      }, run);
+      doPick(r, r.count ?? 1);
     }));
 }
 

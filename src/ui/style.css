@@ -791,3 +791,21 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .fighter .platform { display: none; }
 .enemy.hovered .sprite.front { filter: drop-shadow(0 0 10px rgba(255, 215, 94, 0.95)); }
 .enemy.hovered .sprite.front.primal { filter: brightness(0.6) saturate(1.6) hue-rotate(-12deg) drop-shadow(0 0 12px #ffd75e); }
+
+/* ——— Événements : arcanes majeurs (carte à gauche, choix à droite) ——— */
+.event-side { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.event-panel.tarot { flex-direction: row; align-items: center; justify-content: center; gap: 44px; max-width: 1140px; }
+.event-panel.tarot .event-side { align-items: flex-start; width: 640px; text-align: left; }
+.event-panel.tarot .node-title { margin: 0; color: #ffe08a; }
+.event-panel.tarot .event-text { margin: 0; font-style: italic; }
+.event-panel.tarot .event-choices { align-items: stretch; width: 100%; }
+.event-panel.tarot .event-choices .choice { width: 100%; text-align: left; }
+.tarot-card { width: 300px; height: 520px; flex: none; border-radius: 16px; object-fit: cover;
+  box-shadow: 0 12px 40px #000c, 0 0 0 2px #e9d8b0, 0 0 40px #ffd27a33; animation: tarot-in .7s ease-out; transform-origin: 50% 80%; }
+@keyframes tarot-in { from { opacity: 0; transform: rotateY(90deg) scale(0.9); } }
+.tarot-blank { display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 18px 10px;
+  background: linear-gradient(#efe1bf, #d9c49a); color: #3a2a1a; font-family: var(--font-title); }
+.tarot-blank span { font-size: 26px; }
+.tarot-blank b { font-size: 24px; }
+.tarot-blank img { width: 220px; height: 220px; image-rendering: pixelated; }
+.event-panel.tarot { display: flex; width: auto; padding: 22px 30px; }

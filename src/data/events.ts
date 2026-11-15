@@ -5,16 +5,24 @@ export interface EventChoice {
   label: string;
   /** Texte gris sous le choix (coût ou gain). */
   detail: string;
-  /** Applique le choix ; renvoie le texte du résultat. 'retirer' / 'ameliorer' ouvrent le choix d'une carte. */
-  apply: (run: Run) => string | { pick: 'retirer' | 'ameliorer'; text: string };
+  /** Applique le choix ; renvoie le texte du résultat, ou ouvre le choix d'une carte du deck
+   *  (retirer, améliorer, dupliquer, transformer ; count = combien de fois ; then = un second choix ensuite). */
+  apply: (run: Run) => string | EventPick;
   available?: (run: Run) => boolean;
 }
+
+export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer';
+export interface EventPick { pick: PickKind; text: string; count?: number; then?: PickKind }
 
 export interface GameEvent {
   id: string;
   title: string;
-  /** Sprite PokeAPI à afficher (chemin dans public/sprites). */
+  /** Image à afficher : sprite PokeAPI, ou carte de tarot (public/tarot) si tarot est vrai. */
   image: string;
+  /** Arcane majeur : la carte s'affiche en grand à gauche, les choix à droite. */
+  tarot?: boolean;
+  /** Sprite de secours quand l'arcane n'a pas encore d'illustration. */
+  sprite?: string;
   text: string;
   choices: EventChoice[];
 }

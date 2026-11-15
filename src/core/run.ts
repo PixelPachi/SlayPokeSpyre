@@ -147,6 +147,9 @@ export class Run {
     };
   }
 
+  /** Événements déjà vus pendant cette run (on ne retombe pas deux fois sur le même arcane). */
+  seenEvents: string[] = [];
+
   /** Étape atteinte au sommet (0 = pas encore commencé). */
   summitStep = 0;
 
