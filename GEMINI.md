@@ -8,17 +8,17 @@ Liste des images du jeu à créer avec Gemini. Quand une image est prête, envoi
 
 > Illustration de fond pour un jeu vidéo, format paysage 16:9 (1920 × 1080). Style illustration anime peinte, couleurs vives et douces, lumière atmosphérique, comme une illustration officielle Pokémon. Aucun personnage, aucun Pokémon, aucun texte, aucun logo. Composition : un sol dégagé qui occupe le tiers inférieur, avec une petite clairière plate à gauche et une autre à droite (les combattants y seront posés), le centre de l'image reste dégagé. Le bas de l'image est un peu plus sombre (des cartes s'afficheront par-dessus). Détail récurrent : ce lieu a été arraché à sa région par une faille temporelle et flotte dans la Tour du Temps ; on devine quelques engrenages dorés lumineux et des éclats de lumière bleue dans le ciel ou au loin.
 
-Puis ajouter la description de la zone ci-dessous.
+Puis ajouter la description de la zone ci-dessous. Chaque forêt a sa propre saison pour que les décors ne se ressemblent pas ; le jeu ajoute aussi des particules animées assorties (pollen, pétales, feuilles, neige).
 
 ## Acte 1 — la base de la tour
 
 | Fichier | Zone (région) | Description à ajouter au prompt | Fait |
 | --- | --- | --- | --- |
-| `public/backgrounds/foret-de-jade.png` | Forêt de Jade (Kanto) | Une forêt dense et lumineuse aux grands arbres verts, rayons de soleil entre les feuilles, hautes herbes, petit sentier de terre. | ☐ |
-| `public/backgrounds/bois-aux-chenes.png` | Bois aux Chênes (Johto) | Un bois sombre et mystérieux de vieux chênes aux troncs épais, lumière filtrée et bleutée, petit autel de bois au loin, brume au sol. | ☐ |
-| `public/backgrounds/bois-clematis.png` | Bois Clématis (Hoenn) | Un bois tropical clair et luxuriant, grands champignons, fleurs colorées, lumière chaude de fin de matinée. | ☐ |
-| `public/backgrounds/foret-de-vestigion.png` | Forêt de Vestigion (Sinnoh) | Une forêt ancienne et immense aux arbres moussus, ambiance un peu inquiétante, lumière verte et grise, vieux manoir à peine visible au loin. | ☐ |
-| `public/backgrounds/foret-d-empoigne.png` | Forêt d'Empoigne (Unys) | Une forêt verte et vivante traversée par une rivière, rochers moussus, petit pont de bois, ambiance de nature sauvage. | ☐ |
+| `public/backgrounds/foret-de-jade.png` | Forêt de Jade (Kanto) | **Été lumineux.** Une forêt dense aux grands arbres d'un vert éclatant, rayons de soleil entre les feuilles, pollen doré qui flotte dans l'air, hautes herbes, petit sentier de terre. | ☐ |
+| `public/backgrounds/bois-aux-chenes.png` | Bois aux Chênes (Johto) | **Automne au crépuscule.** Un bois de vieux chênes aux troncs épais, feuilles dorées et brunes qui tombent, tapis de feuilles au sol, brume légère, lumière orangée et basse de fin de journée, petit autel de bois au loin. | ☐ |
+| `public/backgrounds/bois-clematis.png` | Bois Clématis (Hoenn) | **Printemps en fleurs.** Un bois clair aux arbres couverts de fleurs roses, pétales qui volent dans l'air, grands champignons, herbe tendre, lumière douce du matin. | ☐ |
+| `public/backgrounds/foret-de-vestigion.png` | Forêt de Vestigion (Sinnoh) | **Hiver enneigé.** Une forêt ancienne et immense sous la neige, branches chargées de neige, flocons qui tombent, sol blanc, lumière froide et bleutée, vieux manoir à peine visible au loin. | ☐ |
+| `public/backgrounds/foret-d-empoigne.png` | Forêt d'Empoigne (Unys) | **Automne flamboyant.** Une forêt aux feuillages rouges et orange vifs traversée par une rivière, feuilles rouges qui tombent et flottent sur l'eau, rochers moussus, petit pont de bois, lumière chaude de l'après-midi. | ☐ |
 
 ## Acte 2 — le cœur de la tour (à venir dans le jeu)
 

@@ -40,7 +40,16 @@ export class CombatView {
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
     });
     this.combat.drainEvents();
-    root.innerHTML = '<div class="combat"></div><div class="fx-layer"></div>';
+    // Le décor (fond + particules) reste en place pendant tout le combat : les animations ne redémarrent pas
+    const z = run.zone;
+    root.style.setProperty('--ground', z.palette[1]);
+    root.innerHTML = `
+      <div class="scene ${BG_LOADED.get(z.background) ? 'has-bg' : ''}"
+           style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]};--bg:url('${asset(z.background)}')">
+        <div class="trees"></div>
+        <div class="weather weather-${z.weather}">${weatherParticles(z.weather)}</div>
+      </div>
+      <div class="combat"></div><div class="fx-layer"></div>`;
     this.el = root.querySelector('.combat')!;
     this.fx = root.querySelector('.fx-layer')!;
     this.bind();
@@ -51,7 +60,7 @@ export class CombatView {
       const img = new Image();
       img.onload = () => {
         BG_LOADED.set(bg, true);
-        this.el.querySelector('.field')?.classList.add('has-bg');
+        this.root.querySelector('.scene')?.classList.add('has-bg');
       };
       img.onerror = () => BG_LOADED.set(bg, false);
       img.src = asset(bg);
@@ -73,8 +82,7 @@ export class CombatView {
 
     this.el.innerHTML = `
       ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
-      <div class="field ${BG_LOADED.get(this.run.zone.background) ? 'has-bg' : ''}" style="--sky:${this.run.zone.palette[0]};--ground:${this.run.zone.palette[1]};--shade:${this.run.zone.palette[2]};--bg:url('${asset(this.run.zone.background)}')">
-        <div class="trees"></div>
+      <div class="field">
         <div class="fighter player" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
@@ -548,3 +556,17 @@ const INTENT_ICONS: Record<string, string> = {
   boost: '<svg viewBox="0 0 24 24"><path d="M12 3l8 9h-5v9H9v-9H4z" fill="#ff9b4a" stroke="#1b1b1b" stroke-width="1.5"/></svg>',
   inconnu: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#777" stroke="#1b1b1b" stroke-width="1.5"/><text x="12" y="17" font-size="13" text-anchor="middle" fill="#fff">?</text></svg>',
 };
+
+/** Particules de saison : pollen, pétales, feuilles d'automne ou neige. Positions fixes (même rendu à chaque fois). */
+function weatherParticles(kind: string): string {
+  const count = kind === 'neige' ? 46 : kind === 'pollen' ? 26 : 22;
+  let out = '';
+  for (let i = 0; i < count; i++) {
+    const x = (i * 37 + 11) % 100;
+    const delay = -((i * 1.7) % 14);
+    const dur = 9 + ((i * 2.3) % 7);
+    const size = 0.6 + ((i * 7) % 10) / 10;
+    out += `<i style="left:${x}%;animation-delay:${delay.toFixed(1)}s;animation-duration:${dur.toFixed(1)}s;--s:${size.toFixed(2)}"></i>`;
+  }
+  return out;
+}

@@ -130,7 +130,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .tb-zone { color: #a5d6a7; }
 .tb-seed { margin-left: auto; color: #8892a6; font-size: 13px; }
 
-.field {
+.field { position: absolute; left: 0; right: 0; top: 40px; bottom: 0; overflow: hidden; }
+.scene {
   position: absolute; left: 0; right: 0; top: 40px; bottom: 0; overflow: hidden;
   /* Fond de la zone (image Gemini) par-dessus un dégradé de secours aux couleurs de la zone */
   background:
@@ -150,12 +151,12 @@ img.sprite, .roster img { image-rendering: pixelated; }
     radial-gradient(circle at 88% 20%, var(--t) 0 95px, transparent 96px),
     radial-gradient(circle at 98% 36%, var(--t) 0 70px, transparent 71px);
 }
-.field.has-bg .trees { display: none; }
+.scene.has-bg .trees { display: none; }
 
 .fighter { position: absolute; display: flex; flex-direction: column; align-items: center; }
 .fighter .platform {
   position: absolute; bottom: 14px; width: 230px; height: 46px; border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(70, 110, 45, 0.95) 0, rgba(46, 80, 30, 0.9) 60%, rgba(0, 0, 0, 0) 72%);
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--ground, #4a7a2f) 85%, #fff) 0, color-mix(in srgb, var(--ground, #4a7a2f) 80%, #000) 60%, rgba(0, 0, 0, 0) 72%);
 }
 .fighter .sprite { position: relative; z-index: 1; }
 .player { left: 90px; bottom: 236px; width: 340px; }
@@ -587,3 +588,24 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .shiny-note { color: #ffe36e; }
 .map-node .kecleon-icon { transform: scale(1.5); }
 .legend-icon .kecleon-icon { transform: scale(1.5); }
+
+/* ——— Particules de saison ——— */
+.weather { position: absolute; inset: 0; pointer-events: none; }
+.weather i { position: absolute; top: -30px; display: block; animation: fall linear infinite; }
+@keyframes fall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 1; }
+  50% { transform: translate(40px, 340px) rotate(200deg); }
+  92% { opacity: 1; }
+  100% { transform: translate(-10px, 720px) rotate(400deg); opacity: 0; }
+}
+.weather-neige i { width: calc(7px * var(--s)); height: calc(7px * var(--s)); border-radius: 50%; background: #fff; box-shadow: 0 0 6px rgba(255, 255, 255, 0.8); }
+.weather-pollen i { width: calc(5px * var(--s)); height: calc(5px * var(--s)); border-radius: 50%; background: #fff6b0; box-shadow: 0 0 8px #fff2a0; animation-name: drift; }
+@keyframes drift {
+  0% { transform: translate(0, 120px); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translate(120px, 420px); opacity: 0; }
+}
+.weather-petales i { width: calc(11px * var(--s)); height: calc(8px * var(--s)); border-radius: 80% 0 80% 0; background: #ffb7d5; }
+.weather-feuilles-rouges i { width: calc(14px * var(--s)); height: calc(10px * var(--s)); border-radius: 90% 0 90% 0; background: linear-gradient(135deg, #ff7a3d, #c22e1f); }
+.weather-feuilles-or i { width: calc(14px * var(--s)); height: calc(10px * var(--s)); border-radius: 90% 0 90% 0; background: linear-gradient(135deg, #f2c14e, #a8661c); }
