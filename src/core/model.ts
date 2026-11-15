@@ -28,6 +28,7 @@ export type Effect =
       drain?: boolean; // soigne de la moitié des dégâts infligés
       facade?: boolean; // dégâts doublés si le lanceur a Brûlure, Poison ou Paralysie
       revanche?: boolean; // dégâts doublés si le lanceur a perdu des PV au dernier tour ennemi
+      contreStatut?: boolean; // dégâts doublés si la cible a un statut (Poison, Brûlure, Paralysie, Peur, Confusion…)
     }
   | { kind: 'protection'; amount: number }
   | { kind: 'statut'; status: StatusId; stacks: number; on: 'cible' | 'soi' | 'tous' }

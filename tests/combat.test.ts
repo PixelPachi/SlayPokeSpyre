@@ -351,3 +351,44 @@ describe('zones', async () => {
     expect(run.encounter('boss')).toEqual([run.zone.boss]);
   });
 });
+
+describe('cartes neutres', async () => {
+  const { neutralPool, CARD_DEFS } = await import('../src/data/cards');
+  const { CHARACTERS } = await import('../src/data/characters');
+  const { Run } = await import('../src/core/run');
+
+  it('53 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
+    const neutral = neutralPool();
+    expect(neutral).toHaveLength(53);
+    const charTypes = new Set(Object.values(CHARACTERS).flatMap((c) => c.types));
+    const otherNames = new Set(Object.values(CARD_DEFS).filter((c) => c.character !== 'normal').map((c) => c.name));
+    for (const c of neutral) {
+      expect(charTypes.has(c.pokeType), c.name).toBe(false);
+      expect(otherNames.has(c.name), c.name).toBe(false);
+    }
+    expect(new Set(neutral.map((c) => c.name)).size).toBe(53);
+  });
+
+  it('des cartes neutres apparaissent parfois dans les récompenses', () => {
+    const run = new Run('NEUTRE', 'riolu');
+    let neutrals = 0;
+    for (let i = 0; i < 200; i++) neutrals += run.cardChoices('combat').filter((id) => CARD_DEFS[id].character === 'normal').length;
+    expect(neutrals).toBeGreaterThan(20);
+    expect(neutrals).toBeLessThan(150);
+    expect(run.neutralChoices(2).every((id) => CARD_DEFS[id].character === 'normal')).toBe(true);
+  });
+
+  it('Châtiment double contre une cible qui a un statut', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'CHAT' });
+    const rat = c.enemies[0];
+    rat.hp = rat.maxHp = 300;
+    c.player.aura = 0;
+    c.player.energy = 9;
+    c.hand = makeDeck(['n-chatiment', 'n-chatiment']).map((x, i) => ({ ...x, uid: 800 + i }));
+    c.play(800, rat.uid); // 9 ×0,25 (Spectre contre Normal) = 2
+    expect(rat.hp).toBe(298);
+    rat.statuses.poison = 2;
+    c.play(801, rat.uid); // 18 ×0,25 = 4
+    expect(rat.hp).toBe(294);
+  });
+});

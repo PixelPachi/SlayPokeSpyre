@@ -10,6 +10,7 @@
 | `src/data/cards.ts` | Cartes communes et des autres starters (ajouter une carte = ajouter une entrée) |
 | `src/data/cards-riolu.ts` | **Les 79 cartes de Riolu** (4 de départ + 75 en récompense) (une par capacité que Riolu/Lucario peut apprendre) |
 | `src/data/relics.ts` | **Objets tenus** : départ, objets de chaque Pokémon, objets communs (effets appliqués dans `core/combat.ts`) |
+| `src/data/cards-neutres.ts` | **53 cartes neutres** que tous les Pokémon peuvent apprendre (types qu'aucun personnage n'a) |
 | `src/data/unlocks.ts` | **EXP et déblocage** : niveau requis pour chaque carte, EXP gagnée en fin de run |
 | `src/core/save.ts` | Sauvegarde de la progression dans le navigateur |
 | `src/data/characters.ts` | Les 5 personnages : PV, talent, deck de départ |
@@ -43,6 +44,7 @@
 - EXP de fin de run : 10 par étage, 25 par Pokémon dominant, 60 par gardien ; 10 niveaux par Pokémon, chaque niveau débloque des cartes dans les récompenses.
 - Objets tenus : chaque Pokémon commence avec le sien (Riolu : Ceinture Noire), en débloque d'autres par niveau, et les objets communs sont toujours possibles. On les obtient au trésor, sur les Pokémon dominants et au Marché Kecleon.
 - Zones : à chaque acte, une zone est tirée au hasard (acte 1 : Forêt de Jade, Bois aux Chênes, Bois Clématis, Forêt de Vestigion, Forêt d'Empoigne). La carte de l'acte est générée au hasard à chaque run.
+- Cartes neutres : 12 % de chances par emplacement de récompense, 2 au Marché Kecleon ; Mew peut toutes les avoir.
 - Déjà prévus dans le moteur : Contestation (Vipélierre), Intimidation (Caninos), Vampigraine, mots-clés Épuisée / Conservée / Éphémère / Innée / Injouable.
 
 ## Ajouter un sprite

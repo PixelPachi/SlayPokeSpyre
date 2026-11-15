@@ -2,6 +2,7 @@
 // Règle du GDD : la plupart des cartes portent le nom d'une capacité que le Pokémon peut apprendre dans les jeux.
 import type { CardDef } from '../core/model';
 import { RIOLU_CARDS } from './cards-riolu';
+import { NEUTRAL_CARDS } from './cards-neutres';
 
 const CARDS: CardDef[] = [
   // ——— Carte bouclier de départ (commune à Vipélierre, Kangourex et Caninos) ———
@@ -61,7 +62,7 @@ const CARDS: CardDef[] = [
   },
 ];
 
-CARDS.push(...RIOLU_CARDS);
+CARDS.push(...RIOLU_CARDS, ...NEUTRAL_CARDS);
 
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 
@@ -76,6 +77,11 @@ export function cardDef(defId: string, upgraded = false): CardDef {
 /** Cartes qu'un personnage peut obtenir en récompense (hors cartes de départ), limitées aux cartes débloquées. */
 export function rewardPool(character: string, unlocked?: string[]): CardDef[] {
   return CARDS.filter((c) => c.character === character && c.rarity !== 'depart' && (!unlocked || unlocked.includes(c.id)));
+}
+
+/** Cartes neutres que tous les Pokémon peuvent apprendre. */
+export function neutralPool(): CardDef[] {
+  return CARDS.filter((c) => c.character === 'normal' && c.rarity !== 'depart');
 }
 
 export function allCards(): CardDef[] {

@@ -1,7 +1,7 @@
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
 import type { Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
-import { CARD_DEFS, rewardPool } from '../data/cards';
+import { CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
@@ -174,12 +174,26 @@ export class Run {
     return r < rare + unc ? 'peu-commune' : 'commune';
   }
 
-  /** 3 cartes différentes à choisir. */
-  cardChoices(kind: 'combat' | 'elite' | 'boss' | 'boutique', count = 3): string[] {
-    const pool = rewardPool(this.character, this.unlocked);
+  /** 3 cartes différentes à choisir. Chaque emplacement a 12 % de chances d'être une carte neutre. */
+  cardChoices(kind: 'combat' | 'elite' | 'boss' | 'boutique', count = 3, neutralChance = kind === 'boutique' ? 0 : 0.12): string[] {
+    const own = rewardPool(this.character, this.unlocked);
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
+      const pool = this.character === 'mew' ? [...own, ...neutralPool()] : this.rng.next() < neutralChance ? neutralPool() : own;
+      const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
+      const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id)));
+      if (pick) out.push(pick.id);
+    }
+    return out;
+  }
+
+  /** Cartes neutres vendues au Marché Kecleon. */
+  neutralChoices(count: number): string[] {
+    const pool = neutralPool();
+    const out: string[] = [];
+    for (let i = 0; i < count * 10 && out.length < count; i++) {
+      const rarity = this.rollRarity('boutique');
       const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
       const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id)));
       if (pick) out.push(pick.id);
@@ -229,5 +243,6 @@ export class Run {
 
 export function cardPrice(defId: string): number {
   const d = CARD_DEFS[defId];
-  return d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50;
+  const base = d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50;
+  return d.character === 'normal' ? Math.round(base * 1.2) : base; // cartes neutres un peu plus chères
 }

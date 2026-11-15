@@ -239,9 +239,11 @@ export class Combat {
   /** Dégâts affichés sur une carte (contre la cible si elle est donnée). */
   previewCardDamage(card: Card, targetUid?: number): number | null {
     const d = this.def(card);
-    const base = this.baseDamage(d);
+    let base = this.baseDamage(d);
     if (base === null) return null;
     const target = targetUid !== undefined ? this.enemy(targetUid) : undefined;
+    const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
+    if (hit?.contreStatut && target && hasAnyStatus(target)) base += hit.amount;
     if (!target) {
       // Sans cible : bonus de type et statuts du joueur seulement
       let dmg = Math.max(0, base + this.relicFlat(d) + (this.player.statuses.attaque ?? 0));
@@ -452,7 +454,7 @@ export class Combat {
           const targets = this.targetsFor(d, target);
           if (!targets.length) break;
           const bonus = this.takeAura();
-          for (const t of targets) dealt += this.strike(t, base + bonus, d);
+          for (const t of targets) dealt += this.strike(t, (eff.contreStatut && hasAnyStatus(t) ? base * 2 : base) + bonus, d);
         }
         if (eff.drain) this.healPlayer(Math.floor(dealt / 2));
         return;
@@ -664,6 +666,11 @@ export class Combat {
     if (this.player.hp <= 0) this.phase = 'defaite';
     else if (this.aliveEnemies().length === 0) this.phase = 'victoire';
   }
+}
+
+function hasAnyStatus(f: Fighter): boolean {
+  const s = f.statuses;
+  return ['poison', 'brulure', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil'].some((k) => (s[k as StatusId] ?? 0) > 0);
 }
 
 /** Crée les cartes d'un deck de départ. */

@@ -55,6 +55,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         if (e.facade) parts.push('Double si tu as Brûlure, Poison ou Paralysie.');
         if (e.revanche) parts.push('Double si tu as perdu des PV au dernier tour ennemi.');
         if (e.drain) parts.push('Récupère la moitié des dégâts infligés.');
+        if (e.contreStatut) parts.push('Double si la cible a un statut.');
         break;
       }
       case 'degats-aura':

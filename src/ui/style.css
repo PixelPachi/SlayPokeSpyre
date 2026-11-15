@@ -611,3 +611,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .weather-feuilles-or i { width: calc(14px * var(--s)); height: calc(10px * var(--s)); border-radius: 90% 0 90% 0; background: linear-gradient(135deg, #f2c14e, #a8661c); }
 
 .card-text .aura-note { color: #1a6fb5; white-space: nowrap; }
+
+.card-row.shop { gap: 12px; }
+.card-row.shop .card { transform: scale(0.94); }

@@ -1,7 +1,7 @@
 // Écran de sélection du personnage (section 9 du GDD : illustration plein écran + fiche à gauche).
 import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
-import { allCards, cardDef } from '../data/cards';
+import { allCards, cardDef, neutralPool } from '../data/cards';
 import type { SaveData } from '../core/save';
 import { characterLevel } from '../core/save';
 import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
@@ -122,6 +122,9 @@ function openCollection(host: HTMLElement, save: SaveData, c: CharacterId): void
           return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
         }).join('')}
       </div>
+      <h2>Cartes neutres · ${neutralPool().length}</h2>
+      <p class="collection-hint">Tous les Pokémon peuvent les apprendre : elles apparaissent parfois en récompense et au Marché Kecleon.</p>
+      <div class="deck-grid">${neutralPool().map((d) => renderCard(d)).join('')}</div>
       <h2>Objets tenus</h2>
       <div class="relic-grid">
         ${relicsFor(c, lvl)}

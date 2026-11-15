@@ -91,10 +91,10 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
 export function renderShop(root: HTMLElement, run: Run, done: Done): void {
   const shiny = run.rng.next() < SHINY_CHANCE;
   const price = (p: number) => (shiny ? Math.floor(p / 2) : p);
-  const offers = run.cardChoices('boutique', 5).map((id) => ({ id, price: price(cardPrice(id)), sold: false }));
+  const offers = [...run.cardChoices('boutique', 5), ...run.neutralChoices(2)].map((id) => ({ id, price: price(cardPrice(id)), sold: false }));
   const items = run.rollRelics(2).map((id) => ({ id, price: price(relicPrice(id)), sold: false }));
   let pickedItem: number | null = null;
-  const sale = run.rng.int(0, offers.length - 1);
+  const sale = run.rng.int(0, 4);
   offers[sale].price = Math.floor(offers[sale].price / 2);
   let removed = false;
   let picked: number | null = null;
