@@ -7,6 +7,8 @@ import { renderMap } from './ui/map-view';
 import { renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips } from './ui/util';
+import { characterUnlocks, grantExp, loadSave } from './core/save';
+import { runExp } from './data/unlocks';
 
 const stage = document.getElementById('stage')!;
 const screen = document.getElementById('screen')!;
@@ -14,21 +16,33 @@ fitStage(stage);
 installTooltips(stage);
 
 let view: CombatView | null = null;
+const save = loadSave();
+
+// Garde anti-clic : juste après un changement d'écran, un clic (double clic, clic trop rapide)
+// ne doit pas choisir une carte ou acheter quelque chose sans le vouloir.
+let screenShownAt = 0;
+screen.addEventListener('click', (ev) => {
+  if (performance.now() - screenShownAt < 450) {
+    ev.stopPropagation();
+    ev.preventDefault();
+  }
+}, true);
 
 function clear(): void {
   view?.destroy();
   view = null;
   screen.onclick = null;
+  screenShownAt = performance.now();
 }
 
 function menu(): void {
   clear();
-  renderSelect(screen, (id) => startRun(id));
+  renderSelect(screen, save, (id) => startRun(id));
 }
 
 function startRun(character: CharacterId): void {
   const params = new URLSearchParams(location.search);
-  const run = new Run(params.get('seed') ?? randomSeed(), character);
+  const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character));
   showMap(run);
 }
 
@@ -68,10 +82,12 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
     (r) => {
       clear();
       run.hp = r.hp;
-      if (!r.victory) return renderRunEnd(screen, run, false, menu, () => startRun(run.character));
+      if (!r.victory) return endRun(run, false);
+      if (type === 'elite') run.elitesDefeated++;
       if (type === 'boss') {
+        run.bossesDefeated++;
         run.money += run.moneyReward('boss', r.shinies);
-        return renderRunEnd(screen, run, true, menu, () => startRun(run.character));
+        return endRun(run, true);
       }
       renderReward(
         screen, run,
@@ -80,6 +96,13 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       );
     },
   );
+}
+
+/** Fin de run : EXP pour le Pokémon, niveaux et cartes débloquées. */
+function endRun(run: Run, victory: boolean): void {
+  const exp = runExp(run.floor, run.elitesDefeated, run.bossesDefeated);
+  const result = grantExp(save, run.character, exp);
+  renderRunEnd(screen, run, victory, { exp, ...result, total: save.exp[run.character] ?? 0 }, menu, () => startRun(run.character));
 }
 
 menu();

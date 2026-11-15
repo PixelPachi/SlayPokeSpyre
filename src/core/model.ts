@@ -18,8 +18,17 @@ export type Statuses = Partial<Record<StatusId, number>>;
 
 export type Target = 'ennemi' | 'tous' | 'aleatoire' | 'soi';
 
+/** Talents (pouvoirs) : effets permanents pour tout le combat. */
+export type PowerId = 'plenitude' | 'lire-esprit';
+
 export type Effect =
-  | { kind: 'degats'; amount: number; hits?: number }
+  | {
+      kind: 'degats'; amount: number;
+      hits?: number; hitsMax?: number; // nombre de coups (au hasard entre hits et hitsMax)
+      drain?: boolean; // soigne de la moitié des dégâts infligés
+      facade?: boolean; // dégâts doublés si le lanceur a Brûlure, Poison ou Paralysie
+      revanche?: boolean; // dégâts doublés si le lanceur a perdu des PV au dernier tour ennemi
+    }
   | { kind: 'protection'; amount: number }
   | { kind: 'statut'; status: StatusId; stacks: number; on: 'cible' | 'soi' | 'tous' }
   | { kind: 'pioche'; amount: number }
@@ -27,7 +36,15 @@ export type Effect =
   | { kind: 'perte-pv'; amount: number } // se blesse soi-même (donne de l'Aura à Riolu)
   | { kind: 'aura'; amount: number }
   | { kind: 'aura-mult'; amount: number } // multiplie l'Aura actuelle
-  | { kind: 'degats-aura'; mult: number }; // inflige Aura × mult dégâts, puis l'Aura retombe à 0
+  | { kind: 'degats-aura'; mult: number; consume?: boolean } // inflige Aura × mult dégâts (consomme l'Aura sauf consume: false)
+  | { kind: 'aura-protection'; mult: number } // convertit l'Aura en Protection
+  | { kind: 'degats-pv-perdus'; amount: number; per: number } // + 1 dégât par tranche de `per` PV perdus
+  | { kind: 'tout-ou-rien' } // inflige des dégâts égaux à ses PV, puis tombe à 1 PV
+  | { kind: 'copie' } // rejoue la dernière carte jouée
+  | { kind: 'soin'; amount: number }
+  | { kind: 'casse-protection' } // retire la Protection de la cible
+  | { kind: 'metronome' } // joue l'effet d'une carte du personnage au hasard
+  | { kind: 'pouvoir'; power: PowerId; amount: number };
 
 export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable';
 

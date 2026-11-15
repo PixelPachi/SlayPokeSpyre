@@ -1,5 +1,5 @@
 // Textes et couleurs affichés à l'écran.
-import type { CardDef, Effect, StatusId } from '../core/model';
+import type { CardDef, Effect, PowerId, StatusId } from '../core/model';
 import type { PokeType } from '../core/types';
 
 export const TYPE_COLORS: Record<PokeType, string> = {
@@ -26,6 +26,11 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   defense: { label: 'Défense', color: '#5aa5ff', text: (n) => `${n > 0 ? '+' : ''}${n} Protection par carte.` },
 };
 
+export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => string }> = {
+  plenitude: { label: 'Plénitude', text: (n) => `Au début de chaque tour, gagne ${n} Aura.` },
+  'lire-esprit': { label: 'Lire-Esprit', text: () => 'Si ton tour commence avec 30 Aura ou plus, tes cartes coûtent 0 PA pendant ce tour.' },
+};
+
 export const CATEGORY_LABELS: Record<CardDef['category'], string> = {
   attaque: 'Attaque', technique: 'Technique', talent: 'Talent', statut: 'Statut',
 };
@@ -45,9 +50,31 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'degats': {
         const v = dmg ?? e.amount;
         const who = d.target === 'tous' ? ' à tous les ennemis' : d.target === 'aleatoire' ? ' à un ennemi au hasard' : '';
-        parts.push(`Inflige ${hl(v, base ?? e.amount)} dégâts${who}${e.hits && e.hits > 1 ? ` ${e.hits} fois` : ''}.`);
+        const times = e.hitsMax ? ` ${e.hits ?? 1} à ${e.hitsMax} fois` : e.hits && e.hits > 1 ? ` ${e.hits} fois` : '';
+        parts.push(`Inflige ${hl(v, base ?? e.amount)} dégâts${who}${times}.`);
+        if (e.facade) parts.push('Double si tu as Brûlure, Poison ou Paralysie.');
+        if (e.revanche) parts.push('Double si tu as perdu des PV au dernier tour ennemi.');
+        if (e.drain) parts.push('Récupère la moitié des dégâts infligés.');
         break;
       }
+      case 'degats-aura':
+        parts.push(`Inflige ${dmg !== null ? `${hl(dmg, 0)} dégâts (` : ''}Aura × ${e.mult}${dmg !== null ? ')' : ' dégâts'}.`);
+        parts.push(e.consume === false ? "<b>Ne consomme pas</b> l'Aura." : "L'Aura retombe à 0.");
+        break;
+      case 'degats-pv-perdus':
+        parts.push(`Inflige ${dmg !== null ? hl(dmg, e.amount) : e.amount} dégâts, +1 par ${e.per} PV perdus.`);
+        break;
+      case 'tout-ou-rien':
+        parts.push(`Inflige ${dmg !== null ? `<b>${dmg}</b>` : 'autant de'} dégâts que tes PV, puis tombe à 1 PV.`);
+        break;
+      case 'aura-protection':
+        parts.push(e.mult === 1 ? "Convertit toute ton Aura en Protection." : `Convertit ton Aura en Protection (× ${e.mult}).`);
+        break;
+      case 'casse-protection': parts.push('Retire la Protection de la cible.'); break;
+      case 'soin': parts.push(`Récupère <b>${e.amount}</b> PV.`); break;
+      case 'copie': parts.push('Rejoue la dernière carte jouée.'); break;
+      case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
+      case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
       case 'protection': parts.push(`Gagne <b>${e.amount}</b> Protection.`); break;
       case 'statut': {
         const s = STATUS_INFO[e.status].label;
@@ -59,7 +86,6 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
       case 'perte-pv': parts.push(`Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
-      case 'degats-aura': parts.push(dmg !== null ? `Inflige ${hl(dmg, 0)} dégâts (Aura × ${e.mult}). L'Aura retombe à 0.` : `Inflige Aura × ${e.mult} dégâts. L'Aura retombe à 0.`); break;
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }

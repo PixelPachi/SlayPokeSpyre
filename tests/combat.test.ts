@@ -164,3 +164,95 @@ describe('carte de l’acte', async () => {
     }
   });
 });
+
+describe('cartes de Riolu et déblocages', async () => {
+  const { CARD_DEFS, rewardPool } = await import('../src/data/cards');
+  const { UNLOCKS, levelFor, unlockedCards, LEVEL_EXP } = await import('../src/data/unlocks');
+
+  it('chaque carte de récompense se débloque à exactement un niveau', () => {
+    const table = UNLOCKS.riolu!;
+    const all = Object.values(table).flat();
+    for (const id of all) expect(CARD_DEFS[id], id).toBeDefined();
+    expect(new Set(all).size).toBe(all.length);
+    const pool = rewardPool('riolu').map((c) => c.id).sort();
+    expect([...all].sort()).toEqual(pool);
+  });
+
+  it('les niveaux suivent l’EXP', () => {
+    expect(levelFor(0)).toBe(1);
+    expect(levelFor(LEVEL_EXP[1])).toBe(2);
+    expect(levelFor(999999)).toBe(LEVEL_EXP.length);
+    expect(unlockedCards('riolu', 1).length).toBeLessThan(unlockedCards('riolu', 3).length);
+  });
+
+  it('le niveau 1 propose des cartes de chaque rareté', () => {
+    const l1 = unlockedCards('riolu', 1).map((id) => CARD_DEFS[id].rarity);
+    expect(l1).toContain('commune');
+    expect(l1).toContain('peu-commune');
+    expect(l1).toContain('rare');
+  });
+});
+
+describe('effets d’Aura', () => {
+  const setup = () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'AURA' });
+    const rat = c.enemies[0];
+    rat.hp = rat.maxHp = 500;
+    c.player.energy = 10;
+    return { c, rat };
+  };
+  const hand = (c: Combat, ids: string[]) => { c.hand = makeDeck(ids).map((x, i) => ({ ...x, uid: 900 + i })); };
+
+  it('Prévention convertit l’Aura en Protection', () => {
+    const { c } = setup();
+    c.player.aura = 12;
+    hand(c, ['prevention']);
+    c.play(900);
+    expect(c.player.block).toBe(12);
+    expect(c.player.aura).toBe(0);
+  });
+
+  it('Vibrobscur frappe avec l’Aura sans la consommer', () => {
+    const { c, rat } = setup();
+    c.player.aura = 10;
+    hand(c, ['vibrobscur']);
+    c.play(900, rat.uid);
+    // Ténèbres contre Normal ×1, pas de bonus de type : 10
+    expect(rat.hp).toBe(490);
+    expect(c.player.aura).toBe(10);
+  });
+
+  it('Éclate-Roc frappe (en consommant l’Aura) puis remet de l’Aura', () => {
+    const { c, rat } = setup();
+    c.player.aura = 4;
+    hand(c, ['eclate-roc']);
+    c.play(900, rat.uid);
+    // (5 + 4) ×1,25 ×1,5 = 16,875
+    expect(rat.hp).toBe(500 - 16);
+    expect(c.player.aura).toBe(3);
+  });
+
+  it('Lire-Esprit : cartes à 0 PA si le tour commence avec 30 Aura', () => {
+    const { c, rat } = setup();
+    hand(c, ['lire-esprit']);
+    c.play(900);
+    c.player.aura = 30;
+    rat.intent = { id: 'x', name: 'x', weight: 1, intent: 'defense', block: 1 };
+    c.endPlayerTurn();
+    c.enemyAct(rat.uid);
+    c.endEnemyTurn();
+    expect(c.player.freeTurn).toBe(true);
+    expect(c.costOf(c.hand[0])).toBe(0);
+  });
+
+  it('Tout ou Rien inflige les PV et laisse à 1 PV (avec l’Aura gagnée)', () => {
+    const { c, rat } = setup();
+    c.player.aura = 0;
+    hand(c, ['tout-ou-rien']);
+    c.play(900, rat.uid);
+    // 74 ×1,25 ×1,5 = 138,75
+    expect(rat.hp).toBe(500 - 138);
+    expect(c.player.hp).toBe(1);
+    expect(c.player.aura).toBe(74);
+  });
+});

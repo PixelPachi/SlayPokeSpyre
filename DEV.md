@@ -7,7 +7,10 @@
 | `src/core/combat.ts` | Moteur de combat sans affichage : tours, pioche, PA, Protection, statuts, Aura, IA ennemie |
 | `src/core/rng.ts` | Hasard avec graine |
 | `src/core/run.ts` | État d'une run (PV, ₽, deck) et **génération de la carte** à embranchements (15 étages, 7 colonnes) |
-| `src/data/cards.ts` | **Toutes les cartes** (ajouter une carte = ajouter une entrée) |
+| `src/data/cards.ts` | Cartes communes et des autres starters (ajouter une carte = ajouter une entrée) |
+| `src/data/cards-riolu.ts` | **Les 77 cartes de Riolu** (une par capacité que Riolu/Lucario peut apprendre) |
+| `src/data/unlocks.ts` | **EXP et déblocage** : niveau requis pour chaque carte, EXP gagnée en fin de run |
+| `src/core/save.ts` | Sauvegarde de la progression dans le navigateur |
 | `src/data/characters.ts` | Les 5 personnages : PV, talent, deck de départ |
 | `src/data/enemies.ts` | **Tous les ennemis** et les rencontres par zone (combats, élites, gardien) |
 | `src/data/events.ts` | **Événements mystères** (nœuds « ? ») |
@@ -32,6 +35,9 @@
 - Carte de l'acte : 6 chemins qui ne se croisent pas ; étage 1 = combats, étage 9 = trésor, étage 15 = Centre Pokémon ; pas d'élite ni de Centre avant l'étage 6 ; jamais deux Centres, Poké Mart ou élites à la suite ; le gardien au-dessus.
 - Récompenses : ₽ (combat 10-20, élite 25-35, gardien 95-105, doublés si un ennemi était chromatique) et 1 carte parmi 3 (60 % commune, 37 % peu commune, 3 % rare qui monte à chaque récompense sans rare).
 - Centre Pokémon : soigner 30 % des PV max ou améliorer une carte. Poké Mart : 5 cartes (une à -50 %), oublier une carte (75 ₽, +25 à chaque fois). Trésor : en attendant les objets tenus, des ₽ et une carte.
+- Les cartes se jouent uniquement en les tirant : flèche de ciblage vers l'ennemi, ou glisser vers le haut pour les cartes sans cible.
+- Talents (pouvoirs) : effets pour tout le combat (Plénitude : +Aura par tour ; Lire-Esprit : cartes à 0 PA si le tour commence avec 30 Aura).
+- EXP de fin de run : 10 par étage, 25 par Pokémon dominant, 60 par gardien ; 10 niveaux par Pokémon, chaque niveau débloque des cartes dans les récompenses.
 - Déjà prévus dans le moteur : Contestation (Vipélierre), Intimidation (Caninos), Vampigraine, mots-clés Épuisée / Conservée / Éphémère / Innée / Injouable.
 
 ## Ajouter un sprite

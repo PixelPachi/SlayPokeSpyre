@@ -1,7 +1,11 @@
 // Écran de sélection du personnage (section 9 du GDD : illustration plein écran + fiche à gauche).
 import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
-import { cardDef } from '../data/cards';
+import { allCards, cardDef } from '../data/cards';
+import type { SaveData } from '../core/save';
+import { characterLevel } from '../core/save';
+import { LEVEL_EXP, MAX_LEVEL, UNLOCKS } from '../data/unlocks';
+import { renderCard } from './card';
 import { CHARACTERS } from '../data/characters';
 import { TYPE_COLORS } from './labels';
 import { asset, esc } from './util';
@@ -22,7 +26,7 @@ const UNLOCK_TEXT: Record<CharacterId, string> = {
   mew: '???',
 };
 
-export function renderSelect(root: HTMLElement, onStart: (c: CharacterId) => void): void {
+export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: CharacterId) => void): void {
   let current: CharacterId = 'riolu';
 
   const draw = () => {
@@ -42,7 +46,9 @@ export function renderSelect(root: HTMLElement, onStart: (c: CharacterId) => voi
             <div class="sheet-row"><b>PV</b> ${ch.maxHp}</div>
             <div class="sheet-row"><b>Talent — ${esc(ch.talent.name)}</b><br>${esc(ch.talent.text)}</div>
             <div class="sheet-row"><b>Deck de départ</b><br>${deck}</div>
-            <button class="btn primary start">Grimper la Tour du Temps</button>`}
+            ${expBlock(save, current)}
+            <button class="btn primary start">Grimper la Tour du Temps</button>
+            <button class="btn collection">Voir les capacités</button>`}
         </div>
         <div class="select-roster">
           ${ORDER.map((id) => {
@@ -63,6 +69,7 @@ export function renderSelect(root: HTMLElement, onStart: (c: CharacterId) => voi
       current = r.dataset.id as CharacterId;
       return draw();
     }
+    if (t.closest('.collection')) return openCollection(root, save, current);
     if (t.closest('.start')) {
       root.onclick = null;
       onStart(current);
@@ -75,4 +82,48 @@ function countDeck(ids: string[]): string {
   const counts = new Map<string, number>();
   for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
   return [...counts].map(([id, n]) => `${n} × ${esc(cardDef(id).name)}`).join(', ');
+}
+
+function expBlock(save: SaveData, c: CharacterId): string {
+  const exp = save.exp[c] ?? 0;
+  const lvl = characterLevel(save, c);
+  const cur = LEVEL_EXP[lvl - 1];
+  const next = lvl < MAX_LEVEL ? LEVEL_EXP[lvl] : null;
+  const pct = next ? Math.round(((exp - cur) / (next - cur)) * 100) : 100;
+  return `
+    <div class="sheet-row sheet-exp">
+      <b>Niveau ${lvl}</b> <span>${next ? `${exp - cur} / ${next - cur} EXP` : 'niveau max'}</span>
+      <div class="exp-bar"><div style="width:${pct}%"></div></div>
+    </div>`;
+}
+
+/** Toutes les capacités du Pokémon : débloquées, ou verrouillées avec le niveau requis. */
+function openCollection(host: HTMLElement, save: SaveData, c: CharacterId): void {
+  const lvl = characterLevel(save, c);
+  const levelOf = new Map<string, number>();
+  for (const [l, ids] of Object.entries(UNLOCKS[c] ?? {})) for (const id of ids) levelOf.set(id, Number(l));
+  const cards = allCards().filter((d) => d.character === c);
+  const order = ['depart', 'commune', 'peu-commune', 'rare'];
+  cards.sort((a, b) => (levelOf.get(a.id) ?? 0) - (levelOf.get(b.id) ?? 0) || order.indexOf(a.rarity) - order.indexOf(b.rarity));
+  const unlocked = cards.filter((d) => (levelOf.get(d.id) ?? 0) <= lvl).length;
+  const el = document.createElement('div');
+  el.className = 'overlay deck-overlay';
+  el.innerHTML = `
+    <div class="deck-panel">
+      <h2>Capacités de ${esc(CHARACTERS[c].name)} · ${unlocked}/${cards.length}</h2>
+      <p class="collection-hint">Gagne de l'EXP en fin de run pour débloquer de nouvelles capacités dans les récompenses.</p>
+      <div class="deck-grid">
+        ${cards.map((d) => {
+          const need = levelOf.get(d.id) ?? 0;
+          const locked = need > lvl;
+          return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
+        }).join('')}
+      </div>
+      <button class="btn close">Fermer</button>
+    </div>`;
+  host.appendChild(el);
+  el.addEventListener('click', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (t.closest('.close') || t === el) el.remove();
+  });
 }

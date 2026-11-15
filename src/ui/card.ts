@@ -12,6 +12,8 @@ export interface CardRenderOptions {
   style?: string;
   key?: string;
   stab?: boolean;
+  /** Coût affiché s'il diffère du coût de base (tour gratuit). */
+  cost?: number;
   costTooHigh?: boolean;
 }
 
@@ -22,7 +24,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
     <div class="card rarity-${d.rarity} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${o.style ?? ''}">
       <div class="card-inner">
-        <div class="card-cost ${o.costTooHigh ? 'too-much' : ''}">${d.cost}</div>
+        <div class="card-cost ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}">${o.cost ?? d.cost}</div>
         <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
         <div class="card-name">${esc(d.name)}</div>
         <div class="card-art">${CATEGORY_ART[d.category]}</div>

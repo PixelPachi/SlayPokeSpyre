@@ -90,10 +90,13 @@ export class Run {
   pos: { row: number; col: number } | null = null;
   visited: string[] = [];
   removals = 0; // nombre de cartes oubliées au Poké Mart (le prix monte)
+  elitesDefeated = 0;
+  bossesDefeated = 0;
   private nextUid = 1;
   private rareBonus = 0; // la chance de rare monte à chaque récompense sans rare
 
-  constructor(readonly seed: string, character: CharacterId) {
+  /** Cartes débloquées par l'EXP du Pokémon (undefined = toutes). */
+  constructor(readonly seed: string, character: CharacterId, readonly unlocked?: string[]) {
     this.rng = new Rng(seed);
     this.character = character;
     const ch = CHARACTERS[character];
@@ -161,7 +164,7 @@ export class Run {
 
   /** 3 cartes différentes à choisir. */
   cardChoices(kind: 'combat' | 'elite' | 'boss' | 'boutique', count = 3): string[] {
-    const pool = rewardPool(this.character);
+    const pool = rewardPool(this.character, this.unlocked);
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
