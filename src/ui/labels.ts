@@ -70,7 +70,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'aura-protection':
         parts.push(e.mult === 1 ? "Convertit toute ton Aura en Protection." : `Convertit ton Aura en Protection (× ${e.mult}).`);
         break;
-      case 'casse-protection': parts.push('Retire la Protection de la cible.'); break;
+      case 'casse-protection': parts.push(d.target === 'tous' ? 'Retire la Protection de tous les ennemis.' : 'Retire la Protection de la cible.'); break;
       case 'soin': parts.push(`Récupère <b>${e.amount}</b> PV.`); break;
       case 'copie': parts.push('Rejoue la dernière carte jouée.'); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
