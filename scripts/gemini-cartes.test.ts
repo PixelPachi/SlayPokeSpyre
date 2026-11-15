@@ -36,8 +36,20 @@ it('GEMINI-CARTES.md', () => {
     m.who.add(c.character === 'normal' ? 'Neutre' : CHARACTERS[c.character as keyof typeof CHARACTERS].name);
     moves.set(k, m);
   }
-  const rows = [...moves].sort((a, b) => a[1].name.localeCompare(b[1].name, 'fr')).map(([k, m]) =>
-    `| \`${k}.png\` | ${m.name} | ${TYPE_LABELS[m.type as keyof typeof TYPE_LABELS]} · ${CAT[m.cat]} | ${[...m.who].join(', ')} | ${HINTS[m.type]} | ☐ |`);
+  // Capacité exclusive : un seul personnage l'apprend (Mew mis à part, puisqu'il utilise les cartes de tous).
+  // Son illustration montre alors ce Pokémon en train de lancer la capacité.
+  const star = (m: { who: Set<string> }): string | null => {
+    const who = [...m.who];
+    if (who.includes('Neutre')) return null;
+    const others = who.filter((w) => w !== 'Mew');
+    return others.length === 1 ? others[0] : others.length === 0 ? 'Mew' : null;
+  };
+  const sorted = [...moves].sort((a, b) => a[1].name.localeCompare(b[1].name, 'fr'));
+  const exclusive = sorted.filter(([, m]) => star(m)).length;
+  const rows = sorted.map(([k, m]) => {
+    const s = star(m);
+    return `| \`${k}.png\` | ${m.name} | ${TYPE_LABELS[m.type as keyof typeof TYPE_LABELS]} · ${CAT[m.cat]} | ${[...m.who].join(', ')} | ${s ? `**${s}**${s === 'Kangourex' ? ' (avec son Bébé dans la poche)' : ''} lance la capacité` : 'Aucun (capacité seule)'} | ${HINTS[m.type]} | ☐ |`;
+  });
   const md = `# Cartes — images à générer avec Gemini
 
 Les cartes reprennent la disposition des cartes de Slay the Spire : **coût en haut à gauche, nom de la capacité dans un bandeau en haut, illustration au milieu, catégorie (Attaque / Technique / Talent) sur une plaque à la pointe de l'illustration, description en dessous.**
@@ -72,12 +84,17 @@ Dossier : \`src/assets/cartes/illustrations/\`, format paysage **800 × 600** (4
 
 Prompt commun :
 
-> Illustration pour une carte de jeu vidéo, format paysage 4:3, style illustration anime peinte, couleurs vives, cadrage serré et dynamique centré sur l'effet. Aucun texte, aucun logo, aucun Pokémon reconnaissable ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). Fond sombre et flou qui fait ressortir l'effet.
+> Illustration pour une carte de jeu vidéo, format paysage 4:3, style illustration anime peinte façon artwork officiel Pokémon, couleurs vives, cadrage serré et dynamique. Aucun texte, aucun logo. Fond sombre et flou qui fait ressortir l'action.
 
-Puis ajouter : **« Capacité : <nom> »** et l'ambiance visuelle de la ligne.
+Puis, selon la colonne « Pokémon dans l'image » :
 
-| Fichier | Capacité | Type · catégorie | Utilisée par | Ambiance visuelle | Fait |
-| --- | --- | --- | --- | --- | --- |
+- **Capacité exclusive (${exclusive} images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
+- **Capacité partagée (${moves.size - exclusive} images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
+
+Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
+
+| Fichier | Capacité | Type · catégorie | Utilisée par | Pokémon dans l'image | Ambiance visuelle | Fait |
+| --- | --- | --- | --- | --- | --- | --- |
 ${rows.join('\n')}
 `;
   writeFileSync('GEMINI-CARTES.md', md);
