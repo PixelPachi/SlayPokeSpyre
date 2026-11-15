@@ -8,7 +8,7 @@
 | `src/core/rng.ts` | Hasard avec graine |
 | `src/core/run.ts` | État d'une run (PV, ₽, deck) et **génération de la carte** à embranchements (15 étages, 7 colonnes) |
 | `src/data/cards.ts` | Cartes communes et des autres starters (ajouter une carte = ajouter une entrée) |
-| `src/data/cards-riolu.ts` | **Les 81 cartes de Riolu** (4 de départ + 75 en récompense) (une par capacité que Riolu/Lucario peut apprendre) |
+| `src/data/cards-riolu.ts` | **Les 79 cartes de Riolu** (4 de départ + 75 en récompense) (une par capacité que Riolu/Lucario peut apprendre) |
 | `src/data/relics.ts` | **Objets tenus** : départ, objets de chaque Pokémon, objets communs (effets appliqués dans `core/combat.ts`) |
 | `src/data/unlocks.ts` | **EXP et déblocage** : niveau requis pour chaque carte, EXP gagnée en fin de run |
 | `src/core/save.ts` | Sauvegarde de la progression dans le navigateur |
