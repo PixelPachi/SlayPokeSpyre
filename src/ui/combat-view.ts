@@ -47,7 +47,7 @@ export class CombatView {
     root.style.setProperty('--ground', z.palette[1]);
     root.innerHTML = `
       <div class="scene ${z.act === 2 ? 'cave' : z.act >= 3 ? 'peaks' : ''} ${BG_LOADED.get(z.background) ? 'has-bg' : ''}"
-           style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]};--bg:url('${asset(z.background)}')">
+           style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]};--bg:url('${new URL(asset(z.background), location.href).href}')">
         <div class="trees"></div>
         <div class="weather weather-${z.weather}">${weatherParticles(z.weather)}</div>
         ${z.weather === 'orage' ? '<div class="lightning"></div>' : ''}

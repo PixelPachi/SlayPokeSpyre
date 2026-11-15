@@ -18,6 +18,7 @@ const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
   vipelierre: 'illustrations/vipelierre.png',
   kangourex: 'illustrations/kangourex.png',
   caninos: 'illustrations/caninos.png',
+  mew: 'illustrations/mew.png',
 };
 const UNLOCK_TEXT: Record<CharacterId, string> = {
   riolu: '',
