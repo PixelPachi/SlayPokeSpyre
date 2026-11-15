@@ -109,9 +109,8 @@ export const TAROT_EVENTS: GameEvent[] = [
         },
       },
       {
-        label: 'Le défier en duel', detail: 'Perd 12 PV, gagne une carte rare',
-        available: (r) => r.hp > 12,
-        apply: (r) => (hurt(r, 12), `Il respecte ta force et t’enseigne ${addRandomCard(r, 'boss')}.`),
+        label: 'Le défier en duel', detail: 'Combat contre Nidoking. Victoire : une carte rare au choix et des ₽',
+        apply: () => ({ fight: 'nidoking-duel', text: 'Nidoking se lève de son trône. Le duel commence !' }),
       },
       { label: 'S’incliner', detail: 'Rien ne se passe', apply: () => 'Nidoking te laisse passer d’un grognement.' },
     ],
@@ -215,9 +214,8 @@ export const TAROT_EVENTS: GameEvent[] = [
     text: 'Une jeune fille apaise un Machopeur assis en tailleur, d’une simple main sur la tête. La vraie force, c’est la douceur.',
     choices: [
       {
-        label: 'Défier Machopeur', detail: 'Perd 6 PV, gagne une carte rare',
-        available: (r) => r.hp > 6,
-        apply: (r) => (hurt(r, 6), `Après un rude combat, Machopeur t’apprend ${addRandomCard(r, 'boss')}.`),
+        label: 'Défier Machopeur', detail: 'Combat contre Machopeur. Victoire : une carte rare au choix et des ₽',
+        apply: () => ({ fight: 'machopeur-duel', text: 'Machopeur se relève et fait craquer ses poings. En garde !' }),
       },
       { label: 'Méditer avec lui', detail: '+4 PV max, récupère 10 PV', apply: (r) => (gainMax(r, 4), `Le calme vous gagne tous les deux. +4 PV max et +${r.heal(10)} PV.`) },
     ],

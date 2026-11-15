@@ -49,7 +49,7 @@ function startRun(character: CharacterId): void {
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
   // Pour tester : ?evenement=tarot-diable ouvre directement cet événement
-  if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!); }
+  if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (enemy) => duel(run, enemy)); }
   showMap(run);
 }
 
@@ -71,7 +71,7 @@ function showMap(run: Run): void {
       case 'boutique':
         return renderShop(screen, run, back);
       case 'evenement':
-        return renderEvent(screen, run, back);
+        return renderEvent(screen, run, back, undefined, (enemy) => duel(run, enemy));
       case 'tresor':
         return renderTreasure(screen, run, back);
       case 'boss':
@@ -119,6 +119,27 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
           title: type === 'elite' ? 'Pokémon dominant vaincu !' : 'Victoire !',
           relic: type === 'elite' ? run.rollRelics(1)[0] : undefined,
         },
+        () => showMap(run),
+      );
+    },
+  );
+}
+
+/** Duel lancé par un arcane (« Défier ») : le Pokémon de la carte, plus fort à chaque acte. */
+function duel(run: Run, enemy: string): void {
+  clear();
+  const power = [1, 1, 1.7, 2.3, 2.6][run.act] ?? 2.6;
+  view = new CombatView(
+    screen, run,
+    { seed: `${run.seed}-${run.floor}-duel`, enemies: [enemy], label: 'Duel', enemyPower: power },
+    (r) => {
+      clear();
+      run.hp = r.hp;
+      if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
+      if (!r.victory) return endRun(run, false);
+      renderReward(
+        screen, run,
+        { money: run.moneyReward('elite', r.shinies), cards: run.cardChoices('boss'), label: 'Duel', title: 'Duel remporté !' },
         () => showMap(run),
       );
     },

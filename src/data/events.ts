@@ -7,12 +7,14 @@ export interface EventChoice {
   detail: string;
   /** Applique le choix ; renvoie le texte du résultat, ou ouvre le choix d'une carte du deck
    *  (retirer, améliorer, dupliquer, transformer ; count = combien de fois ; then = un second choix ensuite). */
-  apply: (run: Run) => string | EventPick;
+  apply: (run: Run) => string | EventPick | EventFight;
   available?: (run: Run) => boolean;
 }
 
 export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer' | 'monde';
 export interface EventPick { pick: PickKind; text: string; count?: number; then?: PickKind }
+/** Duel : lance un combat contre ce Pokémon ; victoire = une carte rare au choix et des ₽. */
+export interface EventFight { fight: string; text: string }
 
 export interface GameEvent {
   id: string;

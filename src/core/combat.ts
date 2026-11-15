@@ -91,6 +91,8 @@ export interface CombatOptions {
   /** PV max en plus pour le Bébé Kangourex (il grandit à chaque acte). */
   familiarBonus?: number;
   mega?: boolean;
+  /** Multiplie les PV des ennemis et leur donne de l'Attaque (duels des arcanes selon l'acte). */
+  enemyPower?: number;
   /** Stade d'évolution du Pokémon joué (sinon sa forme de base). */
   form?: Form;
   /** Acte en cours (la Méga-Évolution de Lucario demande l'acte 2). */
@@ -131,6 +133,7 @@ export class Combat {
   private nextTempUid = 100000;
   /** Objets tenus consommés pendant ce combat (à retirer de la run). */
   consumedRelics: string[] = [];
+  private enemyPower?: number;
   private lastPlayed: CardDef | null = null;
   readonly relics: Set<string>;
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
@@ -160,7 +163,11 @@ export class Combat {
       this.player.types = [...mega.types];
       this.player.isMega = true;
     }
+    this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
+    if (opts.enemyPower && opts.enemyPower > 1) {
+      for (const e of this.enemies) e.statuses.attaque = Math.round((opts.enemyPower - 1) * 4);
+    }
     this.drawPile = this.rng.shuffle([...opts.deck]);
     // Cartes Innées en haut de la pioche
     this.drawPile.sort((a, b) => Number(this.hasKw(a, 'innee')) - Number(this.hasKw(b, 'innee')));
@@ -424,7 +431,7 @@ export class Combat {
   private spawnEnemy(id: string): EnemyState {
     const d = ENEMY_DEFS[id];
     if (!d) throw new Error(`Ennemi inconnu : ${id}`);
-    const hp = this.rng.int(d.hp[0], d.hp[1]);
+    const hp = Math.round(this.rng.int(d.hp[0], d.hp[1]) * (this.enemyPower ?? 1));
     return {
       uid: this.nextEnemyUid++, defId: id, name: d.name, dex: d.dex, types: [...d.types],
       hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [],

@@ -35,13 +35,13 @@ export class CombatView {
   constructor(
     private root: HTMLElement,
     private run: Run,
-    private opts: { seed: string; enemies: string[]; label: string },
+    private opts: { seed: string; enemies: string[]; label: string; enemyPower?: number },
     private onEnd: (r: CombatResult) => void,
   ) {
     this.combat = new Combat({
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
-      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3,
+      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower,
     });
     this.combat.drainEvents();
     // Le décor (fond + particules) reste en place pendant tout le combat : les animations ne redémarrent pas

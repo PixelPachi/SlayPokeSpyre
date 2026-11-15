@@ -2,6 +2,25 @@
 import type { EnemyDef } from '../core/model';
 
 export const SUMMIT_ENEMIES: EnemyDef[] = [
+  // ——— Duels des arcanes (L'Empereur, La Force) : plus forts à chaque acte ———
+  {
+    id: 'nidoking-duel', name: 'Nidoking', dex: 34, types: ['poison', 'sol'], hp: [62, 66],
+    moves: [
+      { id: 'koud-korne', name: 'Koud\'Korne', weight: 30, intent: 'attaque', pokeType: 'normal', damage: 11 },
+      { id: 'direct-toxik', name: 'Direct Toxik', weight: 25, intent: 'attaque', pokeType: 'poison', damage: 8, playerStatus: { status: 'poison', stacks: 3 } },
+      { id: 'telluriforce', name: 'Telluriforce', weight: 25, intent: 'attaque', pokeType: 'sol', damage: 14 },
+      { id: 'grondement', name: 'Groz\'Yeux', weight: 20, intent: 'boost', selfStatus: { status: 'attaque', stacks: 2 }, block: 10 },
+    ],
+  },
+  {
+    id: 'machopeur-duel', name: 'Machopeur', dex: 67, types: ['combat'], hp: [58, 62],
+    moves: [
+      { id: 'balayage', name: 'Balayage', weight: 30, intent: 'attaque', pokeType: 'combat', damage: 12 },
+      { id: 'poing-karate', name: 'Poing-Karaté', weight: 25, intent: 'attaque', pokeType: 'combat', damage: 5, hits: 2 },
+      { id: 'gonflette', name: 'Gonflette', weight: 25, intent: 'boost', selfStatus: { status: 'attaque', stacks: 2 }, block: 10 },
+      { id: 'frappe-atlas', name: 'Frappe Atlas', weight: 20, intent: 'attaque', pokeType: 'combat', damage: 15 },
+    ],
+  },
   {
     id: 'noctunoir', name: 'Noctunoir', dex: 477, types: ['spectre'], hp: [104, 110],
     moves: [

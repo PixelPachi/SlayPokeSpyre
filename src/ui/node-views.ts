@@ -185,7 +185,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
 }
 
 /** Événement mystère. */
-export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: string): void {
+export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: string, onFight?: (enemy: string) => void): void {
   // Un événement sur deux environ est un arcane majeur ; jamais deux fois le même dans une run
   const fresh = (list: GameEvent[]) => list.filter((e) => !run.seenEvents.includes(e.id));
   const tarot = fresh(TAROT_EVENTS), classic = fresh(EVENTS);
@@ -259,6 +259,11 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
       const r = ev.choices[Number(b.dataset.i)].apply(run);
       refreshBar();
       if (typeof r === 'string') return showResult(r);
+      if ('fight' in r) {
+        root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(r.text)}</p><button class="btn primary leave">Combattre !</button>`;
+        root.querySelector('.leave')!.addEventListener('click', () => (onFight ? onFight(r.fight) : done()));
+        return;
+      }
       doPick(r, r.count ?? 1);
     }));
 }

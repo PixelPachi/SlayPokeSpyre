@@ -619,7 +619,7 @@ describe('arcanes majeurs', async () => {
         run.money = 200;
         const before = run.maxHp;
         const r = c.apply(run);
-        expect(typeof r === 'string' || ['retirer', 'ameliorer', 'dupliquer', 'transformer', 'monde'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
+        expect(typeof r === 'string' || 'fight' in r || ['retirer', 'ameliorer', 'dupliquer', 'transformer', 'monde'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
         expect(run.hp, ev.id).toBeGreaterThan(0);
         expect(run.hp, ev.id).toBeLessThanOrEqual(run.maxHp);
         if (ev.id === 'tarot-diable' && i < 3) expect(run.maxHp).toBeLessThan(before);
@@ -646,4 +646,13 @@ describe('Rappel Max et Vœu Brisé', () => {
     c.endPlayerTurn();
     expect(c.player.hp).toBe(hp - 2);
   });
+});
+
+it('les duels des arcanes : Nidoking et Machopeur se renforcent selon l’acte', () => {
+  const base = { character: 'riolu' as const, deck: makeDeck(CHARACTERS.riolu.starterDeck), seed: 'DUEL' };
+  const a1 = new Combat({ ...base, enemies: ['nidoking-duel'] });
+  const a3 = new Combat({ ...base, enemies: ['nidoking-duel'], enemyPower: 2.3 });
+  expect(a3.enemies[0].maxHp).toBeGreaterThan(a1.enemies[0].maxHp * 2);
+  expect(a3.enemies[0].statuses.attaque).toBeGreaterThan(0);
+  expect(new Combat({ ...base, enemies: ['machopeur-duel'] }).enemies[0].name).toBe('Machopeur');
 });
