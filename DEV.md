@@ -14,6 +14,7 @@
 | `src/core/save.ts` | Sauvegarde de la progression dans le navigateur |
 | `src/data/characters.ts` | Les 5 personnages : PV, talent, deck de départ |
 | `src/data/enemies.ts` | **Tous les ennemis** et les rencontres par zone (combats, élites, gardien) |
+| `src/data/zones.ts` | **Zones** : ennemis, élite, gardien, fond de combat et couleurs de chaque zone |
 | `src/data/events.ts` | **Événements mystères** (nœuds « ? ») |
 | `src/ui/map-view.ts` | Écran de la carte de l'acte |
 | `src/ui/node-views.ts` | Récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run |
@@ -25,6 +26,7 @@
 | `src/main.ts` | Enchaînement des écrans |
 | `public/sprites/` | Sprites PokeAPI fixes, téléchargés par `npm run sprites` (le Pokémon du joueur utilise son sprite de face, retourné vers les ennemis) |
 | `public/illustrations/` | Illustrations des écrans de sélection |
+| `public/backgrounds/` | Fonds de combat des zones (images Gemini, liste dans GEMINI.md) |
 | `tests/` | Tests des règles (Vitest) |
 
 ## Règles déjà en place
@@ -40,6 +42,7 @@
 - Talents (pouvoirs) : effets pour tout le combat (Plénitude : +Aura par tour ; Lire-Esprit : cartes à 0 PA si le tour commence avec 30 Aura).
 - EXP de fin de run : 10 par étage, 25 par Pokémon dominant, 60 par gardien ; 10 niveaux par Pokémon, chaque niveau débloque des cartes dans les récompenses.
 - Objets tenus : chaque Pokémon commence avec le sien (Riolu : Ceinture Noire), en débloque d'autres par niveau, et les objets communs sont toujours possibles. On les obtient au trésor, sur les Pokémon dominants et au Marché Kecleon.
+- Zones : à chaque acte, une zone est tirée au hasard (acte 1 : Forêt de Jade, Bois aux Chênes, Bois Clématis, Forêt de Vestigion, Forêt d'Empoigne). La carte de l'acte est générée au hasard à chaque run.
 - Déjà prévus dans le moteur : Contestation (Vipélierre), Intimidation (Caninos), Vampigraine, mots-clés Épuisée / Conservée / Éphémère / Innée / Injouable.
 
 ## Ajouter un sprite

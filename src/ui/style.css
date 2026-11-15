@@ -132,22 +132,25 @@ img.sprite, .roster img { image-rendering: pixelated; }
 
 .field {
   position: absolute; left: 0; right: 0; top: 40px; bottom: 0; overflow: hidden;
+  /* Fond de la zone (image Gemini) par-dessus un dégradé de secours aux couleurs de la zone */
   background:
     linear-gradient(transparent 62%, rgba(5, 8, 6, 0.75) 100%),
-    radial-gradient(ellipse 160% 62% at 50% 100%, #5e8f3a 0, #4a7a2f 45%, #2f5a22 70%, transparent 71%),
-    radial-gradient(ellipse at 50% 15%, #a9dcaa 0, #5b9866 30%, #24452f 75%);
-  background-color: #24452f;
+    var(--bg, none) center / cover no-repeat,
+    radial-gradient(ellipse 160% 62% at 50% 100%, var(--ground, #4a7a2f) 0, color-mix(in srgb, var(--ground, #4a7a2f) 70%, #000) 70%, transparent 71%),
+    radial-gradient(ellipse at 50% 15%, var(--sky, #a9dcaa) 0, color-mix(in srgb, var(--sky, #a9dcaa) 55%, var(--shade, #163322)) 30%, var(--shade, #163322) 75%);
+  background-color: var(--shade, #24452f);
 }
 .trees {
-  position: absolute; inset: 0; opacity: 0.55;
+  position: absolute; inset: 0; opacity: 0.5; --t: color-mix(in srgb, var(--shade, #163322) 85%, #000);
   background:
-    radial-gradient(circle at 5% 30%, #163322 0 70px, transparent 71px),
-    radial-gradient(circle at 14% 18%, #1b3b27 0 90px, transparent 91px),
-    radial-gradient(circle at 30% 8%, #183524 0 80px, transparent 81px),
-    radial-gradient(circle at 72% 6%, #183524 0 85px, transparent 86px),
-    radial-gradient(circle at 88% 20%, #1b3b27 0 95px, transparent 96px),
-    radial-gradient(circle at 98% 36%, #163322 0 70px, transparent 71px);
+    radial-gradient(circle at 5% 30%, var(--t) 0 70px, transparent 71px),
+    radial-gradient(circle at 14% 18%, var(--t) 0 90px, transparent 91px),
+    radial-gradient(circle at 30% 8%, var(--t) 0 80px, transparent 81px),
+    radial-gradient(circle at 72% 6%, var(--t) 0 85px, transparent 86px),
+    radial-gradient(circle at 88% 20%, var(--t) 0 95px, transparent 96px),
+    radial-gradient(circle at 98% 36%, var(--t) 0 70px, transparent 71px);
 }
+.field.has-bg .trees { display: none; }
 
 .fighter { position: absolute; display: flex; flex-direction: column; align-items: center; }
 .fighter .platform {

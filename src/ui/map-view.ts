@@ -1,7 +1,6 @@
 // Carte de l'acte, façon Slay the Spire : on monte de nœud en nœud jusqu'au gardien.
 import { BOSS_ROW, MAP_COLS, MAP_ROWS, type MapNode, type NodeType, type Run } from '../core/run';
 import { ENEMY_DEFS } from '../data/enemies';
-import { BOSS_FORET_DE_JADE } from '../data/enemies';
 import { openDeckOverlay, topbar } from './run-ui';
 import { asset } from './util';
 
@@ -28,7 +27,7 @@ const pos = (n: { row: number; col: number; dx?: number; dy?: number }) => ({
 });
 const BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (MAP_ROWS - 1) * ROW_H - BOSS_GAP };
 
-export function nodeIcon(type: NodeType): string {
+export function nodeIcon(type: NodeType, bossDex = 15): string {
   switch (type) {
     case 'combat':
       return '<svg viewBox="0 0 40 40"><path d="M8 34c2-10 2-16 0-24 4 6 6 14 6 24zM16 34c1-12 3-20 8-28-2 9-3 18-2 28zM24 34c2-8 5-14 10-18-4 6-6 12-5 18z" fill="#7ad04e" stroke="#1d3b12" stroke-width="2" stroke-linejoin="round"/></svg>';
@@ -43,11 +42,13 @@ export function nodeIcon(type: NodeType): string {
     case 'tresor':
       return `<img src="${asset('sprites/items/poke-ball.png')}" alt="">`;
     case 'boss':
-      return `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[BOSS_FORET_DE_JADE[0]].dex}.png`)}" alt="">`;
+      return `<img src="${asset(`sprites/pokemon/front/${bossDex}.png`)}" alt="">`;
   }
 }
 
 export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void): void {
+  const zone = run.zone;
+  const boss = ENEMY_DEFS[zone.boss];
   const avail = run.available();
   const isAvail = (n: MapNode) => avail !== 'boss' && avail.some((a) => a.row === n.row && a.col === n.col);
   const visited = (r: number, c: number) => run.visited.includes(`${r}-${c}`);
@@ -81,21 +82,21 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
   });
   const bossAvail = avail === 'boss';
   nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
-      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien : ${ENEMY_DEFS[BOSS_FORET_DE_JADE[0]].name}</b><br>Le boss de la Forêt de Jade.">${nodeIcon('boss')}</button>`);
+      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien : ${boss.name}</b><br>Le boss de la zone ${zone.name}.">${nodeIcon('boss', boss.dex)}</button>`);
 
   root.innerHTML = `
     <div class="map-screen">
-      ${topbar(run, 'Forêt de Jade · acte 1')}
+      ${topbar(run, `${zone.name} · acte ${run.act}`)}
       <div class="map-scroll">
         <div class="map-canvas" style="height:${HEIGHT}px">
-          <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien de la Forêt de Jade</div>
+          <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien : ${boss.name}</div>
           <svg class="map-lines" width="1280" height="${HEIGHT}">${lines.join('')}</svg>
           ${nodes.join('')}
         </div>
       </div>
       <div class="map-legend">
         <h3>Tour du Temps</h3>
-        <p>Acte 1 · Forêt de Jade</p>
+        <p>Acte ${run.act} · ${zone.name}<br><small>Une faille venue de ${zone.region}</small></p>
         ${(['combat', 'evenement', 'centre', 'boutique', 'elite', 'tresor'] as NodeType[])
           .map((t) => `<div class="legend-row"><span class="legend-icon node-${t}">${nodeIcon(t)}</span>${NODE_INFO[t].label}</div>`).join('')}
         <p class="legend-hint">Clique sur un nœud qui brille pour avancer.</p>

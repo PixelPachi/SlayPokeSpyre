@@ -325,3 +325,29 @@ describe('objets tenus', async () => {
     expect(new Set(two).size).toBe(2);
   });
 });
+
+describe('zones', async () => {
+  const { ZONES, zonesOfAct } = await import('../src/data/zones');
+  const { ENEMY_DEFS } = await import('../src/data/enemies');
+  const { Run } = await import('../src/core/run');
+
+  it('chaque ennemi des zones existe', () => {
+    for (const z of ZONES) {
+      for (const id of [...z.encounters.flat(), ...z.elites.flat(), z.boss]) expect(ENEMY_DEFS[id], `${z.id}: ${id}`).toBeDefined();
+    }
+  });
+
+  it('l’acte 1 a 5 zones et la zone change selon la run', () => {
+    expect(zonesOfAct(1)).toHaveLength(5);
+    const seen = new Set<string>();
+    for (let i = 0; i < 40; i++) seen.add(new Run(`Z${i}`, 'riolu').zone.id);
+    expect(seen.size).toBe(5);
+  });
+
+  it('les rencontres viennent de la zone de la run', () => {
+    const run = new Run('ZONE-ENC', 'riolu');
+    const ids = new Set(run.zone.encounters.flat());
+    for (let i = 0; i < 10; i++) for (const e of run.encounter('combat')) expect(ids.has(e)).toBe(true);
+    expect(run.encounter('boss')).toEqual([run.zone.boss]);
+  });
+});

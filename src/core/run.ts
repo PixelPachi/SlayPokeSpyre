@@ -3,7 +3,7 @@ import type { Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
 import { CARD_DEFS, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
-import { BOSS_FORET_DE_JADE, ELITES_FORET_DE_JADE, ENCOUNTERS_FORET_DE_JADE } from '../data/enemies';
+import { type ZoneDef, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
 
 export type NodeType = 'combat' | 'evenement' | 'centre' | 'boutique' | 'elite' | 'tresor' | 'boss';
@@ -87,6 +87,9 @@ export class Run {
   money = 99;
   deck: Card[] = [];
   map: MapNode[][];
+  act = 1;
+  /** Zone de l'acte en cours, tirée au hasard. */
+  zone: ZoneDef;
   /** Nœud actuel (null avant le premier étage ; row = BOSS_ROW pour le gardien). */
   pos: { row: number; col: number } | null = null;
   visited: string[] = [];
@@ -110,6 +113,7 @@ export class Run {
     this.hp = this.maxHp = ch.maxHp;
     for (const id of ch.starterDeck) this.addCard(id);
     if (ch.starterRelic) this.relics.push(ch.starterRelic);
+    this.zone = this.rng.pick(zonesOfAct(this.act));
     this.map = generateMap(this.rng);
   }
 
@@ -184,9 +188,9 @@ export class Run {
   }
 
   encounter(type: 'combat' | 'elite' | 'boss'): string[] {
-    if (type === 'boss') return [...BOSS_FORET_DE_JADE];
-    if (type === 'elite') return [...this.rng.pick(ELITES_FORET_DE_JADE)];
-    return [...this.rng.pick(ENCOUNTERS_FORET_DE_JADE)];
+    if (type === 'boss') return [this.zone.boss];
+    if (type === 'elite') return [...this.rng.pick(this.zone.elites)];
+    return [...this.rng.pick(this.zone.encounters)];
   }
 
   moneyReward(type: 'combat' | 'elite' | 'boss', shinies: number): number {

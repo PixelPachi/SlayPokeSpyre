@@ -10,6 +10,8 @@ import { relicDef } from '../data/relics';
 import { asset, esc, sleep } from './util';
 
 const ENEMY_STEP_MS = 700;
+/** Fonds de zone déjà testés (vrai = l'image existe). */
+const BG_LOADED = new Map<string, boolean>();
 
 export interface CombatResult {
   victory: boolean;
@@ -43,6 +45,17 @@ export class CombatView {
     this.fx = root.querySelector('.fx-layer')!;
     this.bind();
     this.render();
+    // Le fond Gemini de la zone remplace le décor de secours dès qu'il existe
+    const bg = this.run.zone.background;
+    if (!BG_LOADED.has(bg)) {
+      const img = new Image();
+      img.onload = () => {
+        BG_LOADED.set(bg, true);
+        this.el.querySelector('.field')?.classList.add('has-bg');
+      };
+      img.onerror = () => BG_LOADED.set(bg, false);
+      img.src = asset(bg);
+    }
   }
 
   destroy(): void {
@@ -60,7 +73,7 @@ export class CombatView {
 
     this.el.innerHTML = `
       ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
-      <div class="field">
+      <div class="field ${BG_LOADED.get(this.run.zone.background) ? 'has-bg' : ''}" style="--sky:${this.run.zone.palette[0]};--ground:${this.run.zone.palette[1]};--shade:${this.run.zone.palette[2]};--bg:url('${asset(this.run.zone.background)}')">
         <div class="trees"></div>
         <div class="fighter player" data-who="player">
           ${this.statusRow(p, true)}
