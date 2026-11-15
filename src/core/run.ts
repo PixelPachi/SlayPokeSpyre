@@ -147,11 +147,11 @@ export class Run {
     };
   }
 
-  /** Une carte d'un autre Pokémon ou neutre (Le Monde). Évite les cartes inutiles sans la mécanique de leur Pokémon. */
+  /** Une carte d'un autre Pokémon ou neutre (Le Monde). Les cartes de Vipélierre restent possibles : sans sa
+   *  Contestation, leurs baisses de stats te pénalisent (c'est le risque). Seules celles du Bébé sont exclues. */
   foreignCard(): string {
     const pool = allCards().filter((c) => c.rarity !== 'depart' && c.character !== this.character
-      && !c.effects.some((e) => (e.kind.startsWith('bebe-') && this.character !== 'kangourex')
-        || (c.character === 'vipelierre' && e.kind === 'statut' && e.on === 'soi' && e.stacks < 0)));
+      && !c.effects.some((e) => e.kind.startsWith('bebe-') && this.character !== 'kangourex'));
     return this.rng.pick(pool).id;
   }
 
