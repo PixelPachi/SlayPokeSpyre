@@ -101,7 +101,7 @@ export interface CharacterDef {
   starterRelic?: string;
 }
 
-export type IntentKind = 'attaque' | 'defense' | 'boost' | 'handicap' | 'inconnu';
+export type IntentKind = 'attaque' | 'defense' | 'boost' | 'handicap' | 'recharge' | 'inconnu';
 
 export interface EnemyMove {
   id: string;
@@ -126,4 +126,10 @@ export interface EnemyDef {
   types: PokeType[];
   hp: [number, number];
   moves: EnemyMove[];
+  /** Ordre fixe des actions (ids de moves), répété en boucle : remplace le tirage au hasard. */
+  pattern?: string[];
+  /** Seconde phase quand les PV passent sous une fraction des PV max. */
+  phase2?: { below: number; name: string; pattern: string[]; selfStatus?: { status: StatusId; stacks: number }; block?: number };
+  /** Classe CSS du sprite (ex. « primal » pour Dialga Primal). */
+  look?: string;
 }

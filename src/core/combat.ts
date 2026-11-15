@@ -53,6 +53,9 @@ export interface EnemyState extends Fighter {
   intent: EnemyMove;
   history: string[];
   shiny: boolean;
+  /** Phase du combat (gardiens à deux phases) et position dans leur ordre d'actions. */
+  phase: 1 | 2;
+  step: number;
 }
 
 /** Cible d'un événement : le joueur, ou l'uid d'un ennemi. */
@@ -399,13 +402,21 @@ export class Combat {
     return {
       uid: this.nextEnemyUid++, defId: id, name: d.name, dex: d.dex, types: [...d.types],
       hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [],
-      shiny: this.rng.next() < SHINY_CHANCE,
+      shiny: this.rng.next() < SHINY_CHANCE, phase: 1, step: 0,
     };
   }
 
   /** Choix pondéré, sans jamais répéter la même action 3 fois de suite. */
   private rollIntent(e: EnemyState): void {
-    const moves = ENEMY_DEFS[e.defId].moves;
+    const def = ENEMY_DEFS[e.defId];
+    const order = e.phase === 2 && def.phase2 ? def.phase2.pattern : def.pattern;
+    if (order) {
+      const id = order[e.step % order.length];
+      e.step++;
+      e.intent = def.moves.find((m) => m.id === id) ?? def.moves[0];
+      return;
+    }
+    const moves = def.moves;
     const [a, b] = e.history.slice(-2);
     const allowed = a !== undefined && a === b ? moves.filter((m) => m.id !== a) : moves;
     e.intent = this.rng.weighted(allowed.length ? allowed : moves);
@@ -670,6 +681,18 @@ export class Combat {
     }
   }
 
+  /** Gardien à deux phases : sous le seuil de PV, il change d'ordre d'actions et se renforce. */
+  private checkPhase(e: EnemyState): void {
+    const p2 = ENEMY_DEFS[e.defId]?.phase2;
+    if (!p2 || e.phase === 2 || e.hp > e.maxHp * p2.below) return;
+    e.phase = 2;
+    e.step = 0;
+    this.events.push({ type: 'enemy-move', uid: e.uid, name: p2.name });
+    if (p2.block) this.gainBlock(e, e.uid, p2.block);
+    if (p2.selfStatus) this.addStatus(e, e.uid, p2.selfStatus.status, p2.selfStatus.stacks);
+    this.rollIntent(e);
+  }
+
   private healPlayer(n: number): void {
     const boosted = this.has('grosse-racine') ? Math.floor(n * 1.5) : n;
     const heal = Math.min(boosted, this.player.maxHp - this.player.hp);
@@ -747,7 +770,7 @@ export class Combat {
       f.hp = 0;
       this.events.push({ type: 'ko', target: who });
       this.checkEnd();
-    }
+    } else if (typeof who === 'number') this.checkPhase(f as EnemyState);
   }
 
   private addStatus(f: Fighter, who: Who, status: StatusId, stacks: number): void {

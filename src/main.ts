@@ -1,10 +1,10 @@
 import './ui/style.css';
 import type { CharacterId } from './core/model';
 import { randomSeed } from './core/rng';
-import { BOSS_ROW, LAST_ACT, Run } from './core/run';
+import { BOSS_ROW, LAST_ACT, Run, SUMMIT_STEPS } from './core/run';
 import { CombatView } from './ui/combat-view';
 import { renderMap } from './ui/map-view';
-import { renderActIntro, renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
+import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
@@ -47,11 +47,13 @@ function startRun(character: CharacterId): void {
   // Pour tester : ?acte=2 commence directement à l'acte 2
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
+  if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
   showMap(run);
 }
 
 function showMap(run: Run): void {
   clear();
+  if (run.act >= LAST_ACT) return showSummit(run);
   renderMap(screen, run, (row, col) => {
     run.moveTo(row, col);
     if (row === BOSS_ROW) return fight(run, 'boss');
@@ -91,6 +93,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'boss') {
         run.bossesDefeated++;
+        if (run.act >= LAST_ACT) return endRun(run, true); // Dialga Primal est apaisé
         const last = run.act >= LAST_ACT;
         return renderReward(
           screen, run,
@@ -117,6 +120,19 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       );
     },
   );
+}
+
+/** Le sommet : une étape après l'autre jusqu'à Dialga Primal. */
+function showSummit(run: Run): void {
+  renderSummit(screen, run, () => {
+    const step = SUMMIT_STEPS[run.summitStep];
+    run.summitStep++;
+    const back = () => showMap(run);
+    clear();
+    if (step === 'centre') return renderCentre(screen, run, back);
+    if (step === 'boutique') return renderShop(screen, run, back);
+    return fight(run, step);
+  });
 }
 
 /** Fin de run : EXP pour le Pokémon, niveaux et cartes débloquées. */

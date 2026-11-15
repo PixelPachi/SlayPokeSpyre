@@ -23,8 +23,10 @@ export const MAP_ROWS = 15;
 export const MAP_COLS = 7;
 const PATHS = 6;
 export const BOSS_ROW = MAP_ROWS;
-/** Dernier acte disponible dans cette version (l'acte 3 et le sommet arriveront ensuite). */
-export const LAST_ACT = 3;
+/** Dernier acte : le sommet de la Tour du Temps (acte 4), avec Dialga Primal. */
+export const LAST_ACT = 4;
+/** Le sommet n'a pas de carte : Noctunoir, un Centre Pokémon, le Marché Kecleon, puis Dialga Primal. */
+export const SUMMIT_STEPS = ['elite', 'centre', 'boutique', 'boss'] as const;
 
 /** Parts du GDD (le trésor et le Centre Pokémon d'avant-boss sont placés à part). */
 const WEIGHTS: [NodeType, number][] = [
@@ -121,8 +123,12 @@ export class Run {
 
   /** Étage de la tour, compté depuis la base (16 étages par acte, gardien compris). */
   get floor(): number {
+    if (this.act >= LAST_ACT) return (this.act - 1) * (MAP_ROWS + 1) + this.summitStep;
     return (this.act - 1) * (MAP_ROWS + 1) + (this.pos ? this.pos.row + 1 : 0);
   }
+
+  /** Étape atteinte au sommet (0 = pas encore commencé). */
+  summitStep = 0;
 
   /** Passe à l'acte suivant : nouvelle zone, nouvelle carte, PV restaurés. */
   nextAct(): void {

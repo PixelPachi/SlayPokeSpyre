@@ -1,4 +1,5 @@
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
+import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, PowerId, StatusId } from '../core/model';
 import { TYPE_LABELS, type PokeType } from '../core/types';
@@ -177,7 +178,7 @@ export class CombatView {
         ${this.intentHtml(e)}
         ${this.statusRow(e, false)}
         <div class="platform"></div>
-        <img class="sprite front" src="${asset(sprite)}" alt="${esc(e.name)}">
+        <img class="sprite front ${ENEMY_DEFS[e.defId].look ?? ''}" src="${asset(sprite)}" alt="${esc(e.name)}">
         ${e.shiny ? '<span class="shiny-star" data-tip="Chromatique ! Rapportera le double de Pokédollars.">★</span>' : ''}
         ${this.hpBar(e)}
       </div>`;
@@ -200,6 +201,8 @@ export class CombatView {
     } else if (m.intent === 'boost') {
       const parts = [m.selfStatus ? `${STATUS_INFO[m.selfStatus.status].label} +${m.selfStatus.stacks}` : '', m.block ? `${m.block} Protection` : ''].filter(Boolean);
       tip += ` : se renforce (${parts.join(', ')})`;
+    } else if (m.intent === 'recharge') {
+      tip += ' : ne peut pas agir ce tour-ci. Profites-en !';
     }
     const color = m.pokeType ? TYPE_COLORS[m.pokeType] : '#888';
     return `
@@ -568,6 +571,7 @@ export class CombatView {
 /** Au-dessus de cette ligne, une carte tirée est jouée. */
 const PLAY_LINE = 470;
 const INTENT_ICONS: Record<string, string> = {
+  recharge: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#5b6478" stroke="#1b1b1b" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">zz</text></svg>',
   attaque: '<svg viewBox="0 0 24 24"><path d="M14.5 2.5l7 7-9.5 9.5-2-2-3.5 3.5-2.5-.5-.5-2.5L7 14l-2-2z" fill="var(--tc)" stroke="#1b1b1b" stroke-width="1.5"/></svg>',
   defense: '<svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" fill="#4c8dff" stroke="#1b1b1b" stroke-width="1.5"/></svg>',
   handicap: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#9b59d0" stroke="#1b1b1b" stroke-width="1.5"/><path d="M12 7a5 5 0 1 1-5 5 3 3 0 1 1 3 3" fill="none" stroke="#fff" stroke-width="2"/></svg>',
@@ -576,7 +580,7 @@ const INTENT_ICONS: Record<string, string> = {
 };
 
 /** Particules de saison : pollen, pétales, feuilles d'automne ou neige. Positions fixes (même rendu à chaque fois). */
-function weatherParticles(kind: string): string {
+export function weatherParticles(kind: string): string {
   const count = kind === 'blizzard' ? 70 : kind === 'neige' || kind === 'cendres' || kind === 'orage' ? 46 : kind === 'gouttes' ? 40 : kind === 'pollen' || kind === 'poussiere' || kind === 'braises' ? 26 : 22;
   let out = '';
   for (let i = 0; i < count; i++) {

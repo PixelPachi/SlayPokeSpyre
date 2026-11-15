@@ -19,12 +19,13 @@ export function playableCharacters(s: SaveData): CharacterId[] {
   return ['riolu', ...(s.characters ?? []).filter((c) => c !== 'riolu')];
 }
 
-/** Débloque les personnages selon la run : gardien de l'acte 1 → Vipélierre, acte 2 → Kangourex, sommet → Caninos. */
+/** Débloque les personnages : gardien de l'acte 1 → Vipélierre, acte 2 → Kangourex, sommet atteint → Caninos, Dialga Primal apaisé → Mew. */
 export function unlockCharacters(s: SaveData, bosses: number, victory: boolean): CharacterId[] {
   const want: CharacterId[] = [];
   if (bosses >= 1) want.push('vipelierre');
   if (bosses >= 2) want.push('kangourex');
-  if (victory && bosses >= 3) want.push('caninos');
+  if (bosses >= 3) want.push('caninos'); // atteindre le sommet
+  if (victory) want.push('mew'); // apaiser Dialga Primal
   const have = new Set(s.characters ?? []);
   const fresh = want.filter((c) => !have.has(c));
   if (fresh.length) {

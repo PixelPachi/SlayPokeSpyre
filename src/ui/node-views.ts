@@ -11,6 +11,7 @@ import { CHARACTER_COLORS } from './labels';
 import { openDeckOverlay, relicCard, topbar } from './run-ui';
 import { relicPrice } from '../data/relics';
 import { asset, esc } from './util';
+import { weatherParticles } from './combat-view';
 
 type Done = () => void;
 
@@ -252,9 +253,9 @@ export function renderRunEnd(
   const pct = next ? Math.round(((xp.total - cur) / (next - cur)) * 100) : 100;
   root.innerHTML = `
     <div class="run-end ${victory ? 'win' : 'lose'}">
-      <h1>${victory ? `Acte ${run.act} terminé !` : 'Fin de la run'}</h1>
+      <h1>${victory ? 'Dialga Primal est apaisé !' : 'Fin de la run'}</h1>
       <p>${victory
-        ? `${esc(name)} a vaincu le gardien de la zone ${esc(run.zone.name)}. ${run.act >= 3 ? 'Le sommet de la Tour du Temps et Dialga Primal arrivent dans une prochaine version.' : `La suite de la Tour du Temps (acte ${run.act + 1} et le sommet) arrive dans une prochaine version.`}`
+        ? `${esc(name)} a atteint le sommet de la Tour du Temps et rendu au temps son cours. Les engrenages se remettent à tourner… Merci d'avoir joué !`
         : `${esc(name)} est tombé à l'étage ${run.floor} de la Tour du Temps.`}</p>
       <div class="run-stats">
         <div><b>${run.floor}</b><span>étage atteint</span></div>
@@ -283,18 +284,53 @@ export function renderRunEnd(
   root.querySelector('.menu')!.addEventListener('click', onMenu);
 }
 
-const ACT_TITLES: Record<number, string> = { 1: 'La base de la tour', 2: 'Le cœur de la tour', 3: 'Les hauteurs' };
+const ACT_TITLES: Record<number, string> = { 1: 'La base de la tour', 2: 'Le cœur de la tour', 3: 'Les hauteurs', 4: 'Le sommet' };
 
 /** Écran de passage d'un acte à l'autre. */
 export function renderActIntro(root: HTMLElement, run: Run, done: Done): void {
   const z = run.zone;
   root.innerHTML = `
     <div class="act-intro" style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]}">
-      <p class="act-num">Acte ${run.act}</p>
+      <p class="act-num">${run.act >= 4 ? 'Dernière étape' : `Acte ${run.act}`}</p>
       <h1>${esc(ACT_TITLES[run.act] ?? '')}</h1>
       <p class="act-zone">Une faille temporelle mène à <b>${esc(z.name)}</b><br><small>${esc(z.region)} · ${esc(z.season)}</small></p>
       <p class="act-heal">${esc(CHARACTERS[run.character].name)} reprend son souffle : PV restaurés (${run.hp}/${run.maxHp}).</p>
       <button class="btn primary go">Continuer l'ascension</button>
     </div>`;
   root.querySelector('.go')!.addEventListener('click', done);
+}
+
+const SUMMIT_INFO: Record<string, { label: string; text: string; icon: string }> = {
+  centre: { label: 'Centre Pokémon', text: 'Un dernier repos avant Dialga.', icon: 'centre' },
+  boutique: { label: 'Marché Kecleon', text: 'Kecleon a suivi jusqu’ici. Dernières emplettes.', icon: 'boutique' },
+  elite: { label: 'Noctunoir', text: 'Le gardien des ombres barre le passage.', icon: 'elite' },
+  boss: { label: 'Dialga Primal', text: 'Le maître du temps, devenu fou. Apaise-le.', icon: 'boss' },
+};
+
+/** Le sommet : un escalier de quatre étapes. */
+export function renderSummit(root: HTMLElement, run: Run, onNext: Done): void {
+  const steps = ['elite', 'centre', 'boutique', 'boss'];
+  const z = run.zone;
+  root.innerHTML = `
+    <div class="summit" style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]}">
+      ${topbar(run, `${z.name}`)}
+      <div class="weather weather-temps">${weatherParticles('temps')}</div>
+      <h1 class="summit-title">Sommet de la Tour du Temps</h1>
+      <div class="summit-steps">
+        ${steps.map((s, i) => {
+          const info = SUMMIT_INFO[s];
+          const state = i < run.summitStep ? 'done' : i === run.summitStep ? 'next' : 'later';
+          const img = s === 'boss' ? `<img class="summit-boss primal" src="${asset('sprites/pokemon/front/483.png')}" alt="">`
+            : s === 'elite' ? `<img src="${asset('sprites/pokemon/front/477.png')}" alt="">`
+            : s === 'boutique' ? `<img src="${asset('sprites/pokemon/front/352.png')}" alt="">`
+            : '<span class="summit-cross">✚</span>';
+          return `<button class="summit-step ${state} step-${s}" ${state === 'next' ? '' : 'disabled'}>
+              <div class="summit-icon">${img}</div>
+              <div class="summit-label"><b>${esc(info.label)}</b><small>${state === 'done' ? 'Terminé' : esc(info.text)}</small></div>
+            </button>`;
+        }).join('<div class="summit-link"></div>')}
+      </div>
+    </div>`;
+  root.querySelector('.summit-step.next')?.addEventListener('click', onNext);
+  bindDeck(root, run);
 }

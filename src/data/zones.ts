@@ -21,7 +21,7 @@ export interface ZoneDef {
   /** Particules animées par-dessus le fond. */
   weather: 'pollen' | 'petales' | 'feuilles-rouges' | 'feuilles-or' | 'neige'
     | 'cristaux' | 'gouttes' | 'cendres' | 'poussiere' | 'etincelles'
-    | 'braises' | 'blizzard' | 'vent' | 'orage';
+    | 'braises' | 'blizzard' | 'vent' | 'orage' | 'temps';
 }
 
 export const ZONES: ZoneDef[] = [
@@ -133,6 +133,14 @@ export const ZONES: ZoneDef[] = [
     elites: [['tranchodon']], boss: 'zekrom',
     background: 'backgrounds/tour-dragospire.png', palette: ['#5a6a8a', '#7d8494', '#141a28'], mood: 'dragon',
     season: "Tempête de neige et d'éclairs", weather: 'orage',
+  },
+
+  // ——— Sommet : le combat final ———
+  {
+    id: 'sommet-tour-du-temps', name: 'Sommet de la Tour du Temps', region: 'Tour du Temps', act: 4,
+    encounters: [['noctunoir']], elites: [['noctunoir']], boss: 'dialga-primal',
+    background: 'backgrounds/sommet-tour-du-temps.png', palette: ['#4a3a8a', '#4a4560', '#0a0618'], mood: 'dragon',
+    season: 'Le temps se désagrège', weather: 'temps',
   },
 ];
 

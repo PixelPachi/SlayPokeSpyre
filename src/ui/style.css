@@ -717,3 +717,33 @@ img.sprite, .roster img { image-rendering: pixelated; }
     conic-gradient(from 145deg at 55% 30%, transparent 0 0, var(--t) 0 70deg, transparent 70deg) 0 0 / 100% 100% no-repeat,
     conic-gradient(from 155deg at 86% 42%, transparent 0 0, var(--t) 0 50deg, transparent 50deg) 0 0 / 100% 100% no-repeat;
 }
+
+/* ——— Sommet de la Tour du Temps ——— */
+.weather-temps i { width: calc(8px * var(--s)); height: calc(8px * var(--s)); background: linear-gradient(135deg, #8fe3ff, #b48cff); transform: rotate(45deg);
+  box-shadow: 0 0 10px #8fd0ff; top: auto; bottom: -20px; animation-name: rise; opacity: .8; }
+.enemy .sprite.front.primal, .summit-boss.primal {
+  filter: brightness(0.55) saturate(1.6) hue-rotate(-12deg) drop-shadow(0 0 10px #ff3d2e) drop-shadow(0 0 24px #7a2cff);
+}
+.enemy .sprite.front.primal { width: 300px; height: 300px; margin: -40px 0 -40px; animation: primal-pulse 3s ease-in-out infinite; }
+@keyframes primal-pulse { 50% { filter: brightness(0.62) saturate(1.8) hue-rotate(-12deg) drop-shadow(0 0 16px #ff3d2e) drop-shadow(0 0 34px #7a2cff); } }
+.intent-recharge span { display: none; }
+.summit { position: absolute; inset: 0; overflow: hidden; color: #fff;
+  background: radial-gradient(ellipse at 50% 10%, var(--sky), var(--shade) 80%); }
+.summit-title { position: relative; text-align: center; margin: 60px 0 10px; font-size: 38px; text-shadow: 0 3px 14px #000; }
+.summit-steps { position: relative; display: flex; flex-direction: column-reverse; align-items: center; gap: 0; margin-top: 10px; }
+.summit-step { display: flex; align-items: center; gap: 16px; width: 440px; padding: 8px 16px; border-radius: 16px; cursor: pointer;
+  background: #1c1530dd; border: 3px solid #5b4f80; color: #fff; text-align: left; font: inherit; transition: transform .15s; }
+.summit-step.next { border-color: #ffe08a; box-shadow: 0 0 22px #ffd75e88; animation: summit-glow 1.6s ease-in-out infinite; }
+.summit-step.next:hover { transform: scale(1.04); }
+.summit-step.done { opacity: .55; cursor: default; }
+.summit-step.later { opacity: .8; cursor: default; }
+@keyframes summit-glow { 50% { box-shadow: 0 0 34px #ffd75ecc; } }
+.summit-icon { width: 76px; height: 76px; display: grid; place-items: center; flex: none; }
+.summit-icon img { width: 96px; height: 96px; image-rendering: pixelated; }
+.summit-icon .summit-boss { width: 96px; height: 96px; }
+.summit-cross { font-size: 44px; color: #ff6b8a; text-shadow: 0 0 10px #fff8; }
+.summit-label b { display: block; font-size: 20px; }
+.summit-label small { opacity: .8; font-size: 14px; }
+.summit-step.step-boss { width: 520px; border-color: #b33a4a; background: #2a0f1cdd; }
+.summit-step.step-boss.next { border-color: #ff5a4a; }
+.summit-link { width: 6px; height: 22px; background: linear-gradient(#ffd27a, #7a5cff); border-radius: 3px; opacity: .7; }

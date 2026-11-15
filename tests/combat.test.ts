@@ -530,7 +530,7 @@ describe('acte 3', async () => {
   const { Run, LAST_ACT } = await import('../src/core/run');
   const { zonesOfAct } = await import('../src/data/zones');
   it('5 zones, une par région, et on y arrive après l’acte 2', () => {
-    expect(LAST_ACT).toBe(3);
+    expect(LAST_ACT).toBe(4);
     const z3 = zonesOfAct(3);
     expect(z3).toHaveLength(5);
     expect(new Set(z3.map((z) => z.region)).size).toBe(5);
@@ -540,5 +540,39 @@ describe('acte 3', async () => {
     expect(run.act).toBe(3);
     expect(run.zone.act).toBe(3);
     expect(run.floor).toBe(32);
+  });
+});
+
+describe('sommet et Dialga Primal', async () => {
+  const { Run, SUMMIT_STEPS } = await import('../src/core/run');
+  it('le sommet suit l’acte 3 et finit par Dialga Primal', () => {
+    const run = new Run('SOMMET', 'riolu');
+    run.nextAct(); run.nextAct(); run.nextAct();
+    expect(run.act).toBe(4);
+    expect(run.zone.id).toBe('sommet-tour-du-temps');
+    expect(SUMMIT_STEPS[SUMMIT_STEPS.length - 1]).toBe('boss');
+    expect(run.encounter('boss')).toEqual(['dialga-primal']);
+    expect(run.encounter('elite')).toEqual(['noctunoir']);
+  });
+
+  it('Dialga annonce Hurle-Temps puis se recharge, et passe en phase 2 sous 50 % de PV', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['dialga-primal'], seed: 'DIALGA', hp: 999, maxHp: 999 });
+    const d = c.enemies[0];
+    const seen: string[] = [];
+    for (let t = 0; t < 6; t++) {
+      seen.push(d.intent.id);
+      c.endPlayerTurn();
+      c.enemyAct(d.uid);
+      c.endEnemyTurn();
+    }
+    expect(seen).toEqual(['distorsion', 'draco-choc', 'luminocanon', 'mur-de-fer', 'hurle-temps', 'recharge']);
+    d.block = 0;
+    c.player.energy = 9;
+    c.hand = makeDeck(['ruse']).map((x) => ({ ...x, uid: 990 }));
+    d.hp = Math.floor(d.maxHp / 2) + 3;
+    c.play(990, d.uid);
+    expect(d.phase).toBe(2);
+    expect(d.intent.id).toBe('luminocanon');
+    expect(d.statuses.attaque).toBeGreaterThanOrEqual(2);
   });
 });
