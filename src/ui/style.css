@@ -747,3 +747,21 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .summit-step.step-boss { width: 520px; border-color: #b33a4a; background: #2a0f1cdd; }
 .summit-step.step-boss.next { border-color: #ff5a4a; }
 .summit-link { width: 6px; height: 22px; background: linear-gradient(#ffd27a, #7a5cff); border-radius: 3px; opacity: .7; }
+
+.unlock-row .card { zoom: 0.8; }
+/* ——— Niveau supérieur ——— */
+.levelup { position: absolute; inset: 0; z-index: 50; overflow-y: auto; background: radial-gradient(circle at 50% 20%, #3a2f12ee, #0b0a10f2 70%);
+  display: flex; justify-content: center; animation: act-in .4s ease-out; }
+.levelup-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 26px 20px 40px; max-width: 1180px; }
+.levelup-sprite { width: 120px; height: 120px; image-rendering: pixelated; transform: scaleX(-1); animation: lvl-hop 1s ease-in-out infinite; }
+@keyframes lvl-hop { 50% { transform: scaleX(-1) translateY(-10px); } }
+.levelup h1 { margin: 0; font-family: var(--font-title); font-size: 54px; color: var(--gold); text-shadow: 0 4px 0 #000, 0 0 30px #ffcf4a88; }
+.levelup p { margin: 0 0 10px; font-size: 18px; color: #e2ddd0; }
+.levelup-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; }
+.levelup-group h2 { margin: 6px 0; font-size: 20px; color: #ffe08a; }
+.levelup-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.levelup-card { animation: lvl-card .5s ease-out backwards; animation-delay: var(--d); }
+.levelup-card .card { margin: 0; transform: none; position: relative; }
+@keyframes lvl-card { from { opacity: 0; transform: translateY(30px) rotateY(80deg); } }
+.levelup-relic { align-self: center; }
+.levelup-ok { margin-top: 14px; }

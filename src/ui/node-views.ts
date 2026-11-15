@@ -2,7 +2,8 @@
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
 import { cardDef } from '../data/cards';
-import { LEVEL_EXP, MAX_LEVEL } from '../data/unlocks';
+import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
+import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
 import { EVENTS, type GameEvent } from '../data/events';
 import { renderCard } from './card';
@@ -269,9 +270,7 @@ export function renderRunEnd(
       </div>
       ${xp.newCards.length ? `
         <p class="unlock-title">Nouvelles capacités débloquées :</p>
-        ${xp.newCards.length <= 6
-          ? `<div class="unlock-row">${xp.newCards.map((id) => renderCard(cardDef(id))).join('')}</div>`
-          : `<div class="unlock-chips">${xp.newCards.map((id) => `<span class="chip" style="--c:${CHARACTER_COLORS[cardDef(id).character]}">${esc(cardDef(id).name)}</span>`).join('')}</div>`}` : ''}
+        <div class="unlock-row">${xp.newCards.map((id) => renderCard(cardDef(id))).join('')}</div>` : ''}
       ${xp.newRelics.length ? `
         <p class="unlock-title">Nouveaux objets tenus débloqués :</p>
         <div class="reward-line">${xp.newRelics.map((id) => relicCard(id)).join('')}</div>` : ''}
@@ -282,6 +281,46 @@ export function renderRunEnd(
     </div>`;
   root.querySelector('.retry')!.addEventListener('click', onRetry);
   root.querySelector('.menu')!.addEventListener('click', onMenu);
+  if (xp.after > xp.before) showLevelUp(root, run.character, xp);
+}
+
+/** Écran « Niveau supérieur ! » : les capacités et objets débloqués, niveau par niveau, avec le design des cartes. */
+function showLevelUp(
+  root: HTMLElement, character: CharacterId,
+  xp: { before: number; after: number; newCards: string[]; newRelics: string[] },
+): void {
+  const table = UNLOCKS[character];
+  const relicTable = RELIC_UNLOCKS[character] ?? {};
+  const levels: { lvl: number; cards: string[]; relics: string[] }[] = [];
+  for (let l = xp.before + 1; l <= xp.after; l++) {
+    levels.push({
+      lvl: l,
+      cards: table && character !== 'mew' ? (table[l] ?? []).filter((id) => xp.newCards.includes(id)) : [],
+      relics: (relicTable[l] ?? []).filter((id) => xp.newRelics.includes(id)),
+    });
+  }
+  // Mew : ses déblocages mêlent ceux des autres personnages, on les montre en un seul groupe
+  if (character === 'mew' || !table) levels[levels.length - 1].cards = xp.newCards;
+  const name = CHARACTERS[character].name;
+  const el = document.createElement('div');
+  el.className = 'levelup';
+  el.innerHTML = `
+    <div class="levelup-inner">
+      <img class="levelup-sprite" src="${asset(`sprites/pokemon/front/${CHARACTERS[character].dex[0]}.png`)}" alt="">
+      <h1>Niveau ${xp.after} !</h1>
+      <p>${esc(name)} ${xp.after - xp.before > 1 ? `gagne ${xp.after - xp.before} niveaux` : 'monte de niveau'} et peut apprendre de nouvelles capacités.</p>
+      ${levels.map((g) => `
+        <div class="levelup-group">
+          ${levels.length > 1 ? `<h2>Niveau ${g.lvl}</h2>` : ''}
+          <div class="levelup-cards">
+            ${g.cards.map((id, i) => `<div class="levelup-card" style="--d:${i * 90}ms">${renderCard(cardDef(id))}</div>`).join('')}
+            ${g.relics.map((id) => `<div class="levelup-relic">${relicCard(id)}</div>`).join('')}
+          </div>
+        </div>`).join('')}
+      <button class="btn primary levelup-ok">Continuer</button>
+    </div>`;
+  root.appendChild(el);
+  el.querySelector('.levelup-ok')!.addEventListener('click', () => el.remove());
 }
 
 const ACT_TITLES: Record<number, string> = { 1: 'La base de la tour', 2: 'Le cœur de la tour', 3: 'Les hauteurs', 4: 'Le sommet' };

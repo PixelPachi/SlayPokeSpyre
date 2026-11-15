@@ -2,7 +2,9 @@
 import type { CharacterId } from '../core/model';
 
 /** EXP totale nécessaire pour atteindre chaque niveau (index 0 = niveau 1). */
-export const LEVEL_EXP = [0, 80, 180, 300, 450, 630, 840, 1080, 1350, 1650];
+/** EXP totale pour chaque niveau. Une run complète (sommet + Dialga) rapporte environ 900 EXP :
+ *  on gagne 1 à 3 niveaux par run, il faut une vingtaine de runs pour atteindre le niveau 10. */
+export const LEVEL_EXP = [0, 250, 600, 1050, 1600, 2250, 3000, 3850, 4800, 5850];
 export const MAX_LEVEL = LEVEL_EXP.length;
 
 /** Cartes débloquées à chaque niveau. Le niveau 1 = cartes disponibles dès la première run. */
