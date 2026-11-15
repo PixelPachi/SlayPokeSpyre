@@ -99,7 +99,14 @@ export interface CharacterDef {
   starterDeck: string[];
   /** Objet tenu de départ (id dans data/relics.ts). */
   starterRelic?: string;
+  /** Évolutions au début des actes : nouveau sprite, nom, types et PV max en plus. */
+  evolutions?: { act: number; dex: number; name: string; types: PokeType[]; hp: number }[];
+  /** Méga-Évolution : avec la Méga-Gemme tenue, au début de chaque combat. */
+  mega?: { stone: string; dex: number; name: string; types: PokeType[]; fromAct: number };
 }
+
+/** Apparence du Pokémon joué à un moment de la run (stade d'évolution). */
+export interface Form { dex: number; name: string; types: PokeType[] }
 
 export type IntentKind = 'attaque' | 'defense' | 'boost' | 'handicap' | 'recharge' | 'inconnu';
 

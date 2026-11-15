@@ -38,7 +38,9 @@ const RELICS: RelicDef[] = [
   { id: 'plaque-fer', name: 'Plaque Fer', sprite: 'iron-plate', rarity: 'commun', owner: 'riolu',
     text: 'Tes attaques de type Acier infligent 3 dégâts de plus.' },
   { id: 'lucarite', name: 'Lucarite', sprite: 'lucarionite', rarity: 'rare', owner: 'riolu',
-    text: 'Une fois par combat, quand ton Aura atteint 25, pioche 2 cartes et gagne 1 PA.' },
+    text: 'Méga-Gemme. À partir de l’acte 2, Lucario devient Méga-Lucario au début de chaque combat : Attaque +2 et 10 Aura. Une fois par combat, quand ton Aura atteint 25, pioche 2 cartes et gagne 1 PA.' },
+  { id: 'kangourexite', name: 'Kangourexite', sprite: 'kangaskhanite', rarity: 'rare', owner: 'kangourex',
+    text: 'Méga-Gemme. Kangourex devient Méga-Kangourex au début de chaque combat : le Bébé attaque 2 fois à la fin de chaque tour.' },
 
   // ——— Communs à tous ———
   { id: 'restes', name: 'Restes', sprite: 'leftovers', rarity: 'commun', owner: 'commun',

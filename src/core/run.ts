@@ -1,5 +1,5 @@
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
-import type { Card, CardDef, CharacterId } from './model';
+import type { Form, Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
 import { allCards, CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
@@ -127,12 +127,34 @@ export class Run {
     return (this.act - 1) * (MAP_ROWS + 1) + (this.pos ? this.pos.row + 1 : 0);
   }
 
+  /** Stade d'évolution actuel (le Pokémon évolue au début de certains actes). */
+  get form(): Form {
+    const ch = CHARACTERS[this.character];
+    const evo = (ch.evolutions ?? []).filter((e) => e.act <= this.act).pop();
+    return evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
+  }
+
+  /** Évolution qui vient d'avoir lieu en entrant dans cet acte. */
+  get justEvolved(): { from: Form; to: Form } | null {
+    const ch = CHARACTERS[this.character];
+    const evos = ch.evolutions ?? [];
+    const i = evos.findIndex((e) => e.act === this.act);
+    if (i < 0) return null;
+    const prev = i > 0 ? evos[i - 1] : null;
+    return {
+      from: prev ? { dex: prev.dex, name: prev.name, types: prev.types } : { dex: ch.dex[0], name: ch.name, types: ch.types },
+      to: { dex: evos[i].dex, name: evos[i].name, types: evos[i].types },
+    };
+  }
+
   /** Étape atteinte au sommet (0 = pas encore commencé). */
   summitStep = 0;
 
   /** Passe à l'acte suivant : nouvelle zone, nouvelle carte, PV restaurés. */
   nextAct(): void {
     this.act++;
+    const evo = CHARACTERS[this.character].evolutions?.find((e) => e.act === this.act);
+    if (evo) this.maxHp += evo.hp;
     this.zone = this.rng.pick(zonesOfAct(this.act));
     this.map = generateMap(this.rng);
     this.pos = null;

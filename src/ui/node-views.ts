@@ -7,6 +7,7 @@ import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
 import { EVENTS, type GameEvent } from '../data/events';
 import { renderCard } from './card';
+import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
 import { CHARACTER_COLORS } from './labels';
 import { openDeckOverlay, relicCard, topbar } from './run-ui';
@@ -323,6 +324,23 @@ function showLevelUp(
   el.querySelector('.levelup-ok')!.addEventListener('click', () => el.remove());
 }
 
+/** Évolution entre deux actes : « Riolu évolue en Lucario ! » avec les deux sprites. */
+function evolutionHtml(run: Run): string {
+  const evo = run.justEvolved;
+  if (run.character === 'kangourex' && run.act <= 4) {
+    return `<div class="act-evo"><img src="${asset('sprites/pokemon/bebe-kangourex-v2.png')}" alt=""><p>Le Bébé grandit : <b>+3 PV max</b> pour lui à chaque combat.</p></div>`;
+  }
+  if (!evo) return '';
+  const gain = CHARACTERS[run.character].evolutions!.find((e) => e.act === run.act)!.hp;
+  return `
+    <div class="act-evo">
+      <img class="evo-from" src="${asset(`sprites/pokemon/front/${evo.from.dex}.png`)}" alt="">
+      <span class="evo-arrow">➜</span>
+      <img class="evo-to" src="${asset(`sprites/pokemon/front/${evo.to.dex}.png`)}" alt="">
+      <p><b>${esc(evo.from.name)} évolue en ${esc(evo.to.name)} !</b><br>PV max +${gain}${evo.to.types.length > evo.from.types.length ? ` · nouveau type : ${evo.to.types.slice(evo.from.types.length).map((t) => TYPE_LABELS[t]).join(', ')}` : ''}</p>
+    </div>`;
+}
+
 const ACT_TITLES: Record<number, string> = { 1: 'La base de la tour', 2: 'Le cœur de la tour', 3: 'Les hauteurs', 4: 'Le sommet' };
 
 /** Écran de passage d'un acte à l'autre. */
@@ -333,7 +351,8 @@ export function renderActIntro(root: HTMLElement, run: Run, done: Done): void {
       <p class="act-num">${run.act >= 4 ? 'Dernière étape' : `Acte ${run.act}`}</p>
       <h1>${esc(ACT_TITLES[run.act] ?? '')}</h1>
       <p class="act-zone">Une faille temporelle mène à <b>${esc(z.name)}</b><br><small>${esc(z.region)} · ${esc(z.season)}</small></p>
-      <p class="act-heal">${esc(CHARACTERS[run.character].name)} reprend son souffle : PV restaurés (${run.hp}/${run.maxHp}).</p>
+      ${evolutionHtml(run)}
+      <p class="act-heal">${esc(run.form.name)} reprend son souffle : PV restaurés (${run.hp}/${run.maxHp}).</p>
       <button class="btn primary go">Continuer l'ascension</button>
     </div>`;
   root.querySelector('.go')!.addEventListener('click', done);

@@ -765,3 +765,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes lvl-card { from { opacity: 0; transform: translateY(30px) rotateY(80deg); } }
 .levelup-relic { align-self: center; }
 .levelup-ok { margin-top: 14px; }
+
+.act-evo { display: flex; align-items: center; gap: 14px; margin: 8px 0 0; padding: 8px 22px; border-radius: 16px; background: #0006; }
+.act-evo img { width: 120px; height: 120px; image-rendering: pixelated; transform: scaleX(-1); }
+.act-evo .evo-to { animation: evo-glow 1.4s ease-in-out infinite; }
+@keyframes evo-glow { 50% { filter: drop-shadow(0 0 14px #fff) brightness(1.25); } }
+.act-evo .evo-arrow { font-size: 34px; color: #ffe08a; }
+.act-evo p { margin: 0; font-size: 18px; text-align: left; }

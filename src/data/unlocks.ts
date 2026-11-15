@@ -75,6 +75,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
 /** Objets tenus débloqués à chaque niveau (les objets communs sont toujours disponibles). */
 export const RELIC_UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
   riolu: { 2: ['plaque-poing'], 3: ['griffe-rasoir'], 4: ['gant-punch'], 6: ['bandeau'], 7: ['plaque-fer'], 9: ['lucarite'] },
+  kangourex: { 6: ['kangourexite'] },
 };
 
 export function unlockedRelics(character: CharacterId, level: number): string[] {

@@ -96,7 +96,9 @@
     613,
     621,
     622,
-    644
+    644,
+    10039,
+    10059
   ],
   "back": [],
   "shiny": [
@@ -207,6 +209,7 @@
     "focus-band",
     "focus-sash",
     "iron-plate",
+    "kangaskhanite",
     "leftovers",
     "life-orb",
     "lucarionite",

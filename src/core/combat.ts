@@ -1,6 +1,6 @@
 // Moteur de combat (section 4 du GDD). Aucune dépendance à l'affichage : l'interface lit l'état
 // et les événements produits, et appelle les actions (jouer une carte, finir le tour…).
-import type { Card, CardDef, CharacterId, EnemyMove, Effect, PowerId, StatusId, Statuses } from './model';
+import type { Card, CardDef, CharacterId, EnemyMove, Effect, PowerId, StatusId, Statuses, Form } from './model';
 import { Rng } from './rng';
 import {
   type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier,
@@ -36,6 +36,8 @@ export interface PlayerState extends Fighter {
   hpLostEnemyTurn: number;
   /** Bébé Kangourex (familier), seulement pour Kangourex. */
   familiar?: Familiar;
+  /** Méga-évolué pour ce combat. */
+  isMega?: boolean;
 }
 
 export interface Familiar {
@@ -86,9 +88,13 @@ export interface CombatOptions {
   maxHp?: number;
   /** Objets tenus (ids de data/relics.ts). */
   relics?: string[];
-  /** PV max en plus pour le Bébé Kangourex (évolution). */
+  /** PV max en plus pour le Bébé Kangourex (il grandit à chaque acte). */
   familiarBonus?: number;
   mega?: boolean;
+  /** Stade d'évolution du Pokémon joué (sinon sa forme de base). */
+  form?: Form;
+  /** Acte en cours (la Méga-Évolution de Lucario demande l'acte 2). */
+  act?: number;
 }
 
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
@@ -132,16 +138,25 @@ export class Combat {
   constructor(opts: CombatOptions) {
     this.rng = new Rng(opts.seed);
     const ch = CHARACTERS[opts.character];
+    const form = opts.form ?? { dex: ch.dex[0], name: ch.name, types: ch.types };
     this.player = {
-      character: ch.id, name: ch.name, dex: ch.dex[0], types: [...ch.types],
+      character: ch.id, name: form.name, dex: form.dex, types: [...form.types],
       hp: opts.hp ?? ch.maxHp, maxHp: opts.maxHp ?? ch.maxHp, block: 0, statuses: {},
       energy: BASE_ENERGY, maxEnergy: BASE_ENERGY, aura: 0,
       powers: {}, freeTurn: false, hpLostEnemyTurn: 0,
     };
     this.relics = new Set(opts.relics ?? []);
+    // Méga-Évolution : la Méga-Gemme tenue (et le bon stade) transforme le Pokémon pour tout le combat
+    const mega = ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
     if (ch.id === 'kangourex') {
       const hp = 6 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
-      this.player.familiar = { hp, maxHp: hp, power: 3, block: 0, mega: !!opts.mega };
+      this.player.familiar = { hp, maxHp: hp, power: 3, block: 0, mega: !!opts.mega || !!mega };
+    }
+    if (mega) {
+      this.player.name = mega.name;
+      this.player.dex = mega.dex;
+      this.player.types = [...mega.types];
+      this.player.isMega = true;
     }
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
     this.drawPile = this.rng.shuffle([...opts.deck]);
@@ -153,6 +168,10 @@ export class Combat {
     if (ch.id === 'caninos') for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
     if (this.has('bandeau-muscle')) this.relicFired('bandeau-muscle', () => this.addStatus(this.player, 'player', 'attaque', 1));
+    if (mega) this.relicFired(mega.stone, () => {
+      this.events.push({ type: 'player-move', name: `${ch.name} méga-évolue !` });
+      if (ch.id === 'riolu') { this.addStatus(this.player, 'player', 'attaque', 2); this.gainAura(10); }
+    });
 
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();

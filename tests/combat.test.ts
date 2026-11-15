@@ -576,3 +576,34 @@ describe('sommet et Dialga Primal', async () => {
     expect(d.statuses.attaque).toBeGreaterThanOrEqual(2);
   });
 });
+
+describe('évolutions et Méga-Évolution', async () => {
+  const { Run } = await import('../src/core/run');
+  it('Riolu évolue en Lucario à l’acte 2 (PV max +10, type Acier)', () => {
+    const run = new Run('EVO', 'riolu');
+    expect(run.form.name).toBe('Riolu');
+    run.nextAct();
+    expect(run.form).toMatchObject({ name: 'Lucario', dex: 448 });
+    expect(run.form.types).toContain('acier');
+    expect(run.maxHp).toBe(85);
+    expect(run.justEvolved?.to.name).toBe('Lucario');
+  });
+  it('Vipélierre devient Lianaja puis Majaspic', () => {
+    const run = new Run('EVO', 'vipelierre');
+    run.nextAct(); expect(run.form.name).toBe('Lianaja');
+    run.nextAct(); expect(run.form.name).toBe('Majaspic');
+  });
+  it('avec la Lucarite, Lucario méga-évolue en combat (pas Riolu à l’acte 1)', () => {
+    const base = { character: 'riolu' as const, deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'MEGA', relics: ['lucarite'] };
+    const a1 = new Combat({ ...base, act: 1 });
+    expect(a1.player.isMega).toBeFalsy();
+    const a2 = new Combat({ ...base, act: 2, form: { dex: 448, name: 'Lucario', types: ['combat', 'acier'] } });
+    expect(a2.player).toMatchObject({ isMega: true, name: 'Méga-Lucario', dex: 10059 });
+    expect(a2.player.statuses.attaque).toBe(2);
+  });
+  it('avec la Kangourexite, le Bébé attaque deux fois', () => {
+    const c = new Combat({ character: 'kangourex', deck: makeDeck(CHARACTERS.kangourex.starterDeck), enemies: ['rattata'], seed: 'MK', relics: ['kangourexite'] });
+    expect(c.player.isMega).toBe(true);
+    expect(c.player.familiar!.mega).toBe(true);
+  });
+});
