@@ -62,7 +62,7 @@ export class CombatView {
         <div class="fighter player" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
-          <img class="sprite back" src="${asset(`sprites/pokemon/back/${p.dex}.png`)}" alt="${esc(p.name)}">
+          <img class="sprite player-sprite" src="${asset(`sprites/pokemon/front/${p.dex}.png`)}" alt="${esc(p.name)}">
           ${this.hpBar(p)}
         </div>
         <div class="enemies">

@@ -14,7 +14,7 @@
 | `src/ui/labels.ts` | Textes des statuts, couleurs des types, texte des cartes |
 | `src/ui/style.css` | Tout le style |
 | `src/main.ts` | Enchaînement des écrans |
-| `public/sprites/` | Sprites PokeAPI fixes, téléchargés par `npm run sprites` |
+| `public/sprites/` | Sprites PokeAPI fixes, téléchargés par `npm run sprites` (le Pokémon du joueur utilise son sprite de face, retourné vers les ennemis) |
 | `public/illustrations/` | Illustrations des écrans de sélection |
 | `tests/` | Tests des règles (Vitest) |
 
