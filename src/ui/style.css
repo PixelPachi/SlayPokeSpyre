@@ -179,6 +179,12 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .enemies { position: absolute; right: 30px; bottom: 244px; display: flex; gap: 6px; align-items: flex-end; }
 .enemy { position: relative; width: 250px; }
 .enemy .sprite.front { width: 280px; height: 280px; margin: -50px 0 -40px; }
+/* 3 ennemis ou plus : plus serrés et un peu plus petits, pour laisser de la place au joueur */
+.enemies:has(> .enemy:nth-child(3)) { right: 20px; gap: 0; }
+.enemies:has(> .enemy:nth-child(3)) .enemy { width: 205px; }
+.enemies:has(> .enemy:nth-child(3)) .enemy .sprite.front { width: 230px; height: 230px; margin: -40px 0 -32px; }
+.enemies:has(> .enemy:nth-child(3)) .enemy .platform { width: 190px; }
+.enemies:has(> .enemy:nth-child(3)) .hpbar { width: 170px; }
 .enemy.dead { width: 0; }
 .enemy.targetable { cursor: crosshair; }
 .enemy.targetable .sprite { filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6)); }
