@@ -224,16 +224,22 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   bindDeck(root, run);
   const results: string[] = [];
   const doPick = (p: EventPick, left: number) => {
-    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded) : run.deck;
+    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise') : run.deck;
     if (!cards.length) return showResult([...results, 'Aucune carte ne convient.'].join(' '));
     openDeckOverlay(root, {
-      title: p.text, cards, upgradePreview: p.pick === 'ameliorer', cancelLabel: 'Annuler',
+      title: p.text, cards, upgradePreview: p.pick === 'ameliorer', cancelLabel: results.length || p.pick === 'monde' ? 'Terminer' : 'Annuler',
       onPick: (uid) => {
         const card = run.deck.find((c) => c.uid === uid)!;
         const name = cardDef(card.defId).name;
         if (p.pick === 'ameliorer') { run.upgradeCard(uid); results.push(`${name} est améliorée !`); }
         else if (p.pick === 'retirer') { run.removeCard(uid); results.push(`Tu as oublié ${name}.`); }
         else if (p.pick === 'dupliquer') { run.addCard(card.defId, card.upgraded); results.push(`${name} est dupliquée.`); }
+        else if (p.pick === 'monde') {
+          run.removeCard(uid);
+          const id = run.foreignCard();
+          run.addCard(id, card.upgraded);
+          results.push(`${name} → ${cardDef(id).name}.`);
+        }
         else {
           run.removeCard(uid);
           const id = run.cardChoices('combat', 1)[0];
@@ -241,7 +247,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
           results.push(`${name} devient ${cardDef(id).name} !`);
         }
         refreshBar();
-        if (left > 1) return doPick({ ...p, text: `Encore ${left - 1} carte${left - 1 > 1 ? 's' : ''} : ${p.text}` }, left - 1);
+        if (left > 1 && run.deck.length > 1) return doPick({ ...p, text: p.pick === 'monde' ? `Encore ${left - 1} au maximum. ${results.join(' ')}` : `Encore ${left - 1} carte${left - 1 > 1 ? 's' : ''} : ${p.text}` }, left - 1);
         if (p.then) return doPick({ pick: p.then, text: p.then === 'ameliorer' ? 'Puis, quelle carte renaît plus forte ?' : 'Choisis une carte.' }, 1);
         showResult(results.join(' '));
       },

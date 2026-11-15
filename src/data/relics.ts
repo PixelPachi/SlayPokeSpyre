@@ -10,8 +10,8 @@ export interface RelicDef {
   /** Nom du sprite dans sprites/items de PokeAPI. */
   sprite: string;
   rarity: RelicRarity;
-  /** Pokémon qui peut l'obtenir ; 'commun' = tous. */
-  owner: CharacterId | 'commun';
+  /** Pokémon qui peut l'obtenir ; 'commun' = tous ; 'evenement' = seulement par un événement. */
+  owner: CharacterId | 'commun' | 'evenement';
   text: string;
 }
 
@@ -71,6 +71,8 @@ const RELICS: RelicDef[] = [
     text: 'Tes attaques infligent 50 % de dégâts en plus, mais tu ne peux jouer qu’une attaque par tour.' },
   { id: 'lentilscope', name: 'Lentilscope', sprite: 'scope-lens', rarity: 'commun', owner: 'commun',
     text: 'Ta première attaque de chaque combat inflige le double de dégâts.' },
+  { id: 'rappel-max', name: 'Rappel Max', sprite: 'max-revive', rarity: 'rare', owner: 'evenement',
+    text: 'Vœu exaucé par Jirachi. Si ton Pokémon tombe K.O., il revient avec 33 % de ses PV max. L’objet disparaît ensuite.' },
 ];
 
 export const RELIC_DEFS: Record<string, RelicDef> = Object.fromEntries(RELICS.map((r) => [r.id, r]));

@@ -66,6 +66,12 @@ const CARDS: CardDef[] = [
   },
 ];
 
+// Malédiction d'un vœu raté (L'Étoile) : injouable, elle encombre la main
+CARDS.push({
+  id: 'voeu-brise', name: 'Vœu Brisé', character: 'normal', pokeType: 'spectre', category: 'statut', rarity: 'depart',
+  cost: 0, target: 'soi', effects: [], keywords: ['injouable', 'conservee'],
+  upgrade: { effects: [] },
+});
 CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS);
 
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));

@@ -18,7 +18,7 @@ const hurt = (r: Run, n: number) => {
 };
 /** Améliore des cartes au hasard ; renvoie leurs noms. */
 const upgradeRandom = (r: Run, n: number): string => {
-  const pool = r.deck.filter((c) => !c.upgraded);
+  const pool = r.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise');
   const names: string[] = [];
   for (let i = 0; i < n && pool.length; i++) {
     const c = pool.splice(r.rng.int(0, pool.length - 1), 1)[0];
@@ -293,11 +293,21 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-etoile', title: 'XVII — L’Étoile', image: 'tarot/l-etoile.webp', tarot: true,
-    text: 'Jirachi s’éveille au-dessus d’une source de lumière. Il exauce un vœu, un seul, tous les mille ans… c’est aujourd’hui.',
+    text: 'Jirachi s’éveille au-dessus d’une source de lumière. Il exauce un vœu, un seul, tous les mille ans… mais les vœux ne se réalisent pas toujours comme on l’espère.',
     choices: [
-      { label: 'Vœu de santé', detail: 'Récupère tous tes PV', apply: (r) => `Une lumière douce te soigne entièrement : +${r.heal(r.maxHp)} PV.` },
-      { label: 'Vœu de force', detail: '+8 PV max', apply: (r) => (gainMax(r, 8), 'Ton corps se renforce : +8 PV max.') },
-      { label: 'Vœu de fortune', detail: 'Gagne un objet tenu', apply: (r) => `Une étoile filante dépose ${giveRelic(r)} à tes pieds.` },
+      {
+        label: 'Faire un vœu', detail: '1 chance sur 2 : le Rappel Max… ou une malédiction',
+        available: (r) => !r.relics.includes('rappel-max'),
+        apply: (r) => {
+          if (r.rng.next() < 0.5) {
+            r.addRelic('rappel-max');
+            return 'Ton vœu est exaucé ! Jirachi te confie un Rappel Max : si tu tombes K.O., tu te relèveras une fois.';
+          }
+          r.addCard('voeu-brise');
+          return 'Le vœu se brise en mille éclats… Une malédiction, Vœu Brisé, rejoint ton deck.';
+        },
+      },
+      { label: 'Contempler les étoiles', detail: 'Récupère 12 PV', apply: (r) => `Tu laisses passer ta chance, apaisé : +${r.heal(12)} PV.` },
     ],
   },
   {
@@ -337,18 +347,14 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-monde', title: 'XXI — Le Monde', image: 'tarot/le-monde.webp', tarot: true,
-    text: 'Mew flotte au centre d’une couronne de lauriers, entouré des quatre vents. Le voyage s’accomplit.',
+    text: 'Mew flotte au centre d’une couronne de lauriers, entouré des quatre vents. Il connaît les techniques du monde entier… et propose d’échanger les tiennes.',
     choices: [
       {
-        label: 'Embrasser le monde', detail: 'Gagne un objet tenu et récupère 15 PV',
-        apply: (r) => `${giveRelic(r)} t’appartient, et tu récupères ${r.heal(15)} PV.`,
+        label: 'Confier tes techniques à Mew', detail: 'Jusqu’à 5 cartes deviennent des cartes d’autres Pokémon ou neutres',
+        available: (r) => r.deck.length > 1,
+        apply: () => ({ pick: 'monde', count: 5, text: 'Donne une carte à Mew (5 au maximum, « Terminer » pour arrêter).' }),
       },
-      { label: 'Apprendre de Mew', detail: 'Gagne une carte d’un autre Pokémon', apply: (r) => {
-        const pool = r.neutralChoices(1);
-        if (!pool.length) return `Tu apprends ${addRandomCard(r, 'elite')}.`;
-        r.addCard(pool[0]);
-        return `Mew te montre ${cardDef(pool[0]).name}.`;
-      } },
+      { label: 'Embrasser le monde', detail: 'Récupère 25 PV', apply: (r) => `La couronne de lauriers t’apaise : +${r.heal(25)} PV.` },
     ],
   },
 ];

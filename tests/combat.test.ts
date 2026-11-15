@@ -619,11 +619,31 @@ describe('arcanes majeurs', async () => {
         run.money = 200;
         const before = run.maxHp;
         const r = c.apply(run);
-        expect(typeof r === 'string' || ['retirer', 'ameliorer', 'dupliquer', 'transformer'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
+        expect(typeof r === 'string' || ['retirer', 'ameliorer', 'dupliquer', 'transformer', 'monde'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
         expect(run.hp, ev.id).toBeGreaterThan(0);
         expect(run.hp, ev.id).toBeLessThanOrEqual(run.maxHp);
         if (ev.id === 'tarot-diable' && i < 3) expect(run.maxHp).toBeLessThan(before);
       });
     }
+  });
+});
+
+describe('Rappel Max et Vœu Brisé', () => {
+  it('le Rappel Max relève le Pokémon à 33 % de ses PV, une seule fois', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'RM', relics: ['rappel-max'], hp: 3 });
+    (c as unknown as { applyHpLoss: (f: unknown, w: string, n: number) => void }).applyHpLoss(c.player, 'player', 50);
+    expect(c.player.hp).toBe(Math.round(c.player.maxHp * 0.33));
+    expect(c.consumedRelics).toEqual(['rappel-max']);
+    expect(c.phase).toBe('joueur');
+    (c as unknown as { applyHpLoss: (f: unknown, w: string, n: number) => void }).applyHpLoss(c.player, 'player', 500);
+    expect(c.phase).toBe('defaite');
+  });
+  it('Vœu Brisé est injouable et coûte 2 PV en fin de tour', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'VB' });
+    c.hand = [{ uid: 777, defId: 'voeu-brise', upgraded: false }];
+    expect(c.canPlay(c.hand[0])).toBe(false);
+    const hp = c.player.hp;
+    c.endPlayerTurn();
+    expect(c.player.hp).toBe(hp - 2);
   });
 });

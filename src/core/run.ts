@@ -147,6 +147,14 @@ export class Run {
     };
   }
 
+  /** Une carte d'un autre Pokémon ou neutre (Le Monde). Évite les cartes inutiles sans la mécanique de leur Pokémon. */
+  foreignCard(): string {
+    const pool = allCards().filter((c) => c.rarity !== 'depart' && c.character !== this.character
+      && !c.effects.some((e) => (e.kind.startsWith('bebe-') && this.character !== 'kangourex')
+        || (c.character === 'vipelierre' && e.kind === 'statut' && e.on === 'soi' && e.stacks < 0)));
+    return this.rng.pick(pool).id;
+  }
+
   /** Événements déjà vus pendant cette run (on ne retombe pas deux fois sur le même arcane). */
   seenEvents: string[] = [];
 

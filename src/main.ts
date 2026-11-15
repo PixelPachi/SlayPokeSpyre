@@ -90,6 +90,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
     (r) => {
       clear();
       run.hp = r.hp;
+      if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
       if (!r.victory) return endRun(run, false);
       if (run.relics.includes('grelot-coque')) run.heal(6);
       if (type === 'elite') run.elitesDefeated++;

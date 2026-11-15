@@ -110,6 +110,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }
+  if (d.id === 'voeu-brise') parts.push('Malédiction. À la fin de ton tour, si elle est dans ta main : perds <b class="down">2</b> PV.');
   for (const k of d.keywords ?? []) parts.push(`<i>${KEYWORD_LABELS[k]}.</i>`);
   return parts.join(' ');
 }

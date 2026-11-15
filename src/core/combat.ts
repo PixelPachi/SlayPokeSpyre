@@ -129,6 +129,8 @@ export class Combat {
   private nextEnemyUid = 1;
   private cardAuraUsed = false;
   private nextTempUid = 100000;
+  /** Objets tenus consommés pendant ce combat (à retirer de la run). */
+  consumedRelics: string[] = [];
   private lastPlayed: CardDef | null = null;
   readonly relics: Set<string>;
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
@@ -358,6 +360,11 @@ export class Combat {
     }
     this.hand = this.hand.filter((c) => this.def(c).keywords?.includes('conservee'));
     if (this.has('restes') && this.player.hp < this.player.maxHp) this.relicFired('restes', () => this.healPlayer(2));
+    // Vœu Brisé (malédiction) : 2 PV perdus par carte restée en main
+    for (const c of this.hand) if (c.defId === 'voeu-brise' && this.player.hp > 0) {
+      this.events.push({ type: 'hp-loss', target: 'player', amount: Math.min(2, this.player.hp), source: 'carte' });
+      this.applyHpLoss(this.player, 'player', 2);
+    }
     const fam = this.player.familiar;
     if (fam && fam.hp > 0) this.familiarAttack((fam.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0));
     if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
@@ -775,6 +782,15 @@ export class Combat {
     const lost = Math.min(f.hp, amt);
     const wasAboveHalf = f.hp >= f.maxHp / 2;
     f.hp -= lost;
+    // Rappel Max : le Pokémon revient avec 33 % de ses PV max, puis l'objet disparaît
+    if (who === 'player' && f.hp <= 0 && this.relics.has('rappel-max')) {
+      this.relics.delete('rappel-max');
+      this.consumedRelics.push('rappel-max');
+      f.hp = Math.max(1, Math.round(f.maxHp * 0.33));
+      this.events.push({ type: 'relic', id: 'rappel-max' } as CombatEvent);
+      this.events.push({ type: 'heal', target: 'player', amount: f.hp });
+      this.events.push({ type: 'player-move', name: 'Rappel Max ! Ton Pokémon se relève !' });
+    }
     if (who === 'player' && lost > 0) {
       this.ceintureBonus = true;
       this.gainAura(lost); // Aura : les PV perdus renforcent la prochaine attaque

@@ -16,6 +16,8 @@ const BG_LOADED = new Map<string, boolean>();
 
 export interface CombatResult {
   victory: boolean;
+  /** Objets tenus consommés (Rappel Max). */
+  consumed?: string[];
   hp: number;
   /** Ennemis chromatiques vaincus (Pokédollars doublés). */
   shinies: number;
@@ -556,6 +558,7 @@ export class CombatView {
         return this.onEnd({
           victory: this.combat.phase === 'victoire',
           hp: this.combat.player.hp,
+          consumed: this.combat.consumedRelics,
           shinies: this.combat.enemies.filter((e) => e.shiny).length,
         });
       }

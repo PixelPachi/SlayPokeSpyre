@@ -11,7 +11,7 @@ export interface EventChoice {
   available?: (run: Run) => boolean;
 }
 
-export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer';
+export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer' | 'monde';
 export interface EventPick { pick: PickKind; text: string; count?: number; then?: PickKind }
 
 export interface GameEvent {
