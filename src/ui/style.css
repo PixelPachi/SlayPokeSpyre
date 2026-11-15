@@ -616,14 +616,14 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card-row.shop .card { transform: scale(0.94); }
 
 /* ——— Bébé Kangourex ——— */
-.fighter.bebe { left: 365px; bottom: 290px; width: 130px; z-index: 2; }
-.bebe-sprite { width: 140px; height: 140px; margin: -34px 0 -30px; transform: scaleX(-1); }
-.bebe-power { font-size: 12px; font-weight: 900; color: #ffd27a; text-shadow: 0 1px 2px #000; }
+.fighter.bebe { left: 385px; bottom: 236px; width: 130px; z-index: 3; }
+.bebe-sprite { width: 140px; height: 140px; margin: -8px 0 -30px; transform: scaleX(-1); }
+.bebe-power { position: relative; z-index: 1; font-size: 12px; font-weight: 900; color: #ffd27a; text-shadow: 0 1px 2px #000; }
 .hpbar.small { width: 120px; }
 .hpbar.small .hp-track { height: 10px; }
 .hpbar.small .hp-text { font-size: 12px; min-width: 36px; }
 .bebe-ko { font-weight: 900; color: #ff8a80; text-shadow: 0 1px 2px #000; }
-.fighter.bebe.dead { bottom: 260px; }
+.fighter.bebe.dead { bottom: 250px; }
 .toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); z-index: 999; padding: 12px 22px;
   background: #2b2236ee; border: 2px solid #ffd27a; border-radius: 12px; color: #fff; font-weight: 800;
   box-shadow: 0 6px 20px #0008; animation: toast-in .35s ease-out; pointer-events: none; }

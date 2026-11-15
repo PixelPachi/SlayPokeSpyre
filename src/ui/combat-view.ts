@@ -118,7 +118,7 @@ export class CombatView {
     return `
       <div class="fighter bebe" data-who="bebe" data-tip="<b>Bébé Kangourex</b><br>Attaque à la fin de ton tour (Puissance ${f.power}). Les ennemis peuvent le viser. S'il est K.O., Kangourex gagne Attaque +2.">
         <div class="bebe-power">Puissance ${f.power}</div>
-        <img class="sprite bebe-sprite" src="${asset('sprites/pokemon/bebe-kangourex.png')}" alt="Bébé">
+        <img class="sprite bebe-sprite" src="${asset('sprites/pokemon/bebe-kangourex-v2.png')}" alt="Bébé">
         <div class="hpbar small">
           ${f.block > 0 ? `<div class="block-badge">${f.block}</div>` : ''}
           <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:var(--hp-green)"></div></div>
