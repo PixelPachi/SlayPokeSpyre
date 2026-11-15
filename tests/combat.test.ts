@@ -256,3 +256,72 @@ describe('effets d’Aura', () => {
     expect(c.player.aura).toBe(74);
   });
 });
+
+describe('objets tenus', async () => {
+  const { allRelics, RELIC_DEFS } = await import('../src/data/relics');
+  const { rewardPool } = await import('../src/data/cards');
+  const { Run } = await import('../src/core/run');
+  const mk = (relics: string[]) => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'REL', relics });
+    c.enemies[0].hp = c.enemies[0].maxHp = 500;
+    return c;
+  };
+
+  it('Riolu a 75 cartes possibles en récompense', () => {
+    expect(rewardPool('riolu')).toHaveLength(75);
+  });
+
+  it('chaque objet a un sprite et un texte', () => {
+    for (const r of allRelics()) {
+      expect(r.sprite).toBeTruthy();
+      expect(r.text.length).toBeGreaterThan(10);
+    }
+    expect(RELIC_DEFS[CHARACTERS.riolu.starterRelic!]).toBeDefined();
+  });
+
+  it('Ceinture Noire : 1 Aura de plus à chaque perte de PV', () => {
+    const c = mk(['ceinture-noire']);
+    c.player.aura = 0;
+    c.hand = makeDeck(['tenacite']).map((x) => ({ ...x, uid: 700 }));
+    c.play(700); // perd 3 PV
+    expect(c.player.aura).toBe(4);
+  });
+
+  it('Ceinture Force : survit une fois à un coup fatal', () => {
+    const c = mk(['ceinture-force']);
+    c.player.hp = 5;
+    c.endPlayerTurn();
+    const e = c.enemies[0];
+    e.intent = { id: 'x', name: 'x', weight: 1, intent: 'attaque', pokeType: 'normal', damage: 50 };
+    c.enemyAct(e.uid);
+    expect(c.player.hp).toBe(1);
+    expect(c.phase).toBe('ennemi');
+  });
+
+  it('Plaque Poing et Bandeau Muscle augmentent les dégâts', () => {
+    const c = mk(['plaque-poing', 'bandeau-muscle']);
+    c.player.aura = 0;
+    c.hand = makeDeck(['poing-karate']).map((x) => ({ ...x, uid: 701 }));
+    c.play(701, c.enemies[0].uid);
+    // (8 + 2 plaque + 1 attaque) ×1,25 ×1,5 = 20,6
+    expect(c.enemies[0].hp).toBe(500 - 20);
+  });
+
+  it('Bandeau Choix : une seule attaque par tour', () => {
+    const c = mk(['bandeau-choix']);
+    c.hand = makeDeck(['ruse', 'ruse']).map((x, i) => ({ ...x, uid: 710 + i }));
+    c.play(710, c.enemies[0].uid);
+    expect(c.canPlay(c.hand[0])).toBe(false);
+  });
+
+  it('la run commence avec l’objet de départ et propose des objets non tenus', () => {
+    const run = new Run('RELRUN', 'riolu', undefined, []);
+    expect(run.relics).toEqual(['ceinture-noire']);
+    const pool = run.relicPool();
+    expect(pool).not.toContain('ceinture-noire');
+    expect(pool).not.toContain('plaque-poing'); // pas encore débloqué
+    expect(pool).toContain('restes');
+    const two = run.rollRelics(2);
+    expect(new Set(two).size).toBe(2);
+  });
+});

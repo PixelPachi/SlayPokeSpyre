@@ -1,6 +1,6 @@
 // Progression sauvegardée dans le navigateur (EXP de chaque Pokémon).
 import type { CharacterId } from './model';
-import { levelFor, unlockedCards } from '../data/unlocks';
+import { levelFor, unlockedCards, unlockedRelics } from '../data/unlocks';
 
 const KEY = 'slaypokespyre-save-v1';
 
@@ -35,13 +35,22 @@ export function characterUnlocks(s: SaveData, c: CharacterId): string[] {
   return unlockedCards(c, characterLevel(s, c));
 }
 
-/** Ajoute l'EXP d'une run ; renvoie les niveaux gagnés et les cartes débloquées. */
-export function grantExp(s: SaveData, c: CharacterId, gained: number): { before: number; after: number; newCards: string[] } {
+export function characterRelics(s: SaveData, c: CharacterId): string[] {
+  return unlockedRelics(c, characterLevel(s, c));
+}
+
+/** Ajoute l'EXP d'une run ; renvoie les niveaux gagnés, les cartes et les objets débloqués. */
+export function grantExp(s: SaveData, c: CharacterId, gained: number): { before: number; after: number; newCards: string[]; newRelics: string[] } {
   const before = characterLevel(s, c);
   const oldCards = new Set(characterUnlocks(s, c));
+  const oldRelics = new Set(characterRelics(s, c));
   s.exp[c] = (s.exp[c] ?? 0) + gained;
   s.runs++;
   writeSave(s);
   const after = characterLevel(s, c);
-  return { before, after, newCards: characterUnlocks(s, c).filter((id) => !oldCards.has(id)) };
+  return {
+    before, after,
+    newCards: characterUnlocks(s, c).filter((id) => !oldCards.has(id)),
+    newRelics: characterRelics(s, c).filter((id) => !oldRelics.has(id)),
+  };
 }

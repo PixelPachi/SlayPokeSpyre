@@ -13,14 +13,24 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     2: ['griffe-acier', 'riolu-morsure', 'grincement', 'coup-main', 'casse-brique', 'balayage', 'contre', 'close-combat', 'plenitude'],
     3: ['tomberoche', 'pietisol', 'meteores', 'facade', 'affilage', 'poing-boost', 'vampi-poing', 'lire-esprit'],
     4: ['grimace', 'poing-eclair', 'poing-glace', 'represailles', 'rengorgement', 'charge-os', 'hate', 'machination'],
-    5: ['vibraqua', 'aeropique', 'griffe-ombre', 'force', 'mur-de-fer', 'clonage', 'machouille'],
+    5: ['vibraqua', 'aeropique', 'griffe-ombre', 'force', 'mur-de-fer', 'clonage', 'machouille', 'hurlement'],
     6: ['direct-toxik', 'poing-meteore', 'draco-choc', 'projection', 'pied-bruleur', 'vibra-soin', 'strido-son', 'megapoing'],
     7: ['queue-de-fer', 'plaquage', 'belier', 'seisme', 'lame-de-roc', 'photocopie', 'danse-lames'],
-    8: ['eboulement', 'psyko', 'ball-ombre', 'luminocanon', 'metronome', 'ultimawashi'],
+    8: ['eboulement', 'psyko', 'ball-ombre', 'luminocanon', 'metronome', 'ultimawashi', 'psykoudboul'],
     9: ['pied-voltige', 'tout-ou-rien', 'exploforce', 'mitra-poing'],
     10: ['metalaser', 'ultralaser'],
   },
 };
+
+/** Objets tenus débloqués à chaque niveau (les objets communs sont toujours disponibles). */
+export const RELIC_UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
+  riolu: { 2: ['plaque-poing'], 3: ['griffe-rasoir'], 4: ['gant-punch'], 6: ['bandeau'], 7: ['plaque-fer'], 9: ['lucarite'] },
+};
+
+export function unlockedRelics(character: CharacterId, level: number): string[] {
+  const table = RELIC_UNLOCKS[character] ?? {};
+  return Object.entries(table).filter(([l]) => Number(l) <= level).flatMap(([, ids]) => ids);
+}
 
 export function levelFor(exp: number): number {
   let lvl = 1;

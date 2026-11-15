@@ -57,6 +57,7 @@ export type CombatEvent =
   | { type: 'enemy-move'; uid: number; name: string }
   | { type: 'player-move'; name: string }
   | { type: 'break'; target: Who }
+  | { type: 'relic'; id: string }
   | { type: 'power'; power: PowerId; amount: number }
   | { type: 'ko'; target: Who };
 
@@ -68,6 +69,9 @@ export interface CombatOptions {
   enemies: string[];
   seed: string;
   hp?: number;
+  maxHp?: number;
+  /** Objets tenus (ids de data/relics.ts). */
+  relics?: string[];
 }
 
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
@@ -102,27 +106,73 @@ export class Combat {
   private nextEnemyUid = 1;
   private cardAuraUsed = false;
   private lastPlayed: CardDef | null = null;
+  readonly relics: Set<string>;
+  private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
+  private attacksThisTurn = 0;
+  private firstAttackDone = false;
 
   constructor(opts: CombatOptions) {
     this.rng = new Rng(opts.seed);
     const ch = CHARACTERS[opts.character];
     this.player = {
       character: ch.id, name: ch.name, dex: ch.dex[0], types: [...ch.types],
-      hp: opts.hp ?? ch.maxHp, maxHp: ch.maxHp, block: 0, statuses: {},
+      hp: opts.hp ?? ch.maxHp, maxHp: opts.maxHp ?? ch.maxHp, block: 0, statuses: {},
       energy: BASE_ENERGY, maxEnergy: BASE_ENERGY, aura: 0,
       powers: {}, freeTurn: false, hpLostEnemyTurn: 0,
     };
+    this.relics = new Set(opts.relics ?? []);
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
     this.drawPile = this.rng.shuffle([...opts.deck]);
     // Cartes Innées en haut de la pioche
-    this.drawPile.sort((a, b) => Number(this.has(a, 'innee')) - Number(this.has(b, 'innee')));
+    this.drawPile.sort((a, b) => Number(this.hasKw(a, 'innee')) - Number(this.hasKw(b, 'innee')));
 
     // Talents de départ
     if (ch.id === 'riolu') this.gainAura(3);
     if (ch.id === 'caninos') for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
+    if (this.has('bandeau-muscle')) this.relicFired('bandeau-muscle', () => this.addStatus(this.player, 'player', 'attaque', 1));
+
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
+    if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
+    if (this.has('vive-griffe')) this.relicFired('vive-griffe', () => this.draw(2));
+  }
+
+  // ——— Objets tenus ———
+
+  has(relic: string): boolean {
+    return this.relics.has(relic);
+  }
+
+  private relicFired(id: string, effect?: () => void): void {
+    this.events.push({ type: 'relic', id });
+    effect?.();
+  }
+
+  /** Bonus fixes des objets sur une attaque. */
+  private relicFlat(d: CardDef): number {
+    let b = 0;
+    if (this.has('plaque-poing') && d.pokeType === 'combat') b += 2;
+    if (this.has('plaque-fer') && d.pokeType === 'acier') b += 3;
+    if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
+    if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
+    return b;
+  }
+
+  /** Multiplicateurs des objets sur une attaque. */
+  private relicMult(super_: boolean): number {
+    let m = 1;
+    if (this.has('orbe-vie')) m *= 1.3;
+    if (this.has('bandeau-choix')) m *= 1.5;
+    if (this.has('lentilscope') && !this.firstAttackDone) m *= 2;
+    if (this.has('ceinture-pro') && super_) m *= 1.25;
+    return m;
+  }
+
+  /** Dégâts d'une attaque du joueur, objets compris. */
+  private playerDamage(base: number, d: CardDef, t: Fighter) {
+    const r = computeDamage(base + this.relicFlat(d), this.player, t, d.pokeType);
+    return { amount: Math.floor(r.amount * this.relicMult(r.effectiveness === 'super') + 1e-9), effectiveness: r.effectiveness };
   }
 
   // ——— Lecture ———
@@ -159,6 +209,7 @@ export class Combat {
     if (this.phase !== 'joueur') return false;
     const d = this.def(card);
     if (d.keywords?.includes('injouable')) return false;
+    if (this.has('bandeau-choix') && d.category === 'attaque' && this.attacksThisTurn >= 1) return false;
     return this.costOf(card) <= this.player.energy;
   }
 
@@ -193,13 +244,13 @@ export class Combat {
     const target = targetUid !== undefined ? this.enemy(targetUid) : undefined;
     if (!target) {
       // Sans cible : bonus de type et statuts du joueur seulement
-      let dmg = Math.max(0, base + (this.player.statuses.attaque ?? 0));
+      let dmg = Math.max(0, base + this.relicFlat(d) + (this.player.statuses.attaque ?? 0));
       if (this.player.types.includes(d.pokeType)) dmg *= SAME_TYPE_BONUS;
       if ((this.player.statuses.paralysie ?? 0) > 0) dmg *= 0.75;
       if ((this.player.statuses.brulure ?? 0) > 0) dmg *= 0.75;
-      return Math.floor(dmg + 1e-9);
+      return Math.floor(Math.floor(dmg + 1e-9) * this.relicMult(false) + 1e-9);
     }
-    return computeDamage(base, this.player, target, d.pokeType).amount;
+    return this.playerDamage(base, d, target).amount;
   }
 
   private hasBadStatus(): boolean {
@@ -237,6 +288,11 @@ export class Combat {
       this.resolve(eff, d, target);
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
+    if (d.category === 'attaque') {
+      this.attacksThisTurn++;
+      this.firstAttackDone = true;
+      if (this.has('orbe-vie') && this.phase === 'joueur') this.relicFired('orbe-vie', () => this.loseHp(this.player, 'player', 1, 'carte'));
+    }
 
     // Talents et cartes Épuisées quittent le combat
     if (d.category === 'talent' || d.keywords?.includes('epuisee')) this.exhaustPile.push(card);
@@ -255,6 +311,7 @@ export class Combat {
       else this.discardPile.push(c);
     }
     this.hand = this.hand.filter((c) => this.def(c).keywords?.includes('conservee'));
+    if (this.has('restes') && this.player.hp < this.player.maxHp) this.relicFired('restes', () => this.healPlayer(2));
     this.tickDurations(this.player);
     this.phase = 'ennemi';
     this.player.freeTurn = false;
@@ -280,6 +337,9 @@ export class Combat {
         for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
           const { amount, effectiveness } = computeDamage(m.damage, e, this.player, m.pokeType ?? 'normal');
           this.dealDamage(this.player, 'player', amount, effectiveness);
+        }
+        if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
+          this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
         }
       }
       if (m.playerStatus && this.phase === 'ennemi') this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
@@ -319,6 +379,7 @@ export class Combat {
   private startPlayerTurn(): void {
     this.turn++;
     this.phase = 'joueur';
+    this.attacksThisTurn = 0;
     this.player.block = 0;
     this.player.energy = this.player.maxEnergy;
     this.tickDots(this.player, 'player');
@@ -330,6 +391,7 @@ export class Combat {
       this.events.push({ type: 'player-move', name: 'Énergie illimitée !' });
     }
     this.draw(HAND_SIZE);
+    this.checkLucarite();
   }
 
   draw(n: number): void {
@@ -344,7 +406,7 @@ export class Combat {
     }
   }
 
-  private has(card: Card, kw: NonNullable<CardDef['keywords']>[number]): boolean {
+  private hasKw(card: Card, kw: NonNullable<CardDef['keywords']>[number]): boolean {
     return this.def(card).keywords?.includes(kw) ?? false;
   }
 
@@ -369,9 +431,9 @@ export class Combat {
   }
 
   /** Inflige un coup ; renvoie les PV réellement retirés. */
-  private strike(t: EnemyState, base: number, type: PokeType): number {
+  private strike(t: EnemyState, base: number, d: CardDef): number {
     const before = t.hp;
-    const { amount, effectiveness } = computeDamage(base, this.player, t, type);
+    const { amount, effectiveness } = this.playerDamage(base, d, t);
     this.dealDamage(t, t.uid, amount, effectiveness);
     return before - t.hp;
   }
@@ -390,7 +452,7 @@ export class Combat {
           const targets = this.targetsFor(d, target);
           if (!targets.length) break;
           const bonus = this.takeAura();
-          for (const t of targets) dealt += this.strike(t, base + bonus, d.pokeType);
+          for (const t of targets) dealt += this.strike(t, base + bonus, d);
         }
         if (eff.drain) this.healPlayer(Math.floor(dealt / 2));
         return;
@@ -400,19 +462,19 @@ export class Combat {
         const aura = p.aura;
         if (eff.consume !== false) this.takeAura();
         else this.cardAuraUsed = true; // ne consomme pas, mais ne s'ajoute pas une deuxième fois
-        if (t) this.strike(t, aura * eff.mult, d.pokeType);
+        if (t) this.strike(t, aura * eff.mult, d);
         return;
       }
       case 'degats-pv-perdus': {
         const t = this.targetsFor(d, target)[0];
         const base = eff.amount + Math.floor((p.maxHp - p.hp) / eff.per) + this.takeAura();
-        if (t) this.strike(t, base, d.pokeType);
+        if (t) this.strike(t, base, d);
         return;
       }
       case 'tout-ou-rien': {
         const t = this.targetsFor(d, target)[0];
         const base = p.hp - 1;
-        if (t) this.strike(t, base, d.pokeType);
+        if (t) this.strike(t, base, d);
         if (this.phase === 'joueur') this.loseHp(p, 'player', p.hp - 1, 'carte');
         return;
       }
@@ -435,9 +497,10 @@ export class Combat {
         return;
       }
       case 'casse-protection':
-        if (target && target.block > 0) {
-          target.block = 0;
-          this.events.push({ type: 'break', target: target.uid });
+        for (const t of d.target === 'tous' ? this.aliveEnemies() : target ? [target] : []) {
+          if (t.block <= 0) continue;
+          t.block = 0;
+          this.events.push({ type: 'break', target: t.uid });
         }
         return;
       case 'pioche':
@@ -482,16 +545,32 @@ export class Combat {
   }
 
   private healPlayer(n: number): void {
-    const heal = Math.min(n, this.player.maxHp - this.player.hp);
+    const boosted = this.has('grosse-racine') ? Math.floor(n * 1.5) : n;
+    const heal = Math.min(boosted, this.player.maxHp - this.player.hp);
     if (heal <= 0) return;
     this.player.hp += heal;
     this.events.push({ type: 'heal', target: 'player', amount: heal });
   }
 
+  private ceintureBonus = false; // vrai pendant un gain d'Aura venant d'une perte de PV
+
+  private checkLucarite(): void {
+    if (!this.has('lucarite') || this.used.has('lucarite') || this.phase !== 'joueur' || this.player.aura < 25) return;
+    this.used.add('lucarite');
+    this.relicFired('lucarite', () => {
+      this.draw(2);
+      this.player.energy += 1;
+    });
+  }
+
   private gainAura(n: number): void {
     if (this.player.character !== 'riolu' && this.player.character !== 'mew') return;
     this.player.aura += n;
+    if (this.has('ceinture-noire') && n > 0 && this.ceintureBonus) {
+      this.player.aura += 1;
+    }
     this.events.push({ type: 'aura', amount: this.player.aura });
+    this.checkLucarite();
   }
 
   private gainBlock(f: Fighter, who: Who, amount: number): void {
@@ -518,11 +597,25 @@ export class Combat {
   }
 
   private applyHpLoss(f: Fighter, who: Who, amount: number): void {
-    const lost = Math.min(f.hp, amount);
+    let amt = amount;
+    // Ceinture Force : une fois par combat, survit à un coup fatal avec 1 PV
+    if (who === 'player' && amt >= f.hp && f.hp > 1 && this.has('ceinture-force') && !this.used.has('ceinture-force')) {
+      this.used.add('ceinture-force');
+      this.relicFired('ceinture-force');
+      amt = f.hp - 1;
+    }
+    const lost = Math.min(f.hp, amt);
+    const wasAboveHalf = f.hp >= f.maxHp / 2;
     f.hp -= lost;
     if (who === 'player' && lost > 0) {
+      this.ceintureBonus = true;
       this.gainAura(lost); // Aura : les PV perdus renforcent la prochaine attaque
+      this.ceintureBonus = false;
       if (this.phase === 'ennemi') this.player.hpLostEnemyTurn += lost;
+      if (wasAboveHalf && f.hp < f.maxHp / 2 && f.hp > 0 && this.has('bandeau') && !this.used.has('bandeau')) {
+        this.used.add('bandeau');
+        this.relicFired('bandeau', () => this.gainAura(10));
+      }
     }
     if (f.hp <= 0) {
       f.hp = 0;
@@ -535,6 +628,7 @@ export class Combat {
     let s = stacks;
     // Contestation (Vipélierre) : ses baisses de stats deviennent des hausses, et inversement
     if (who === 'player' && this.player.character === 'vipelierre' && (status === 'attaque' || status === 'defense')) s = -s;
+    if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
     const v = (f.statuses[status] ?? 0) + s;
     if (v === 0) delete f.statuses[status];
     else f.statuses[status] = v;
@@ -546,7 +640,7 @@ export class Combat {
     for (const s of DOTS) {
       const n = f.statuses[s] ?? 0;
       if (n <= 0 || f.hp <= 0) continue;
-      this.loseHp(f, who, n, s);
+      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0), s);
       if (s === 'vampigraine' && who !== 'player') {
         this.healPlayer(Math.floor(n / 2));
       }

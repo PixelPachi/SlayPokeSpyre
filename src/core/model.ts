@@ -82,6 +82,8 @@ export interface CharacterDef {
   maxHp: number;
   talent: { name: string; text: string };
   starterDeck: string[];
+  /** Objet tenu de départ (id dans data/relics.ts). */
+  starterRelic?: string;
 }
 
 export type IntentKind = 'attaque' | 'defense' | 'boost' | 'handicap' | 'inconnu';

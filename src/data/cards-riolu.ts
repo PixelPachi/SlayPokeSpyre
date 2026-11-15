@@ -87,6 +87,8 @@ export const RIOLU_CARDS: CardDef[] = [
   c('luminocanon', 'Luminocanon', 'acier', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(15)], { effects: [dmg(19)] }),
   c('lame-de-roc', 'Lame de Roc', 'roche', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(18)], { effects: [dmg(24)] }),
   c('photocopie', 'Photocopie', 'normal', 'technique', 'peu-commune', 1, 'ennemi', [{ kind: 'copie' }], { cost: 0 }),
+  c('hurlement', 'Hurlement', 'normal', 'technique', 'peu-commune', 1, 'tous', [{ kind: 'casse-protection' }, st('peur', 1, 'tous')], { effects: [{ kind: 'casse-protection' }, st('peur', 2, 'tous')] }),
+  c('psykoudboul', "Psykoud'Boul", 'psy', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(13), st('peur', 1)], { effects: [dmg(17), st('peur', 2)] }),
   c('pied-voltige', 'Pied Voltige', 'combat', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(20), hpLoss(4)], { effects: [dmg(26), hpLoss(4)] }),
 
   // ——— Rares ———

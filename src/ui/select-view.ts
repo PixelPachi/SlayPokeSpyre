@@ -4,8 +4,10 @@ import { TYPE_LABELS } from '../core/types';
 import { allCards, cardDef } from '../data/cards';
 import type { SaveData } from '../core/save';
 import { characterLevel } from '../core/save';
-import { LEVEL_EXP, MAX_LEVEL, UNLOCKS } from '../data/unlocks';
+import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import { renderCard } from './card';
+import { relicCard, relicIcon } from './run-ui';
+import { allRelics, relicDef } from '../data/relics';
 import { CHARACTERS } from '../data/characters';
 import { TYPE_COLORS } from './labels';
 import { asset, esc } from './util';
@@ -45,6 +47,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
           ${locked ? `<p class="sheet-locked">Verrouillé<br><small>${esc(UNLOCK_TEXT[current])}</small></p>` : `
             <div class="sheet-row"><b>PV</b> ${ch.maxHp}</div>
             <div class="sheet-row"><b>Talent — ${esc(ch.talent.name)}</b><br>${esc(ch.talent.text)}</div>
+            ${ch.starterRelic ? `<div class="sheet-row sheet-relic">${relicIcon(ch.starterRelic)}<div><b>Objet — ${esc(relicDef(ch.starterRelic).name)}</b><br>${esc(relicDef(ch.starterRelic).text)}</div></div>` : ''}
             <div class="sheet-row"><b>Deck de départ</b><br>${deck}</div>
             ${expBlock(save, current)}
             <button class="btn primary start">Grimper la Tour du Temps</button>
@@ -119,6 +122,10 @@ function openCollection(host: HTMLElement, save: SaveData, c: CharacterId): void
           return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
         }).join('')}
       </div>
+      <h2>Objets tenus</h2>
+      <div class="relic-grid">
+        ${relicsFor(c, lvl)}
+      </div>
       <button class="btn close">Fermer</button>
     </div>`;
   host.appendChild(el);
@@ -126,4 +133,16 @@ function openCollection(host: HTMLElement, save: SaveData, c: CharacterId): void
     const t = ev.target as HTMLElement;
     if (t.closest('.close') || t === el) el.remove();
   });
+}
+
+function relicsFor(c: CharacterId, lvl: number): string {
+  const need = new Map<string, number>();
+  for (const [l, ids] of Object.entries(RELIC_UNLOCKS[c] ?? {})) for (const id of ids) need.set(id, Number(l));
+  const mine = allRelics().filter((r) => r.owner === c);
+  const common = allRelics().filter((r) => r.owner === 'commun');
+  return [...mine, ...common].map((r) => {
+    const n = need.get(r.id) ?? 0;
+    const tag = r.rarity === 'depart' ? 'Objet de départ' : r.owner === 'commun' ? 'Commun à tous' : n > lvl ? `Niveau ${n}` : `Débloqué (niveau ${n})`;
+    return `<div class="collect-relic ${n > lvl ? 'locked' : ''}">${relicCard(r.id, `<em>${tag}</em>`)}</div>`;
+  }).join('');
 }

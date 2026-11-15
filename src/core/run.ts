@@ -4,6 +4,7 @@ import { Rng } from './rng';
 import { CARD_DEFS, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { BOSS_FORET_DE_JADE, ELITES_FORET_DE_JADE, ENCOUNTERS_FORET_DE_JADE } from '../data/enemies';
+import { allRelics, type RelicRarity } from '../data/relics';
 
 export type NodeType = 'combat' | 'evenement' | 'centre' | 'boutique' | 'elite' | 'tresor' | 'boss';
 
@@ -92,16 +93,23 @@ export class Run {
   removals = 0; // nombre de cartes oubliées au Poké Mart (le prix monte)
   elitesDefeated = 0;
   bossesDefeated = 0;
+  /** Objets tenus (le premier est l'objet de départ). */
+  relics: string[] = [];
   private nextUid = 1;
   private rareBonus = 0; // la chance de rare monte à chaque récompense sans rare
 
   /** Cartes débloquées par l'EXP du Pokémon (undefined = toutes). */
-  constructor(readonly seed: string, character: CharacterId, readonly unlocked?: string[]) {
+  constructor(
+    readonly seed: string, character: CharacterId, readonly unlocked?: string[],
+    /** Objets débloqués par le niveau du Pokémon (les objets communs sont toujours disponibles). */
+    readonly unlockedRelics: string[] = [],
+  ) {
     this.rng = new Rng(seed);
     this.character = character;
     const ch = CHARACTERS[character];
     this.hp = this.maxHp = ch.maxHp;
     for (const id of ch.starterDeck) this.addCard(id);
+    if (ch.starterRelic) this.relics.push(ch.starterRelic);
     this.map = generateMap(this.rng);
   }
 
@@ -183,7 +191,35 @@ export class Run {
 
   moneyReward(type: 'combat' | 'elite' | 'boss', shinies: number): number {
     const [a, b] = type === 'boss' ? [95, 105] : type === 'elite' ? [25, 35] : [10, 20];
-    return this.rng.int(a, b) * (shinies > 0 ? 2 : 1);
+    const base = this.rng.int(a, b) * (shinies > 0 ? 2 : 1);
+    return this.relics.includes('piece-rune') ? Math.floor(base * 1.5) : base;
+  }
+
+  /** Objets qu'on peut encore obtenir : communs + ceux du Pokémon débloqués, sans ceux déjà tenus. */
+  relicPool(): string[] {
+    return allRelics()
+      .filter((r) => r.rarity !== 'depart' && (r.owner === 'commun' || (r.owner === this.character && this.unlockedRelics.includes(r.id))))
+      .filter((r) => !this.relics.includes(r.id))
+      .map((r) => r.id);
+  }
+
+  /** Tire des objets différents (50 % commun, 33 % peu commun, 17 % rare). */
+  rollRelics(count: number): string[] {
+    const out: string[] = [];
+    const defs = allRelics();
+    for (let i = 0; i < count * 10 && out.length < count; i++) {
+      const pool = this.relicPool().filter((id) => !out.includes(id));
+      if (!pool.length) break;
+      const r = this.rng.next();
+      const want: RelicRarity = r < 0.5 ? 'commun' : r < 0.83 ? 'peu-commun' : 'rare';
+      const ofRarity = pool.filter((id) => defs.find((d) => d.id === id)!.rarity === want);
+      out.push(this.rng.pick(ofRarity.length ? ofRarity : pool));
+    }
+    return out;
+  }
+
+  addRelic(id: string): void {
+    if (!this.relics.includes(id)) this.relics.push(id);
   }
 }
 

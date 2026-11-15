@@ -3,6 +3,8 @@ import type { Card } from '../core/model';
 import type { Run } from '../core/run';
 import { cardDef } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
+import { relicDef } from '../data/relics';
+import { asset } from './util';
 import { renderCard } from './card';
 import { esc } from './util';
 
@@ -15,7 +17,25 @@ export function topbar(run: Run, label: string, hp = run.hp): string {
       <span class="tb-zone">${esc(label)}</span>
       <span class="tb-floor" data-tip="Étage de la Tour du Temps">Étage ${run.floor}</span>
       <button class="tb-deck" data-tip="Voir ton deck">Deck ${run.deck.length}</button>
+      <span class="tb-relics">${run.relics.map((id) => relicIcon(id)).join('')}</span>
       <span class="tb-seed" data-tip="Même graine = même run">Graine ${esc(run.seed)}</span>
+    </div>`;
+}
+
+/** Icône d'un objet tenu avec son infobulle. */
+export function relicIcon(id: string, cls = ''): string {
+  const r = relicDef(id);
+  return `<img class="relic-icon ${cls}" data-relic="${id}" src="${asset(`sprites/items/${r.sprite}.png`)}" alt="${esc(r.name)}"
+    data-tip="<b>${esc(r.name)}</b>${r.rarity === 'depart' ? ' (objet de départ)' : ''}<br>${esc(r.text)}">`;
+}
+
+/** Grand affichage d'un objet tenu (récompense, boutique, fin de run). */
+export function relicCard(id: string, extra = ''): string {
+  const r = relicDef(id);
+  return `
+    <div class="relic-card rarity-${r.rarity}" data-relic="${id}">
+      <img src="${asset(`sprites/items/${r.sprite}.png`)}" alt="">
+      <div><b>${esc(r.name)}</b><span>${esc(r.text)}</span>${extra}</div>
     </div>`;
 }
 

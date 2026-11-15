@@ -7,7 +7,7 @@ import { renderMap } from './ui/map-view';
 import { renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips } from './ui/util';
-import { characterUnlocks, grantExp, loadSave } from './core/save';
+import { characterRelics, characterUnlocks, grantExp, loadSave } from './core/save';
 import { runExp } from './data/unlocks';
 
 const stage = document.getElementById('stage')!;
@@ -42,7 +42,7 @@ function menu(): void {
 
 function startRun(character: CharacterId): void {
   const params = new URLSearchParams(location.search);
-  const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character));
+  const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character), characterRelics(save, character));
   showMap(run);
 }
 
@@ -83,6 +83,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       clear();
       run.hp = r.hp;
       if (!r.victory) return endRun(run, false);
+      if (run.relics.includes('grelot-coque')) run.heal(6);
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'boss') {
         run.bossesDefeated++;
@@ -91,7 +92,11 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       }
       renderReward(
         screen, run,
-        { money: run.moneyReward(type, r.shinies), cards: run.cardChoices(type), title: type === 'elite' ? 'Pokémon dominant vaincu !' : 'Victoire !', label: labels[type] },
+        {
+          money: run.moneyReward(type, r.shinies), cards: run.cardChoices(type), label: labels[type],
+          title: type === 'elite' ? 'Pokémon dominant vaincu !' : 'Victoire !',
+          relic: type === 'elite' ? run.rollRelics(1)[0] : undefined,
+        },
         () => showMap(run),
       );
     },
@@ -100,7 +105,8 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
 
 /** Fin de run : EXP pour le Pokémon, niveaux et cartes débloquées. */
 function endRun(run: Run, victory: boolean): void {
-  const exp = runExp(run.floor, run.elitesDefeated, run.bossesDefeated);
+  const base = runExp(run.floor, run.elitesDefeated, run.bossesDefeated);
+  const exp = run.relics.includes('oeuf-chance') ? Math.floor(base * 1.5) : base;
   const result = grantExp(save, run.character, exp);
   renderRunEnd(screen, run, victory, { exp, ...result, total: save.exp[run.character] ?? 0 }, menu, () => startRun(run.character));
 }

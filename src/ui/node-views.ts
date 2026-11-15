@@ -7,7 +7,8 @@ import { CHARACTERS } from '../data/characters';
 import { EVENTS, type GameEvent } from '../data/events';
 import { renderCard } from './card';
 import { CHARACTER_COLORS } from './labels';
-import { openDeckOverlay, topbar } from './run-ui';
+import { openDeckOverlay, relicCard, topbar } from './run-ui';
+import { relicPrice } from '../data/relics';
 import { asset, esc } from './util';
 
 type Done = () => void;
@@ -21,11 +22,17 @@ function bindDeck(root: HTMLElement, run: Run): void {
 }
 
 /** Récompenses après un combat : Pokédollars puis 1 carte parmi 3 (ou passer). */
-export function renderReward(root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string }, done: Done): void {
+export function renderReward(
+  root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string }, done: Done,
+): void {
   run.money += o.money;
+  if (o.relic) run.addRelic(o.relic);
   root.innerHTML = shell(run, o.label, `
     <h1 class="node-title">${esc(o.title)}</h1>
-    <div class="reward-money">+${o.money} ₽</div>
+    <div class="reward-line">
+      <div class="reward-money">+${o.money} ₽</div>
+      ${o.relic ? relicCard(o.relic, '<em>Objet tenu obtenu !</em>') : ''}
+    </div>
     <p class="node-sub">Choisis une capacité à apprendre :</p>
     <div class="card-row">${o.cards.map((id) => renderCard(cardDef(id), { classes: 'pickable' }).replace('class="card', `data-id="${id}" class="card`)).join('')}</div>
     <div class="reward-actions">
@@ -81,6 +88,8 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
 /** Poké Mart : 5 cartes du personnage + oublier une carte. */
 export function renderShop(root: HTMLElement, run: Run, done: Done): void {
   const offers = run.cardChoices('boutique', 5).map((id) => ({ id, price: cardPrice(id), sold: false }));
+  const items = run.rollRelics(2).map((id) => ({ id, price: relicPrice(id), sold: false }));
+  let pickedItem: number | null = null;
   const sale = run.rng.int(0, offers.length - 1);
   offers[sale].price = Math.floor(offers[sale].price / 2);
   let removed = false;
@@ -99,6 +108,11 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
             ${picked === i && !o.sold ? `<button class="btn primary buy" ${run.money < o.price ? 'disabled' : ''}>${run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
           </div>`).join('')}
       </div>
+      ${items.length ? `<div class="shop-relics">${items.map((o, i) => `
+        <div class="shop-relic ${o.sold ? 'sold' : ''} ${pickedItem === i ? 'picked' : ''}" data-i="${i}">
+          ${relicCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
+          ${pickedItem === i && !o.sold ? `<button class="btn primary buy-relic" ${run.money < o.price ? 'disabled' : ''}>${run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
+        </div>`).join('')}</div>` : ''}
       <div class="shop-actions">
         <button class="choice remove" ${removed || run.money < removeCost ? 'disabled' : ''}>
           <b>Oublier une capacité</b><span>${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
@@ -120,6 +134,22 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
           picked = null;
         } else {
           picked = picked === i ? null : i;
+        }
+        draw();
+      }));
+    root.querySelectorAll<HTMLElement>('.shop-relic').forEach((el) =>
+      el.addEventListener('click', (ev) => {
+        const i = Number(el.dataset.i);
+        const o = items[i];
+        if (o.sold) return;
+        if ((ev.target as HTMLElement).closest('.buy-relic')) {
+          if (run.money < o.price) return;
+          run.money -= o.price;
+          run.addRelic(o.id);
+          o.sold = true;
+          pickedItem = null;
+        } else {
+          pickedItem = pickedItem === i ? null : i;
         }
         draw();
       }));
@@ -180,15 +210,28 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done): void {
     }));
 }
 
-/** Trésor : en attendant les objets tenus, des Pokédollars et une carte au choix. */
+/** Trésor : une Poké Ball qui contient un objet tenu et quelques Pokédollars. */
 export function renderTreasure(root: HTMLElement, run: Run, done: Done): void {
-  renderReward(root, run, { money: run.rng.int(50, 80), cards: run.cardChoices('elite'), title: 'Une Poké Ball scintillante !', label: 'Trésor' }, done);
+  const relic = run.rollRelics(1)[0];
+  const money = run.rng.int(20, 40);
+  run.money += money;
+  if (relic) run.addRelic(relic);
+  root.innerHTML = shell(run, 'Trésor', `
+    <img class="treasure-ball" src="${asset('sprites/items/poke-ball.png')}" alt="">
+    <h1 class="node-title">Une Poké Ball scintillante !</h1>
+    <div class="reward-line">
+      <div class="reward-money">+${money} ₽</div>
+      ${relic ? relicCard(relic, '<em>Objet tenu obtenu !</em>') : '<p class="node-sub">Elle ne contenait que des Pokédollars.</p>'}
+    </div>
+    <button class="btn primary leave">Continuer</button>`, 'reward');
+  bindDeck(root, run);
+  root.querySelector('.leave')!.addEventListener('click', done);
 }
 
 /** Fin de run : défaite ou gardien vaincu, avec l'EXP gagnée et les cartes débloquées. */
 export function renderRunEnd(
   root: HTMLElement, run: Run, victory: boolean,
-  xp: { exp: number; before: number; after: number; newCards: string[]; total: number },
+  xp: { exp: number; before: number; after: number; newCards: string[]; newRelics: string[]; total: number },
   onMenu: Done, onRetry: Done,
 ): void {
   const name = CHARACTERS[run.character].name;
@@ -217,6 +260,9 @@ export function renderRunEnd(
         ${xp.newCards.length <= 6
           ? `<div class="unlock-row">${xp.newCards.map((id) => renderCard(cardDef(id))).join('')}</div>`
           : `<div class="unlock-chips">${xp.newCards.map((id) => `<span class="chip" style="--c:${CHARACTER_COLORS[cardDef(id).character]}">${esc(cardDef(id).name)}</span>`).join('')}</div>`}` : ''}
+      ${xp.newRelics.length ? `
+        <p class="unlock-title">Nouveaux objets tenus débloqués :</p>
+        <div class="reward-line">${xp.newRelics.map((id) => relicCard(id)).join('')}</div>` : ''}
       <div class="end-buttons">
         <button class="btn primary retry">Nouvelle run</button>
         <button class="btn menu">Menu principal</button>

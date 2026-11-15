@@ -6,6 +6,7 @@ import type { Run } from '../core/run';
 import { renderCard } from './card';
 import { POWER_INFO, STATUS_INFO, TYPE_COLORS, cardText } from './labels';
 import { openDeckOverlay, topbar } from './run-ui';
+import { relicDef } from '../data/relics';
 import { asset, esc, sleep } from './util';
 
 const ENEMY_STEP_MS = 700;
@@ -32,8 +33,10 @@ export class CombatView {
     private opts: { seed: string; enemies: string[]; label: string },
     private onEnd: (r: CombatResult) => void,
   ) {
-    this.combat = new Combat({ character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed, hp: run.hp });
-    this.combat.player.maxHp = run.maxHp;
+    this.combat = new Combat({
+      character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
+      hp: run.hp, maxHp: run.maxHp, relics: run.relics,
+    });
     this.combat.drainEvents();
     root.innerHTML = '<div class="combat"></div><div class="fx-layer"></div>';
     this.el = root.querySelector('.combat')!;
@@ -257,6 +260,14 @@ export class CombatView {
         case 'power':
           this.float('player', POWER_INFO[ev.power].label, 'status', at('player'), '#c9a6ff');
           break;
+        case 'relic': {
+          this.float('player', relicDef(ev.id).name, 'status', at('player'), '#ffe08a');
+          const icon = this.el.querySelector(`.tb-relics [data-relic="${ev.id}"]`);
+          icon?.classList.remove('pulse');
+          void (icon as HTMLElement | null)?.offsetWidth;
+          icon?.classList.add('pulse');
+          break;
+        }
         case 'aura':
           break;
       }
