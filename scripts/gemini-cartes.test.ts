@@ -69,12 +69,12 @@ Puis préciser la couleur :
 
 | Fichier | Cartes | Couleur à ajouter au prompt | Fait |
 | --- | --- | --- | --- |
-| \`riolu.png\` | Riolu | Bordure **bleu roi** profond, petits motifs de flamme d'aura bleue gravés dans la bordure, médaillon bleu et noir. | ☐ |
-| \`vipelierre.png\` | Vipélierre | Bordure **vert feuille**, motifs de lianes et de feuilles gravés dans la bordure, médaillon vert et or. | ☐ |
-| \`kangourex.png\` | Kangourex | Bordure **brun chaud** façon cuir, motifs de petites empreintes gravés dans la bordure, médaillon brun et crème. | ☐ |
-| \`caninos.png\` | Caninos | Bordure **rouge vif**, motifs de flammes gravés dans la bordure, médaillon rouge et orange. | ☐ |
-| \`mew.png\` | Mew | Bordure **rose pastel**, motifs de bulles et d'hélices d'ADN gravés dans la bordure, médaillon rose et violet. | ☐ |
-| \`neutre.png\` | Cartes neutres | Bordure **gris acier**, motifs géométriques sobres gravés dans la bordure, médaillon gris et argent. | ☐ |
+| \`riolu.png\` | Riolu | Bordure **bleu roi** profond, petits motifs de flamme d'aura bleue gravés dans la bordure, médaillon bleu et noir. | ☑ |
+| \`vipelierre.png\` | Vipélierre | Bordure **vert feuille**, motifs de lianes et de feuilles gravés dans la bordure, médaillon vert et or. | ☑ |
+| \`kangourex.png\` | Kangourex | Bordure **brun chaud** façon cuir, motifs de petites empreintes gravés dans la bordure, médaillon brun et crème. | ☑ |
+| \`caninos.png\` | Caninos | Bordure **rouge vif**, motifs de flammes gravés dans la bordure, médaillon rouge et orange. | ☑ |
+| \`mew.png\` | Mew | Bordure **rose pastel**, motifs de bulles et d'hélices d'ADN gravés dans la bordure, médaillon rose et violet. | ☑ |
+| \`neutre.png\` | Cartes neutres | Bordure **gris acier**, motifs géométriques sobres gravés dans la bordure, médaillon gris et argent. | ☑ |
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
