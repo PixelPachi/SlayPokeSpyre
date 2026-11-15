@@ -162,7 +162,7 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-justice', title: 'VIII — La Justice', image: 'tarot/la-justice.webp', tarot: true,
-    text: 'Lucario siège entre Démolosse et Grahyèna. Chaque faute a son prix, chaque prix sa récompense.',
+    text: 'Tranchodon siège sur son trône, l’épée dans une main, la balance dans l’autre. Chaque faute a son prix, chaque prix sa récompense.',
     choices: [
       {
         label: 'Avouer tes fautes', detail: 'Perd 8 PV, retire une carte',
@@ -179,7 +179,7 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-ermite', title: 'IX — L’Ermite', image: 'tarot/l-ermite.webp', tarot: true,
-    text: 'Feunard médite au sommet d’une montagne enneigée, lanterne à la main. Sa lumière n’éclaire qu’un pas à la fois.',
+    text: 'Noarfang, perché sur une branche sous les étoiles, tend sa lanterne vers toi. Sa lumière n’éclaire qu’un pas à la fois.',
     choices: [
       {
         label: 'Suivre sa lanterne', detail: 'Améliore une carte de ton choix',
@@ -212,14 +212,14 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-force', title: 'XI — La Force', image: 'tarot/la-force.webp', tarot: true,
-    text: 'Une Dresseuse chevauche un Arcanin sans selle ni rênes. La vraie force, c’est la confiance.',
+    text: 'Une jeune fille apaise un Machopeur assis en tailleur, d’une simple main sur la tête. La vraie force, c’est la douceur.',
     choices: [
       {
-        label: 'Dompter la bête', detail: 'Perd 6 PV, gagne une carte rare',
+        label: 'Défier Machopeur', detail: 'Perd 6 PV, gagne une carte rare',
         available: (r) => r.hp > 6,
-        apply: (r) => (hurt(r, 6), `Arcanin finit par t’accepter et t’apprend ${addRandomCard(r, 'boss')}.`),
+        apply: (r) => (hurt(r, 6), `Après un rude combat, Machopeur t’apprend ${addRandomCard(r, 'boss')}.`),
       },
-      { label: 'Le caresser doucement', detail: '+4 PV max, récupère 10 PV', apply: (r) => (gainMax(r, 4), `Arcanin ronronne. +4 PV max et +${r.heal(10)} PV.`) },
+      { label: 'Méditer avec lui', detail: '+4 PV max, récupère 10 PV', apply: (r) => (gainMax(r, 4), `Le calme vous gagne tous les deux. +4 PV max et +${r.heal(10)} PV.`) },
     ],
   },
   {
@@ -236,7 +236,7 @@ export const TAROT_EVENTS: GameEvent[] = [
   },
   {
     id: 'tarot-mort', title: 'XIII — La Mort', image: 'tarot/la-mort.webp', tarot: true,
-    text: 'Noctunoir chevauche Absol dans la brume. La Mort n’est pas une fin : seulement une transformation.',
+    text: 'Absol avance sous un drapeau noir, suivi d’une grande ombre. La Mort n’est pas une fin : seulement une transformation.',
     choices: [
       {
         label: 'Laisser partir le passé', detail: 'Perd 6 PV, retire 2 cartes',
