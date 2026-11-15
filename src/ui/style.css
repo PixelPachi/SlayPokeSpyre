@@ -319,7 +319,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card-cost.too-much { background: radial-gradient(circle at 35% 30%, #ff9e9e, #c62828 70%); }
 .card-type {
   position: absolute; right: 6px; top: 6px; font-size: 10px; font-weight: 900; padding: 0 6px; border-radius: 6px;
-  background: rgba(0, 0, 0, 0.35); color: #fff;
+  background: var(--type, rgba(0, 0, 0, 0.35)); color: #fff; border: 1px solid rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
 }
 .card-name {
   margin-top: 16px; width: 100%; text-align: center; font-weight: 900; font-size: 15px; line-height: 1.1;

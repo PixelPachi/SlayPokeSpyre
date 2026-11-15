@@ -1,7 +1,7 @@
 // Rendu HTML d'une carte, partagé par le combat, les récompenses, la boutique et le deck.
 import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
-import { CATEGORY_LABELS, TYPE_COLORS, cardText } from './labels';
+import { CATEGORY_LABELS, CHARACTER_COLORS, TYPE_COLORS, cardText } from './labels';
 import { esc } from './util';
 
 export interface CardRenderOptions {
@@ -20,7 +20,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const text = o.text ?? cardText(d, null, null);
   return `
     <div class="card rarity-${d.rarity} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
-         style="--tc:${TYPE_COLORS[d.pokeType]};${o.style ?? ''}">
+         style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-cost ${o.costTooHigh ? 'too-much' : ''}">${d.cost}</div>
         <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>

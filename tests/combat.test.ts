@@ -47,13 +47,27 @@ describe('combat', () => {
   it('consomme l’Aura sur la prochaine attaque', () => {
     const c = start();
     // Forcer une main connue
-    c.hand = makeDeck(['mach-punch', 'abri']).map((x, i) => ({ ...x, uid: 100 + i }));
+    c.hand = makeDeck(['poing-karate', 'abri']).map((x, i) => ({ ...x, uid: 100 + i }));
     const rat = c.enemies[0];
     rat.hp = rat.maxHp = 99;
     c.play(100, rat.uid);
-    // (6 + 3 Aura) ×1,25 ×1,5 = 16,875
-    expect(rat.hp).toBe(99 - 16);
+    // (8 + 3 Aura) ×1,25 ×1,5 = 20,6
+    expect(rat.hp).toBe(99 - 20);
     expect(c.player.aura).toBe(0);
+  });
+
+  it('Aurasphère inflige Aura × 2 dégâts', () => {
+    const c = start();
+    c.player.aura = 10;
+    c.hand = makeDeck(['aurasphere']).map((x) => ({ ...x, uid: 300 }));
+    const rat = c.enemies[0];
+    rat.hp = rat.maxHp = 99;
+    expect(c.previewCardDamage(c.hand[0], rat.uid)).toBe(37);
+    c.play(300, rat.uid);
+    // 10 × 2 = 20, ×1,25 ×1,5 = 37,5
+    expect(rat.hp).toBe(99 - 37);
+    expect(c.player.aura).toBe(0);
+    expect(c.player.energy).toBe(0);
   });
 
   it('les PV perdus donnent de l’Aura, pas les dégâts bloqués', () => {
@@ -101,7 +115,7 @@ describe('combat', () => {
   it('victoire quand tous les ennemis sont K.O.', () => {
     const c = start();
     c.enemies[0].hp = 1;
-    const attack = c.hand.find((x) => x.defId !== 'abri');
+    const attack = c.hand.find((x) => ['ruse', 'poing-karate'].includes(x.defId));
     if (!attack) return; // main sans attaque avec cette graine
     c.play(attack.uid);
     expect(c.phase).toBe('victoire');

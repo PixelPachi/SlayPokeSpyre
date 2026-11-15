@@ -9,6 +9,11 @@ export const TYPE_COLORS: Record<PokeType, string> = {
   tenebres: '#705746', acier: '#B7B7CE', fee: '#D685AD',
 };
 
+/** Code couleur des cartes de chaque personnage (les cartes communes restent grises). */
+export const CHARACTER_COLORS: Record<string, string> = {
+  riolu: '#3a7bd5', vipelierre: '#3f9f45', kangourex: '#8b6343', caninos: '#d6402b', mew: '#e57bb8', normal: '#8f8f8f',
+};
+
 export const STATUS_INFO: Record<StatusId, { label: string; color: string; text: (n: number) => string }> = {
   brulure: { label: 'Brûlure', color: '#ff7a2f', text: (n) => `Perd ${n} PV au début du tour et inflige 25 % de dégâts en moins. Baisse de 1 chaque tour.` },
   poison: { label: 'Poison', color: '#b45cd6', text: (n) => `Perd ${n} PV au début du tour. Baisse de 1 chaque tour.` },
@@ -54,6 +59,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
       case 'perte-pv': parts.push(`Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
+      case 'degats-aura': parts.push(dmg !== null ? `Inflige ${hl(dmg, 0)} dégâts (Aura × ${e.mult}). L'Aura retombe à 0.` : `Inflige Aura × ${e.mult} dégâts. L'Aura retombe à 0.`); break;
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }

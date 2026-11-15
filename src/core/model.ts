@@ -26,7 +26,8 @@ export type Effect =
   | { kind: 'pa'; amount: number }
   | { kind: 'perte-pv'; amount: number } // se blesse soi-même (donne de l'Aura à Riolu)
   | { kind: 'aura'; amount: number }
-  | { kind: 'aura-mult'; amount: number }; // multiplie l'Aura actuelle
+  | { kind: 'aura-mult'; amount: number } // multiplie l'Aura actuelle
+  | { kind: 'degats-aura'; mult: number }; // inflige Aura × mult dégâts, puis l'Aura retombe à 0
 
 export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable';
 

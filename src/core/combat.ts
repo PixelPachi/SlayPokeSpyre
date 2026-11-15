@@ -150,10 +150,11 @@ export class Combat {
   previewCardDamage(card: Card, targetUid?: number): number | null {
     const d = this.def(card);
     const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
-    if (!hit) return null;
+    const auraHit = d.effects.find((e): e is Extract<Effect, { kind: 'degats-aura' }> => e.kind === 'degats-aura');
+    if (!hit && !auraHit) return null;
     const target = targetUid !== undefined ? this.enemy(targetUid) : undefined;
     const mult = d.effects.find((e): e is Extract<Effect, { kind: 'aura-mult' }> => e.kind === 'aura-mult');
-    const base = hit.amount + this.player.aura * (mult ? mult.amount : 1);
+    const base = auraHit ? this.player.aura * auraHit.mult : hit!.amount + this.player.aura * (mult ? mult.amount : 1);
     if (!target) {
       // Sans cible : bonus de type et statuts du joueur seulement
       let dmg = Math.max(0, base + (this.player.statuses.attaque ?? 0));
@@ -316,6 +317,15 @@ export class Combat {
             this.dealDamage(t, t.uid, amount, effectiveness);
           }
           used = true;
+        }
+        return true;
+      }
+      case 'degats-aura': {
+        // Aurasphère : les dégâts viennent uniquement de l'Aura
+        const t = target && target.hp > 0 ? target : undefined;
+        if (t) {
+          const { amount, effectiveness } = computeDamage(p.aura * eff.mult, p, t, d.pokeType);
+          this.dealDamage(t, t.uid, amount, effectiveness);
         }
         return true;
       }
