@@ -3,6 +3,7 @@ import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { CATEGORY_LABELS, CHARACTER_COLORS, TYPE_COLORS, cardText } from './labels';
 import { esc } from './util';
+import { artUrl, frameUrl } from './card-assets';
 
 export interface CardRenderOptions {
   uid?: number;
@@ -20,18 +21,22 @@ export interface CardRenderOptions {
 export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const base = d.effects.find((e) => e.kind === 'degats');
   const text = o.text ?? cardText(d, null, null);
+  const frame = frameUrl(d.character);
+  const art = artUrl(d.name);
   return `
-    <div class="card rarity-${d.rarity} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
-         style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${o.style ?? ''}">
+    <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+         style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
-        <div class="card-cost ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}">${o.cost ?? d.cost}</div>
-        <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
-        <div class="card-name">${esc(d.name)}</div>
-        <div class="card-art">${CATEGORY_ART[d.category]}</div>
+        <div class="card-window">
+          <div class="card-art">${art ? `<img src="${art}" alt="" draggable="false">` : CATEGORY_ART[d.category]}</div>
+          <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
+        </div>
+        <div class="card-banner"><div class="card-name ${d.name.length > 13 ? 'long' : ''}">${esc(d.name)}</div></div>
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
         <div class="card-text"><span>${text}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
       </div>
+      <div class="card-cost ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}">${o.cost ?? d.cost}</div>
     </div>`;
 }
 

@@ -48,6 +48,10 @@ Ambiances (le jeu ajoute les particules assorties) : Mont Sélénite **nuit de p
 | --- | --- | --- | --- |
 | `public/backgrounds/sommet-tour-du-temps.png` | Sommet de la Tour du Temps | Le sommet de la Tour du Temps de Pokémon Donjon Mystère : plateforme de pierre antique flottant dans un ciel déchiré, énormes engrenages dorés figés, fissures de lumière bleue et violette, temps qui se désagrège. Ambiance de combat final. | ☐ |
 
+## Cartes
+
+Les cadres de cartes (un par personnage + neutre) et les illustrations des capacités sont listés dans **[GEMINI-CARTES.md](GEMINI-CARTES.md)**.
+
 ## Autres images
 
 | Fichier | Image | Fait |

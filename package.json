@@ -7,7 +7,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "sprites": "node scripts/fetch-sprites.mjs"
+    "sprites": "node scripts/fetch-sprites.mjs",
+    "gemini-cartes": "vitest run --dir scripts gemini-cartes"
   },
   "repository": {
     "type": "git",
