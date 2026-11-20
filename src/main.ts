@@ -48,7 +48,7 @@ stage.addEventListener('click', (ev) => {
     if (inCombat) {
       if (!view!.eatBerry(b.name, b.fx)) return;
     } else {
-      if (b.fx.maxHp) { run.maxHp += b.fx.maxHp; run.hp += b.fx.maxHp; }
+      if (b.fx.maxHp) run.maxHp += b.fx.maxHp;
       if (b.fx.heal) run.hp = Math.min(run.maxHp, run.hp + b.fx.heal);
       document.querySelectorAll('.tb-hp').forEach((el) => (el.textContent = `PV ${run.hp}/${run.maxHp}`));
     }
