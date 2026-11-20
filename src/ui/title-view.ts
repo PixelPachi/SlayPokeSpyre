@@ -84,7 +84,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
       }).join('');
     }
     if (tab === 'baies') {
-      return `<p class="gl-note">Les effets des baies arriveront bientôt.</p><div class="gl-grid">${BERRIES.map((b) => berryCard(b.id)).join('')}</div>`;
+      return `<p class="gl-note">Clique une baie dans la barre du haut pour la manger. Certaines baies sont exclusives à un personnage.</p><div class="gl-grid">${BERRIES.map((b) => berryCard(b.id)).join('')}</div>`;
     }
     return `<p class="gl-note">${[...seen].filter((d) => mons.some(([m]) => m === d)).length} / ${mons.length} Pokémon croisés · ${shiny.size} chromatique${shiny.size > 1 ? 's' : ''}</p>
       <div class="gl-mons">${mons.map(([dex, name]) => {

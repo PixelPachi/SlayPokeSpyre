@@ -683,8 +683,8 @@ describe('arcanes inversés, baies, Kecleon', async () => {
     expect(run.deck.filter((c) => c.defId === 'diable-vampirisme')).toHaveLength(4);
     expect(run.deck.filter((c) => c.defId === 'diable-soin')).toHaveLength(4);
   });
-  it('42 baies et 3 emplacements', () => {
-    expect(BERRIES).toHaveLength(42);
+  it('52 baies et 3 emplacements', () => {
+    expect(BERRIES).toHaveLength(52);
     const run = new Run('BAIES', 'riolu');
     for (let i = 0; i < 3; i++) expect(run.addBerry(run.rollBerry())).toBe(true);
     expect(run.addBerry('oran')).toBe(false);
@@ -891,5 +891,19 @@ describe('baies', () => {
     c.useBerry('Chocco', BERRY_DEFS.occa.fx);
     expect(c.resists.has('feu')).toBe(true);
     expect(BERRY_DEFS.oran.text).toBe('Restaure 10 PV.');
+  });
+});
+
+describe('baies exclusives', () => {
+  it('Enigma donne 10 Aura à Riolu et ne sort que pour lui', async () => {
+    const { BERRY_DEFS } = await import('../src/data/berries');
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['dardargnan'], seed: 'e' });
+    const before = c.player.aura;
+    c.useBerry('Enigma', BERRY_DEFS.enigma.fx);
+    expect(c.player.aura).toBe(before + 10);
+    expect(BERRY_DEFS.enigma.character).toBe('riolu');
+    const v = new Combat({ character: 'vipelierre', deck: makeDeck(CHARACTERS.vipelierre.starterDeck), enemies: ['dardargnan'], seed: 'e' });
+    v.useBerry('Rangma', BERRY_DEFS.maranga.fx);
+    expect(v.player.statuses.attaque).toBe(2);
   });
 });

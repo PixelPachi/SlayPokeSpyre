@@ -172,7 +172,9 @@ export class Run {
   rollBerry(): string {
     const r = this.rng.next();
     const want = r < 0.65 ? 'commune' : r < 0.95 ? 'peu-commune' : 'rare';
-    return this.rng.pick(BERRIES.filter((x) => x.rarity === want)).id;
+    const mine = BERRIES.filter((x) => x.character === this.character);
+    if (mine.length && this.rng.next() < 0.2) return this.rng.pick(mine).id;
+    return this.rng.pick(BERRIES.filter((x) => x.rarity === want && !x.character)).id;
   }
 
   /** Événements déjà vus pendant cette run (on ne retombe pas deux fois sur le même arcane). */

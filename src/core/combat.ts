@@ -923,6 +923,12 @@ export class Combat {
     if (fx.block) this.gainBlock(p, 'player', fx.block);
     for (const x of fx.self ?? []) this.addStatus(p, 'player', x.status, x.stacks);
     if (fx.resist) this.resists.add(fx.resist);
+    if (fx.effects) {
+      const card = { id: 'baie', name, character: p.character, pokeType: 'normal', category: 'technique', rarity: 'commune', cost: 0, target: 'ennemi', effects: fx.effects, upgrade: {} } as CardDef;
+      const t = this.aliveEnemies()[0];
+      for (const e of fx.effects) if (this.phase === 'joueur') this.resolve(e, card, t);
+      this.checkEnd();
+    }
     if (fx.draw) this.draw(fx.draw);
     if (fx.damageAll) {
       for (const e of this.aliveEnemies()) { this.dealDamage(e, e.uid, fx.damageAll, 'normal'); this.checkPhase(e); }

@@ -1,6 +1,6 @@
 // Les baies : l'équivalent des potions de Slay the Spire. 3 emplacements par run.
 
-import type { StatusId } from '../core/model';
+import type { CharacterId, Effect, StatusId } from '../core/model';
 import { TYPE_LABELS, type PokeType } from '../core/types';
 
 export type BerryRarity = 'commune' | 'peu-commune' | 'rare';
@@ -16,6 +16,9 @@ export interface BerryFx {
   self?: { status: StatusId; stacks: number }[];
   damageAll?: number;
   resist?: PokeType;
+  /** Effets de carte (baies exclusives) et leur description. */
+  effects?: Effect[];
+  say?: string;
 }
 
 export interface BerryDef {
@@ -28,6 +31,8 @@ export interface BerryDef {
   text: string;
   /** Utilisable seulement en combat. */
   combatOnly: boolean;
+  /** Baie exclusive : on ne la trouve qu'avec ce personnage. */
+  character?: CharacterId;
 }
 
 const BAD: StatusId[] = ['brulure', 'poison', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil', 'gel', 'etourdi'];
@@ -37,6 +42,7 @@ const SNAME: Partial<Record<StatusId, string>> = {
 };
 
 function describe(fx: BerryFx): string {
+  if (fx.say) return fx.say;
   const t: string[] = [];
   if (fx.maxHp) t.push(`+${fx.maxHp} PV max`);
   if (fx.heal) t.push(`Restaure ${fx.heal} PV`);
@@ -57,6 +63,11 @@ const b = (id: string, name: string, rarity: BerryRarity, fx: BerryFx): BerryDef
   return { id, name: `Baie ${name}`, sprite: `${id}-berry`, rarity, fx, combatOnly,
     text: describe(fx) + (combatOnly ? ' (en combat)' : '') };
 };
+const CHAR_NAMES: Partial<Record<CharacterId, string>> = { riolu: 'Riolu', vipelierre: 'Vipélierre', kangourex: 'Kangourex', caninos: 'Caninos', mew: 'Mew' };
+const x = (id: string, name: string, character: CharacterId, say: string, effects: Effect[]): BerryDef => ({
+  id, name: `Baie ${name}`, sprite: `${id}-berry`, rarity: 'peu-commune', fx: { effects, say }, combatOnly: true, character,
+  text: `${say} (en combat) ★ Exclusive à ${CHAR_NAMES[character]}.`,
+});
 const conf = (heal: number, extra: BerryFx): BerryFx => ({ heal, ...extra, self: [...(extra.self ?? []), { status: 'confusion', stacks: 1 }] });
 const res = (t: PokeType): BerryFx => ({ resist: t });
 
@@ -100,6 +111,19 @@ export const BERRIES: BerryDef[] = [
   b('ganlon', 'Lingan', 'rare', { self: [{ status: 'defense', stacks: 3 }] }),
   b('salac', 'Sailak', 'rare', { energy: 2, draw: 2 }),
   b('petaya', 'Pitaye', 'rare', { damageAll: 15 }),
+  // Baies exclusives : on ne les trouve qu'avec un personnage précis
+  x('enigma', 'Enigma', 'riolu', 'Gagne 10 Aura.', [{ kind: 'aura', amount: 10 }]),
+  x('micle', 'Micle', 'riolu', 'Double ton Aura.', [{ kind: 'aura-mult', amount: 2 }]),
+  x('durin', 'Durin', 'vipelierre', 'Inflige 3 Vampigraine à tous les ennemis.', [{ kind: 'statut', status: 'vampigraine', stacks: 3, on: 'tous' }]),
+  x('maranga', 'Rangma', 'vipelierre', '−2 Attaque et −2 Défense… que Contestation transforme en hausses !',
+    [{ kind: 'statut', status: 'attaque', stacks: -2, on: 'soi' }, { kind: 'statut', status: 'defense', stacks: -2, on: 'soi' }]),
+  x('kee', 'Éka', 'kangourex', 'Soigne le Bébé Kangourex de 15 PV (le ramène s\'il est K.O.) et lui donne 6 Protection.',
+    [{ kind: 'bebe-soin', amount: 15 }, { kind: 'bebe-protection', amount: 6 }]),
+  x('lansat', 'Lansat', 'kangourex', 'Le Bébé gagne 2 Puissance et attaque tout de suite.', [{ kind: 'bebe-puissance', amount: 2 }, { kind: 'bebe-attaque', times: 1 }]),
+  x('jaboca', 'Jacoba', 'caninos', 'Inflige 3 Brûlure à tous les ennemis.', [{ kind: 'statut', status: 'brulure', stacks: 3, on: 'tous' }]),
+  x('starf', 'Frista', 'caninos', '+2 Attaque et +1 PA.', [{ kind: 'statut', status: 'attaque', stacks: 2, on: 'soi' }, { kind: 'pa', amount: 1 }]),
+  x('custap', 'Chérim', 'mew', 'Lance deux Métronomes.', [{ kind: 'metronome' }, { kind: 'metronome' }]),
+  x('rowap', 'Pommo', 'mew', 'Ajoute 2 cartes au hasard dans ta main.', [{ kind: 'ajoute-carte', from: 'tous', count: 2 }]),
 ];
 
 export { BAD as BAD_STATUSES };
