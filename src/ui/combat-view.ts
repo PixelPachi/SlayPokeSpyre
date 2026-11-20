@@ -1,6 +1,6 @@
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
 import { saveHooks } from '../core/save';
-import { orbUrl } from './card-assets';
+import { backUrl, orbUrl } from './card-assets';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, PowerId, StatusId } from '../core/model';
@@ -108,7 +108,7 @@ export class CombatView {
         <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : ${p.energy} sur ${p.maxEnergy}. Chaque carte coûte des PA ; ils se rechargent à chaque tour.">
           <span class="energy-num">${p.energy}</span>
         </div>
-        <div class="pile draw" data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
+        <div class="pile draw ${backUrl(p.character) ? 'has-back' : ''}" ${backUrl(p.character) ? `style="--back:url('${backUrl(p.character)}')"` : ''} data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
           <span>${c.drawPile.length}</span><small>Pioche</small>
         </div>
         <div class="hand">${c.hand.map((card, i) => this.cardHtml(card, i, c.hand.length)).join('')}</div>

@@ -921,3 +921,20 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card .card-cost.has-orb.free { color: #b8ffc6; }
 
 .energy .energy-num { font-size: 56px; line-height: 1; -webkit-text-stroke: 5px #1a1220; paint-order: stroke fill; text-shadow: 0 4px 0 #1a1220; }
+
+/* ——— Cadres Gemini : boîte de dialogue (événements) et panneau de menu (fenêtres) ——— */
+.event-panel { border: 56px solid transparent; border-radius: 0; background: none; padding: 0 14px;
+  border-image: url('../assets/ui/cadre-dialogue.png') 118 fill / 56px stretch; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .6)); }
+.event-panel.tarot { padding: 0 8px; }
+.panel { border: 62px solid transparent; border-radius: 0; background: none; padding: 0 12px;
+  border-image: url('../assets/ui/cadre-menu.png') 140 fill / 62px stretch; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .6)); }
+/* ——— Pioche : dos de carte du personnage, en pile ——— */
+.pile.draw.has-back { left: 148px; bottom: 30px; width: 66px; height: 96px; border: 0; border-radius: 6px; background: none; }
+.pile.draw.has-back::before, .pile.draw.has-back::after { content: ''; position: absolute; inset: 0; border-radius: 6px;
+  background: var(--back) center / 100% 100% no-repeat; box-shadow: 0 3px 8px rgba(0, 0, 0, .55); z-index: -1; }
+.pile.draw.has-back::before { transform: translate(-5px, 4px) rotate(-6deg); filter: brightness(.7); }
+.pile.draw.has-back::after { transform: translate(-2px, 2px) rotate(-2deg); filter: brightness(.85); }
+.pile.draw.has-back { background: var(--back) center / 100% 100% no-repeat; box-shadow: 0 4px 10px rgba(0, 0, 0, .6); isolation: isolate; }
+.pile.draw.has-back > span { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 22px;
+  background: rgba(12, 14, 26, .82); border: 2px solid rgba(255, 255, 255, .7); }
+.pile.draw.has-back > small { position: absolute; bottom: -19px; left: 50%; transform: translateX(-50%); text-shadow: 0 1px 3px #000; }

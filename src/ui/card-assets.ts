@@ -11,6 +11,13 @@ const byName = (files: Record<string, string>) =>
 const FRAME_URLS = byName(FRAMES);
 const ORBS = import.meta.glob<string>('../assets/orbes/*.png', { eager: true, query: '?url', import: 'default' });
 const ORB_URLS = byName(ORBS);
+const BACKS = import.meta.glob<string>('../assets/ui/dos-*.png', { eager: true, query: '?url', import: 'default' });
+const BACK_URLS = byName(BACKS);
+
+/** Dos de carte Gemini d'un personnage (pour la pioche). */
+export function backUrl(character: string): string | undefined {
+  return BACK_URLS.get(`dos-${character}`);
+}
 
 /** Orbe d'énergie Gemini d'un personnage (« neutre » pour les cartes communes). */
 export function orbUrl(character: string): string | undefined {
