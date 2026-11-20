@@ -907,3 +907,18 @@ describe('baies exclusives', () => {
     expect(v.player.statuses.attaque).toBe(2);
   });
 });
+
+describe('objets tenus exclusifs', () => {
+  const mk = (ch: 'riolu' | 'vipelierre' | 'caninos' | 'mew' | 'kangourex', relics: string[]) =>
+    new Combat({ character: ch, deck: makeDeck(CHARACTERS[ch].starterDeck), enemies: ['dardargnan'], seed: 'r', relics });
+  it('chaque objet exclusif fait son effet', () => {
+    expect(mk('riolu', ['lunettes-sages']).player.aura - mk('riolu', []).player.aura).toBe(5);
+    const v = mk('vipelierre', ['herbe-blanche']);
+    expect(v.player.statuses.attaque).toBe(1);
+    expect(v.player.statuses.defense).toBe(1);
+    expect(mk('vipelierre', ['pierre-plante']).enemies[0].statuses.vampigraine).toBe(2);
+    expect(mk('caninos', ['pierre-feu']).enemies[0].statuses.brulure).toBeGreaterThanOrEqual(2);
+    expect(mk('mew', ['cuillere-tordue']).player.energy).toBe(mk('mew', []).player.energy + 1);
+    expect(mk('kangourex', ['grelot-zen']).player.familiar!.power).toBe(5);
+  });
+});

@@ -13,6 +13,8 @@ export interface RelicDef {
   /** Pokémon qui peut l'obtenir ; 'commun' = tous ; 'evenement' = seulement par un événement. */
   owner: CharacterId | 'commun' | 'evenement';
   text: string;
+  /** Objet exclusif disponible tout de suite (sans déblocage par niveau). */
+  free?: boolean;
 }
 
 const RELICS: RelicDef[] = [
@@ -55,6 +57,28 @@ const RELICS: RelicDef[] = [
     text: 'Méga-Gemme. À partir de l’acte 2, Lucario devient Méga-Lucario au début de chaque combat : Attaque +2 et 10 Aura. Une fois par combat, quand ton Aura atteint 25, pioche 2 cartes et gagne 1 PA.' },
   { id: 'kangourexite', name: 'Kangourexite', sprite: 'kangaskhanite', rarity: 'rare', owner: 'kangourex',
     text: 'Méga-Gemme. Kangourex devient Méga-Kangourex au début de chaque combat : le Bébé attaque 2 fois à la fin de chaque tour.' },
+
+  // ——— Objets exclusifs (disponibles dès le début, seulement pour ce Pokémon) ———
+  { id: 'lunettes-sages', name: 'Lunettes Sages', sprite: 'wise-glasses', rarity: 'commun', owner: 'riolu', free: true,
+    text: 'Commence chaque combat avec 5 Aura de plus.' },
+  { id: 'plaque-herbe', name: 'Plaque Herbe', sprite: 'meadow-plate', rarity: 'commun', owner: 'vipelierre', free: true,
+    text: 'Tes attaques de type Plante infligent 2 dégâts de plus.' },
+  { id: 'herbe-blanche', name: 'Herbe Blanche', sprite: 'white-herb', rarity: 'peu-commun', owner: 'vipelierre', free: true,
+    text: 'Commence chaque combat avec Attaque −1 et Défense −1… que Contestation transforme en +1 et +1.' },
+  { id: 'pierre-plante', name: 'Pierre Plante', sprite: 'leaf-stone', rarity: 'rare', owner: 'vipelierre', free: true,
+    text: 'Au début de chaque combat, inflige 2 Vampigraine à tous les ennemis.' },
+  { id: 'mouchoir-soie', name: 'Mouchoir Soie', sprite: 'silk-scarf', rarity: 'commun', owner: 'kangourex', free: true,
+    text: 'Tes attaques de type Normal infligent 2 dégâts de plus.' },
+  { id: 'grelot-zen', name: 'Grelot Zen', sprite: 'soothe-bell', rarity: 'peu-commun', owner: 'kangourex', free: true,
+    text: 'Le Bébé Kangourex commence chaque combat avec 2 Puissance de plus.' },
+  { id: 'plaque-flamme', name: 'Plaque Flamme', sprite: 'flame-plate', rarity: 'commun', owner: 'caninos', free: true,
+    text: 'Tes attaques de type Feu infligent 2 dégâts de plus.' },
+  { id: 'pierre-feu', name: 'Pierre Feu', sprite: 'fire-stone', rarity: 'rare', owner: 'caninos', free: true,
+    text: 'Au début de chaque combat, inflige 2 Brûlure à tous les ennemis.' },
+  { id: 'plaque-esprit', name: 'Plaque Esprit', sprite: 'mind-plate', rarity: 'commun', owner: 'mew', free: true,
+    text: 'Tes attaques de type Psy infligent 2 dégâts de plus.' },
+  { id: 'cuillere-tordue', name: 'Cuillère Tordue', sprite: 'twisted-spoon', rarity: 'peu-commun', owner: 'mew', free: true,
+    text: 'Au premier tour de chaque combat, +1 PA.' },
 
   // ——— Communs à tous ———
   { id: 'restes', name: 'Restes', sprite: 'leftovers', rarity: 'commun', owner: 'commun',

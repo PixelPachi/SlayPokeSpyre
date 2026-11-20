@@ -176,7 +176,7 @@ export class Combat {
     const mega = ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
     if (ch.id === 'kangourex') {
       const hp = 6 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
-      this.player.familiar = { hp, maxHp: hp, power: 3, block: 0, mega: !!opts.mega || !!mega };
+      this.player.familiar = { hp, maxHp: hp, power: 3 + (this.relics.has('grelot-zen') ? 2 : 0), block: 0, mega: !!opts.mega || !!mega };
     }
     if (mega) {
       this.player.name = mega.name;
@@ -204,6 +204,13 @@ export class Combat {
     if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
     if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);
     if (this.has('orbe-flamme')) this.addStatus(this.player, 'player', 'brulure', 2);
+    if (this.has('lunettes-sages')) this.relicFired('lunettes-sages', () => this.gainAura(5));
+    if (this.has('herbe-blanche')) this.relicFired('herbe-blanche', () => {
+      this.addStatus(this.player, 'player', 'attaque', -1);
+      this.addStatus(this.player, 'player', 'defense', -1);
+    });
+    if (this.has('pierre-plante')) this.relicFired('pierre-plante', () => { for (const e of this.enemies) this.addStatus(e, e.uid, 'vampigraine', 2); });
+    if (this.has('pierre-feu')) this.relicFired('pierre-feu', () => { for (const e of this.enemies) this.addStatus(e, e.uid, 'brulure', 2); });
     if (this.has('bandeau-muscle')) this.relicFired('bandeau-muscle', () => this.addStatus(this.player, 'player', 'attaque', 1));
     if (mega) this.relicFired(mega.stone, () => {
       this.events.push({ type: 'player-move', name: `${ch.name} méga-évolue !` });
@@ -215,6 +222,7 @@ export class Combat {
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
     if (this.has('vive-griffe')) this.relicFired('vive-griffe', () => this.draw(2));
+    if (this.has('cuillere-tordue')) this.relicFired('cuillere-tordue', () => { this.player.energy += 1; });
   }
 
   // ——— Objets tenus ———
@@ -235,6 +243,10 @@ export class Combat {
     if (this.player.powers['zenith-plante'] && d.pokeType === 'plante') b += this.player.powers['zenith-plante'];
     if (this.has('plaque-poing') && d.pokeType === 'combat') b += 2;
     if (this.has('plaque-fer') && d.pokeType === 'acier') b += 3;
+    if (this.has('plaque-herbe') && d.pokeType === 'plante') b += 2;
+    if (this.has('mouchoir-soie') && d.pokeType === 'normal') b += 2;
+    if (this.has('plaque-flamme') && d.pokeType === 'feu') b += 2;
+    if (this.has('plaque-esprit') && d.pokeType === 'psy') b += 2;
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
     if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
     return b;
