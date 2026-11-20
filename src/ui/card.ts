@@ -21,11 +21,12 @@ export interface CardRenderOptions {
 export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const base = d.effects.find((e) => e.kind === 'degats');
   const text = o.text ?? cardText(d, null, null);
-  const frame = frameUrl(d.character);
-  const art = d.id.startsWith('ennemi-') ? artNoPokemon(d.name) : artUrl(d.name, d.character);
+  const enemy = d.id.startsWith('ennemi-');
+  const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character);
+  const art = enemy ? artNoPokemon(d.name) : artUrl(d.name, d.character);
   const orb = orbUrl(d.character);
   return `
-    <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+    <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-window">

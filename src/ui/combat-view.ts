@@ -334,7 +334,7 @@ export class CombatView {
     if (m.block) effects.push({ kind: 'protection', amount: m.block });
     const def: CardDef = {
       id: `ennemi-${m.id}`, name: m.name, character: 'normal', pokeType: m.pokeType ?? 'normal', category: 'attaque',
-      rarity: 'commune', cost: 0, target: 'ennemi', effects, upgrade: {},
+      rarity: 'depart', cost: 0, target: 'ennemi', effects, upgrade: {},
     };
     this.fx.querySelector('.enemy-card')?.remove();
     const box = document.createElement('div');

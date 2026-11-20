@@ -951,3 +951,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .enemy-card .card-cost { display: none; }
 @keyframes ecard { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.6) rotateY(80deg); } 14% { opacity: 1; transform: translate(-50%, -50%) scale(1.04) rotateY(0); }
   22% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -56%) scale(.95); } }
+
+.card.enemy-move-card .card-cost { display: none; }
+.card.enemy-move-card { --tc: #141a33; }
