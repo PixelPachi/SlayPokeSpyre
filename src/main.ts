@@ -38,7 +38,25 @@ stage.addEventListener('click', (ev) => {
   const r = slot.getBoundingClientRect(), s = stage.getBoundingClientRect(), k = s.width / 1280;
   menu.style.left = `${(r.left - s.left) / k - 40}px`;
   menu.style.top = `${(r.bottom - s.top) / k + 6}px`;
-  menu.innerHTML = `<b>${b.name}</b><span>${b.text || 'Effet à venir : les baies ne s’utilisent pas encore.'}</span><button class="btn small toss">Jeter la baie</button>`;
+  const inCombat = !!view && document.contains(stage.querySelector('.combat'));
+  const canEat = inCombat || !b.combatOnly;
+  menu.innerHTML = `<b>${b.name}</b><span>${b.text}</span>
+    <button class="btn small primary eat" ${canEat ? '' : 'disabled'}>${canEat ? 'Manger' : 'Seulement en combat'}</button>
+    <button class="btn small toss">Jeter la baie</button>`;
+  menu.querySelector('.eat')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (inCombat) {
+      if (!view!.eatBerry(b.name, b.fx)) return;
+    } else {
+      if (b.fx.maxHp) { run.maxHp += b.fx.maxHp; run.hp += b.fx.maxHp; }
+      if (b.fx.heal) run.hp = Math.min(run.maxHp, run.hp + b.fx.heal);
+      document.querySelectorAll('.tb-hp').forEach((el) => (el.textContent = `PV ${run.hp}/${run.maxHp}`));
+    }
+    run.berries.splice(i, 1);
+    menu.remove();
+    document.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
+    persist(run, run.inNode);
+  });
   menu.querySelector('.toss')!.addEventListener('click', (e) => {
     e.stopPropagation();
     run.berries.splice(i, 1);
@@ -167,6 +185,8 @@ function startRun(character: CharacterId): void {
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
+  // Pour tester : ?baies=oran,sitrus remplit le sac de baies
+  for (const id of (params.get('baies') ?? '').split(',').filter(Boolean)) run.addBerry(id);
   // Pour tester : ?evenement=tarot-diable ouvre directement cet événement
   // Pour tester : ?combat=apireine lance directement un combat contre ce gardien
   if (params.get('combat')) {

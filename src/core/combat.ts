@@ -9,6 +9,7 @@ import { CARD_DEFS, cardDef } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { ENEMY_DEFS } from '../data/enemies';
 import '../data/boss-gimmicks';
+import { BAD_STATUSES, type BerryFx } from '../data/berries';
 
 export const HAND_SIZE = 5;
 export const MAX_HAND = 10;
@@ -474,7 +475,8 @@ export class Combat {
             this.hitFamiliar(amount, effectiveness);
             continue;
           }
-          const { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
+          let { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
+          if (this.resists.has(m.pokeType ?? 'normal')) amount = Math.floor(amount / 2);
           // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
           const hidden = m.pierce ? this.player.block : this.gimmickOf(e) === 'teravolt' ? Math.ceil(this.player.block / 2) : 0;
           this.player.block -= hidden;
@@ -902,6 +904,31 @@ export class Combat {
     if (heal <= 0) return;
     this.player.hp += heal;
     this.events.push({ type: 'heal', target: 'player', amount: heal });
+  }
+
+  /** Types d'attaques ennemies réduits de moitié (baies de résistance). */
+  resists = new Set<string>();
+
+  /** Manger une baie pendant ton tour. */
+  useBerry(name: string, fx: BerryFx): boolean {
+    if (this.phase !== 'joueur') return false;
+    const p = this.player;
+    this.events.push({ type: 'player-move', name: `${name} !` });
+    if (fx.maxHp) { p.maxHp += fx.maxHp; }
+    if (fx.heal) this.healPlayer(fx.heal);
+    if (fx.cure) for (const s of fx.cure === 'tous' ? BAD_STATUSES : fx.cure) delete p.statuses[s];
+    if (fx.cure === 'tous' && (p.statuses.attaque ?? 0) < 0) delete p.statuses.attaque;
+    if (fx.cure === 'tous' && (p.statuses.defense ?? 0) < 0) delete p.statuses.defense;
+    if (fx.energy) p.energy += fx.energy;
+    if (fx.block) this.gainBlock(p, 'player', fx.block);
+    for (const x of fx.self ?? []) this.addStatus(p, 'player', x.status, x.stacks);
+    if (fx.resist) this.resists.add(fx.resist);
+    if (fx.draw) this.draw(fx.draw);
+    if (fx.damageAll) {
+      for (const e of this.aliveEnemies()) { this.dealDamage(e, e.uid, fx.damageAll, 'normal'); this.checkPhase(e); }
+      this.checkEnd();
+    }
+    return true;
   }
 
   private ceintureBonus = false; // vrai pendant un gain d'Aura venant d'une perte de PV

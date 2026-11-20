@@ -876,3 +876,20 @@ describe('gardiens : talents et capacités exclusives', () => {
     expect(c.player.statuses.attaque ?? 0).toBe(0);
   });
 });
+
+describe('baies', () => {
+  it('Oran soigne 10, Sitrus +5 PV max, Chocco réduit le Feu', async () => {
+    const { BERRY_DEFS } = await import('../src/data/berries');
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['dardargnan'], seed: 'b', hp: 30, maxHp: 70 });
+    c.useBerry('Oran', BERRY_DEFS.oran.fx);
+    expect(c.player.hp).toBe(40);
+    c.useBerry('Sitrus', BERRY_DEFS.sitrus.fx);
+    expect(c.player.maxHp).toBe(75);
+    expect(c.player.hp).toBe(45);
+    expect(BERRY_DEFS.oran.combatOnly).toBe(false);
+    expect(BERRY_DEFS.occa.combatOnly).toBe(true);
+    c.useBerry('Chocco', BERRY_DEFS.occa.fx);
+    expect(c.resists.has('feu')).toBe(true);
+    expect(BERRY_DEFS.oran.text).toBe('Restaure 10 PV.');
+  });
+});

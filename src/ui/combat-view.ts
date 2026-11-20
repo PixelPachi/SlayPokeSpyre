@@ -1,3 +1,4 @@
+import type { BerryFx } from '../data/berries';
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
 import { saveHooks } from '../core/save';
 import { backUrl, orbUrl } from './card-assets';
@@ -386,6 +387,14 @@ export class CombatView {
     const events = this.combat.drainEvents();
     this.render();
     this.showEvents(events);
+  }
+
+  /** Manger une baie depuis la barre du haut (pendant ton tour). */
+  eatBerry(name: string, fx: BerryFx): boolean {
+    if (this.busy || !this.combat.useBerry(name, fx)) return false;
+    if (fx.maxHp) this.run.maxHp += fx.maxHp;
+    this.refresh();
+    return true;
   }
 
   private tryPlay(uid: number, targetUid?: number): void {
