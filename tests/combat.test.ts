@@ -223,14 +223,15 @@ describe('effets d’Aura', () => {
     expect(c.player.aura).toBe(10);
   });
 
-  it('Éclate-Roc frappe (en consommant l’Aura) puis remet de l’Aura', () => {
+  it('Éclate-Roc frappe (en consommant l’Aura) puis rend la cible vulnérable (Peur)', () => {
     const { c, rat } = setup();
     c.player.aura = 4;
     hand(c, ['eclate-roc']);
     c.play(900, rat.uid);
     // (5 + 4) ×1,25 ×1,5 = 16,875
     expect(rat.hp).toBe(500 - 16);
-    expect(c.player.aura).toBe(3);
+    expect(c.player.aura).toBe(0);
+    expect(rat.statuses.peur).toBe(1);
   });
 
   it('Lire-Esprit : cartes à 0 PA si le tour commence avec 30 Aura', () => {
@@ -283,9 +284,9 @@ describe('objets tenus', async () => {
   it('Ceinture Noire : 1 Aura de plus à chaque perte de PV', () => {
     const c = mk(['ceinture-noire']);
     c.player.aura = 0;
-    c.hand = makeDeck(['tenacite']).map((x) => ({ ...x, uid: 700 }));
-    c.play(700); // perd 3 PV
-    expect(c.player.aura).toBe(4);
+    c.hand = makeDeck(['clonage']).map((x) => ({ ...x, uid: 700 }));
+    c.play(700); // perd 6 PV
+    expect(c.player.aura).toBe(7);
   });
 
   it('Ceinture Force : survit une fois à un coup fatal', () => {
@@ -691,5 +692,107 @@ describe('arcanes inversés, baies, Kecleon', async () => {
   it('Kecleon existe comme adversaire', () => {
     const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['kecleon'], seed: 'K' });
     expect(c.enemies[0].name).toBe('Kecleon');
+  });
+});
+
+describe('modifications des cartes de Riolu', () => {
+  const mkc = (cards: string[], enemies = ['rattata'], boss = false) => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies, seed: 'MOD', boss });
+    c.hand = cards.map((id, i) => ({ uid: 800 + i, defId: id, upgraded: false }));
+    c.player.energy = 10;
+    for (const e of c.enemies) { e.hp = 300; e.maxHp = 300; }
+    return c;
+  };
+  it('Ténacité : impossible de tomber K.O. avant le prochain tour', () => {
+    const c = mkc(['tenacite']);
+    c.play(800);
+    c.endPlayerTurn();
+    const e = c.enemies[0];
+    e.intent = { id: 'x', name: 'x', weight: 1, intent: 'attaque', pokeType: 'normal', damage: 999 };
+    c.enemyAct(e.uid);
+    expect(c.player.hp).toBe(1);
+    expect(c.phase).toBe('ennemi');
+  });
+  it('Poing Glace : 3 Gel font passer le tour', () => {
+    const c = mkc(['poing-glace', 'poing-glace', 'poing-glace']);
+    const e = c.enemies[0];
+    for (let i = 0; i < 3; i++) c.play(800 + i, e.uid);
+    expect(e.statuses.gel).toBe(3);
+    c.endPlayerTurn();
+    const hp = c.player.hp;
+    e.intent = { id: 'x', name: 'x', weight: 1, intent: 'attaque', pokeType: 'normal', damage: 20 };
+    c.enemyAct(e.uid);
+    expect(c.player.hp).toBe(hp);
+    expect(e.statuses.gel).toBeUndefined();
+  });
+  it('Photocopie : la carte suivante est jouée 2 fois', () => {
+    const c = mkc(['photocopie', 'grincement']);
+    c.play(800);
+    c.play(801);
+    expect(c.enemies[0].statuses.peur).toBe(4);
+  });
+  it('Hurlement : fuite sans récompense, impossible contre un gardien', () => {
+    const c = mkc(['hurlement']);
+    c.play(800);
+    expect(c.phase).toBe('victoire');
+    expect(c.fled).toBe(true);
+    const b = mkc(['hurlement'], ['rattata'], true);
+    expect(b.canPlay(b.hand[0])).toBe(false);
+  });
+  it('Luminocanon demande de la Protection ; Poing Météore frappe avec la Protection', () => {
+    const c = mkc(['luminocanon', 'poing-meteore']);
+    expect(c.canPlay(c.hand[0])).toBe(false);
+    c.player.block = 10;
+    c.player.aura = 0;
+    expect(c.canPlay(c.hand[0])).toBe(true);
+    const e = c.enemies[0];
+    c.play(801, e.uid);
+    expect(e.hp).toBe(300 - 10); // 10 de Protection, Acier neutre contre Rattata
+  });
+  it('Ball’Ombre gagne 5 dégâts à chaque utilisation', () => {
+    const c = mkc(['ball-ombre', 'ball-ombre']);
+    c.player.aura = 0;
+    const card = c.hand[1];
+    const before = c.previewCardDamage(card);
+    c.play(800, c.enemies[0].uid);
+    c.player.aura = 0;
+    expect(c.previewCardDamage(card)!).toBeGreaterThan(before!);
+  });
+  it('Mitra-Poing : frappe au tour suivant sans dégâts subis, sinon rien', () => {
+    const c = mkc(['mitra-poing']);
+    c.player.aura = 0;
+    const e = c.enemies[0];
+    c.play(800, e.uid);
+    expect(c.player.statuses.concentration).toBe(30);
+    c.endPlayerTurn();
+    e.intent = { id: 'x', name: 'x', weight: 1, intent: 'defense', block: 0 };
+    c.enemyAct(e.uid);
+    c.endEnemyTurn();
+    expect(e.hp).toBeLessThan(300);
+    const d = mkc(['mitra-poing']);
+    const f = d.enemies[0];
+    d.play(800, f.uid);
+    d.endPlayerTurn();
+    f.intent = { id: 'x', name: 'x', weight: 1, intent: 'attaque', pokeType: 'normal', damage: 5 };
+    d.enemyAct(f.uid);
+    d.endEnemyTurn();
+    expect(f.hp).toBe(300);
+  });
+  it('Ultralaser étourdit : tour suivant perdu', () => {
+    const c = mkc(['ultralaser']);
+    c.play(800);
+    c.endPlayerTurn();
+    for (const e of c.aliveEnemies()) { e.intent = { id: 'x', name: 'x', weight: 1, intent: 'defense', block: 0 }; c.enemyAct(e.uid); }
+    c.endEnemyTurn();
+    expect(c.skipTurn).toBe(true);
+    expect(c.hand.every((x) => !c.canPlay(x))).toBe(true);
+  });
+  it('Close Combat demande la fin du tour ; Exploforce consomme 20 Aura', () => {
+    const c = mkc(['close-combat', 'exploforce']);
+    c.player.aura = 25;
+    c.play(801, c.enemies[0].uid);
+    expect(c.player.aura).toBe(5);
+    c.play(800, c.enemies[0].uid);
+    expect(c.endTurnRequested).toBe(true);
   });
 });

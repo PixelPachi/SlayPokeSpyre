@@ -24,11 +24,15 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   sommeil: { label: 'Sommeil', color: '#8fa7d9', text: () => 'Saute son prochain tour.' },
   attaque: { label: 'Attaque', color: '#ff9b4a', text: (n) => `${n > 0 ? '+' : ''}${n} dégâts par coup.` },
   defense: { label: 'Défense', color: '#5aa5ff', text: (n) => `${n > 0 ? '+' : ''}${n} Protection par carte.` },
+  tenace: { label: 'Tenace', color: '#ffd166', text: () => 'Ne peut pas tomber K.O. avant son prochain tour.' },
+  gel: { label: 'Gel', color: '#9fe3ff', text: (n) => `${n}/3. À 3 Gel, passe son tour (un gardien n'inflige que la moitié de ses dégâts).` },
+  concentration: { label: 'Concentration', color: '#ff8a5c', text: (n) => `Au début du prochain tour, inflige ${n} dégâts… si aucun dégât n'est subi d'ici là.` },
+  etourdi: { label: 'Étourdi', color: '#c9c9c9', text: () => 'Passe son prochain tour.' },
 };
 
 export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => string }> = {
   plenitude: { label: 'Plénitude', text: (n) => `Au début de chaque tour, gagne ${n} Aura.` },
-  'lire-esprit': { label: 'Lire-Esprit', text: () => 'Si ton tour commence avec 30 Aura ou plus, tes cartes coûtent 0 PA pendant ce tour.' },
+  'lire-esprit': { label: 'Lire-Esprit', text: () => 'Si ton tour commence avec 30 Aura ou plus, consomme 15 Aura : tes cartes coûtent 0 PA pendant ce tour.' },
   'champ-herbu': { label: 'Champ Herbu', text: (n) => `Au début de chaque tour, récupère ${n} PV.` },
   racines: { label: 'Racines', text: (n) => `Au début de chaque tour, gagne ${n} Protection.` },
   'zenith-plante': { label: 'Zénith', text: (n) => `Tes attaques Plante infligent ${n} dégâts de plus.` },
@@ -60,8 +64,14 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         const v = dmg ?? e.amount;
         const who = d.target === 'tous' ? ' à tous les ennemis' : d.target === 'aleatoire' ? ' à un ennemi au hasard' : '';
         const times = e.hitsMax ? ` ${e.hits ?? 1} à ${e.hitsMax} fois` : e.hits && e.hits > 1 ? ` ${e.hits} fois` : '';
-        parts.push(`Inflige ${hl(v, base ?? e.amount)} dégâts${who}${times}.`);
-        if (e.facade) parts.push('Double si tu as Brûlure, Poison ou Paralysie.');
+        if (e.parProtection && dmg === null) parts.push(`Inflige ${e.amount ? `${e.amount} + ` : ''}ta Protection en dégâts${who}${times}.`);
+        else parts.push(`Inflige ${hl(v, base ?? e.amount)} dégâts${who}${times}.`);
+        if (e.parProtection && dmg !== null) parts.push(`<i>(${e.amount ? `${e.amount} + ` : ''}ta Protection)</i>`);
+        if (e.noAura) parts.push('<i>Sans bonus d’Aura.</i>');
+        if (e.cumul) parts.push(`+${e.cumul} dégâts à chaque utilisation.`);
+        if (e.peurChance) parts.push(`${Math.round(e.peurChance * 100)} % : 1 Peur.`);
+        if (e.recul) parts.push(`Perd <b class="down">${e.recul}</b> PV si la cible avait de la Protection.`);
+        if (e.facade) parts.push('Double si tu as un statut ou une baisse de stat.');
         if (e.revanche) parts.push('Double si tu as perdu des PV au dernier tour ennemi.');
         if (e.drain) parts.push('Récupère la moitié des dégâts infligés.');
         if (e.contreStatut) parts.push('Double si la cible a un statut.');
@@ -76,7 +86,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         parts.push(`Inflige ${dmg !== null ? hl(dmg, e.amount) : e.amount} dégâts, +1 par ${e.per} PV perdus.`);
         break;
       case 'tout-ou-rien':
-        parts.push(`Inflige ${dmg !== null ? `<b>${dmg}</b>` : 'autant de'} dégâts que tes PV, puis tombe à 1 PV.`);
+        parts.push(`Tombe à 1 PV. Inflige ${dmg !== null ? `<b>${dmg}</b>` : 'autant de'} dégâts et gagne autant d’Aura que de PV perdus.`);
         break;
       case 'aura-protection':
         parts.push(e.mult === 1 ? "Convertit toute ton Aura en Protection." : `Convertit ton Aura en Protection (× ${e.mult}).`);
@@ -84,6 +94,14 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'casse-protection': parts.push(d.target === 'tous' ? 'Retire la Protection de tous les ennemis.' : 'Retire la Protection de la cible.'); break;
       case 'soin': parts.push(`Récupère <b>${e.amount}</b> PV.`); break;
       case 'copie': parts.push('Rejoue la dernière carte jouée.'); break;
+      case 'protection-cible': parts.push('Gagne autant de Protection que la cible en a.'); break;
+      case 'soin-cible': parts.push(`La cible récupère aussi <b>${e.amount}</b> PV.`); break;
+      case 'double-jeu': parts.push(e.amount > 1 ? `Tes <b>${e.amount}</b> prochaines cartes sont jouées 2 fois.` : 'Ta prochaine carte est jouée 2 fois.'); break;
+      case 'fuite': parts.push('Les ennemis fuient : fin du combat <b class="down">sans récompense</b>. Pas contre un gardien.'); break;
+      case 'fin-tour': parts.push('Termine ton tour.'); break;
+      case 'concentration': parts.push(`<b>Concentration</b> : ${dmg !== null ? hl(dmg, e.amount) : e.amount} dégâts au prochain tour si tu ne subis aucun dégât.`); break;
+      case 'auto-degats': parts.push(`Subis <b class="down">${e.amount}</b> dégâts (ta Protection compte).`); break;
+      case 'consomme-aura': parts.push(`Consomme <b>${e.amount}</b> Aura (requis).`); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
       case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
@@ -96,7 +114,9 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'protection': parts.push(`Gagne <b>${e.amount}</b> Protection.`); break;
       case 'statut': {
         const s = STATUS_INFO[e.status].label;
-        if (e.on === 'soi' && (e.status === 'attaque' || e.status === 'defense')) {
+        if (e.status === 'tenace') parts.push('<b>Tenace</b> : pas de K.O. avant ton prochain tour.');
+        else if (e.status === 'etourdi') parts.push('<b>Étourdi</b> : tu passes ton prochain tour.');
+        else if (e.on === 'soi' && (e.status === 'attaque' || e.status === 'defense')) {
           // Contestation : les baisses de stats de Vipélierre deviennent des hausses
           parts.push(d.character === 'vipelierre' && e.stacks < 0 ? `${s} ${signed(-e.stacks)} <i>(Contestation)</i>.` : `${s} ${signed(e.stacks)}.`);
         } else if (e.on === 'soi') parts.push(`Gagne ${e.stacks} ${s}.`);
@@ -110,6 +130,8 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }
+  if (d.requires?.block) parts.push('<i>Jouable seulement avec de la Protection.</i>');
+  if (d.requires?.aura && !d.effects.some((e) => e.kind === 'consomme-aura')) parts.push(`<i>Demande ${d.requires.aura} Aura.</i>`);
   if (d.id === 'voeu-brise') parts.push('Malédiction. À la fin de ton tour, si elle est dans ta main : perds <b class="down">2</b> PV.');
   for (const k of d.keywords ?? []) parts.push(`<i>${KEYWORD_LABELS[k]}.</i>`);
   return parts.join(' ');

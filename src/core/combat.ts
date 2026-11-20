@@ -97,6 +97,8 @@ export interface CombatOptions {
   form?: Form;
   /** Acte en cours (la Méga-Évolution de Lucario demande l'acte 2). */
   act?: number;
+  /** Combat contre un gardien (Hurlement ne fait pas fuir, le Gel ne fait pas passer le tour). */
+  boss?: boolean;
 }
 
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
@@ -139,6 +141,19 @@ export class Combat {
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
   private attacksThisTurn = 0;
   private firstAttackDone = false;
+  private boss = false;
+  /** Photocopie : nombre de prochaines cartes jouées deux fois. */
+  doubleNext = 0;
+  /** Close Combat : le tour du joueur doit se terminer (l'interface enchaîne). */
+  endTurnRequested = false;
+  /** Étourdi : ce tour est perdu (l'interface le passe). */
+  skipTurn = false;
+  /** Hurlement : les ennemis ont fui (victoire sans récompense). */
+  fled = false;
+  /** Ball'Ombre : dégâts gagnés par nom de carte pour ce combat. */
+  private cumul: Record<string, number> = {};
+  /** Mitra-Poing : carte et cible de la frappe concentrée. */
+  private focus: { d: CardDef; uid: number } | null = null;
 
   constructor(opts: CombatOptions) {
     this.rng = new Rng(opts.seed);
@@ -151,6 +166,7 @@ export class Combat {
       powers: {}, freeTurn: false, hpLostEnemyTurn: 0,
     };
     this.relics = new Set(opts.relics ?? []);
+    this.boss = !!opts.boss;
     // Méga-Évolution : la Méga-Gemme tenue (et le bon stade) transforme le Pokémon pour tout le combat
     const mega = ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
     if (ch.id === 'kangourex') {
@@ -260,7 +276,10 @@ export class Combat {
   canPlay(card: Card): boolean {
     if (this.phase !== 'joueur') return false;
     const d = this.def(card);
-    if (d.keywords?.includes('injouable')) return false;
+    if (d.keywords?.includes('injouable') || this.skipTurn) return false;
+    if (d.requires?.block && this.player.block < d.requires.block) return false;
+    if (d.requires?.aura && this.player.aura < d.requires.aura) return false;
+    if (d.requires?.notBoss && this.boss) return false;
     if (this.has('bandeau-choix') && d.category === 'attaque' && this.attacksThisTurn >= 1) return false;
     return this.costOf(card) <= this.player.energy;
   }
@@ -272,10 +291,10 @@ export class Combat {
       switch (e.kind) {
         case 'degats': {
           const mult = d.effects.find((x): x is Extract<Effect, { kind: 'aura-mult' }> => x.kind === 'aura-mult');
-          let base = e.amount;
+          let base = e.amount + (e.parProtection ? p.block : 0) + (e.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
           if (e.facade && this.hasBadStatus()) base *= 2;
           if (e.revanche && p.hpLostEnemyTurn > 0) base *= 2;
-          return base + p.aura * (mult ? mult.amount : 1);
+          return base + (e.noAura ? 0 : p.aura * (mult ? mult.amount : 1));
         }
         case 'degats-aura':
           return p.aura * e.mult;
@@ -283,6 +302,8 @@ export class Combat {
           return e.amount + Math.floor((p.maxHp - p.hp) / e.per) + p.aura;
         case 'tout-ou-rien':
           return p.hp - 1;
+        case 'concentration':
+          return e.amount + p.aura;
       }
     }
     return null;
@@ -308,9 +329,10 @@ export class Combat {
     return this.playerDamage(base, d, target).amount;
   }
 
+  /** Façade : un statut néfaste ou une baisse de stat. */
   private hasBadStatus(): boolean {
     const s = this.player.statuses;
-    return (s.brulure ?? 0) > 0 || (s.poison ?? 0) > 0 || (s.paralysie ?? 0) > 0;
+    return hasAnyStatus(this.player) || (s.attaque ?? 0) < 0 || (s.defense ?? 0) < 0 || (s.gel ?? 0) > 0;
   }
 
   /** Dégâts par coup annoncés par l'intention d'un ennemi. */
@@ -337,10 +359,21 @@ export class Combat {
     this.player.energy -= this.costOf(card);
     this.hand.splice(idx, 1);
 
-    this.cardAuraUsed = false;
-    for (const eff of d.effects) {
-      if (this.phase !== 'joueur') break;
-      this.resolve(eff, d, target);
+    // Photocopie : la prochaine carte est jouée deux fois
+    const reps = this.doubleNext > 0 && !d.effects.some((e) => e.kind === 'double-jeu') ? 2 : 1;
+    if (reps === 2) {
+      this.doubleNext--;
+      this.events.push({ type: 'player-move', name: `Photocopie : ${d.name} × 2` });
+    }
+    for (let r = 0; r < reps; r++) {
+      this.cardAuraUsed = false;
+      const t = target && target.hp > 0 ? target : d.target === 'ennemi' ? this.aliveEnemies()[0] : undefined;
+      for (const eff of d.effects) {
+        if (this.phase !== 'joueur') break;
+        this.resolve(eff, d, t);
+      }
+      const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
+      if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
     if (d.category === 'attaque') {
@@ -359,6 +392,8 @@ export class Combat {
 
   endPlayerTurn(): void {
     if (this.phase !== 'joueur') return;
+    this.endTurnRequested = false;
+    this.skipTurn = false;
     for (const c of this.hand) {
       const d = this.def(c);
       if (d.keywords?.includes('conservee')) continue;
@@ -389,11 +424,19 @@ export class Combat {
     this.tickDots(e, uid);
     if (e.hp <= 0) return this.checkEnd();
 
-    if ((e.statuses.sommeil ?? 0) > 0) {
+    // Gel : à 3, l'ennemi passe son tour (un gardien inflige seulement la moitié de ses dégâts)
+    const frozen = (e.statuses.gel ?? 0) >= 3;
+    if (frozen) {
+      delete e.statuses.gel;
+      this.events.push({ type: 'status', target: uid, status: 'gel', stacks: -3 });
+    }
+    if (frozen && !this.boss) {
+      this.events.push({ type: 'enemy-move', uid, name: 'Gelé !' });
+    } else if ((e.statuses.sommeil ?? 0) > 0) {
       e.statuses.sommeil! -= 1;
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
-      const m = e.intent;
+      const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
       this.events.push({ type: 'enemy-move', uid, name: m.name });
       if (m.block) this.gainBlock(e, uid, m.block);
       if (m.damage !== undefined) {
@@ -462,8 +505,32 @@ export class Combat {
     if (this.player.familiar) this.player.familiar.block = 0;
     this.player.block = 0;
     this.player.energy = this.player.maxEnergy;
+    if (this.player.statuses.tenace) {
+      delete this.player.statuses.tenace;
+      this.events.push({ type: 'status', target: 'player', status: 'tenace', stacks: -1 });
+    }
     this.tickDots(this.player, 'player');
     if (this.player.hp <= 0) return this.checkEnd();
+    // Mitra-Poing : la frappe concentrée part si aucun dégât n'a été subi
+    const focus = this.player.statuses.concentration;
+    if (focus && this.focus) {
+      delete this.player.statuses.concentration;
+      const f = this.focus;
+      this.focus = null;
+      const t = this.enemy(f.uid)?.hp ? this.enemy(f.uid)! : this.aliveEnemies()[0];
+      if (t) {
+        this.events.push({ type: 'player-move', name: `${f.d.name} : frappe concentrée !` });
+        this.strike(t, focus, f.d);
+        this.checkEnd();
+        if (this.phase !== 'joueur') return;
+      }
+    }
+    if (this.player.statuses.etourdi) {
+      delete this.player.statuses.etourdi;
+      this.skipTurn = true;
+      this.player.energy = 0;
+      this.events.push({ type: 'player-move', name: 'Étourdi : tu passes ce tour…' });
+    }
     const pw = this.player.powers;
     if (pw.plenitude) this.gainAura(pw.plenitude);
     if (pw['champ-herbu']) this.healPlayer(pw['champ-herbu']);
@@ -474,6 +541,8 @@ export class Combat {
     if (pw.telekinesie) this.draw(pw.telekinesie);
     if (pw['lire-esprit'] && this.player.aura >= 30) {
       this.player.freeTurn = true;
+      this.player.aura -= 15;
+      this.events.push({ type: 'aura', amount: this.player.aura });
       this.events.push({ type: 'player-move', name: 'Énergie illimitée !' });
     }
     this.draw(HAND_SIZE);
@@ -530,21 +599,27 @@ export class Combat {
     switch (eff.kind) {
       case 'degats': {
         const hits = eff.hitsMax ? this.rng.int(eff.hits ?? 1, eff.hitsMax) : (eff.hits ?? 1);
-        let base = eff.amount;
+        let base = eff.amount + (eff.parProtection ? p.block : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
         if (eff.facade && this.hasBadStatus()) base *= 2;
         if (eff.revanche && p.hpLostEnemyTurn > 0) base *= 2;
         let dealt = 0;
+        let recoil = false;
         for (let i = 0; i < hits && this.phase === 'joueur'; i++) {
           const targets = this.targetsFor(d, target);
           if (!targets.length) break;
-          const bonus = this.takeAura();
+          let bonus = 0;
+          if (eff.noAura) this.cardAuraUsed = true;
+          else bonus = this.takeAura();
           for (const t of targets) {
             let b = eff.contreStatut && hasAnyStatus(t) ? base * 2 : base;
             if (eff.parStatut) b += (t.statuses[eff.parStatut] ?? 0) * (eff.parStatutX ?? 1);
+            if (eff.recul && t.block > 0) recoil = true;
             dealt += this.strike(t, b + bonus, d);
+            if (eff.peurChance && t.hp > 0 && this.rng.next() < eff.peurChance) this.addStatus(t, t.uid, 'peur', 1);
           }
         }
         if (eff.drain) this.healPlayer(Math.floor(dealt / 2));
+        if (recoil && this.phase === 'joueur') this.loseHp(p, 'player', eff.recul!, 'carte');
         return;
       }
       case 'degats-aura': {
@@ -665,6 +740,47 @@ export class Combat {
           this.events.push({ type: 'block', target: 'bebe', amount: eff.amount });
         }
         return;
+      case 'protection-cible':
+        if (target && target.block > 0) this.gainBlock(p, 'player', target.block);
+        return;
+      case 'soin-cible':
+        if (target && target.hp > 0) {
+          const h = Math.min(eff.amount, target.maxHp - target.hp);
+          if (h > 0) {
+            target.hp += h;
+            this.events.push({ type: 'heal', target: target.uid, amount: h });
+          }
+        }
+        return;
+      case 'double-jeu':
+        this.doubleNext += eff.amount;
+        this.events.push({ type: 'player-move', name: eff.amount > 1 ? `Les ${eff.amount} prochaines cartes seront jouées 2 fois` : 'La prochaine carte sera jouée 2 fois' });
+        return;
+      case 'fuite':
+        if (this.boss) return;
+        for (const e of this.aliveEnemies()) this.events.push({ type: 'enemy-move', uid: e.uid, name: "S'enfuit !" });
+        this.fled = true;
+        this.phase = 'victoire';
+        return;
+      case 'fin-tour':
+        this.endTurnRequested = true;
+        return;
+      case 'concentration': {
+        const t = target ?? this.aliveEnemies()[0];
+        if (!t) return;
+        const bonus = this.takeAura();
+        this.focus = { d, uid: t.uid };
+        this.player.statuses.concentration = eff.amount + bonus;
+        this.events.push({ type: 'status', target: 'player', status: 'concentration', stacks: eff.amount + bonus });
+        return;
+      }
+      case 'auto-degats':
+        this.dealDamage(p, 'player', eff.amount, 'normal');
+        return;
+      case 'consomme-aura':
+        p.aura = Math.max(0, p.aura - eff.amount);
+        this.events.push({ type: 'aura', amount: p.aura });
+        return;
       case 'copie': {
         const last = this.lastPlayed;
         if (!last) return;
@@ -674,7 +790,7 @@ export class Combat {
       }
       case 'metronome': {
         const pool = Object.values(CARD_DEFS).filter((c) =>
-          c.character === p.character && c.category !== 'talent' && !c.effects.some((e) => e.kind === 'metronome' || e.kind === 'copie'));
+          c.character === p.character && c.category !== 'talent' && !c.requires && !c.effects.some((e) => ['metronome', 'copie', 'fuite', 'fin-tour', 'concentration', 'double-jeu'].includes(e.kind)));
         const pick = this.rng.pick(pool);
         this.events.push({ type: 'player-move', name: `Métronome : ${pick.name}` });
         const t = this.aliveEnemies().length ? this.rng.pick(this.aliveEnemies()) : undefined;
@@ -768,6 +884,11 @@ export class Combat {
     f.block -= blocked;
     const rest = amount - blocked;
     this.events.push({ type: 'damage', target: who, amount: rest, blocked, effectiveness });
+    if (rest > 0 && who === 'player' && this.player.statuses.concentration) {
+      delete this.player.statuses.concentration;
+      this.focus = null;
+      this.events.push({ type: 'player-move', name: 'Concentration perdue !' });
+    }
     if (rest > 0) this.applyHpLoss(f, who, rest);
   }
 
@@ -786,6 +907,8 @@ export class Combat {
       this.relicFired('ceinture-force');
       amt = f.hp - 1;
     }
+    // Tenace : ne peut pas tomber K.O. avant son prochain tour
+    if (who === 'player' && (f.statuses.tenace ?? 0) > 0 && amt >= f.hp) amt = Math.max(0, f.hp - 1);
     const lost = Math.min(f.hp, amt);
     const wasAboveHalf = f.hp >= f.maxHp / 2;
     f.hp -= lost;
@@ -859,6 +982,15 @@ export class Combat {
 
 /** Le Bébé Kangourex comme combattant (type Normal), pour le calcul des dégâts. */
 const BABY_FIGHTER: Fighter = { name: 'Bébé', dex: 115, types: ['normal'], hp: 1, maxHp: 1, block: 0, statuses: {} };
+
+/** Nom d'une carte sans le « + » de l'amélioration. */
+function baseName(name: string): string {
+  return name.replace(/\+$/, '');
+}
+
+function m0(m: EnemyMove): EnemyMove {
+  return m;
+}
 
 function hasAnyStatus(f: Fighter): boolean {
   const s = f.statuses;

@@ -117,12 +117,13 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   view = new CombatView(
     screen,
     run,
-    { seed: `${run.seed}-${run.floor}`, enemies: run.encounter(type), label: labels[type] },
+    { seed: `${run.seed}-${run.floor}`, enemies: run.encounter(type), label: labels[type], boss: type === 'boss' },
     (r) => {
       clear();
       run.hp = r.hp;
       if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
       if (!r.victory) return endRun(run, false);
+      if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
       if (run.relics.includes('grelot-coque')) run.heal(6);
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'boss') {
@@ -170,6 +171,7 @@ function kecleonFight(run: Run, onWin: () => void): void {
       run.hp = r.hp;
       if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
       if (!r.victory) return endRun(run, false);
+      if (r.fled) return showMap(run);
       onWin();
     },
   );
@@ -187,6 +189,7 @@ function duel(run: Run, f: EventFight): void {
       run.hp = r.hp;
       if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
       if (!r.victory) return endRun(run, false);
+      if (r.fled) return showMap(run);
       renderReward(
         screen, run,
         { money: run.moneyReward('elite', r.shinies), cards: run.cardChoices('boss'), label: 'Duel', title: 'Duel remporté !', relic: f.relic ? run.rollRelics(1)[0] : undefined },

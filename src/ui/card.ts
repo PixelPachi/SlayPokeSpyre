@@ -33,7 +33,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
         </div>
         <div class="card-banner"><div class="card-name ${d.name.length > 13 ? 'long' : ''}">${esc(d.name)}</div></div>
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
-        <div class="card-text"><span>${text}</span></div>
+        <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${text}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
       </div>
       <div class="card-cost ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}">${o.cost ?? d.cost}</div>
@@ -46,3 +46,8 @@ const CATEGORY_ART: Record<string, string> = {
   talent: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(255,255,255,.18)"/><path d="M32 12l5 13h14l-11 8 4 14-12-9-12 9 4-14-11-8h14z" fill="#fff" opacity=".9"/></svg>',
   statut: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="rgba(0,0,0,.25)"/></svg>',
 };
+
+/** Longueur visible d'un texte de carte (sans les balises). */
+function textLen(html: string): number {
+  return html.replace(/<[^>]+>/g, '').length;
+}

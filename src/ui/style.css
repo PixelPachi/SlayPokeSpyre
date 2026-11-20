@@ -828,3 +828,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .btn.danger { background: #8e2430; color: #fff; border-color: #ff8a80; }
 .btn.danger.confirm { background: #c62828; animation: summit-glow 1s infinite; }
 .kecleon-gone { width: 96px; height: 96px; display: grid; place-items: center; font-size: 56px; font-weight: 900; color: #ff8a80; }
+
+/* Textes de carte longs : police réduite pour rester dans le cadre */
+.card-text.long { font-size: 10.4px; line-height: 1.14; }
+.card-text.xlong { font-size: 9.6px; line-height: 1.1; }

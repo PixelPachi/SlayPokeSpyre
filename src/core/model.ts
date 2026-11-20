@@ -12,7 +12,11 @@ export type StatusId =
   | 'confusion' // gagne 25 % de Protection en moins, X tours
   | 'sommeil' // saute son prochain tour
   | 'attaque' // +X dégâts par coup (peut être négatif)
-  | 'defense'; // +X Protection par carte (peut être négatif)
+  | 'defense' // +X Protection par carte (peut être négatif)
+  | 'tenace' // ne peut pas tomber K.O. jusqu'à son prochain tour
+  | 'gel' // à 3 Gel : passe son tour (un gardien inflige seulement la moitié de ses dégâts)
+  | 'concentration' // Mitra-Poing : frappe au début du prochain tour si aucun dégât n'est subi d'ici là
+  | 'etourdi'; // passe son prochain tour
 
 export type Statuses = Partial<Record<StatusId, number>>;
 
@@ -36,6 +40,11 @@ export type Effect =
       contreStatut?: boolean; // dégâts doublés si la cible a un statut (Poison, Brûlure, Paralysie, Peur, Confusion…)
       parStatut?: StatusId; // + parStatutX dégâts par point de ce statut sur la cible
       parStatutX?: number;
+      noAura?: boolean; // l'Aura ne s'ajoute pas (et n'est pas consommée)
+      parProtection?: boolean; // + la Protection actuelle du lanceur
+      cumul?: number; // chaque utilisation donne +cumul dégâts à toutes les cartes du même nom (pour le combat)
+      peurChance?: number; // chance d'appliquer 1 Peur à chaque cible touchée
+      recul?: number; // le lanceur perd ce nombre de PV si la cible avait de la Protection
     }
   | { kind: 'protection'; amount: number }
   | { kind: 'statut'; status: StatusId; stacks: number; on: 'cible' | 'soi' | 'tous' }
@@ -59,7 +68,15 @@ export type Effect =
   | { kind: 'bebe-puissance'; amount: number }
   | { kind: 'bebe-soin'; amount: number } // soigne le Bébé (le ramène s'il est K.O.)
   | { kind: 'bebe-pvmax'; amount: number }
-  | { kind: 'bebe-protection'; amount: number };
+  | { kind: 'bebe-protection'; amount: number }
+  | { kind: 'protection-cible' } // gagne autant de Protection que la cible en a
+  | { kind: 'soin-cible'; amount: number } // soigne aussi la cible
+  | { kind: 'double-jeu'; amount: number } // les N prochaines cartes jouées le sont 2 fois
+  | { kind: 'fuite' } // les ennemis s'enfuient : fin du combat sans récompense (pas contre un gardien)
+  | { kind: 'fin-tour' } // termine le tour du joueur
+  | { kind: 'concentration'; amount: number } // Mitra-Poing
+  | { kind: 'auto-degats'; amount: number } // le lanceur subit ces dégâts (la Protection compte)
+  | { kind: 'consomme-aura'; amount: number };
 
 export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable';
 
@@ -77,6 +94,8 @@ export interface CardDef {
   target: Target;
   effects: Effect[];
   keywords?: Keyword[];
+  /** Conditions pour jouer la carte. */
+  requires?: { block?: number; aura?: number; notBoss?: boolean };
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

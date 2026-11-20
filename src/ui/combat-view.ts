@@ -21,6 +21,8 @@ export interface CombatResult {
   hp: number;
   /** Ennemis chromatiques vaincus (Pokédollars doublés). */
   shinies: number;
+  /** Hurlement : les ennemis ont fui, pas de récompense. */
+  fled?: boolean;
 }
 
 export class CombatView {
@@ -35,13 +37,13 @@ export class CombatView {
   constructor(
     private root: HTMLElement,
     private run: Run,
-    private opts: { seed: string; enemies: string[]; label: string; enemyPower?: number },
+    private opts: { seed: string; enemies: string[]; label: string; enemyPower?: number; boss?: boolean },
     private onEnd: (r: CombatResult) => void,
   ) {
     this.combat = new Combat({
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
-      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower,
+      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss,
     });
     this.combat.drainEvents();
     // Le décor (fond + particules) reste en place pendant tout le combat : les animations ne redémarrent pas
@@ -238,8 +240,8 @@ export class CombatView {
     return `
       <div class="overlay">
         <div class="panel">
-          <h2>${win ? 'Victoire !' : 'K.O.…'}</h2>
-          <p>${win ? `${esc(this.combat.player.name)} remporte le combat avec ${this.combat.player.hp} PV.` : `${esc(this.combat.player.name)} est tombé au combat. La run est terminée.`}</p>
+          <h2>${this.combat.fled ? 'Ils ont fui !' : win ? 'Victoire !' : 'K.O.…'}</h2>
+          <p>${this.combat.fled ? 'Les ennemis se sont enfuis : pas de récompense.' : win ? `${esc(this.combat.player.name)} remporte le combat avec ${this.combat.player.hp} PV.` : `${esc(this.combat.player.name)} est tombé au combat. La run est terminée.`}</p>
           <button class="btn primary next">${win ? 'Continuer' : 'Voir le bilan'}</button>
         </div>
       </div>`;
@@ -364,6 +366,8 @@ export class CombatView {
     this.combat.play(uid, targetUid);
     this.refresh();
     if (isAttack) this.whoEl('player')?.classList.add('lunge'); // petit pas en avant vers les ennemis
+    // Close Combat : la carte termine le tour
+    if (this.combat.endTurnRequested && this.combat.phase === 'joueur') setTimeout(() => void this.endTurn(), 450);
   }
 
   /** Met à jour la cible survolée sans tout redessiner (garde le glisser fluide). */
@@ -404,6 +408,11 @@ export class CombatView {
     c.endEnemyTurn();
     this.busy = false;
     this.refresh();
+    // Étourdi : le tour du joueur est passé automatiquement
+    if (c.skipTurn && c.phase === 'joueur') {
+      await sleep(900);
+      return this.endTurn();
+    }
   }
 
   // ——— Entrées : les cartes se jouent uniquement en les tirant ———
@@ -560,6 +569,7 @@ export class CombatView {
           hp: this.combat.player.hp,
           consumed: this.combat.consumedRelics,
           shinies: this.combat.enemies.filter((e) => e.shiny).length,
+          fled: this.combat.fled,
         });
       }
       if (t.closest('.tb-deck')) return openDeckOverlay(this.root, { title: 'Ton deck' }, this.run);
