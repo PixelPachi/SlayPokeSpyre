@@ -1,3 +1,4 @@
+import { soundIcon, soundLabel } from '../audio/audio';
 // Écran titre et Glossaire (objets tenus, baies, Pokémon croisés et leur version chromatique).
 import type { SaveData } from '../core/save';
 import { allRelics } from '../data/relics';
@@ -40,6 +41,7 @@ export function renderTitle(root: HTMLElement, a: TitleActions): void {
         ${items.map((it, i) => `<button class="t-item ${it.cls}" style="animation-delay:${0.25 + i * 0.09}s"><span>${esc(it.label)}</span>${it.sub ? `<small>${esc(it.sub)}</small>` : ''}</button>`).join('')}
       </nav>
       <div class="title-foot">Fan-game Pokémon non officiel</div>
+      <button class="tb-sound title-sound" data-tip="${soundLabel()} (cliquer pour changer)">${soundIcon()}</button>
     </div>`;
   root.onclick = (ev) => {
     const t = ev.target as HTMLElement;

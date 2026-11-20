@@ -1,3 +1,4 @@
+import { soundIcon, soundLabel } from '../audio/audio';
 // Éléments communs aux écrans d'une run : barre du haut et fenêtre du deck.
 import { BERRY_DEFS, MAX_BERRIES } from '../data/berries';
 import type { Card } from '../core/model';
@@ -21,6 +22,7 @@ export function topbar(run: Run, label: string, hp = run.hp): string {
       <span class="tb-berries">${berrySlots(run)}</span>
       <span class="tb-relics">${run.relics.map((id) => relicIcon(id)).join('')}</span>
       <span class="tb-seed" data-tip="Même graine = même run">Graine ${esc(run.seed)}</span>
+      <button class="tb-sound" data-tip="${soundLabel()} (cliquer pour changer)">${soundIcon()}</button>
       <button class="tb-menu" data-tip="Menu : sauvegarder et quitter">☰</button>
     </div>`;
 }

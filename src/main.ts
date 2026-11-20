@@ -1,3 +1,4 @@
+import { cycleSound, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
@@ -20,6 +21,16 @@ const stage = document.getElementById('stage')!;
 const screen = document.getElementById('screen')!;
 fitStage(stage);
 installTooltips(stage);
+installAudioUnlock();
+
+// Bouton son (barre du haut, écran titre) : musique + effets → effets seuls → muet
+stage.addEventListener('click', (ev) => {
+  const b = (ev.target as HTMLElement).closest('.tb-sound');
+  if (!b) return;
+  ev.stopPropagation();
+  cycleSound();
+  document.querySelectorAll<HTMLElement>('.tb-sound').forEach((el) => { el.textContent = soundIcon(); el.dataset.tip = `${soundLabel()} (cliquer pour changer)`; });
+}, true);
 
 let view: CombatView | null = null;
 /** Run en cours (pour le menu des baies). */
@@ -48,6 +59,7 @@ stage.addEventListener('click', (ev) => {
     if (inCombat) {
       if (!view!.eatBerry(b.name, b.fx)) return;
     } else {
+      sfx('baie');
       if (b.fx.maxHp) run.maxHp += b.fx.maxHp;
       if (b.fx.heal) run.hp = Math.min(run.maxHp, run.hp + b.fx.heal);
       document.querySelectorAll('.tb-hp').forEach((el) => (el.textContent = `PV ${run.hp}/${run.maxHp}`));
@@ -116,6 +128,7 @@ function clear(): void {
 
 function title(): void {
   clear();
+  playTheme('titre');
   activeRun = null;
   const resume = savedRunSummary();
   renderTitle(screen, {
@@ -174,6 +187,7 @@ function continueRun(): void {
 
 function menu(): void {
   clear();
+  playTheme('titre');
   renderSelect(screen, save, (id) => startRun(id), title);
 }
 
@@ -191,6 +205,7 @@ function startRun(character: CharacterId): void {
   // Pour tester : ?combat=apireine lance directement un combat contre ce gardien
   if (params.get('combat')) {
     clear();
+    playTheme(params.get('combat')!.startsWith('dialga') ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
     view = new CombatView(screen, run, { seed: `${run.seed}-test`, enemies: params.get('combat')!.split(','), label: 'Test', boss: true }, () => showMap(run));
     return;
   }
@@ -202,6 +217,7 @@ function startRun(character: CharacterId): void {
 
 function showMap(run: Run): void {
   clear();
+  playTheme(run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
   if (run.act >= LAST_ACT) return showSummit(run);
   persist(run, false);
   renderMap(screen, run, (row, col) => {
@@ -239,10 +255,13 @@ function enterNode(run: Run, row: number, col: number): void {
 function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   clear();
   const labels = { combat: 'Combat', elite: 'Pokémon dominant', boss: 'Gardien' };
+  const enemies = run.encounter(type);
+  if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
+  else playTheme(run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
   view = new CombatView(
     screen,
     run,
-    { seed: `${run.seed}-${run.floor}`, enemies: run.encounter(type), label: labels[type], boss: type === 'boss' },
+    { seed: `${run.seed}-${run.floor}`, enemies, label: labels[type], boss: type === 'boss' },
     (r) => {
       clear();
       run.hp = r.hp;

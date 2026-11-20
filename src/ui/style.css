@@ -965,3 +965,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .enemy-card-who .sig { display: block; font-size: 15px; color: #ffd76a; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
 .gl-mon.boss { border-color: #b8862a; background: linear-gradient(#2a2312cc, #151a2bcc); }
 .gl-gim { font-style: normal; font-size: 11px; font-weight: 900; color: #ffd76a; }
+.tb-sound { margin-left: 10px; width: 34px; height: 30px; border-radius: 8px; border: 2px solid #8892a6; background: #1a2030; color: #fff; font-size: 15px; cursor: pointer; }
+.tb-sound:hover { border-color: var(--gold); }
+.title-sound { position: absolute; right: 24px; bottom: 20px; z-index: 5; width: 44px; height: 40px; font-size: 20px; }

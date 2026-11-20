@@ -1,3 +1,4 @@
+import { sfx, sfxType } from '../audio/audio';
 import type { BerryFx } from '../data/berries';
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
 import { saveHooks } from '../core/save';
@@ -87,8 +88,14 @@ export class CombatView {
 
   // ——— Rendu ———
 
+  private endSfx = false;
+
   private render(): void {
     const c = this.combat;
+    if ((c.phase === 'victoire' || c.phase === 'defaite') && !this.endSfx) {
+      this.endSfx = true;
+      setTimeout(() => sfx(c.phase === 'victoire' ? 'victoire' : 'defaite'), 500);
+    }
     const p = c.player;
     const targeting = false;
 
@@ -285,9 +292,11 @@ export class CombatView {
           break;
         case 'block':
           this.float(ev.target, `+${ev.amount}`, 'block', at(ev.target));
+          if (ev.amount > 0) sfx('protection');
           break;
         case 'heal':
           this.float(ev.target, `+${ev.amount}`, 'heal', at(ev.target));
+          sfx('soin');
           break;
         case 'status': {
           const info = STATUS_INFO[ev.status];
@@ -298,12 +307,15 @@ export class CombatView {
         case 'enemy-move': {
           const el = this.whoEl(ev.uid);
           el?.classList.add('lunge');
+          if (ev.move?.damage !== undefined) sfxType(ev.move.pokeType ?? 'normal', 1.2);
+          else if (ev.move) sfx('statut');
           if (ev.move && (ev.move.damage !== undefined || ev.move.signature)) this.showEnemyCard(ev.uid, ev.move, ev.damage ?? ev.move.damage ?? 0);
           else this.float(ev.uid, ev.name, 'move', 0);
           break;
         }
         case 'ko':
           this.whoEl(ev.target)?.classList.add('fainting');
+          sfx('ko');
           break;
         case 'player-move':
           this.float('player', ev.name, 'move', 0);
@@ -392,6 +404,7 @@ export class CombatView {
   /** Manger une baie depuis la barre du haut (pendant ton tour). */
   eatBerry(name: string, fx: BerryFx): boolean {
     if (this.busy || !this.combat.useBerry(name, fx)) return false;
+    sfx('baie');
     if (fx.maxHp) this.run.maxHp += fx.maxHp;
     this.refresh();
     return true;
@@ -407,6 +420,7 @@ export class CombatView {
     this.selected = null;
     this.hoverEnemy = null;
     const isAttack = this.combat.def(card).category === 'attaque';
+    if (isAttack) sfxType(this.combat.def(card).pokeType); else sfx('carte');
     this.combat.play(uid, targetUid);
     this.refresh();
     if (isAttack) this.whoEl('player')?.classList.add('lunge'); // petit pas en avant vers les ennemis
