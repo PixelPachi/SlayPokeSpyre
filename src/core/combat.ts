@@ -9,6 +9,7 @@ import { CARD_DEFS, cardDef } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { ENEMY_DEFS } from '../data/enemies';
 import '../data/boss-gimmicks';
+import '../data/balance';
 import { BAD_STATUSES, type BerryFx } from '../data/berries';
 
 export const HAND_SIZE = 5;

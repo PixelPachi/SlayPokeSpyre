@@ -245,10 +245,10 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
 
 /** Événement mystère. */
 export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: string, onFight?: (f: EventFight) => void): void {
-  // Un événement sur deux environ est un arcane majeur ; jamais deux fois le même dans une run
+  // Environ 4 événements sur 10 sont des arcanes majeurs, les autres des rencontres Pokémon ; jamais deux fois le même dans une run
   const fresh = (list: GameEvent[]) => list.filter((e) => !run.seenEvents.includes(e.id));
   const tarot = fresh(TAROT_EVENTS), classic = fresh(EVENTS);
-  const pool = tarot.length && (run.rng.next() < 0.6 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
+  const pool = tarot.length && (run.rng.next() < 0.4 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
   const forced = forcedId?.replace(/-inverse$/, '');
   const ev: GameEvent = [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
   run.seenEvents.push(ev.id);
@@ -271,7 +271,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     ? (ev.image
       ? `<img class="tarot-card ${reversed ? 'reversed' : ''}" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
       : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
-    : `<img class="event-img" src="${asset(ev.image)}" alt="">`;
+    : `<img class="event-img ${ev.image.includes('sprites/pokemon') ? 'poke' : ''}" src="${asset(ev.image)}" alt="">`;
   root.innerHTML = shell(run, 'Événement', `
     <div class="event-panel ${ev.tarot ? 'tarot' : ''} ${reversed ? 'is-reversed' : ''}">
       ${art}

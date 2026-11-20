@@ -922,3 +922,20 @@ describe('objets tenus exclusifs', () => {
     expect(mk('kangourex', ['grelot-zen']).player.familiar!.power).toBe(5);
   });
 });
+
+describe('événements Pokémon', () => {
+  it('chaque choix de chaque événement fonctionne', async () => {
+    const { POKEMON_EVENTS } = await import('../src/data/events-pokemon');
+    const { Run } = await import('../src/core/run');
+    expect(POKEMON_EVENTS.length).toBeGreaterThanOrEqual(20);
+    for (const ev of POKEMON_EVENTS) for (const ch of ev.choices) {
+      const r = new Run('EV', 'riolu');
+      r.money = 200;
+      r.addBerry('oran');
+      if (ch.available && !ch.available(r)) continue;
+      const out = ch.apply(r);
+      expect(out).toBeTruthy();
+      expect(r.hp).toBeGreaterThan(0);
+    }
+  });
+});

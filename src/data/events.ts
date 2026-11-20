@@ -1,5 +1,6 @@
 // Événements mystères (nœuds « ? » de la carte).
 import type { Run } from '../core/run';
+import { POKEMON_EVENTS } from './events-pokemon';
 
 export interface EventChoice {
   label: string;
@@ -104,4 +105,5 @@ export const EVENTS: GameEvent[] = [
       { label: 'Repartir', detail: 'Rien ne se passe', apply: () => 'Tu reprends l’ascension.' },
     ],
   },
+  ...POKEMON_EVENTS,
 ];

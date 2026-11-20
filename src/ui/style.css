@@ -968,3 +968,4 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .tb-sound { margin-left: 10px; width: 34px; height: 30px; border-radius: 8px; border: 2px solid #8892a6; background: #1a2030; color: #fff; font-size: 15px; cursor: pointer; }
 .tb-sound:hover { border-color: var(--gold); }
 .title-sound { position: absolute; right: 24px; bottom: 20px; z-index: 5; width: 44px; height: 40px; font-size: 20px; }
+.event-img.poke { width: 150px; height: 150px; image-rendering: pixelated; margin: -20px auto -16px; }
