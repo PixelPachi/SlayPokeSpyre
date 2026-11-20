@@ -3,7 +3,6 @@ import type { SaveData } from '../core/save';
 import { allRelics } from '../data/relics';
 import { BERRIES } from '../data/berries';
 import { ENEMY_DEFS } from '../data/enemies';
-import { CHARACTERS } from '../data/characters';
 import { berryCard, relicCard } from './run-ui';
 import { asset, esc } from './util';
 
@@ -17,21 +16,30 @@ export interface TitleActions {
 }
 
 export function renderTitle(root: HTMLElement, a: TitleActions): void {
+  const items: { cls: string; label: string; sub?: string }[] = [
+    ...(a.resume ? [{ cls: 't-continue', label: 'Continuer', sub: a.resume }] : []),
+    { cls: 't-play', label: a.resume ? 'Nouvelle partie' : 'Jouer' },
+    { cls: 't-glossary', label: 'Glossaire' },
+    { cls: 't-save', label: 'Sauvegarde' },
+  ];
+  // Poussières de temps qui montent doucement
+  const motes = Array.from({ length: 34 }, (_, i) => {
+    const x = (i * 37) % 100, d = 9 + ((i * 7) % 9), delay = -((i * 13) % 17), size = 2 + (i % 4);
+    return `<i style="left:${x}%;width:${size}px;height:${size}px;animation-duration:${d}s;animation-delay:${delay}s"></i>`;
+  }).join('');
   root.innerHTML = `
     <div class="title-screen">
-      <img class="title-bg" src="${asset('backgrounds/sommet-tour-du-temps.jpg')}" alt="">
-      <div class="title-team">${(['riolu', 'vipelierre', 'kangourex', 'caninos'] as const).map((c) => `<img src="${asset(`sprites/pokemon/artwork/${CHARACTERS[c].dex[0]}.png`)}" alt="">`).join('')}</div>
-      <div class="title-glow"></div>
-      <div class="title-box">
-        <h1 class="logo big">SlayPoke<span>Spyre</span></h1>
-        <p class="title-sub">L'ascension de la Tour du Temps</p>
-        <div class="title-menu">
-          ${a.resume ? `<button class="btn primary t-continue">Continuer<small>${esc(a.resume)}</small></button>` : ''}
-          <button class="btn ${a.resume ? '' : 'primary'} t-play">${a.resume ? 'Nouvelle partie' : 'Jouer'}</button>
-          <button class="btn t-glossary">Glossaire</button>
-          <button class="btn t-save">Sauvegarde</button>
-        </div>
+      <img class="title-bg" src="${asset('title/ecran-titre.jpg')}" alt="" onerror="this.src='${asset('backgrounds/sommet-tour-du-temps.jpg')}'">
+      <div class="title-shade"></div>
+      <div class="title-motes">${motes}</div>
+      <div class="title-logo">
+        <h1>SlayPoke<span>Spyre</span></h1>
+        <p>L'ascension de la Tour du Temps</p>
       </div>
+      <nav class="title-menu">
+        ${items.map((it, i) => `<button class="t-item ${it.cls}" style="animation-delay:${0.25 + i * 0.09}s"><span>${esc(it.label)}</span>${it.sub ? `<small>${esc(it.sub)}</small>` : ''}</button>`).join('')}
+      </nav>
+      <div class="title-foot">Fan-game Pokémon non officiel</div>
     </div>`;
   root.onclick = (ev) => {
     const t = ev.target as HTMLElement;

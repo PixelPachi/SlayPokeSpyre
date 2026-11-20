@@ -1,3 +1,4 @@
+import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
 import { randomSeed } from './core/rng';
