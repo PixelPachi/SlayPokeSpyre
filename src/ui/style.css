@@ -196,7 +196,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .enemies:has(> .enemy:nth-child(3)) .enemy .sprite.front { width: 230px; height: 230px; margin: -40px 0 -32px; }
 .enemies:has(> .enemy:nth-child(3)) .enemy .platform { width: 190px; }
 .enemies:has(> .enemy:nth-child(3)) .hpbar { width: 170px; }
-.enemy.dead { width: 0; }
+.enemy.dead { visibility: hidden; } /* garde sa place : les autres ne se décalent pas */
 .enemy.targetable { cursor: crosshair; }
 .enemy.targetable .sprite { filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6)); }
 .enemy.hovered .sprite { filter: drop-shadow(0 0 10px #ffd75e) drop-shadow(0 0 4px #ffd75e); }
@@ -942,3 +942,12 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Icônes Gemini du carré de sélection */
 .roster img.icon { width: 88%; height: 88%; object-fit: contain; image-rendering: auto; filter: drop-shadow(0 3px 4px rgba(0,0,0,.6)); }
 .roster.locked img.icon { filter: brightness(0) opacity(.6); }
+
+/* Carte de l'attaque ennemie, au milieu de l'écran */
+.enemy-card { position: absolute; left: 50%; top: 42%; z-index: 55; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transform: translate(-50%, -50%); animation: ecard 1.5s ease-out forwards; }
+.enemy-card .card { margin: 0; transform: scale(1.45); transform-origin: 50% 0; --lift: 0px; --rot: 0deg; }
+.enemy-card-who { font-family: var(--font-num); font-size: 24px; color: #fff; text-shadow: 0 3px 0 #000, 0 0 10px #000; margin-bottom: 4px; }
+.enemy-card .card-cost { display: none; }
+@keyframes ecard { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.6) rotateY(80deg); } 14% { opacity: 1; transform: translate(-50%, -50%) scale(1.04) rotateY(0); }
+  22% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -56%) scale(.95); } }

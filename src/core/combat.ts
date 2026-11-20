@@ -70,7 +70,7 @@ export type CombatEvent =
   | { type: 'heal'; target: Who; amount: number }
   | { type: 'status'; target: Who; status: StatusId; stacks: number }
   | { type: 'aura'; amount: number }
-  | { type: 'enemy-move'; uid: number; name: string }
+  | { type: 'enemy-move'; uid: number; name: string; move?: EnemyMove; damage?: number }
   | { type: 'player-move'; name: string }
   | { type: 'break'; target: Who }
   | { type: 'relic'; id: string }
@@ -444,7 +444,7 @@ export class Combat {
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
       const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
-      this.events.push({ type: 'enemy-move', uid, name: m.name });
+      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? computeDamage(m.damage, e, this.player, m.pokeType ?? 'normal').amount : undefined });
       if (m.block) this.gainBlock(e, uid, m.block);
       if (m.damage !== undefined) {
         // Le Bébé Kangourex peut être visé (3 chances sur 10)

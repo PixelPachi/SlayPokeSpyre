@@ -3,7 +3,7 @@ import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { CATEGORY_LABELS, CHARACTER_COLORS, TYPE_COLORS, cardText } from './labels';
 import { esc } from './util';
-import { artUrl, orbUrl, frameUrl } from './card-assets';
+import { artNoPokemon, artUrl, orbUrl, frameUrl } from './card-assets';
 
 export interface CardRenderOptions {
   uid?: number;
@@ -22,7 +22,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const base = d.effects.find((e) => e.kind === 'degats');
   const text = o.text ?? cardText(d, null, null);
   const frame = frameUrl(d.character);
-  const art = artUrl(d.name, d.character);
+  const art = d.id.startsWith('ennemi-') ? artNoPokemon(d.name) : artUrl(d.name, d.character);
   const orb = orbUrl(d.character);
   return `
     <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}

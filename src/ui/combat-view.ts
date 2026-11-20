@@ -3,7 +3,7 @@ import { saveHooks } from '../core/save';
 import { backUrl, orbUrl } from './card-assets';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
-import type { Card, PowerId, StatusId } from '../core/model';
+import type { Card, CardDef, Effect, EnemyMove, PowerId, StatusId } from '../core/model';
 import { TYPE_LABELS, type PokeType } from '../core/types';
 import type { Run } from '../core/run';
 import { renderCard } from './card';
@@ -295,7 +295,8 @@ export class CombatView {
         case 'enemy-move': {
           const el = this.whoEl(ev.uid);
           el?.classList.add('lunge');
-          this.float(ev.uid, ev.name, 'move', 0);
+          if (ev.move?.damage !== undefined) this.showEnemyCard(ev.uid, ev.move, ev.damage ?? ev.move.damage);
+          else this.float(ev.uid, ev.name, 'move', 0);
           break;
         }
         case 'ko':
@@ -323,6 +324,28 @@ export class CombatView {
       }
     }
   }
+
+  /** Carte de l'attaque ennemie, affichée au milieu de l'écran. */
+  private showEnemyCard(uid: number, m: EnemyMove, dmg: number): void {
+    const e = this.combat.enemy(uid);
+    const effects: Effect[] = [{ kind: 'degats', amount: dmg, hits: m.hits }];
+    if (m.playerStatus) effects.push({ kind: 'statut', status: m.playerStatus.status, stacks: m.playerStatus.stacks, on: 'cible' });
+    if (m.selfStatus) effects.push({ kind: 'statut', status: m.selfStatus.status, stacks: m.selfStatus.stacks, on: 'soi' });
+    if (m.block) effects.push({ kind: 'protection', amount: m.block });
+    const def: CardDef = {
+      id: `ennemi-${m.id}`, name: m.name, character: 'normal', pokeType: m.pokeType ?? 'normal', category: 'attaque',
+      rarity: 'commune', cost: 0, target: 'ennemi', effects, upgrade: {},
+    };
+    this.fx.querySelector('.enemy-card')?.remove();
+    const box = document.createElement('div');
+    box.className = 'enemy-card';
+    box.innerHTML = `<div class="enemy-card-who">${esc(e?.name ?? '')} utilise</div>${renderCard(def, { classes: 'no-cost' })}`;
+    this.fx.appendChild(box);
+    this.lastEnemyCard = performance.now();
+    setTimeout(() => box.remove(), 1500);
+  }
+
+  private lastEnemyCard = 0;
 
   private float(who: Who, text: string, cls: string, offset: number, color?: string): void {
     const target = this.whoEl(who)?.querySelector('.sprite') ?? this.whoEl(who);
@@ -404,8 +427,10 @@ export class CombatView {
     for (const e of c.aliveEnemies()) {
       await sleep(ENEMY_STEP_MS);
       if ((c.phase as string) !== 'ennemi') break;
+      const t0 = performance.now();
       c.enemyAct(e.uid);
       this.refresh();
+      if (this.lastEnemyCard >= t0) await sleep(650); // le temps de lire la carte de l'attaque
     }
     await sleep(ENEMY_STEP_MS * 0.6);
     c.endEnemyTurn();

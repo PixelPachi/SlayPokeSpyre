@@ -43,3 +43,14 @@ export function artUrl(name: string, character?: string): string | undefined {
   const slug = artSlug(name.replace(/\+$/, ''));
   return (character && ART_URLS.get(`${character}/${slug}`)) || ART_URLS.get(slug);
 }
+
+/** Illustration sans Pokémon pour une attaque ennemie : neutre, sinon celle de Caninos ou de Kangourex
+ *  (sauf leurs cartes de départ, où leur Pokémon est dessiné). */
+const WITH_POKEMON = new Set(['caninos/griffe', 'caninos/flammeche', 'caninos/morsure', 'kangourex/ecras-face', 'kangourex/coup-d-main', 'kangourex/coup-double']);
+export function artNoPokemon(name: string): string | undefined {
+  const slug = artSlug(name);
+  for (const key of [slug, `caninos/${slug}`, `kangourex/${slug}`]) {
+    if (!WITH_POKEMON.has(key) && ART_URLS.get(key)) return ART_URLS.get(key);
+  }
+  return undefined;
+}
