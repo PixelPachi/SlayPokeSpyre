@@ -105,8 +105,8 @@ export class CombatView {
         </div>
       </div>
       <div class="hud">
-        <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : chaque carte coûte des PA. Rechargés à chaque tour.">
-          <span>${p.energy}/${p.maxEnergy}</span><small>PA</small>
+        <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : ${p.energy} sur ${p.maxEnergy}. Chaque carte coûte des PA ; ils se rechargent à chaque tour.">
+          <span class="energy-num">${p.energy}</span>
         </div>
         <div class="pile draw" data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
           <span>${c.drawPile.length}</span><small>Pioche</small>

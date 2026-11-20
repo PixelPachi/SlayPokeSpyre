@@ -919,3 +919,5 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.has-frame .card-cost.has-orb { left: -5px; top: -4px; width: 37px; height: 37px; }
 .card .card-cost.has-orb.too-much { filter: hue-rotate(-40deg) saturate(1.6) brightness(.85); color: #ffb3b3; }
 .card .card-cost.has-orb.free { color: #b8ffc6; }
+
+.energy .energy-num { font-size: 56px; line-height: 1; -webkit-text-stroke: 5px #1a1220; paint-order: stroke fill; text-shadow: 0 4px 0 #1a1220; }
