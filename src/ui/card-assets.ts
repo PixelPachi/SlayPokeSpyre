@@ -9,6 +9,13 @@ const ARTS = import.meta.glob<string>('../assets/cartes/illustrations/**/*.{png,
 const byName = (files: Record<string, string>) =>
   new Map(Object.entries(files).map(([path, url]) => [path.split('/').pop()!.replace(/\.png$/, ''), url]));
 const FRAME_URLS = byName(FRAMES);
+const ORBS = import.meta.glob<string>('../assets/orbes/*.png', { eager: true, query: '?url', import: 'default' });
+const ORB_URLS = byName(ORBS);
+
+/** Orbe d'énergie Gemini d'un personnage (« neutre » pour les cartes communes). */
+export function orbUrl(character: string): string | undefined {
+  return ORB_URLS.get(frameFile(character));
+}
 const ART_URLS = new Map(Object.entries(ARTS).map(([path, url]) => [path.split('/illustrations/')[1].replace(/\.(png|webp|jpg)$/, ''), url]));
 
 /** Nom de fichier d'une capacité : « Écras'Face » → ecras-face. */

@@ -1,5 +1,6 @@
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
 import { saveHooks } from '../core/save';
+import { orbUrl } from './card-assets';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, PowerId, StatusId } from '../core/model';
@@ -104,7 +105,7 @@ export class CombatView {
         </div>
       </div>
       <div class="hud">
-        <div class="energy ${p.energy === 0 ? 'empty' : ''}" data-tip="Points d'Action (PA) : chaque carte coûte des PA. Rechargés à chaque tour.">
+        <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : chaque carte coûte des PA. Rechargés à chaque tour.">
           <span>${p.energy}/${p.maxEnergy}</span><small>PA</small>
         </div>
         <div class="pile draw" data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">

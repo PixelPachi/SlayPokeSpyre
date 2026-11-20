@@ -3,7 +3,7 @@ import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { CATEGORY_LABELS, CHARACTER_COLORS, TYPE_COLORS, cardText } from './labels';
 import { esc } from './util';
-import { artUrl, frameUrl } from './card-assets';
+import { artUrl, orbUrl, frameUrl } from './card-assets';
 
 export interface CardRenderOptions {
   uid?: number;
@@ -23,6 +23,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const text = o.text ?? cardText(d, null, null);
   const frame = frameUrl(d.character);
   const art = artUrl(d.name, d.character);
+  const orb = orbUrl(d.character);
   return `
     <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
@@ -37,7 +38,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
         <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${text}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
       </div>
-      <div class="card-cost ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}">${o.cost ?? d.cost}</div>
+      <div class="card-cost ${orb ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orb ? `style="--orb:url('${orb}')"` : ''}>${o.cost ?? d.cost}</div>
     </div>`;
 }
 

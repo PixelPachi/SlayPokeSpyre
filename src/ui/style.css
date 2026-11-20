@@ -910,3 +910,12 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.rarity-commune .card-tint { --rt: #3fbf4f; }
 .card.rarity-peu-commune .card-tint { --rt: #2f8cff; }
 .card.rarity-rare .card-tint { --rt: #ffb300; }
+
+/* Orbes d'énergie Gemini : boule de PA du combat et rond de coût des cartes */
+.energy.has-orb { background: var(--orb) center / 100% 100% no-repeat; border: 0; box-shadow: 0 0 26px rgba(255, 255, 255, 0.25); }
+.energy.has-orb.empty { filter: grayscale(0.85) brightness(0.65); }
+.card .card-cost.has-orb { background: var(--orb) center / 100% 100% no-repeat; border: 0; box-shadow: none;
+  -webkit-text-stroke: 3px #1a1220; paint-order: stroke fill; text-shadow: 0 2px 0 #1a1220; }
+.card.has-frame .card-cost.has-orb { left: -5px; top: -4px; width: 37px; height: 37px; }
+.card .card-cost.has-orb.too-much { filter: hue-rotate(-40deg) saturate(1.6) brightness(.85); color: #ffb3b3; }
+.card .card-cost.has-orb.free { color: #b8ffc6; }
