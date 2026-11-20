@@ -31,6 +31,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
           <div class="card-art">${art ? `<img src="${art}" alt="" draggable="false">` : CATEGORY_ART[d.category]}</div>
           <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
         </div>
+        ${frame ? '<div class="card-tint"></div>' : ''}
         <div class="card-banner"><div class="card-name ${d.name.length > 13 ? 'long' : ''}">${esc(d.name)}</div></div>
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
         <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${text}</span></div>

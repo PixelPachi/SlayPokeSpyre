@@ -878,3 +878,13 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .tb-menu { margin-left: 8px; }
 .tb-menu { margin-left: 10px; width: 34px; height: 30px; border-radius: 8px; border: 2px solid #8892a6; background: #1a2030; color: #fff; font-size: 17px; font-weight: 900; cursor: pointer; }
 .tb-menu:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Bandeau du nom coloré selon la rareté : un calque teinté découpé à la forme du cadre (seulement en haut) */
+.card.has-frame .card-inner > .card-tint {
+  position: absolute; left: 27px; top: -0.3px; width: 134.2px; height: 27px; z-index: 1; pointer-events: none;
+  -webkit-mask: var(--frame) -39.7px 0 / 173.9px 210.6px no-repeat; mask: var(--frame) -39.7px 0 / 173.9px 210.6px no-repeat;
+  background: var(--rt, transparent); mix-blend-mode: color; opacity: 0.9;
+}
+.card.rarity-commune .card-tint { --rt: #3fbf4f; }
+.card.rarity-peu-commune .card-tint { --rt: #2f8cff; }
+.card.rarity-rare .card-tint { --rt: #ffb300; }
