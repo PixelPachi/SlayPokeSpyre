@@ -32,7 +32,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
           <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
         </div>
         ${frame ? '<div class="card-tint"></div>' : ''}
-        <div class="card-banner"><div class="card-name ${d.name.length > 13 ? 'long' : ''}">${esc(d.name)}</div></div>
+        <div class="card-banner"><div class="card-name" style="font-size:${nameSize(d.name)}px">${esc(d.name)}</div></div>
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
         <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${text}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
@@ -51,4 +51,24 @@ const CATEGORY_ART: Record<string, string> = {
 /** Longueur visible d'un texte de carte (sans les balises). */
 function textLen(html: string): number {
   return html.replace(/<[^>]+>/g, '').length;
+}
+
+/** Taille du nom pour qu'il tienne sur une ligne dans le ruban (mesuré une fois par nom). */
+const NAME_MAX = 15;
+const NAME_WIDTH = 96;
+const nameCache = new Map<string, number>();
+// Mesures refaites une fois la police du titre chargée
+if (typeof document !== 'undefined') void document.fonts?.ready.then(() => nameCache.clear());
+let measureCtx: CanvasRenderingContext2D | null = null;
+function nameSize(name: string): number {
+  const hit = nameCache.get(name);
+  if (hit) return hit;
+  if (!measureCtx && typeof document !== 'undefined') measureCtx = document.createElement('canvas').getContext('2d');
+  if (!measureCtx) return NAME_MAX;
+  const font = getComputedStyle(document.documentElement).getPropertyValue('--font-title').trim() || 'sans-serif';
+  measureCtx.font = `900 ${NAME_MAX}px ${font}`;
+  const w = measureCtx.measureText(name).width + 3; // + contour du texte
+  const size = Math.max(9, Math.min(NAME_MAX, Math.floor((NAME_MAX * NAME_WIDTH / w) * 10) / 10));
+  nameCache.set(name, size);
+  return size;
 }

@@ -711,7 +711,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .weather-poussiere i { width: calc(4px * var(--s)); height: calc(4px * var(--s)); border-radius: 50%; background: #e6ecf5aa; animation-name: drift; }
 .weather-etincelles i { width: calc(3px * var(--s)); height: calc(12px * var(--s)); background: #9fe3ff; box-shadow: 0 0 8px #5ccfff, 0 0 2px #fff; animation-name: spark; }
 @keyframes spark { 0%, 100% { transform: translate(0, 200px) rotate(20deg); opacity: 0; } 45% { opacity: 0; } 50% { transform: translate(10px, 260px) rotate(-30deg); opacity: 1; } 55% { opacity: 0; } }
-.card-name.long { font-size: 12px; -webkit-text-stroke-width: 2.5px; }
+.card-name { white-space: nowrap; }
 
 /* Particules de l'acte 3 */
 .weather-braises i { top: auto; bottom: -20px; width: calc(5px * var(--s)); height: calc(5px * var(--s)); border-radius: 50%; background: #ffb347; box-shadow: 0 0 8px #ff7a1a; animation-name: rise; }
