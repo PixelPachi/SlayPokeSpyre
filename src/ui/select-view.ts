@@ -12,6 +12,10 @@ import { CHARACTERS } from '../data/characters';
 import { TYPE_COLORS } from './labels';
 import { asset, esc } from './util';
 
+// Petites icônes Gemini du carré de sélection
+const ICON_FILES = import.meta.glob<string>('../assets/ui/icones/*.png', { eager: true, query: '?url', import: 'default' });
+const ICONS: Partial<Record<string, string>> = Object.fromEntries(Object.entries(ICON_FILES).map(([p, u]) => [p.split('/').pop()!.replace('.png', ''), u]));
+
 const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
 const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
   riolu: 'illustrations/riolu.png',
@@ -59,7 +63,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
           ${ORDER.map((id) => {
             const lockedId = !UNLOCKED.includes(id);
             return `<button class="roster ${id === current ? 'on' : ''} ${lockedId ? 'locked' : ''}" data-id="${id}" data-tip="${lockedId ? 'Verrouillé' : esc(CHARACTERS[id].name)}">
-              <img src="${asset(`sprites/pokemon/artwork/${CHARACTERS[id].dex[0]}.png`)}" alt="">
+              <img class="${ICONS[id] ? 'icon' : ''}" src="${ICONS[id] ?? asset(`sprites/pokemon/artwork/${CHARACTERS[id].dex[0]}.png`)}" alt="">
             </button>`;
           }).join('')}
         </div>
