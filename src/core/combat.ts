@@ -209,7 +209,7 @@ export class Combat {
       if (ch.id === 'riolu') { this.addStatus(this.player, 'player', 'attaque', 2); this.gainAura(10); }
     });
 
-    for (const e of this.enemies) if (this.gimmickOf(e) === 'mur-roc') this.gainBlock(e, e.uid, 20);
+    for (const e of this.enemies) if (this.gimmickOf(e) === 'mur-roc') this.gainBlock(e, e.uid, 12);
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
@@ -390,7 +390,7 @@ export class Combat {
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
     this.cardsThisTurn++;
-    if (this.phase === 'joueur' && this.cardsThisTurn >= 4 && this.bossAlive('decharge')) {
+    if (this.phase === 'joueur' && this.cardsThisTurn >= 5 && this.bossAlive('decharge')) {
       this.events.push({ type: 'player-move', name: 'Décharge !' });
       this.loseHp(this.player, 'player', 2, 'carte');
     }
@@ -429,13 +429,13 @@ export class Combat {
     const fam = this.player.familiar;
     if (fam && fam.hp > 0) this.familiarAttack((fam.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0));
     if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
-    if (this.cardsThisTurn >= 4 && this.bossAlive('ailes')) this.addStatus(this.player, 'player', 'confusion', 1);
+    if (this.cardsThisTurn >= 5 && this.bossAlive('ailes')) this.addStatus(this.player, 'player', 'confusion', 1);
     if (this.player.energy > 0 && this.bossAlive('sol-brulant')) this.addStatus(this.player, 'player', 'brulure', this.player.energy);
     this.tickDurations(this.player);
     this.phase = 'ennemi';
     this.player.freeTurn = false;
     this.player.hpLostEnemyTurn = 0;
-    for (const e of this.aliveEnemies()) if (this.gimmickOf(e) !== 'mur-roc') e.block = 0;
+    for (const e of this.aliveEnemies()) e.block = this.gimmickOf(e) === 'mur-roc' ? Math.floor(e.block / 2) : 0;
   }
 
   /** Fait agir un ennemi (appelé un par un par l'interface, pour animer). */
@@ -444,7 +444,7 @@ export class Combat {
     if (this.phase !== 'ennemi' || !e || e.hp <= 0) return;
     this.tickDots(e, uid);
     if (e.hp <= 0) return this.checkEnd();
-    if (this.gimmickOf(e) === 'clair-de-lune' && e.hp < e.maxHp) this.healEnemy(e, 6);
+    if (this.gimmickOf(e) === 'clair-de-lune' && e.hp < e.maxHp) this.healEnemy(e, 4);
 
     // Gel : à 3, l'ennemi passe son tour (un gardien inflige seulement la moitié de ses dégâts)
     const frozen = (e.statuses.gel ?? 0) >= 3;
@@ -560,10 +560,10 @@ export class Combat {
     }
     if (this.bossAlive('tempete-sable')) {
       this.events.push({ type: 'player-move', name: 'Tempête de Sable !' });
-      this.loseHp(this.player, 'player', 3, 'carte');
+      this.loseHp(this.player, 'player', 2, 'carte');
       if (this.player.hp <= 0) return this.checkEnd();
     }
-    if (this.bossAlive('distorsion') && this.turn % 3 === 0) {
+    if (this.bossAlive('distorsion') && this.turn === 3) {
       this.player.energy = Math.max(0, this.player.energy - 1);
       this.events.push({ type: 'player-move', name: 'Le temps se fige : −1 PA' });
     }

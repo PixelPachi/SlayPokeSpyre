@@ -835,11 +835,11 @@ describe('gardiens : talents et capacités exclusives', () => {
     const { ENEMY_DEFS } = await import('../src/data/enemies');
     for (const z of ZONES) expect(ENEMY_DEFS[z.boss].gimmick, z.boss).toBeDefined();
   });
-  it('Charkos garde sa Protection ; Dardargnan bloque le Poison', () => {
+  it('Charkos garde la moitié de sa Protection ; Dardargnan bloque le Poison', () => {
     const c = vs('charkos');
-    expect(c.enemies[0].block).toBe(20);
+    expect(c.enemies[0].block).toBe(12);
     c.endPlayerTurn();
-    expect(c.enemies[0].block).toBeGreaterThanOrEqual(20);
+    expect(c.enemies[0].block).toBeGreaterThanOrEqual(6);
     const d = vs('dardargnan');
     d.player.statuses.poison = 3;
     d.endPlayerTurn();

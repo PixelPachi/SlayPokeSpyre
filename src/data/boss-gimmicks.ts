@@ -12,10 +12,10 @@ const SPECS: Record<string, Spec> = {
   },
   scarhino: {
     gimmick: { id: 'cuirasse', name: 'Cuirasse', text: 'Le premier coup qu\'il reçoit à chacun de tes tours ne lui inflige que la moitié des dégâts.' },
-    moves: [{ id: 'corne-titanesque', name: 'Corne Titanesque', weight: 25, intent: 'attaque', pokeType: 'insecte', damage: 22, pierce: true, signature: true }],
+    moves: [{ id: 'corne-titanesque', name: 'Corne Titanesque', weight: 25, intent: 'attaque', pokeType: 'insecte', damage: 18, pierce: true, signature: true }],
   },
   charmillon: {
-    gimmick: { id: 'ailes', name: 'Ailes Envoûtantes', text: 'Si tu joues 4 cartes ou plus dans un tour, tu subis 1 Confusion.' },
+    gimmick: { id: 'ailes', name: 'Ailes Envoûtantes', text: 'Si tu joues 5 cartes ou plus dans un tour, tu subis 1 Confusion.' },
     moves: [{ id: 'poudre-ecailles', name: 'Poudre d\'Écailles', weight: 30, intent: 'handicap', pokeType: 'insecte', signature: true,
       addCards: { id: 'g-ecaille-poudreuse', count: 2, to: 'main' }, playerStatus: { status: 'paralysie', stacks: 1 } }],
   },
@@ -28,8 +28,8 @@ const SPECS: Record<string, Spec> = {
     moves: [{ id: 'roulade-folle', name: 'Roulade Folle', weight: 35, intent: 'attaque', pokeType: 'roche', damage: 4, hits: 3, escalate: 4, signature: true }],
   },
   melodelfe: {
-    gimmick: { id: 'clair-de-lune', name: 'Clair de Lune', text: 'Au début de chacun de ses tours, elle récupère 6 PV.' },
-    moves: [{ id: 'berceuse-lunaire', name: 'Berceuse Lunaire', weight: 30, intent: 'handicap', pokeType: 'fee', heal: 12, signature: true,
+    gimmick: { id: 'clair-de-lune', name: 'Clair de Lune', text: 'Au début de chacun de ses tours, elle récupère 4 PV.' },
+    moves: [{ id: 'berceuse-lunaire', name: 'Berceuse Lunaire', weight: 30, intent: 'handicap', pokeType: 'fee', heal: 10, signature: true,
       addCards: { id: 'g-reve-lourd', count: 2, to: 'pioche' } }],
   },
   roigada: {
@@ -42,26 +42,26 @@ const SPECS: Record<string, Spec> = {
       playerStatus: { status: 'brulure', stacks: 3 }, addCards: { id: 'g-cendres', count: 1, to: 'defausse' } }],
   },
   charkos: {
-    gimmick: { id: 'mur-roc', name: 'Mur de Roc', text: 'Commence avec 20 Protection, et sa Protection ne disparaît pas d\'un tour à l\'autre.' },
-    moves: [{ id: 'forteresse', name: 'Forteresse', weight: 30, intent: 'defense', block: 25, selfStatus: { status: 'defense', stacks: 2 }, signature: true }],
+    gimmick: { id: 'mur-roc', name: 'Mur de Roc', text: 'Commence avec 12 Protection, et ne perd que la moitié de sa Protection d\'un tour à l\'autre.' },
+    moves: [{ id: 'forteresse', name: 'Forteresse', weight: 30, intent: 'defense', block: 18, selfStatus: { status: 'defense', stacks: 2 }, signature: true }],
   },
   ohmassacre: {
-    gimmick: { id: 'decharge', name: 'Décharge', text: 'À partir de ta 4e carte jouée dans un tour, chaque carte te fait perdre 2 PV.' },
+    gimmick: { id: 'decharge', name: 'Décharge', text: 'À partir de ta 5e carte jouée dans un tour, chaque carte te fait perdre 2 PV.' },
     moves: [{ id: 'machoire-electrique', name: 'Mâchoire Électrique', weight: 30, intent: 'attaque', pokeType: 'electrik', damage: 12, signature: true,
       playerStatus: { status: 'paralysie', stacks: 2 }, addCards: { id: 'g-electrocution', count: 2, to: 'pioche' } }],
   },
   dracolosse: {
     gimmick: { id: 'multiecaille', name: 'Multiécaille', text: 'Tant qu\'il a tous ses PV, il ne subit que la moitié des dégâts.' },
-    moves: [{ id: 'plongeon-draconique', name: 'Plongeon Draconique', weight: 25, intent: 'attaque', pokeType: 'dragon', damage: 30, signature: true }],
+    moves: [{ id: 'plongeon-draconique', name: 'Plongeon Draconique', weight: 25, intent: 'attaque', pokeType: 'dragon', damage: 24, signature: true }],
   },
   tyranocif: {
-    gimmick: { id: 'tempete-sable', name: 'Tempête de Sable', text: 'Au début de chacun de tes tours, tu perds 3 PV.' },
+    gimmick: { id: 'tempete-sable', name: 'Tempête de Sable', text: 'Au début de chacun de tes tours, tu perds 2 PV.' },
     moves: [{ id: 'avalanche-pierres', name: 'Avalanche de Pierres', weight: 30, intent: 'attaque', pokeType: 'roche', damage: 7, hits: 3, signature: true,
       playerStatus: { status: 'peur', stacks: 1 } }],
   },
   rayquaza: {
     gimmick: { id: 'air-lock', name: 'Air Lock', text: 'Tant qu\'il est en vie, tes hausses d\'Attaque et de Défense n\'ont aucun effet.' },
-    moves: [{ id: 'draco-meteore-celeste', name: 'Draco-Météore Céleste', weight: 25, intent: 'attaque', pokeType: 'dragon', damage: 34, signature: true,
+    moves: [{ id: 'draco-meteore-celeste', name: 'Draco-Météore Céleste', weight: 25, intent: 'attaque', pokeType: 'dragon', damage: 28, signature: true,
       selfStatus: { status: 'attaque', stacks: -2 } }],
   },
   heatran: {
@@ -71,10 +71,10 @@ const SPECS: Record<string, Spec> = {
   },
   zekrom: {
     gimmick: { id: 'teravolt', name: 'Téra-Voltage', text: 'Ses attaques ignorent la moitié de ta Protection.' },
-    moves: [{ id: 'foudre-fusion', name: 'Foudre Fusion', weight: 25, intent: 'attaque', pokeType: 'electrik', damage: 26, pierce: true, signature: true }],
+    moves: [{ id: 'foudre-fusion', name: 'Foudre Fusion', weight: 25, intent: 'attaque', pokeType: 'electrik', damage: 22, pierce: true, signature: true }],
   },
   'dialga-primal': {
-    gimmick: { id: 'distorsion', name: 'Distorsion du Temps', text: 'Tous les 3 tours, le temps se fige : tu as 1 PA de moins.' },
+    gimmick: { id: 'distorsion', name: 'Distorsion du Temps', text: 'Au 3e tour, le temps se fige : tu as 1 PA de moins (une seule fois).' },
     moves: [],
   },
 };
@@ -89,7 +89,7 @@ for (const [id, spec] of Object.entries(SPECS)) {
 const dialga = ENEMY_DEFS['dialga-primal'];
 if (dialga) {
   const dist = dialga.moves.find((m) => m.id === 'distorsion');
-  if (dist) dist.addCards = { id: 'g-felure-temporelle', count: 2, to: 'pioche' };
+  if (dist) dist.addCards = { id: 'g-felure-temporelle', count: 1, to: 'pioche' };
   const ht = dialga.moves.find((m) => m.id === 'hurle-temps');
   if (ht) ht.signature = true;
 }
