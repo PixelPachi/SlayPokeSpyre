@@ -873,7 +873,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .t-item small { font-family: var(--font); font-weight: 800; font-size: 14px; color: #b9c6ee; text-shadow: 0 1px 3px #000; margin-top: -2px; letter-spacing: 0; }
 .t-item.t-continue span { color: #ffe08a; }
 .title-foot { position: absolute; right: 22px; bottom: 14px; font-size: 12px; color: rgba(220, 228, 255, .55); text-shadow: 0 1px 2px #000; }
-.btn.back-title { position: absolute; left: 48px; top: 104px; z-index: 3; }
+.btn.back-title { position: absolute; right: 28px; top: 24px; left: auto; z-index: 3; font-size: 16px; padding: 8px 16px; }
 .confirm-box .row, .save-body .row { display: flex; gap: 12px; justify-content: center; margin-top: 14px; }
 /* ——— Glossaire / Sauvegarde ——— */
 .glossary { position: absolute; inset: 0; background: radial-gradient(circle at 50% 0, #26304d, #0b0e18 70%); display: flex; flex-direction: column; }
