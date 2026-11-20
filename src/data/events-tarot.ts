@@ -4,6 +4,7 @@ import type { Run } from '../core/run';
 import { cardDef } from './cards';
 import { relicDef } from './relics';
 import type { GameEvent } from './events';
+import { CHARACTERS } from './characters';
 
 const loseMax = (r: Run, n: number) => {
   r.maxHp = Math.max(1, r.maxHp - n);
@@ -356,3 +357,246 @@ export const TAROT_EVENTS: GameEvent[] = [
     ],
   },
 ];
+
+// ——— Arcanes inversés : la carte apparaît à l'envers, avec des effets extrêmes ———
+const STARTER_ATTACKS = ['ruse', 'charge', 'ecras-face', 'griffe', 'mew-ecras-face'];
+const STARTER_SHIELDS = ['abri', 'detection'];
+const leave = (text: string) => ({ label: 'Remettre la carte à l’endroit', detail: 'Rien ne se passe', apply: () => text });
+/** Remplace chaque carte du deck par une autre de ton Pokémon (l'amélioration est gardée). */
+const transformAll = (r: Run): number => {
+  const n = r.deck.length;
+  for (const c of r.deck) c.defId = r.cardChoices('combat', 1)[0];
+  return n;
+};
+const addCurses = (r: Run, n: number) => {
+  for (let i = 0; i < n; i++) r.addCard('voeu-brise');
+};
+
+const REVERSED: Record<string, NonNullable<GameEvent['reversed']>> = {
+  'tarot-fou': {
+    text: 'La carte est à l’envers : Togepi saute dans le vide les yeux bandés… et t’entraîne avec lui.',
+    choices: [
+      { label: 'Sauter les yeux fermés', detail: 'Perd la moitié de tes PV, gagne 2 objets tenus', apply: (r) => (hurt(r, Math.floor(r.hp / 2)), `Atterrissage brutal… au milieu d’un trésor : ${giveRelic(r)} et ${giveRelic(r)}.`) },
+      leave('Tu recules du bord. Togepi boude.'),
+    ],
+  },
+  'tarot-bateleur': {
+    text: 'À l’envers, le Bateleur devient l’escroc : Alakazam mélange ton deck entier sous tes yeux.',
+    choices: [
+      { label: 'Le laisser faire', detail: 'Transforme 5 cartes au hasard', apply: (r) => {
+        const pool = [...r.deck];
+        const out: string[] = [];
+        for (let i = 0; i < 5 && pool.length; i++) {
+          const c = pool.splice(r.rng.int(0, pool.length - 1), 1)[0];
+          const before = cardDef(c.defId).name;
+          c.defId = r.cardChoices('combat', 1)[0];
+          out.push(`${before} → ${cardDef(c.defId).name}`);
+        }
+        return `Tour joué ! ${out.join(', ')}.`;
+      } },
+      leave('Tu gardes une main sur tes cartes.'),
+    ],
+  },
+  'tarot-papesse': {
+    text: 'Le parchemin de Gothitelle est à l’envers : un savoir interdit, qui coûte cher à qui le lit.',
+    choices: [
+      { label: 'Lire le savoir interdit', detail: 'Améliore TOUTES tes cartes, −15 PV max', available: hasUpgradable, apply: (r) => {
+        loseMax(r, 15);
+        let n = 0;
+        for (const c of r.deck) if (!c.upgraded && c.defId !== 'voeu-brise') { r.upgradeCard(c.uid); n++; }
+        return `Ta tête brûle… ${n} cartes améliorées, mais −15 PV max.`;
+      } },
+      leave('Tu refermes le parchemin sans le lire.'),
+    ],
+  },
+  'tarot-imperatrice': {
+    text: 'À l’envers, Nidoqueen devient étouffante : elle te protège… jusqu’à t’empêcher de bouger.',
+    choices: [
+      { label: 'Se laisser couver', detail: '+20 PV max et tous tes PV, mais 2 malédictions', apply: (r) => {
+        gainMax(r, 20);
+        r.heal(r.maxHp);
+        addCurses(r, 2);
+        return 'Tu te sens invincible… et lourd : +20 PV max, PV au maximum, 2 Vœu Brisé dans ton deck.';
+      } },
+      leave('Tu t’éclipses avant qu’elle ne te serre trop fort.'),
+    ],
+  },
+  'tarot-empereur': {
+    text: 'L’Empereur inversé est un tyran : Nidoking, fou de rage, exige un combat à mort.',
+    choices: [
+      { label: 'Affronter le tyran', detail: 'Duel contre un Nidoking enragé. Victoire : carte rare, objet tenu et ₽', apply: () => ({ fight: 'nidoking-duel', text: 'Nidoking écrase son trône d’un coup de queue !', power: 1.5, relic: true }) },
+      leave('Tu t’enfuis avant qu’il ne te remarque.'),
+    ],
+  },
+  'tarot-pape': {
+    text: 'Le Pape inversé prêche l’hérésie : Roigada brûle les écritures… et tes techniques avec.',
+    choices: [
+      { label: 'Brûler tes écritures', detail: 'Retire jusqu’à 3 cartes, −8 PV max', available: (r) => r.deck.length > 6, apply: (r) => (loseMax(r, 8), { pick: 'retirer', count: 3, text: 'Jette au feu jusqu’à 3 cartes (« Terminer » pour arrêter).' }) },
+      leave('Tu gardes tes écritures intactes.'),
+    ],
+  },
+  'tarot-amoureux': {
+    text: 'À l’envers, c’est la rupture : il faut abandonner ce qui t’est le plus cher.',
+    choices: [
+      { label: 'Abandonner ton objet de départ', detail: 'Perd ton objet de départ, gagne 2 objets tenus', available: (r) => r.relics.includes(CHARACTERS[r.character].starterRelic ?? '-'), apply: (r) => {
+        const old = CHARACTERS[r.character].starterRelic!;
+        r.relics = r.relics.filter((x) => x !== old);
+        return `Adieu ${relicDef(old).name}… Tu trouves ${giveRelic(r)} et ${giveRelic(r)}.`;
+      } },
+      leave('Tu gardes ce qui t’est cher.'),
+    ],
+  },
+  'tarot-chariot': {
+    text: 'Le Chariot inversé s’emballe : les Tauros foncent sans contrôle à travers les étages.',
+    choices: [
+      { label: 'S’accrocher', detail: 'Perd 15 PV, gagne 3 cartes de ton Pokémon', available: (r) => r.hp > 15, apply: (r) => (hurt(r, 15), `Tu ramasses tout ce qui tombe du chariot : ${addRandomCard(r, 'combat')}, ${addRandomCard(r, 'combat')} et ${addRandomCard(r, 'elite')}.`) },
+      leave('Tu plonges sur le côté et laisses passer le chariot fou.'),
+    ],
+  },
+  'tarot-justice': {
+    text: 'La Justice inversée est truquée : Tranchodon fait pencher la balance… contre toi.',
+    choices: [
+      { label: 'Accepter le verdict truqué', detail: 'Tombe à 1 PV, gagne 2 objets tenus', apply: (r) => {
+        r.hp = 1;
+        return `Verdict : coupable. Il ne te reste qu’1 PV… mais tu repars avec ${giveRelic(r)} et ${giveRelic(r)}.`;
+      } },
+      leave('Tu refuses ce procès.'),
+    ],
+  },
+  'tarot-ermite': {
+    text: 'L’Ermite inversé, c’est l’exil : Noarfang éteint sa lanterne, et tu dois avancer sans protection.',
+    choices: [
+      { label: 'Partir en exil', detail: 'Retire toutes tes protections de départ, +10 PV max', apply: (r) => {
+        const shields = r.deck.filter((c) => STARTER_SHIELDS.includes(c.defId));
+        for (const c of shields) r.removeCard(c.uid);
+        gainMax(r, 10);
+        return `${shields.length} protection${shields.length > 1 ? 's' : ''} de départ abandonnée${shields.length > 1 ? 's' : ''}. +10 PV max.`;
+      } },
+      leave('Tu restes près de la lumière.'),
+    ],
+  },
+  'tarot-roue': {
+    text: 'La Roue inversée tourne à l’envers : elle prend tout… et rend peut-être beaucoup.',
+    choices: [
+      { label: 'Tout miser', detail: 'Perd tout ton argent ; chaque carte a 1 chance sur 20 d’être améliorée', apply: (r) => {
+        const lost = r.money;
+        r.money = 0;
+        const won: string[] = [];
+        for (const c of r.deck) if (!c.upgraded && c.defId !== 'voeu-brise' && r.rng.next() < 0.05) { r.upgradeCard(c.uid); won.push(cardDef(c.defId).name); }
+        return `−${lost} ₽. ${won.length ? `La roue améliore : ${won.join(', ')} !` : 'La roue ne rend rien…'}`;
+      } },
+      leave('Tu gardes ta bourse bien fermée.'),
+    ],
+  },
+  'tarot-force': {
+    text: 'La Force inversée, c’est la rage : Machopeur a perdu son calme et frappe tout ce qui bouge.',
+    choices: [
+      { label: 'Affronter sa rage', detail: 'Duel contre un Machopeur enragé. Victoire : carte rare, objet tenu et ₽', apply: () => ({ fight: 'machopeur-duel', text: 'Machopeur hurle et se jette sur toi !', power: 1.5, relic: true }) },
+      leave('Tu le laisses se calmer seul.'),
+    ],
+  },
+  'tarot-pendu': {
+    text: 'Le Pendu inversé coupe la corde : Migalos tombe, et sa toile pleine de trésors avec lui.',
+    choices: [
+      { label: 'Couper la corde', detail: '−10 PV max, gagne 200 ₽', apply: (r) => (loseMax(r, 10), (r.money += 200), 'La toile se déchire : 200 ₽ tombent à tes pieds. −10 PV max.') },
+      leave('Tu laisses Migalos à sa méditation.'),
+    ],
+  },
+  'tarot-mort': {
+    text: 'La Mort inversée refuse de te prendre : Absol t’offre un sursis… contre une part de toi.',
+    choices: [
+      { label: 'Accepter le sursis', detail: '−30 % de tes PV max, gagne le Rappel Max', available: (r) => !r.relics.includes('rappel-max'), apply: (r) => {
+        loseMax(r, Math.round(r.maxHp * 0.3));
+        r.addRelic('rappel-max');
+        return 'Tu te sens plus fragile… mais la Mort te laissera une seconde chance (Rappel Max).';
+      } },
+      leave('Tu détournes le regard.'),
+    ],
+  },
+  'tarot-temperance': {
+    text: 'La Tempérance inversée, c’est l’excès : Milobellus renverse les deux coupes sur ton deck.',
+    choices: [
+      { label: 'Tout boire', detail: 'Duplique TOUTES tes cartes, −10 PV max', apply: (r) => {
+        const copy = [...r.deck];
+        for (const c of copy) r.addCard(c.defId, c.upgraded);
+        loseMax(r, 10);
+        return `Ton deck double : ${r.deck.length} cartes ! −10 PV max.`;
+      } },
+      leave('Tu reposes les coupes.'),
+    ],
+  },
+  'tarot-diable': {
+    text: 'Le Diable inversé brise les chaînes… et les recolle autrement : tes techniques de base se changent en vampirisme et en soins.',
+    choices: [
+      { label: 'Briser les chaînes', detail: 'Attaques de départ → Vampirisme (4 dégâts, soin 2) ; protections de départ → Soin (5 PV)', apply: (r) => {
+        let a = 0, d = 0;
+        for (const c of r.deck) {
+          if (STARTER_ATTACKS.includes(c.defId)) { c.defId = 'diable-vampirisme'; a++; }
+          else if (STARTER_SHIELDS.includes(c.defId)) { c.defId = 'diable-soin'; d++; }
+        }
+        return `${a} attaque${a > 1 ? 's' : ''} devenue${a > 1 ? 's' : ''} Vampirisme, ${d} protection${d > 1 ? 's' : ''} devenue${d > 1 ? 's' : ''} Soin.`;
+      } },
+      leave('Tu ne touches pas aux chaînes.'),
+    ],
+  },
+  'tarot-maison-dieu': {
+    text: 'La Maison Dieu inversée : la tour s’effondre sur toi. Sous les gravats, des trésors oubliés.',
+    choices: [
+      { label: 'Rester sous l’effondrement', detail: '−20 PV max, gagne 3 objets tenus', apply: (r) => (loseMax(r, 20), `Écrasé… mais riche : ${giveRelic(r)}, ${giveRelic(r)} et ${giveRelic(r)}.`) },
+      leave('Tu fuis avant que tout ne s’écroule.'),
+    ],
+  },
+  'tarot-etoile': {
+    text: 'L’Étoile inversée exauce les vœux… à l’envers : la chance tourne beaucoup plus fort.',
+    choices: [
+      { label: 'Faire un vœu inversé', detail: '1 chance sur 2 : 2 objets tenus… ou 3 malédictions', apply: (r) => (r.rng.next() < 0.5
+        ? `Jirachi rit à l’envers : ${giveRelic(r)} et ${giveRelic(r)} !`
+        : (addCurses(r, 3), 'Le vœu explose : 3 Vœu Brisé rejoignent ton deck.')) },
+      leave('Tu ne fais aucun vœu.'),
+    ],
+  },
+  'tarot-lune': {
+    text: 'La Lune inversée : le reflet devient réel, et prend la place de tes techniques.',
+    choices: [
+      { label: 'Traverser le reflet', detail: 'Perd 15 PV, transforme 4 cartes au hasard en cartes rares', available: (r) => r.hp > 15, apply: (r) => {
+        hurt(r, 15);
+        const pool = [...r.deck];
+        const out: string[] = [];
+        for (let i = 0; i < 4 && pool.length; i++) {
+          const c = pool.splice(r.rng.int(0, pool.length - 1), 1)[0];
+          c.defId = r.cardChoices('boss', 1)[0];
+          out.push(cardDef(c.defId).name);
+        }
+        return `De l’autre côté du miroir : ${out.join(', ')}.`;
+      } },
+      leave('Tu détournes les yeux du reflet.'),
+    ],
+  },
+  'tarot-soleil': {
+    text: 'Le Soleil inversé brûle : une canicule écrasante qui forge ceux qui la supportent.',
+    choices: [
+      { label: 'Supporter la canicule', detail: 'Perd 30 % de tes PV, améliore 4 cartes au hasard', available: hasUpgradable, apply: (r) => (hurt(r, Math.round(r.hp * 0.3)), `Brûlé mais aguerri. Améliorées : ${upgradeRandom(r, 4)}.`) },
+      leave('Tu te mets à l’ombre.'),
+    ],
+  },
+  'tarot-jugement': {
+    text: 'Le Jugement inversé efface tout ce que tu as accompli… et te paie pour recommencer.',
+    choices: [
+      { label: 'Accepter le jugement', detail: 'Toutes tes cartes perdent leur amélioration ; gagne 250 ₽ et un objet tenu', apply: (r) => {
+        let n = 0;
+        for (const c of r.deck) if (c.upgraded) { c.upgraded = false; n++; }
+        r.money += 250;
+        return `${n} amélioration${n > 1 ? 's' : ''} effacée${n > 1 ? 's' : ''}. +250 ₽ et ${giveRelic(r)}.`;
+      } },
+      leave('Tu fais la sourde oreille.'),
+    ],
+  },
+  'tarot-monde': {
+    text: 'Le Monde inversé : Mew retourne la couronne, et ton deck entier change de forme.',
+    choices: [
+      { label: 'Tout transformer', detail: 'Perd 20 PV, transforme TOUTES les cartes de ton deck', available: (r) => r.hp > 20, apply: (r) => (hurt(r, 20), `Le monde bascule : tes ${transformAll(r)} cartes sont transformées.`) },
+      leave('Tu reposes la couronne.'),
+    ],
+  },
+};
+for (const e of TAROT_EVENTS) e.reversed = REVERSED[e.id];

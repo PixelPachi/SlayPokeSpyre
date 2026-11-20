@@ -809,3 +809,22 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .tarot-blank b { font-size: 24px; }
 .tarot-blank img { width: 220px; height: 220px; image-rendering: pixelated; }
 .event-panel.tarot { display: flex; width: auto; padding: 22px 30px; }
+
+/* Arcane inversé : la carte est retournée */
+.tarot-card.reversed { transform-origin: 50% 50%; transform: rotate(180deg); animation: tarot-in-rev .9s ease-out; box-shadow: 0 12px 40px #000c, 0 0 0 2px #b9a2ff, 0 0 50px #8a5cff66; }
+@keyframes tarot-in-rev { from { opacity: 0; transform: rotate(0deg) scale(0.9); } 60% { opacity: 1; transform: rotate(200deg) scale(1.02); } to { transform: rotate(180deg); } }
+.event-panel.is-reversed .node-title { color: #c9b4ff; }
+/* Baies */
+.tb-berries { display: inline-flex; gap: 3px; margin-left: 6px; }
+.berry-slot { width: 30px; height: 30px; border-radius: 8px; border: 2px solid #5b4a7a; background: #1a1428aa; padding: 0; display: grid; place-items: center; cursor: pointer; }
+.berry-slot.empty { cursor: default; opacity: .55; border-style: dashed; }
+.berry-slot .berry-icon { width: 28px; height: 28px; image-rendering: pixelated; }
+.berry-menu { position: absolute; z-index: 60; width: 220px; padding: 10px 12px; border-radius: 12px; background: #221a33f2; border: 2px solid #ffd27a;
+  color: #fff; display: flex; flex-direction: column; gap: 6px; font-size: 13px; box-shadow: 0 8px 24px #000a; }
+.berry-menu b { font-size: 15px; color: #ffe08a; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.shop-berries { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+.berry-card img { image-rendering: pixelated; }
+.btn.danger { background: #8e2430; color: #fff; border-color: #ff8a80; }
+.btn.danger.confirm { background: #c62828; animation: summit-glow 1s infinite; }
+.kecleon-gone { width: 96px; height: 96px; display: grid; place-items: center; font-size: 56px; font-weight: 900; color: #ff8a80; }

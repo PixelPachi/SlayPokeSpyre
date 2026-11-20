@@ -66,6 +66,16 @@ const CARDS: CardDef[] = [
   },
 ];
 
+// Diable inversé : les attaques de départ deviennent Vampirisme, les protections de départ deviennent Soin
+CARDS.push({
+  id: 'diable-vampirisme', name: 'Vampirisme', character: 'normal', pokeType: 'insecte', category: 'attaque', rarity: 'depart',
+  cost: 1, target: 'ennemi', effects: [{ kind: 'degats', amount: 4 }, { kind: 'soin', amount: 2 }],
+  upgrade: { effects: [{ kind: 'degats', amount: 6 }, { kind: 'soin', amount: 3 }] },
+}, {
+  id: 'diable-soin', name: 'Soin', character: 'normal', pokeType: 'normal', category: 'technique', rarity: 'depart',
+  cost: 1, target: 'soi', effects: [{ kind: 'soin', amount: 5 }],
+  upgrade: { effects: [{ kind: 'soin', amount: 7 }] },
+});
 // Malédiction d'un vœu raté (L'Étoile) : injouable, elle encombre la main
 CARDS.push({
   id: 'voeu-brise', name: 'Vœu Brisé', character: 'normal', pokeType: 'spectre', category: 'statut', rarity: 'depart',

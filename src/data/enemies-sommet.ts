@@ -2,6 +2,17 @@
 import type { EnemyDef } from '../core/model';
 
 export const SUMMIT_ENEMIES: EnemyDef[] = [
+  // ——— Kecleon furieux (quand on attaque son marché) ———
+  {
+    id: 'kecleon', name: 'Kecleon', dex: 352, types: ['normal'], hp: [96, 100],
+    moves: [
+      { id: 'griffe-ombre', name: 'Griffe Ombre', weight: 25, intent: 'attaque', pokeType: 'spectre', damage: 13 },
+      { id: 'furie', name: 'Furie', weight: 20, intent: 'attaque', pokeType: 'normal', damage: 4, hits: 4 },
+      { id: 'queue-de-fer', name: 'Queue de Fer', weight: 20, intent: 'attaque', pokeType: 'acier', damage: 16, playerStatus: { status: 'defense', stacks: -1 } },
+      { id: 'camouflage', name: 'Camouflage', weight: 20, intent: 'boost', selfStatus: { status: 'defense', stacks: 2 }, block: 18 },
+      { id: 'grimace', name: 'Grimace', weight: 15, intent: 'handicap', playerStatus: { status: 'paralysie', stacks: 2 } },
+    ],
+  },
   // ——— Duels des arcanes (L'Empereur, La Force) : plus forts à chaque acte ———
   {
     id: 'nidoking-duel', name: 'Nidoking', dex: 34, types: ['poison', 'sol'], hp: [62, 66],

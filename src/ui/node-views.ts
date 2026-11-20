@@ -5,13 +5,14 @@ import { cardDef } from '../data/cards';
 import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
-import { EVENTS, type EventPick, type GameEvent } from '../data/events';
+import { EVENTS, type EventFight, type EventPick, type GameEvent } from '../data/events';
 import { TAROT_EVENTS } from '../data/events-tarot';
 import { renderCard } from './card';
+import { MAX_BERRIES, berryPrice } from '../data/berries';
 import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
 import { CHARACTER_COLORS } from './labels';
-import { openDeckOverlay, relicCard, topbar } from './run-ui';
+import { openDeckOverlay, relicCard, topbar, berryCard } from './run-ui';
 import { relicPrice } from '../data/relics';
 import { asset, esc } from './util';
 import { weatherParticles } from './combat-view';
@@ -28,15 +29,17 @@ function bindDeck(root: HTMLElement, run: Run): void {
 
 /** Récompenses après un combat : Pokédollars puis 1 carte parmi 3 (ou passer). */
 export function renderReward(
-  root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string }, done: Done,
+  root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string; berry?: string }, done: Done,
 ): void {
   run.money += o.money;
   if (o.relic) run.addRelic(o.relic);
+  const berryKept = o.berry ? run.addBerry(o.berry) : false;
   root.innerHTML = shell(run, o.label, `
     <h1 class="node-title">${esc(o.title)}</h1>
     <div class="reward-line">
       <div class="reward-money">+${o.money} ₽</div>
       ${o.relic ? relicCard(o.relic, '<em>Objet tenu obtenu !</em>') : ''}
+      ${o.berry ? berryCard(o.berry, berryKept ? '<em>Baie ramassée !</em>' : '<em>Sac plein : la baie reste sur place.</em>') : ''}
     </div>
     <p class="node-sub">Choisis une capacité à apprendre :</p>
     <div class="card-row">${o.cards.map((id) => renderCard(cardDef(id), { classes: 'pickable' }).replace('class="card', `data-id="${id}" class="card`)).join('')}</div>
@@ -92,27 +95,47 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
 
 /** Marché Kecleon : 5 cartes du personnage, 2 objets tenus, oublier une carte.
  *  Kecleon peut être chromatique (même chance que les ennemis) : tous les prix sont alors divisés par deux. */
-export function renderShop(root: HTMLElement, run: Run, done: Done): void {
+export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (onWin: () => void) => void): void {
+  // Kecleon n'a pas oublié : après une attaque, les marchés suivants sont vides
+  if (run.kecleonHostile) {
+    root.innerHTML = shell(run, 'Marché Kecleon', `
+      <div class="kecleon-head">
+        <div class="kecleon-gone">?</div>
+        <div>
+          <h1 class="node-title">Marché Kecleon… fermé</h1>
+          <p class="node-sub">Les étals sont vides. Un panneau griffonné : « Interdit aux voleurs. » Kecleon se souvient de toi.</p>
+        </div>
+      </div>
+      <div class="shop-actions"><button class="btn leave">Repartir</button></div>`, 'shop-screen');
+    bindDeck(root, run);
+    root.querySelector('.leave')!.addEventListener('click', done);
+    return;
+  }
   const shiny = run.rng.next() < SHINY_CHANCE;
   const price = (p: number) => (shiny ? Math.floor(p / 2) : p);
   const offers = [...run.cardChoices('boutique', 5), ...run.neutralChoices(2)].map((id) => ({ id, price: price(cardPrice(id)), sold: false }));
   const items = run.rollRelics(2).map((id) => ({ id, price: price(relicPrice(id)), sold: false }));
+  const berries = Array.from({ length: 3 }, () => run.rollBerry()).map((id) => ({ id, price: price(berryPrice(id)), sold: false }));
   let pickedItem: number | null = null;
+  let pickedBerry: number | null = null;
+  let looted = false;
   const sale = run.rng.int(0, 4);
   offers[sale].price = Math.floor(offers[sale].price / 2);
   let removed = false;
   let picked: number | null = null;
 
   const draw = () => {
-    const removeCost = price(75 + 25 * run.removals);
+    const removeCost = looted ? 0 : price(75 + 25 * run.removals);
     root.innerHTML = shell(run, 'Marché Kecleon', `
       <div class="kecleon-head ${shiny ? 'shiny' : ''}">
-        <img class="kecleon" src="${asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`)}" alt="Kecleon">
+        ${looted ? '<div class="kecleon-gone">!</div>' : `<img class="kecleon" src="${asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`)}" alt="Kecleon">`}
         <div>
-          <h1 class="node-title">Marché Kecleon</h1>
-          <p class="node-sub">${shiny
-            ? '<b class="shiny-note">★ Kecleon chromatique ! Tous les prix sont divisés par deux.</b>'
-            : '« Bienvenue ! Des capacités et des objets venus de toutes les régions ! »'}</p>
+          <h1 class="node-title">${looted ? 'Marché Kecleon… pillé !' : 'Marché Kecleon'}</h1>
+          <p class="node-sub">${looted
+            ? '<b class="shiny-note">Kecleon a pris la fuite. Sers-toi : tout est gratuit… mais il s’en souviendra.</b>'
+            : shiny
+              ? '<b class="shiny-note">★ Kecleon chromatique ! Tous les prix sont divisés par deux.</b>'
+              : '« Bienvenue ! Des capacités et des objets venus de toutes les régions ! »'}</p>
         </div>
       </div>
       <div class="card-row shop">
@@ -128,12 +151,48 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
           ${relicCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
           ${pickedItem === i && !o.sold ? `<button class="btn primary buy-relic" ${run.money < o.price ? 'disabled' : ''}>${run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
         </div>`).join('')}</div>` : ''}
+      <div class="shop-berries">${berries.map((o, i) => `
+        <div class="shop-relic shop-berry ${o.sold ? 'sold' : ''} ${pickedBerry === i ? 'picked' : ''}" data-i="${i}">
+          ${berryCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
+          ${pickedBerry === i && !o.sold ? `<button class="btn primary buy-berry" ${run.money < o.price || run.berries.length >= MAX_BERRIES ? 'disabled' : ''}>${run.berries.length >= MAX_BERRIES ? 'Sac plein' : run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
+        </div>`).join('')}</div>
       <div class="shop-actions">
         <button class="choice remove" ${removed || run.money < removeCost ? 'disabled' : ''}>
           <b>Oublier une capacité</b><span>${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
         </button>
+        ${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}
         <button class="btn leave">Quitter le marché</button>
       </div>`, 'shop-screen');
+    root.querySelectorAll<HTMLElement>('.shop-berry').forEach((el) =>
+      el.addEventListener('click', (ev) => {
+        const i = Number(el.dataset.i);
+        const o = berries[i];
+        if (o.sold) return;
+        if ((ev.target as HTMLElement).closest('.buy-berry')) {
+          if (run.money < o.price || run.berries.length >= MAX_BERRIES) return;
+          run.money -= o.price;
+          run.addBerry(o.id);
+          o.sold = true;
+          pickedBerry = null;
+        } else {
+          pickedBerry = pickedBerry === i ? null : i;
+        }
+        draw();
+      }));
+    root.querySelector('.attack-kecleon')?.addEventListener('click', (ev) => {
+      const b = ev.currentTarget as HTMLButtonElement;
+      // Deux clics : on ne déclenche pas un combat difficile par erreur
+      if (!b.classList.contains('confirm')) {
+        b.classList.add('confirm');
+        b.textContent = 'Vraiment ? Combat très dur, et plus aucun marché ensuite';
+        return;
+      }
+      onAttack!(() => {
+        looted = true;
+        for (const o of [...offers, ...items, ...berries]) o.price = 0;
+        draw();
+      });
+    });
     bindDeck(root, run);
     // Un premier clic choisit la carte, le bouton « Acheter » confirme (pas d'achat par erreur)
     root.querySelectorAll<HTMLElement>('.shop-item').forEach((el) =>
@@ -152,7 +211,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
         }
         draw();
       }));
-    root.querySelectorAll<HTMLElement>('.shop-relic').forEach((el) =>
+    root.querySelectorAll<HTMLElement>('.shop-relic:not(.shop-berry)').forEach((el) =>
       el.addEventListener('click', (ev) => {
         const i = Number(el.dataset.i);
         const o = items[i];
@@ -185,13 +244,19 @@ export function renderShop(root: HTMLElement, run: Run, done: Done): void {
 }
 
 /** Événement mystère. */
-export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: string, onFight?: (enemy: string) => void): void {
+export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: string, onFight?: (f: EventFight) => void): void {
   // Un événement sur deux environ est un arcane majeur ; jamais deux fois le même dans une run
   const fresh = (list: GameEvent[]) => list.filter((e) => !run.seenEvents.includes(e.id));
   const tarot = fresh(TAROT_EVENTS), classic = fresh(EVENTS);
   const pool = tarot.length && (run.rng.next() < 0.6 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
-  const ev: GameEvent = [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forcedId) ?? run.rng.pick(pool);
+  const forced = forcedId?.replace(/-inverse$/, '');
+  const ev: GameEvent = [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
   run.seenEvents.push(ev.id);
+  // Arcane inversé (1 chance sur 4) : la carte est retournée, avec des effets extrêmes
+  const reversed = !!ev.reversed && (forcedId ? forcedId.endsWith('-inverse') : run.rng.next() < 0.25);
+  const text = reversed ? ev.reversed!.text : ev.text;
+  const choices = reversed ? ev.reversed!.choices : ev.choices;
+  const title = reversed ? `${ev.title} (inversé)` : ev.title;
   const refreshBar = () => {
     root.querySelector('.tb-hp')!.textContent = `PV ${run.hp}/${run.maxHp}`;
     root.querySelector('.tb-money')!.textContent = `${run.money} ₽`;
@@ -204,17 +269,17 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   };
   const art = ev.tarot
     ? (ev.image
-      ? `<img class="tarot-card" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
+      ? `<img class="tarot-card ${reversed ? 'reversed' : ''}" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
       : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
     : `<img class="event-img" src="${asset(ev.image)}" alt="">`;
   root.innerHTML = shell(run, 'Événement', `
-    <div class="event-panel ${ev.tarot ? 'tarot' : ''}">
+    <div class="event-panel ${ev.tarot ? 'tarot' : ''} ${reversed ? 'is-reversed' : ''}">
       ${art}
       <div class="event-side">
-        <h1 class="node-title">${esc(ev.title)}</h1>
-        <p class="event-text">${esc(ev.text)}</p>
+        <h1 class="node-title">${esc(title)}</h1>
+        <p class="event-text">${esc(text)}</p>
         <div class="event-choices">
-          ${ev.choices.map((c, i) => {
+          ${choices.map((c, i) => {
             const ok = c.available?.(run) ?? true;
             return `<button class="choice" data-i="${i}" ${ok ? '' : 'disabled'}><b>${esc(c.label)}</b><span>${esc(c.detail)}</span></button>`;
           }).join('')}
@@ -256,12 +321,12 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   };
   root.querySelectorAll<HTMLElement>('.event-choices .choice').forEach((b) =>
     b.addEventListener('click', () => {
-      const r = ev.choices[Number(b.dataset.i)].apply(run);
+      const r = choices[Number(b.dataset.i)].apply(run);
       refreshBar();
       if (typeof r === 'string') return showResult(r);
       if ('fight' in r) {
         root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(r.text)}</p><button class="btn primary leave">Combattre !</button>`;
-        root.querySelector('.leave')!.addEventListener('click', () => (onFight ? onFight(r.fight) : done()));
+        root.querySelector('.leave')!.addEventListener('click', () => (onFight ? onFight(r) : done()));
         return;
       }
       doPick(r, r.count ?? 1);

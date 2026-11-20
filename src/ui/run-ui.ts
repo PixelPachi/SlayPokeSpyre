@@ -1,4 +1,5 @@
 // Éléments communs aux écrans d'une run : barre du haut et fenêtre du deck.
+import { BERRY_DEFS, MAX_BERRIES } from '../data/berries';
 import type { Card } from '../core/model';
 import type { Run } from '../core/run';
 import { cardDef } from '../data/cards';
@@ -17,8 +18,34 @@ export function topbar(run: Run, label: string, hp = run.hp): string {
       <span class="tb-zone">${esc(label)}</span>
       <span class="tb-floor" data-tip="Étage de la Tour du Temps">Étage ${run.floor}</span>
       <button class="tb-deck" data-tip="Voir ton deck">Deck ${run.deck.length}</button>
+      <span class="tb-berries">${berrySlots(run)}</span>
       <span class="tb-relics">${run.relics.map((id) => relicIcon(id)).join('')}</span>
       <span class="tb-seed" data-tip="Même graine = même run">Graine ${esc(run.seed)}</span>
+    </div>`;
+}
+
+/** Les 3 emplacements de baies (cliquer une baie : voir son effet ou la jeter). */
+export function berrySlots(run: Run): string {
+  return Array.from({ length: MAX_BERRIES }, (_, i) => {
+    const id = run.berries[i];
+    if (!id) return '<span class="berry-slot empty" data-tip="Emplacement de baie vide"></span>';
+    return `<button class="berry-slot" data-berry-index="${i}">${berryIcon(id)}</button>`;
+  }).join('');
+}
+
+export function berryIcon(id: string, cls = ''): string {
+  const b = BERRY_DEFS[id];
+  return `<img class="berry-icon ${cls}" src="${asset(`sprites/items/${b.sprite}.png`)}" alt="${esc(b.name)}"
+    data-tip="<b>${esc(b.name)}</b><br>${b.text ? esc(b.text) : '<i>Effet à venir.</i>'}">`;
+}
+
+/** Grand affichage d'une baie (récompense, boutique). */
+export function berryCard(id: string, extra = ''): string {
+  const b = BERRY_DEFS[id];
+  return `
+    <div class="relic-card berry-card rarity-${b.rarity}">
+      <img src="${asset(`sprites/items/${b.sprite}.png`)}" alt="">
+      <div><b>${esc(b.name)}</b><span>${b.text ? esc(b.text) : 'Effet à venir.'}</span>${extra}</div>
     </div>`;
 }
 

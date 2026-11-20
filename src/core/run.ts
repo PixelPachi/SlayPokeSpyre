@@ -1,6 +1,7 @@
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
 import type { Form, Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
+import { BERRIES, MAX_BERRIES } from '../data/berries';
 import { allCards, CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, zonesOfAct } from '../data/zones';
@@ -153,6 +154,25 @@ export class Run {
     const pool = allCards().filter((c) => c.rarity !== 'depart' && c.character !== this.character
       && !c.effects.some((e) => e.kind.startsWith('bebe-') && this.character !== 'kangourex'));
     return this.rng.pick(pool).id;
+  }
+
+  /** Baies portées (3 emplacements au plus). */
+  berries: string[] = [];
+  /** Kecleon a été attaqué : les Marchés Kecleon suivants sont vides. */
+  kecleonHostile = false;
+
+  /** Ajoute une baie si un emplacement est libre ; renvoie false sinon. */
+  addBerry(id: string): boolean {
+    if (this.berries.length >= MAX_BERRIES) return false;
+    this.berries.push(id);
+    return true;
+  }
+
+  /** Tire une baie (65 % commune, 30 % peu commune, 5 % rare). */
+  rollBerry(): string {
+    const r = this.rng.next();
+    const want = r < 0.65 ? 'commune' : r < 0.95 ? 'peu-commune' : 'rare';
+    return this.rng.pick(BERRIES.filter((x) => x.rarity === want)).id;
   }
 
   /** Événements déjà vus pendant cette run (on ne retombe pas deux fois sur le même arcane). */

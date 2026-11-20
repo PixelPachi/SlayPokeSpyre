@@ -1,3 +1,4 @@
+import { CARD_DEFS as CARD_DEFS_ALL } from '../src/data/cards';
 import { describe, expect, it } from 'vitest';
 import { Combat, computeDamage, makeDeck, type Fighter } from '../src/core/combat';
 import { typeMultiplier } from '../src/core/types';
@@ -655,4 +656,40 @@ it('les duels des arcanes : Nidoking et Machopeur se renforcent selon l’acte',
   expect(a3.enemies[0].maxHp).toBeGreaterThan(a1.enemies[0].maxHp * 2);
   expect(a3.enemies[0].statuses.attaque).toBeGreaterThan(0);
   expect(new Combat({ ...base, enemies: ['machopeur-duel'] }).enemies[0].name).toBe('Machopeur');
+});
+
+describe('arcanes inversés, baies, Kecleon', async () => {
+  const { TAROT_EVENTS } = await import('../src/data/events-tarot');
+  const { BERRIES } = await import('../src/data/berries');
+  const { Run } = await import('../src/core/run');
+  it('22 arcanes inversés, chaque choix s’applique sans erreur', () => {
+    for (const ev of TAROT_EVENTS) {
+      expect(ev.reversed, ev.id).toBeDefined();
+      ev.reversed!.choices.forEach((c, i) => {
+        const run = new Run(`R-${ev.id}-${i}`, 'riolu');
+        run.money = 300;
+        if (c.available && !c.available(run)) return;
+        c.apply(run);
+        expect(run.hp, ev.id).toBeGreaterThan(0);
+        expect(run.hp, ev.id).toBeLessThanOrEqual(run.maxHp);
+        for (const card of run.deck) expect(CARD_DEFS_ALL[card.defId], `${ev.id} ${card.defId}`).toBeDefined();
+      });
+    }
+  });
+  it('Diable inversé : Vampirisme et Soin remplacent les cartes de départ', () => {
+    const run = new Run('DIABLE', 'riolu');
+    TAROT_EVENTS.find((e) => e.id === 'tarot-diable')!.reversed!.choices[0].apply(run);
+    expect(run.deck.filter((c) => c.defId === 'diable-vampirisme')).toHaveLength(4);
+    expect(run.deck.filter((c) => c.defId === 'diable-soin')).toHaveLength(4);
+  });
+  it('42 baies et 3 emplacements', () => {
+    expect(BERRIES).toHaveLength(42);
+    const run = new Run('BAIES', 'riolu');
+    for (let i = 0; i < 3; i++) expect(run.addBerry(run.rollBerry())).toBe(true);
+    expect(run.addBerry('oran')).toBe(false);
+  });
+  it('Kecleon existe comme adversaire', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['kecleon'], seed: 'K' });
+    expect(c.enemies[0].name).toBe('Kecleon');
+  });
 });

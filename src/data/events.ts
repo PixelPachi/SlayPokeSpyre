@@ -14,7 +14,7 @@ export interface EventChoice {
 export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer' | 'monde';
 export interface EventPick { pick: PickKind; text: string; count?: number; then?: PickKind }
 /** Duel : lance un combat contre ce Pokémon ; victoire = une carte rare au choix et des ₽. */
-export interface EventFight { fight: string; text: string }
+export interface EventFight { fight: string; text: string; /** PV et Attaque de l'adversaire multipliés en plus. */ power?: number; /** La victoire rapporte aussi un objet tenu. */ relic?: boolean }
 
 export interface GameEvent {
   id: string;
@@ -25,6 +25,8 @@ export interface GameEvent {
   tarot?: boolean;
   /** Sprite de secours quand l'arcane n'a pas encore d'illustration. */
   sprite?: string;
+  /** Arcane inversé : la carte est retournée, avec des effets extrêmes. */
+  reversed?: { text: string; choices: EventChoice[] };
   text: string;
   choices: EventChoice[];
 }
