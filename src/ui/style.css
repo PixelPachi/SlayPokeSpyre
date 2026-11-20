@@ -954,3 +954,14 @@ img.sprite, .roster img { image-rendering: pixelated; }
 
 .card.enemy-move-card .card-cost { display: none; }
 .card.enemy-move-card { --tc: #141a33; }
+
+/* Gardiens : talent affiché sous le nom, capacité exclusive en carte dorée */
+.gimmick { position: absolute; left: 50%; top: -22px; transform: translateX(-50%); white-space: nowrap; cursor: help; z-index: 4;
+  padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; color: #2a1606;
+  background: linear-gradient(#ffe7a0, #f0b43a); border: 2px solid #7a4a10; box-shadow: 0 0 12px rgba(255, 200, 80, .6); }
+.enemy-card .card.signature .card-inner::before { filter: drop-shadow(0 0 14px #ffcf4a) drop-shadow(0 6px 10px rgba(0, 0, 0, .55)); }
+.enemy-card .card.signature { animation: sig-glow 1s ease-in-out infinite alternate; }
+@keyframes sig-glow { to { filter: drop-shadow(0 0 22px #ffcf4a); } }
+.enemy-card-who .sig { display: block; font-size: 15px; color: #ffd76a; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
+.gl-mon.boss { border-color: #b8862a; background: linear-gradient(#2a2312cc, #151a2bcc); }
+.gl-gim { font-style: normal; font-size: 11px; font-weight: 900; color: #ffd76a; }

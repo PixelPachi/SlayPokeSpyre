@@ -7,6 +7,7 @@ import type { Card, CardDef, Effect, EnemyMove, PowerId, StatusId } from '../cor
 import { TYPE_LABELS, type PokeType } from '../core/types';
 import type { Run } from '../core/run';
 import { renderCard } from './card';
+import { cardDef } from '../data/cards';
 import { POWER_INFO, STATUS_INFO, TYPE_COLORS, cardText } from './labels';
 import { openDeckOverlay, topbar } from './run-ui';
 import { relicDef } from '../data/relics';
@@ -185,6 +186,7 @@ export class CombatView {
       <div class="fighter enemy ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
         ${this.intentHtml(e)}
         ${this.statusRow(e, false)}
+        ${ENEMY_DEFS[e.defId].gimmick ? `<div class="gimmick" data-tip="<b>${esc(ENEMY_DEFS[e.defId].gimmick!.name)}</b><br>${esc(ENEMY_DEFS[e.defId].gimmick!.text)}">★ ${esc(ENEMY_DEFS[e.defId].gimmick!.name)}</div>` : ''}
         <div class="platform"></div>
         <img class="sprite front ${ENEMY_DEFS[e.defId].look ?? ''}" src="${asset(sprite)}" alt="${esc(e.name)}">
         ${e.shiny ? '<span class="shiny-star" data-tip="Chromatique ! Rapportera le double de Pokédollars.">★</span>' : ''}
@@ -295,7 +297,7 @@ export class CombatView {
         case 'enemy-move': {
           const el = this.whoEl(ev.uid);
           el?.classList.add('lunge');
-          if (ev.move?.damage !== undefined) this.showEnemyCard(ev.uid, ev.move, ev.damage ?? ev.move.damage);
+          if (ev.move && (ev.move.damage !== undefined || ev.move.signature)) this.showEnemyCard(ev.uid, ev.move, ev.damage ?? ev.move.damage ?? 0);
           else this.float(ev.uid, ev.name, 'move', 0);
           break;
         }
@@ -328,10 +330,11 @@ export class CombatView {
   /** Carte de l'attaque ennemie, affichée au milieu de l'écran. */
   private showEnemyCard(uid: number, m: EnemyMove, dmg: number): void {
     const e = this.combat.enemy(uid);
-    const effects: Effect[] = [{ kind: 'degats', amount: dmg, hits: m.hits }];
+    const effects: Effect[] = m.damage !== undefined ? [{ kind: 'degats', amount: dmg, hits: m.hits }] : [];
     if (m.playerStatus) effects.push({ kind: 'statut', status: m.playerStatus.status, stacks: m.playerStatus.stacks, on: 'cible' });
     if (m.selfStatus) effects.push({ kind: 'statut', status: m.selfStatus.status, stacks: m.selfStatus.stacks, on: 'soi' });
     if (m.block) effects.push({ kind: 'protection', amount: m.block });
+    if (m.heal) effects.push({ kind: 'soin', amount: m.heal });
     const def: CardDef = {
       id: `ennemi-${m.id}`, name: m.name, character: 'normal', pokeType: m.pokeType ?? 'normal', category: 'attaque',
       rarity: 'depart', cost: 0, target: 'ennemi', effects, upgrade: {},
@@ -339,7 +342,13 @@ export class CombatView {
     this.fx.querySelector('.enemy-card')?.remove();
     const box = document.createElement('div');
     box.className = 'enemy-card';
-    box.innerHTML = `<div class="enemy-card-who">${esc(e?.name ?? '')} utilise</div>${renderCard(def, { classes: 'no-cost' })}`;
+    const extra: string[] = [];
+    if (m.pierce) extra.push('<b>Ignore ta Protection.</b>');
+    if (m.addCards) extra.push(`Ajoute ${m.addCards.count} <b>${esc(cardDef(m.addCards.id).name)}</b> à ta ${m.addCards.to === 'main' ? 'main' : m.addCards.to === 'defausse' ? 'défausse' : 'pioche'}.`);
+    if (m.discard) extra.push(`Défausse ${m.discard} de tes cartes au hasard.`);
+    if (m.summon) extra.push('Appelle une ouvrière en renfort.');
+    const text = [cardText(def, null, null), ...extra].filter(Boolean).join(' ');
+    box.innerHTML = `<div class="enemy-card-who">${m.signature ? '<span class="sig">Capacité exclusive</span>' : ''}${esc(e?.name ?? '')} utilise</div>${renderCard(def, { classes: `no-cost ${m.signature ? 'signature' : ''}`, text })}`;
     this.fx.appendChild(box);
     this.lastEnemyCard = performance.now();
     setTimeout(() => box.remove(), 1500);

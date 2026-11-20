@@ -168,6 +168,12 @@ function startRun(character: CharacterId): void {
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
   // Pour tester : ?evenement=tarot-diable ouvre directement cet événement
+  // Pour tester : ?combat=apireine lance directement un combat contre ce gardien
+  if (params.get('combat')) {
+    clear();
+    view = new CombatView(screen, run, { seed: `${run.seed}-test`, enemies: params.get('combat')!.split(','), label: 'Test', boss: true }, () => showMap(run));
+    return;
+  }
   if (params.has('boutique')) { clear(); return renderShop(screen, run, () => showMap(run), (onWin) => kecleonFight(run, onWin)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
   if (run.act >= LAST_ACT) return showSummit(run);
@@ -331,5 +337,5 @@ function endRun(run: Run, victory: boolean): void {
 
 // Les paramètres de test (?tous, ?seed, ?acte, ?evenement, ?boutique) mènent directement au choix du Pokémon
 const dev = new URLSearchParams(location.search);
-if (['tous', 'seed', 'acte', 'evenement', 'boutique'].some((k) => dev.has(k))) menu();
+if (['tous', 'seed', 'acte', 'evenement', 'boutique', 'combat'].some((k) => dev.has(k))) menu();
 else title();

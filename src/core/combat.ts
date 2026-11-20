@@ -8,6 +8,7 @@ import {
 import { CARD_DEFS, cardDef } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { ENEMY_DEFS } from '../data/enemies';
+import '../data/boss-gimmicks';
 
 export const HAND_SIZE = 5;
 export const MAX_HAND = 10;
@@ -58,6 +59,8 @@ export interface EnemyState extends Fighter {
   /** Phase du combat (gardiens à deux phases) et position dans leur ordre d'actions. */
   phase: 1 | 2;
   step: number;
+  /** Compteurs propres (talents de gardien). */
+  flags: Record<string, number>;
 }
 
 /** Cible d'un événement : le joueur, ou l'uid d'un ennemi. */
@@ -140,6 +143,7 @@ export class Combat {
   readonly relics: Set<string>;
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
   private attacksThisTurn = 0;
+  private cardsThisTurn = 0;
   private firstAttackDone = false;
   private boss = false;
   /** Photocopie : nombre de prochaines cartes jouées deux fois. */
@@ -205,6 +209,7 @@ export class Combat {
       if (ch.id === 'riolu') { this.addStatus(this.player, 'player', 'attaque', 2); this.gainAura(10); }
     });
 
+    for (const e of this.enemies) if (this.gimmickOf(e) === 'mur-roc') this.gainBlock(e, e.uid, 20);
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
@@ -345,7 +350,8 @@ export class Combat {
   /** Dégâts par coup annoncés par l'intention d'un ennemi. */
   previewIntentDamage(e: EnemyState): number | null {
     if (e.intent.damage === undefined) return null;
-    return computeDamage(e.intent.damage, e, this.player, e.intent.pokeType ?? 'normal').amount;
+    const extra = e.intent.escalate ? (e.flags[e.intent.id] ?? 0) * e.intent.escalate : 0;
+    return computeDamage(e.intent.damage + extra, e, this.player, e.intent.pokeType ?? 'normal').amount;
   }
 
   // ——— Actions du joueur ———
@@ -383,6 +389,12 @@ export class Combat {
       if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
+    this.cardsThisTurn++;
+    if (this.phase === 'joueur' && this.cardsThisTurn >= 4 && this.bossAlive('decharge')) {
+      this.events.push({ type: 'player-move', name: 'Décharge !' });
+      this.loseHp(this.player, 'player', 2, 'carte');
+    }
+    if (d.category === 'technique') for (const e of this.aliveEnemies()) if (this.gimmickOf(e) === 'regard-royal') this.gainBlock(e, e.uid, 3);
     if (d.category === 'attaque') {
       this.attacksThisTurn++;
       this.firstAttackDone = true;
@@ -417,11 +429,13 @@ export class Combat {
     const fam = this.player.familiar;
     if (fam && fam.hp > 0) this.familiarAttack((fam.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0));
     if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
+    if (this.cardsThisTurn >= 4 && this.bossAlive('ailes')) this.addStatus(this.player, 'player', 'confusion', 1);
+    if (this.player.energy > 0 && this.bossAlive('sol-brulant')) this.addStatus(this.player, 'player', 'brulure', this.player.energy);
     this.tickDurations(this.player);
     this.phase = 'ennemi';
     this.player.freeTurn = false;
     this.player.hpLostEnemyTurn = 0;
-    for (const e of this.aliveEnemies()) e.block = 0;
+    for (const e of this.aliveEnemies()) if (this.gimmickOf(e) !== 'mur-roc') e.block = 0;
   }
 
   /** Fait agir un ennemi (appelé un par un par l'interface, pour animer). */
@@ -430,6 +444,7 @@ export class Combat {
     if (this.phase !== 'ennemi' || !e || e.hp <= 0) return;
     this.tickDots(e, uid);
     if (e.hp <= 0) return this.checkEnd();
+    if (this.gimmickOf(e) === 'clair-de-lune' && e.hp < e.maxHp) this.healEnemy(e, 6);
 
     // Gel : à 3, l'ennemi passe son tour (un gardien inflige seulement la moitié de ses dégâts)
     const frozen = (e.statuses.gel ?? 0) >= 3;
@@ -444,8 +459,11 @@ export class Combat {
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
       const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
-      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? computeDamage(m.damage, e, this.player, m.pokeType ?? 'normal').amount : undefined });
+      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount : undefined });
       if (m.block) this.gainBlock(e, uid, m.block);
+      if (m.heal) this.healEnemy(e, m.heal);
+      const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
+      if (m.escalate) e.flags[m.id] = (e.flags[m.id] ?? 0) + 1;
       if (m.damage !== undefined) {
         // Le Bébé Kangourex peut être visé (3 chances sur 10)
         const fam = this.player.familiar;
@@ -456,8 +474,12 @@ export class Combat {
             this.hitFamiliar(amount, effectiveness);
             continue;
           }
-          const { amount, effectiveness } = computeDamage(m.damage, e, this.player, m.pokeType ?? 'normal');
+          const { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
+          // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
+          const hidden = m.pierce ? this.player.block : this.gimmickOf(e) === 'teravolt' ? Math.ceil(this.player.block / 2) : 0;
+          this.player.block -= hidden;
           this.dealDamage(this.player, 'player', amount, effectiveness);
+          this.player.block += hidden;
         }
         if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
           this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
@@ -465,6 +487,9 @@ export class Combat {
       }
       if (m.playerStatus && this.phase === 'ennemi') this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
       if (m.selfStatus) this.addStatus(e, uid, m.selfStatus.status, m.selfStatus.stacks);
+      if (m.addCards && this.phase === 'ennemi') this.addBossCards(m.addCards.id, m.addCards.count, m.addCards.to);
+      if (m.discard && this.phase === 'ennemi') this.discardRandom(m.discard);
+      if (m.summon) this.summon(m.summon.id, m.summon.max);
       e.history.push(m.id);
     }
     this.tickDurations(e);
@@ -484,7 +509,7 @@ export class Combat {
     const hp = Math.round(this.rng.int(d.hp[0], d.hp[1]) * (this.enemyPower ?? 1) * (this.relics?.has('orbe-perle') ? 1.2 : 1));
     return {
       uid: this.nextEnemyUid++, defId: id, name: d.name, dex: d.dex, types: [...d.types],
-      hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [],
+      hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [], flags: {},
       shiny: this.rng.next() < SHINY_CHANCE, phase: 1, step: 0,
     };
   }
@@ -509,6 +534,7 @@ export class Combat {
     this.turn++;
     this.phase = 'joueur';
     this.attacksThisTurn = 0;
+    this.cardsThisTurn = 0;
     if (this.player.familiar) this.player.familiar.block = 0;
     this.player.block = 0;
     this.player.energy = this.player.maxEnergy;
@@ -531,6 +557,15 @@ export class Combat {
         this.checkEnd();
         if (this.phase !== 'joueur') return;
       }
+    }
+    if (this.bossAlive('tempete-sable')) {
+      this.events.push({ type: 'player-move', name: 'Tempête de Sable !' });
+      this.loseHp(this.player, 'player', 3, 'carte');
+      if (this.player.hp <= 0) return this.checkEnd();
+    }
+    if (this.bossAlive('distorsion') && this.turn % 3 === 0) {
+      this.player.energy = Math.max(0, this.player.energy - 1);
+      this.events.push({ type: 'player-move', name: 'Le temps se fige : −1 PA' });
     }
     if (this.player.statuses.etourdi) {
       delete this.player.statuses.etourdi;
@@ -564,7 +599,14 @@ export class Combat {
         this.drawPile = this.rng.shuffle(this.discardPile);
         this.discardPile = [];
       }
-      this.hand.push(this.drawPile.pop()!);
+      const card = this.drawPile.pop()!;
+      this.hand.push(card);
+      const od = this.def(card).onDraw;
+      if (od?.length && this.phase === 'joueur') {
+        this.events.push({ type: 'player-move', name: `${this.def(card).name} !` });
+        for (const eff of od) this.resolve(eff, this.def(card), undefined);
+        if (this.player.energy < 0) this.player.energy = 0;
+      }
     }
   }
 
@@ -595,7 +637,12 @@ export class Combat {
   /** Inflige un coup ; renvoie les PV réellement retirés. */
   private strike(t: EnemyState, base: number, d: CardDef): number {
     const before = t.hp;
-    const { amount, effectiveness } = this.playerDamage(base, d, t);
+    let { amount, effectiveness } = this.playerDamage(base, d, t);
+    const g = this.gimmickOf(t);
+    if (g === 'cuirasse' && t.flags.cuirasse !== this.turn) { t.flags.cuirasse = this.turn; amount = Math.floor(amount / 2); }
+    if (g === 'reine' && this.aliveEnemies().some((x) => x !== t)) amount = Math.floor(amount / 2);
+    if (g === 'multiecaille' && t.hp >= t.maxHp) amount = Math.floor(amount / 2);
+    if (g === 'torche' && d.pokeType === 'feu') { amount = Math.floor(amount / 2); this.addStatus(t, t.uid, 'attaque', 1); }
     this.dealDamage(t, t.uid, amount, effectiveness);
     return before - t.hp;
   }
@@ -950,6 +997,10 @@ export class Combat {
     // Contestation (Vipélierre) : ses baisses de stats deviennent des hausses, et inversement
     if (who === 'player' && this.player.character === 'vipelierre' && (status === 'attaque' || status === 'defense')) s = -s;
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
+    if (who === 'player' && s > 0 && (status === 'attaque' || status === 'defense') && this.bossAlive('air-lock')) {
+      this.events.push({ type: 'player-move', name: 'Air Lock bloque la hausse !' });
+      return;
+    }
     const v = (f.statuses[status] ?? 0) + s;
     if (v === 0) delete f.statuses[status];
     else f.statuses[status] = v;
@@ -965,9 +1016,55 @@ export class Combat {
       if (s === 'vampigraine' && who !== 'player') {
         this.healPlayer(Math.floor(n / 2));
       }
+      if (s === 'poison' && who === 'player' && this.bossAlive('venin-tenace')) continue; // Venin Tenace
       if (n - 1 <= 0) delete f.statuses[s];
       else f.statuses[s] = n - 1;
     }
+  }
+
+  // ——— Gardiens ———
+
+  gimmickOf(e: EnemyState): string | undefined {
+    return ENEMY_DEFS[e.defId]?.gimmick?.id;
+  }
+
+  private bossAlive(id: string): boolean {
+    return this.aliveEnemies().some((e) => this.gimmickOf(e) === id);
+  }
+
+  private healEnemy(e: EnemyState, n: number): void {
+    const h = Math.min(n, e.maxHp - e.hp);
+    if (h <= 0) return;
+    e.hp += h;
+    this.events.push({ type: 'heal', target: e.uid, amount: h });
+  }
+
+  /** Cartes de gardien glissées dans le deck pour ce combat. */
+  private addBossCards(id: string, count: number, to: 'pioche' | 'defausse' | 'main'): void {
+    for (let i = 0; i < count; i++) {
+      const card: Card = { uid: this.nextTempUid++, defId: id, upgraded: false };
+      if (to === 'main' && this.hand.length < MAX_HAND) this.hand.push(card);
+      else if (to === 'defausse') this.discardPile.push(card);
+      else this.drawPile.splice(this.rng.int(0, this.drawPile.length), 0, card);
+    }
+    const where = to === 'main' ? 'ta main' : to === 'defausse' ? 'ta défausse' : 'ta pioche';
+    this.events.push({ type: 'player-move', name: `${count} ${cardDef(id).name} dans ${where}` });
+  }
+
+  private discardRandom(n: number): void {
+    for (let i = 0; i < n && this.hand.length; i++) {
+      const [c] = this.hand.splice(this.rng.int(0, this.hand.length - 1), 1);
+      this.discardPile.push(c);
+      this.events.push({ type: 'player-move', name: `${this.def(c).name} est défaussée` });
+    }
+  }
+
+  private summon(id: string, max: number): void {
+    if (this.aliveEnemies().filter((e) => e.defId === id).length >= max || this.aliveEnemies().length >= 4) return;
+    const e = this.spawnEnemy(id);
+    this.enemies.push(e);
+    this.rollIntent(e);
+    this.events.push({ type: 'enemy-move', uid: e.uid, name: 'Arrive en renfort !' });
   }
 
   /** Fin du tour du porteur : Paralysie, Peur, Confusion baissent de 1. */

@@ -82,6 +82,19 @@ CARDS.push({
   cost: 0, target: 'soi', effects: [], keywords: ['injouable', 'conservee'],
   upgrade: { effects: [] },
 });
+// Cartes de gardien : glissées dans ton deck pendant un combat de gardien, injouables, elles agissent quand on les pioche
+const bossCard = (id: string, name: string, pokeType: CardDef['pokeType'], onDraw: CardDef['onDraw']): CardDef => ({
+  id, name, character: 'normal', pokeType, category: 'statut', rarity: 'depart', cost: 0, target: 'soi', effects: [],
+  keywords: ['injouable', 'ephemere'], upgrade: { effects: [] }, onDraw,
+});
+CARDS.push(
+  bossCard('g-dard-venimeux', 'Dard Venimeux', 'poison', [{ kind: 'statut', status: 'poison', stacks: 2, on: 'soi' }]),
+  bossCard('g-ecaille-poudreuse', 'Écaille Poudreuse', 'insecte', []),
+  bossCard('g-reve-lourd', 'Rêve Lourd', 'fee', [{ kind: 'pa', amount: -1 }]),
+  bossCard('g-cendres', 'Cendres', 'feu', [{ kind: 'statut', status: 'brulure', stacks: 2, on: 'soi' }]),
+  bossCard('g-electrocution', 'Électrocution', 'electrik', [{ kind: 'perte-pv', amount: 4 }]),
+  bossCard('g-felure-temporelle', 'Fêlure Temporelle', 'dragon', [{ kind: 'pa', amount: -1 }]),
+);
 CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS);
 
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));

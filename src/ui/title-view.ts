@@ -89,12 +89,15 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
     return `<p class="gl-note">${[...seen].filter((d) => mons.some(([m]) => m === d)).length} / ${mons.length} Pokémon croisés · ${shiny.size} chromatique${shiny.size > 1 ? 's' : ''}</p>
       <div class="gl-mons">${mons.map(([dex, name]) => {
         const known = seen.has(dex);
-        return `<div class="gl-mon ${known ? '' : 'unknown'}" data-tip="${known ? esc(name) : 'Pas encore croisé'}">
+        const gim = Object.values(ENEMY_DEFS).find((e) => e.dex === dex && e.gimmick)?.gimmick;
+        const tip = known ? `<b>${esc(name)}</b>${gim ? `<br>★ <b>${esc(gim.name)}</b> : ${esc(gim.text)}` : ''}` : 'Pas encore croisé';
+        return `<div class="gl-mon ${known ? '' : 'unknown'} ${gim ? 'boss' : ''}" data-tip="${tip}">
           <div class="gl-sprites">
             <img src="${asset(`sprites/pokemon/front/${dex}.png`)}" alt="">
             ${shiny.has(dex) ? `<img class="shiny" src="${asset(`sprites/pokemon/shiny/${dex}.png`)}" alt="" data-tip="${esc(name)} chromatique">` : ''}
           </div>
           <span>${known ? esc(name) : '???'}${shiny.has(dex) ? ' <b class="star">★</b>' : ''}</span>
+          ${gim && known ? `<em class="gl-gim">${esc(gim.name)}</em>` : gim ? '<em class="gl-gim">Gardien</em>' : ''}
           <small>n° ${String(dex).padStart(3, '0')}</small>
         </div>`;
       }).join('')}</div>`;

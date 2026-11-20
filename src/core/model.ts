@@ -96,6 +96,8 @@ export interface CardDef {
   keywords?: Keyword[];
   /** Conditions pour jouer la carte. */
   requires?: { block?: number; aura?: number; notBoss?: boolean };
+  /** Cartes de gardien : effet subi quand on la pioche. */
+  onDraw?: Effect[];
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }
@@ -143,7 +145,25 @@ export interface EnemyMove {
   selfStatus?: { status: StatusId; stacks: number };
   /** Statut posé sur le joueur. */
   playerStatus?: { status: StatusId; stacks: number };
+  /** Capacité exclusive d'un gardien (carte dorée). */
+  signature?: boolean;
+  /** Ajoute des cartes de gardien dans le deck du joueur pour ce combat. */
+  addCards?: { id: string; count: number; to: 'pioche' | 'defausse' | 'main' };
+  /** Ignore la Protection du joueur. */
+  pierce?: boolean;
+  /** Appelle un allié (id d'ennemi), au plus `max` en même temps. */
+  summon?: { id: string; max: number };
+  /** Défausse des cartes au hasard de la main du joueur. */
+  discard?: number;
+  /** Se soigne. */
+  heal?: number;
+  /** Dégâts en plus à chaque nouvelle utilisation pendant le combat. */
+  escalate?: number;
 }
+
+export type GimmickId =
+  | 'venin-tenace' | 'cuirasse' | 'ailes' | 'reine' | 'boule-de-neige' | 'clair-de-lune' | 'regard-royal' | 'sol-brulant'
+  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'distorsion';
 
 export interface EnemyDef {
   id: string;
@@ -158,4 +178,6 @@ export interface EnemyDef {
   phase2?: { below: number; name: string; pattern: string[]; selfStatus?: { status: StatusId; stacks: number }; block?: number };
   /** Classe CSS du sprite (ex. « primal » pour Dialga Primal). */
   look?: string;
+  /** Talent propre à un gardien. */
+  gimmick?: { id: GimmickId; name: string; text: string };
 }

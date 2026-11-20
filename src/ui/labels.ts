@@ -130,6 +130,10 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }
+  if (d.onDraw) {
+    const t = d.onDraw.map((e) => e.kind === 'statut' ? `tu subis ${e.stacks} ${STATUS_INFO[e.status].label}` : e.kind === 'pa' ? `tu perds ${-e.amount} PA` : e.kind === 'perte-pv' ? `tu perds <b class="down">${e.amount}</b> PV` : '').filter(Boolean);
+    parts.push(t.length ? `Carte de gardien. Quand tu la pioches, ${t.join(' et ')}.` : 'Carte de gardien. Encombre ta main.');
+  }
   if (d.requires?.block) parts.push('<i>Jouable seulement avec de la Protection.</i>');
   if (d.requires?.aura && !d.effects.some((e) => e.kind === 'consomme-aura')) parts.push(`<i>Demande ${d.requires.aura} Aura.</i>`);
   if (d.id === 'voeu-brise') parts.push('Malédiction. À la fin de ton tour, si elle est dans ta main : perds <b class="down">2</b> PV.');

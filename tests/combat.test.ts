@@ -821,3 +821,58 @@ describe('sauvegarde et reliques de gardien', async () => {
     expect(c.hand.length).toBe(4);
   });
 });
+
+describe('gardiens : talents et capacités exclusives', () => {
+  const vs = (boss: string, cards: string[] = []) => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: [boss], seed: 'G', boss: true });
+    c.hand = cards.map((id, i) => ({ uid: 900 + i, defId: id, upgraded: false }));
+    c.player.energy = 10;
+    c.player.aura = 0;
+    return c;
+  };
+  it('chaque gardien a un talent', async () => {
+    const { ZONES } = await import('../src/data/zones');
+    const { ENEMY_DEFS } = await import('../src/data/enemies');
+    for (const z of ZONES) expect(ENEMY_DEFS[z.boss].gimmick, z.boss).toBeDefined();
+  });
+  it('Charkos garde sa Protection ; Dardargnan bloque le Poison', () => {
+    const c = vs('charkos');
+    expect(c.enemies[0].block).toBe(20);
+    c.endPlayerTurn();
+    expect(c.enemies[0].block).toBeGreaterThanOrEqual(20);
+    const d = vs('dardargnan');
+    d.player.statuses.poison = 3;
+    d.endPlayerTurn();
+    d.enemies[0].intent = { id: 'x', name: 'x', weight: 1, intent: 'defense', block: 0 };
+    d.enemyAct(d.enemies[0].uid);
+    d.endEnemyTurn();
+    expect(d.player.statuses.poison).toBe(3);
+  });
+  it('Assaut Venimeux glisse des Dards Venimeux qui empoisonnent à la pioche', () => {
+    const c = vs('dardargnan');
+    c.endPlayerTurn();
+    c.enemies[0].intent = c.enemies[0].intent = (c as any).constructor && { ...((c.enemies[0] as any).intent), ...{ id: 'assaut-venimeux', name: 'Assaut Venimeux', weight: 1, intent: 'attaque', pokeType: 'poison', damage: 8, addCards: { id: 'g-dard-venimeux', count: 2, to: 'pioche' } } };
+    c.enemyAct(c.enemies[0].uid);
+    expect(c.drawPile.filter((x) => x.defId === 'g-dard-venimeux').length + c.discardPile.filter((x) => x.defId === 'g-dard-venimeux').length).toBe(2);
+  });
+  it('Apireine appelle des ouvrières et encaisse moitié moins tant qu’elles sont là', () => {
+    const c = vs('apireine', ['ruse']);
+    c.endPlayerTurn();
+    c.enemies[0].intent = { id: 'appel-ouvrieres', name: 'Appel', weight: 1, intent: 'boost', summon: { id: 'apitrini', max: 2 } };
+    c.enemyAct(c.enemies[0].uid);
+    expect(c.enemies.length).toBe(2);
+    c.endEnemyTurn();
+    const q = c.enemies[0];
+    q.block = 0;
+    const hp = q.hp;
+    c.hand = [{ uid: 990, defId: 'ruse', upgraded: false }];
+    c.player.aura = 0;
+    c.play(990, q.uid);
+    expect(hp - q.hp).toBeLessThanOrEqual(4);
+  });
+  it('Rayquaza bloque les hausses d’Attaque', () => {
+    const c = vs('rayquaza', ['danse-lames']);
+    c.play(900);
+    expect(c.player.statuses.attaque ?? 0).toBe(0);
+  });
+});
