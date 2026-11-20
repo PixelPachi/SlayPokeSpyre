@@ -75,7 +75,7 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
     <h1 class="node-title">Centre Pokémon</h1>
     <p class="node-sub">« Bonjour ! Bienvenue au Centre Pokémon de la Tour du Temps. »</p>
     <div class="choice-row">
-      <button class="choice heal"><b>Se soigner</b><span>Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)</span></button>
+      <button class="choice heal" ${run.relics.includes('cendre-sacree') ? 'disabled' : ''}><b>Se soigner</b><span>${run.relics.includes('cendre-sacree') ? 'Impossible : la Cendre Sacrée t’en empêche' : `Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)`}</span></button>
       <button class="choice upgrade" ${upgradable.length ? '' : 'disabled'}><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
     </div>`, 'centre');
   bindDeck(root, run);

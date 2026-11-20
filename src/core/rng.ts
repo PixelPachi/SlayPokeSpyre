@@ -12,6 +12,15 @@ export class Rng {
     this.state = h >>> 0;
   }
 
+  /** État interne (pour sauvegarder une run et la reprendre exactement). */
+  get snapshot(): number {
+    return this.state;
+  }
+
+  set snapshot(v: number) {
+    this.state = v >>> 0;
+  }
+
   /** Nombre entre 0 (inclus) et 1 (exclu). */
   next(): number {
     let t = (this.state += 0x6d2b79f5);

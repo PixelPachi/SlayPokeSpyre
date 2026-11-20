@@ -796,3 +796,28 @@ describe('modifications des cartes de Riolu', () => {
     expect(c.endTurnRequested).toBe(true);
   });
 });
+
+describe('sauvegarde et reliques de gardien', async () => {
+  const { Run } = await import('../src/core/run');
+  it('une run sauvegardée reprend à l’identique (même hasard)', () => {
+    const a = new Run('SAVE1', 'riolu');
+    a.money = 321;
+    a.addBerry('oran');
+    a.moveTo(0, a.map[0][0].col);
+    const b = Run.fromJSON(JSON.parse(JSON.stringify(a.toJSON())));
+    expect(b.money).toBe(321);
+    expect(b.berries).toEqual(['oran']);
+    expect(b.zone.id).toBe(a.zone.id);
+    expect(b.pos).toEqual(a.pos);
+    expect(b.deck.length).toBe(a.deck.length);
+    expect(b.rng.next()).toBe(a.rng.next());
+    expect(b.cardChoices('combat')).toEqual(a.cardChoices('combat'));
+  });
+  it('relique de gardien : +1 PA et sa contrepartie', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['rattata'], seed: 'B', relics: ['orbe-adamant', 'orbe-platine'] });
+    expect(c.player.maxEnergy).toBe(5);
+    expect(c.player.energy).toBe(5);
+    expect(c.enemies[0].statuses.attaque).toBe(1);
+    expect(c.hand.length).toBe(4);
+  });
+});

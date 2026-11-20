@@ -4,7 +4,7 @@ import { Rng } from './rng';
 import { BERRIES, MAX_BERRIES } from '../data/berries';
 import { allCards, CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
-import { type ZoneDef, zonesOfAct } from '../data/zones';
+import { type ZoneDef, ZONES, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
 
 export type NodeType = 'combat' | 'evenement' | 'centre' | 'boutique' | 'elite' | 'tresor' | 'boss';
@@ -181,6 +181,25 @@ export class Run {
   /** Étape atteinte au sommet (0 = pas encore commencé). */
   summitStep = 0;
 
+  /** Le joueur est entré dans le nœud actuel sans l'avoir terminé (on le rouvre à la reprise). */
+  inNode = false;
+
+  /** Sauvegarde : tout l'état de la run en données simples. */
+  toJSON(): Record<string, unknown> {
+    const { rng, zone, ...rest } = this as unknown as Record<string, unknown> & { rng: Rng; zone: ZoneDef };
+    return { ...rest, zoneId: zone.id, rngState: rng.snapshot, version: 1 };
+  }
+
+  /** Reprend une run sauvegardée. */
+  static fromJSON(data: Record<string, unknown>): Run {
+    const { zoneId, rngState, version: _v, ...rest } = data as Record<string, unknown> & { zoneId: string; rngState: number; version: number };
+    const run = new Run(String(rest.seed), rest.character as CharacterId, rest.unlocked as string[] | undefined, rest.unlockedRelics as string[]);
+    Object.assign(run, rest);
+    run.zone = ZONES.find((z) => z.id === zoneId) ?? run.zone;
+    run.rng.snapshot = rngState;
+    return run;
+  }
+
   /** Passe à l'acte suivant : nouvelle zone, nouvelle carte, PV restaurés. */
   nextAct(): void {
     this.act++;
@@ -288,9 +307,15 @@ export class Run {
   /** Objets qu'on peut encore obtenir : communs + ceux du Pokémon débloqués, sans ceux déjà tenus. */
   relicPool(): string[] {
     return allRelics()
-      .filter((r) => r.rarity !== 'depart' && (r.owner === 'commun' || (r.owner === this.character && this.unlockedRelics.includes(r.id))))
+      .filter((r) => r.rarity !== 'depart' && r.rarity !== 'gardien' && (r.owner === 'commun' || (r.owner === this.character && this.unlockedRelics.includes(r.id))))
       .filter((r) => !this.relics.includes(r.id))
       .map((r) => r.id);
+  }
+
+  /** Relique de gardien (+1 PA avec contrepartie) pas encore possédée ; sinon un objet normal. */
+  rollBossRelic(): string {
+    const pool = allRelics().filter((r) => r.rarity === 'gardien' && !this.relics.includes(r.id)).map((r) => r.id);
+    return pool.length ? this.rng.pick(pool) : this.rollRelics(1)[0];
   }
 
   /** Tire des objets différents (50 % commun, 33 % peu commun, 17 % rare). */

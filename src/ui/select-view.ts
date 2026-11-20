@@ -28,7 +28,7 @@ const UNLOCK_TEXT: Record<CharacterId, string> = {
   mew: '???',
 };
 
-export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: CharacterId) => void): void {
+export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: CharacterId) => void, onBack?: () => void): void {
   let current: CharacterId = 'riolu';
   const UNLOCKED = playableCharacters(save);
 
@@ -42,6 +42,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
         ${ill ? `<img class="select-bg" src="${asset(ill)}" alt="">` : '<div class="select-bg secret"></div>'}
         <div class="select-shade"></div>
         <h1 class="logo">SlayPoke<span>Spyre</span></h1>
+        ${onBack ? '<button class="btn back-title">← Écran titre</button>' : ''}
         <div class="select-sheet">
           <div class="sheet-name">${locked && current === 'mew' ? '???' : esc(ch.name)}</div>
           <div class="sheet-types">${ch.types.map((t) => `<span class="type-badge" style="background:${TYPE_COLORS[t]}">${TYPE_LABELS[t]}</span>`).join('')}</div>
@@ -62,7 +63,6 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
             </button>`;
           }).join('')}
         </div>
-        <div class="version">Prototype — acte 1 : Forêt de Jade</div>
       </div>`;
   };
 
@@ -74,6 +74,10 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
       return draw();
     }
     if (t.closest('.collection')) return openCollection(root, save, current);
+    if (t.closest('.back-title') && onBack) {
+      root.onclick = null;
+      return onBack();
+    }
     if (t.closest('.start')) {
       root.onclick = null;
       onStart(current);

@@ -9,7 +9,74 @@ export interface SaveData {
   runs: number;
   /** Personnages jouables (Riolu au départ). */
   characters?: CharacterId[];
+  /** Pokédex : n° des Pokémon croisés en combat, et de ceux croisés en chromatique. */
+  seen?: number[];
+  seenShiny?: number[];
 }
+
+const RUN_KEY = 'slaypokespyre-run-v1';
+
+/** Sauvegarde automatique de la run en cours. */
+export function saveRun(data: unknown): void {
+  try {
+    localStorage.setItem(RUN_KEY, JSON.stringify(data));
+  } catch {
+    // stockage indisponible
+  }
+}
+
+export function loadRunData(): Record<string, unknown> | null {
+  try {
+    const raw = localStorage.getItem(RUN_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearRun(): void {
+  try {
+    localStorage.removeItem(RUN_KEY);
+  } catch {
+    // stockage indisponible
+  }
+}
+
+/** Note les Pokémon croisés (Glossaire). */
+export function recordEncounter(s: SaveData, list: { dex: number; shiny: boolean }[]): void {
+  const seen = new Set(s.seen ?? []);
+  const shiny = new Set(s.seenShiny ?? []);
+  let changed = false;
+  for (const e of list) {
+    if (!seen.has(e.dex)) { seen.add(e.dex); changed = true; }
+    if (e.shiny && !shiny.has(e.dex)) { shiny.add(e.dex); changed = true; }
+  }
+  if (!changed) return;
+  s.seen = [...seen];
+  s.seenShiny = [...shiny];
+  writeSave(s);
+}
+
+/** Fichier de sauvegarde complet (progression + run en cours), pour l'exporter ou l'importer. */
+export function exportAll(s: SaveData): string {
+  return JSON.stringify({ game: 'SlayPokeSpyre', version: 1, date: new Date().toISOString(), save: s, run: loadRunData() }, null, 1);
+}
+
+export function importAll(text: string): boolean {
+  try {
+    const d = JSON.parse(text);
+    if (d.game !== 'SlayPokeSpyre' || !d.save) return false;
+    localStorage.setItem(KEY, JSON.stringify(d.save));
+    if (d.run) localStorage.setItem(RUN_KEY, JSON.stringify(d.run));
+    else localStorage.removeItem(RUN_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Rappel pour les écrans qui veulent noter une rencontre sans connaître la sauvegarde. */
+export const saveHooks: { encounter?: (list: { dex: number; shiny: boolean }[]) => void } = {};
 
 /** Personnages jouables. `?tous` dans l'adresse les débloque tous (pour tester). */
 export function playableCharacters(s: SaveData): CharacterId[] {

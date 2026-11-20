@@ -1,4 +1,5 @@
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
+import { saveHooks } from '../core/save';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, PowerId, StatusId } from '../core/model';
@@ -46,6 +47,7 @@ export class CombatView {
       form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss,
     });
     this.combat.drainEvents();
+    saveHooks.encounter?.(this.combat.enemies.map((e) => ({ dex: e.dex, shiny: e.shiny })));
     // Le décor (fond + particules) reste en place pendant tout le combat : les animations ne redémarrent pas
     const z = run.zone;
     root.style.setProperty('--ground', z.palette[1]);

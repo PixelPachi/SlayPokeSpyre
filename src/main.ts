@@ -8,7 +8,8 @@ import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, 
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
-import { characterRelics, characterUnlocks, grantExp, loadSave, unlockCharacters } from './core/save';
+import { characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
+import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
 import { runExp } from './data/unlocks';
 import { BERRY_DEFS } from './data/berries';
 import type { EventFight } from './data/events';
@@ -47,6 +48,35 @@ stage.addEventListener('click', (ev) => {
   stage.appendChild(menu);
 });
 const save = loadSave();
+saveHooks.encounter = (list) => recordEncounter(save, list);
+
+/** Sauvegarde automatique : à chaque étape de la run (inNode = le nœud est commencé mais pas fini). */
+function persist(run: Run, inNode: boolean): void {
+  run.inNode = inNode;
+  saveRun(run.toJSON());
+}
+
+/** Résumé de la run sauvegardée (écran titre). */
+function savedRunSummary(): string | null {
+  const data = loadRunData();
+  if (!data) return null;
+  try {
+    const run = Run.fromJSON(data);
+    return `${run.form.name} · acte ${Math.min(run.act, LAST_ACT)} · étage ${run.floor} · ${run.hp}/${run.maxHp} PV`;
+  } catch {
+    return null;
+  }
+}
+
+// Menu pendant une run : bouton ☰ de la barre du haut
+stage.addEventListener('click', (ev) => {
+  if (!(ev.target as HTMLElement).closest('.tb-menu') || !activeRun) return;
+  ev.stopPropagation();
+  confirmBox(screen, 'Pause', 'Ta run est sauvegardée automatiquement. En quittant pendant un combat ou un événement, tu le reprendras depuis son début.', 'Sauvegarder et quitter', () => {
+    activeRun = null;
+    title();
+  }, 'Reprendre');
+}, true);
 
 // Garde anti-clic : juste après un changement d'écran, un clic (double clic, clic trop rapide)
 // ne doit pas choisir une carte ou acheter quelque chose sans le vouloir.
@@ -65,9 +95,67 @@ function clear(): void {
   screenShownAt = performance.now();
 }
 
+function title(): void {
+  clear();
+  activeRun = null;
+  const resume = savedRunSummary();
+  renderTitle(screen, {
+    resume,
+    onContinue: continueRun,
+    onPlay: () => {
+      clearRun();
+      menu();
+    },
+    onGlossary: () => {
+      clear();
+      renderGlossary(screen, save, title);
+    },
+    onSave: saveScreen,
+  });
+}
+
+function saveScreen(): void {
+  clear();
+  renderSaveScreen(screen, {
+    hasRun: savedRunSummary(),
+    onBack: title,
+    onExport: () => {
+      const blob = new Blob([exportAll(save)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `slaypokespyre-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Sauvegarde exportée !');
+    },
+    onImport: (text) => {
+      if (!importAll(text)) return toast('Ce fichier n’est pas une sauvegarde de SlayPokeSpyre.');
+      toast('Sauvegarde importée !');
+      setTimeout(() => location.reload(), 600);
+    },
+  });
+}
+
+function continueRun(): void {
+  const data = loadRunData();
+  if (!data) return title();
+  let run: Run;
+  try {
+    run = Run.fromJSON(data);
+  } catch {
+    clearRun();
+    toast('La sauvegarde de la run est illisible.');
+    return title();
+  }
+  activeRun = run;
+  if (run.act >= LAST_ACT) return run.inNode ? summitStep(run) : showSummit(run);
+  if (run.inNode && run.pos) return enterNode(run, run.pos.row, run.pos.col);
+  showMap(run);
+}
+
 function menu(): void {
   clear();
-  renderSelect(screen, save, (id) => startRun(id));
+  renderSelect(screen, save, (id) => startRun(id), title);
 }
 
 function startRun(character: CharacterId): void {
@@ -81,14 +169,24 @@ function startRun(character: CharacterId): void {
   // Pour tester : ?evenement=tarot-diable ouvre directement cet événement
   if (params.has('boutique')) { clear(); return renderShop(screen, run, () => showMap(run), (onWin) => kecleonFight(run, onWin)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
+  if (run.act >= LAST_ACT) return showSummit(run);
   showMap(run);
 }
 
 function showMap(run: Run): void {
   clear();
   if (run.act >= LAST_ACT) return showSummit(run);
+  persist(run, false);
   renderMap(screen, run, (row, col) => {
     run.moveTo(row, col);
+    persist(run, true);
+    enterNode(run, row, col);
+  });
+}
+
+/** Ouvre le nœud de la carte où se trouve le joueur. */
+function enterNode(run: Run, row: number, col: number): void {
+  {
     if (row === BOSS_ROW) return fight(run, 'boss');
     const node = run.nodeAt(row, col)!;
     const back = () => showMap(run);
@@ -108,7 +206,7 @@ function showMap(run: Run): void {
       case 'boss':
         return fight(run, 'boss');
     }
-  });
+  }
 }
 
 function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
@@ -134,7 +232,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
           screen, run,
           {
             money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), label: labels.boss,
-            title: `Gardien de ${run.zone.name} vaincu !`, relic: run.rollRelics(1)[0], berry: run.rollBerry(),
+            title: `Gardien de ${run.zone.name} vaincu !`, relic: run.rollBossRelic(), berry: run.rollBerry(),
           },
           () => {
             if (last) return endRun(run, true);
@@ -201,25 +299,36 @@ function duel(run: Run, f: EventFight): void {
 
 /** Le sommet : une étape après l'autre jusqu'à Dialga Primal. */
 function showSummit(run: Run): void {
-  renderSummit(screen, run, () => {
-    const step = SUMMIT_STEPS[run.summitStep];
-    run.summitStep++;
-    const back = () => showMap(run);
-    clear();
-    if (step === 'centre') return renderCentre(screen, run, back);
-    if (step === 'boutique') return renderShop(screen, run, back);
-    return fight(run, step);
-  });
+  clear();
+  persist(run, false);
+  renderSummit(screen, run, () => summitStep(run));
+}
+
+/** Étape suivante du sommet (sauvegardée avant d'y entrer, pour la reprendre). */
+function summitStep(run: Run): void {
+  const step = SUMMIT_STEPS[run.summitStep];
+  persist(run, true);
+  run.summitStep++;
+  const back = () => showMap(run);
+  clear();
+  if (step === 'centre') return renderCentre(screen, run, back);
+  if (step === 'boutique') return renderShop(screen, run, back);
+  return fight(run, step);
 }
 
 /** Fin de run : EXP pour le Pokémon, niveaux et cartes débloquées. */
 function endRun(run: Run, victory: boolean): void {
+  clearRun();
+  activeRun = null;
   const base = runExp(run.floor, run.elitesDefeated, run.bossesDefeated);
   const exp = run.relics.includes('oeuf-chance') ? Math.floor(base * 1.5) : base;
   const result = grantExp(save, run.character, exp);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory);
   if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
-  renderRunEnd(screen, run, victory, { exp, ...result, total: save.exp[run.character] ?? 0 }, menu, () => startRun(run.character));
+  renderRunEnd(screen, run, victory, { exp, ...result, total: save.exp[run.character] ?? 0 }, title, () => startRun(run.character));
 }
 
-menu();
+// Les paramètres de test (?tous, ?seed, ?acte, ?evenement, ?boutique) mènent directement au choix du Pokémon
+const dev = new URLSearchParams(location.search);
+if (['tous', 'seed', 'acte', 'evenement', 'boutique'].some((k) => dev.has(k))) menu();
+else title();

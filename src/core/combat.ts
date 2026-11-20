@@ -192,6 +192,13 @@ export class Combat {
     if (ch.id === 'riolu') this.gainAura(3);
     if (ch.id === 'caninos') for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
+    // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
+    const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
+    this.player.maxEnergy += bossRelics.length;
+    this.player.energy = this.player.maxEnergy;
+    if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
+    if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);
+    if (this.has('orbe-flamme')) this.addStatus(this.player, 'player', 'brulure', 2);
     if (this.has('bandeau-muscle')) this.relicFired('bandeau-muscle', () => this.addStatus(this.player, 'player', 'attaque', 1));
     if (mega) this.relicFired(mega.stone, () => {
       this.events.push({ type: 'player-move', name: `${ch.name} méga-évolue !` });
@@ -474,7 +481,7 @@ export class Combat {
   private spawnEnemy(id: string): EnemyState {
     const d = ENEMY_DEFS[id];
     if (!d) throw new Error(`Ennemi inconnu : ${id}`);
-    const hp = Math.round(this.rng.int(d.hp[0], d.hp[1]) * (this.enemyPower ?? 1));
+    const hp = Math.round(this.rng.int(d.hp[0], d.hp[1]) * (this.enemyPower ?? 1) * (this.relics?.has('orbe-perle') ? 1.2 : 1));
     return {
       uid: this.nextEnemyUid++, defId: id, name: d.name, dex: d.dex, types: [...d.types],
       hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [],
@@ -545,7 +552,7 @@ export class Combat {
       this.events.push({ type: 'aura', amount: this.player.aura });
       this.events.push({ type: 'player-move', name: 'Énergie illimitée !' });
     }
-    this.draw(HAND_SIZE);
+    this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0));
     this.checkLucarite();
   }
 

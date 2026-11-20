@@ -2,7 +2,7 @@
 // Les effets sont appliqués par le moteur (core/combat.ts) et la run (main.ts) d'après l'id de l'objet.
 import type { CharacterId } from '../core/model';
 
-export type RelicRarity = 'depart' | 'commun' | 'peu-commun' | 'rare';
+export type RelicRarity = 'depart' | 'commun' | 'peu-commun' | 'rare' | 'gardien';
 
 export interface RelicDef {
   id: string;
@@ -16,6 +16,20 @@ export interface RelicDef {
 }
 
 const RELICS: RelicDef[] = [
+  // ——— Reliques de gardien : +1 PA, avec une contrepartie (récompense des gardiens) ———
+  { id: 'orbe-adamant', name: 'Orbe Adamant', sprite: 'adamant-orb', rarity: 'gardien', owner: 'commun',
+    text: '+1 PA par tour. Les ennemis commencent chaque combat avec +1 Attaque.' },
+  { id: 'orbe-platine', name: 'Orbe Platiné', sprite: 'griseous-orb', rarity: 'gardien', owner: 'commun',
+    text: '+1 PA par tour. Tu pioches 1 carte de moins à chaque tour.' },
+  { id: 'orbe-perle', name: 'Orbe Perlé', sprite: 'lustrous-orb', rarity: 'gardien', owner: 'commun',
+    text: '+1 PA par tour. Les ennemis ont 20 % de PV en plus.' },
+  { id: 'orbe-toxique', name: 'Orbe Toxique', sprite: 'toxic-orb', rarity: 'gardien', owner: 'commun',
+    text: '+1 PA par tour. Tu commences chaque combat avec 4 Poison.' },
+  { id: 'orbe-flamme', name: 'Orbe Flamme', sprite: 'flame-orb', rarity: 'gardien', owner: 'commun',
+    text: '+1 PA par tour. Tu commences chaque combat avec 2 Brûlure.' },
+  { id: 'cendre-sacree', name: 'Cendre Sacrée', sprite: 'sacred-ash', rarity: 'gardien', owner: 'commun',
+    text: '+1 PA par tour. Tu ne peux plus te soigner au Centre Pokémon.' },
+
   // ——— Objets de départ ———
   { id: 'ceinture-noire', name: 'Ceinture Noire', sprite: 'black-belt', rarity: 'depart', owner: 'riolu',
     text: 'Chaque fois que tu perds des PV, gagne 1 Aura de plus.' },
