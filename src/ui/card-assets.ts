@@ -3,12 +3,13 @@
 // sinon la carte garde son cadre dessiné en CSS et l'icône de sa catégorie.
 
 const FRAMES = import.meta.glob<string>('../assets/cartes/cadres/*.png', { eager: true, query: '?url', import: 'default' });
-const ARTS = import.meta.glob<string>('../assets/cartes/illustrations/*.png', { eager: true, query: '?url', import: 'default' });
+// illustrations/<slug>.png : capacité partagée (sans Pokémon) ; illustrations/<perso>/<slug>.webp : version dessinée avec ce Pokémon
+const ARTS = import.meta.glob<string>('../assets/cartes/illustrations/**/*.{png,webp,jpg}', { eager: true, query: '?url', import: 'default' });
 
 const byName = (files: Record<string, string>) =>
   new Map(Object.entries(files).map(([path, url]) => [path.split('/').pop()!.replace(/\.png$/, ''), url]));
 const FRAME_URLS = byName(FRAMES);
-const ART_URLS = byName(ARTS);
+const ART_URLS = new Map(Object.entries(ARTS).map(([path, url]) => [path.split('/illustrations/')[1].replace(/\.(png|webp|jpg)$/, ''), url]));
 
 /** Nom de fichier d'une capacité : « Écras'Face » → ecras-face. */
 export function artSlug(name: string): string {
@@ -24,6 +25,7 @@ export function frameUrl(character: string): string | undefined {
   return FRAME_URLS.get(frameFile(character));
 }
 
-export function artUrl(name: string): string | undefined {
-  return ART_URLS.get(artSlug(name.replace(/\+$/, '')));
+export function artUrl(name: string, character?: string): string | undefined {
+  const slug = artSlug(name.replace(/\+$/, ''));
+  return (character && ART_URLS.get(`${character}/${slug}`)) || ART_URLS.get(slug);
 }
