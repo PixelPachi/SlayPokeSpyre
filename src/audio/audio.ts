@@ -7,8 +7,13 @@ import type { PokeType } from '../core/types';
 const FILE_TRACKS: Record<string, string> = {
   dialga: 'music/dialga.mp3',
   'foret-de-jade': 'music/foret-de-jade.mp3', // Viridian Forest
+  'foret-de-jade-combat': 'music/foret-de-jade-combat.mp3', // Viridian Forest 2 (combats)
+  'bois-aux-chenes': 'music/bois-aux-chenes.mp3', // Ilex Forest
   'bois-clematis': 'music/bois-clematis.mp3', // Bois Clémenti (Hoenn)
+  'foret-de-vestigion': 'music/foret-de-vestigion.mp3', // Eterna Forest
 };
+/** Vrai si une musique enregistrée existe pour cet identifiant. */
+export function hasTrack(id: string): boolean { return !!FILE_TRACKS[id]; }
 let fileAudio: HTMLAudioElement | null = null;
 let fileTrack: string | null = null;
 const fileVolume = () => (mode === 'tout' ? 0.5 : 0);

@@ -1,7 +1,7 @@
 import { skinDef } from './data/skins';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
-import { cycleSound, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
+import { cycleSound, hasTrack, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
@@ -303,7 +303,10 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   const labels = { combat: 'Combat', elite: 'Pokémon dominant', boss: 'Gardien' };
   const enemies = run.encounter(type);
   if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
-  else playTheme(run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
+  else {
+    const zt = run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id;
+    playTheme(hasTrack(`${zt}-combat`) ? `${zt}-combat` : zt); // musique de combat propre à la zone si elle existe
+  }
   run.lastEnemies = enemies;
   view = new CombatView(
     screen,
