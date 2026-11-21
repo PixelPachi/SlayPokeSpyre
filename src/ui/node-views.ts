@@ -1,4 +1,5 @@
 import { welcomeEvent } from '../data/events-accueil';
+import { ZONE_BG } from '../data/zone-bg';
 import { babySprite, skinSprite } from '../data/skins';
 import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
@@ -383,7 +384,20 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
       : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
     : ev.images ? `<div class="event-duo">${ev.images.map((im) => `<img class="event-img poke" src="${asset(im)}" alt="">`).join('')}</div>`
     : `<img class="event-img ${ev.image.includes('sprites/pokemon') ? 'poke' : ''}" src="${asset(ev.image)}" alt="">`;
-  root.innerHTML = shell(run, 'Événement', `
+  // Accueil de Grodoudou : la scène se passe dans le décor de la zone, ton Pokémon à gauche, la Guilde à droite
+  if (ev.images && ev.id === 'accueil') {
+    const fr = ZONE_BG[run.zone.id];
+    root.innerHTML = `<div class="node-screen welcome">${topbar(run, run.zone.name)}
+      <div class="welcome-scene" style="background-image:url('${asset(run.zone.background)}');${fr ? `background-size:${fr[0]}px auto;background-position:center ${fr[1]}px` : ''}">
+        <div class="weather weather-${run.zone.weather}">${weatherParticles(run.zone.weather)}</div>
+        <img class="welcome-hero" src="${asset(skinSprite(run.form.dex, run.skin))}" alt="">
+        <div class="welcome-guild">${ev.images.map((im, i) => `<img class="welcome-npc n${i}" src="${asset(im)}" alt="">`).join('')}</div>
+        <div class="welcome-dialog"><b>${esc(title)}</b><p class="event-text">${esc(text)}</p></div>
+        <div class="event-choices welcome-choices">
+          ${choices.map((c, i) => `<button class="choice" data-i="${i}" ${(c.available?.(run) ?? true) ? '' : 'disabled'}><b>${esc(c.label)}</b><span>${esc(c.detail)}</span></button>`).join('')}
+        </div>
+      </div></div>`;
+  } else root.innerHTML = shell(run, 'Événement', `
     <div class="event-panel ${ev.tarot ? 'tarot' : ''} ${reversed ? 'is-reversed' : ''}">
       ${art}
       <div class="event-side">
