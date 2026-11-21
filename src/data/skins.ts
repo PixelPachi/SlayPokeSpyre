@@ -1,5 +1,6 @@
 // Skins des personnages : à débloquer avec des objectifs qui se cumulent sur plusieurs runs.
 import type { CharacterId } from '../core/model';
+import type { PokeType } from '../core/types';
 
 export type SkinStat = 'shinies' | 'elites' | 'bosses' | 'combats' | 'wins';
 
@@ -19,6 +20,8 @@ export interface SkinDef {
   /** Prévu pour plus tard : le skin remplace le deck de départ et/ou l'objet tenu de départ. */
   deck?: string[];
   relic?: string;
+  /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
+  evolutions?: { act: number; dex: number; name: string; types: PokeType[]; hp: number }[];
 }
 
 const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id: 'shiny', name: 'Chromatique', stat, goal, goalText });
@@ -39,7 +42,14 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   }, primordial('Riolu', [447, 448, 10059])],
   vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497])],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
-  caninos: [SHINY_GOAL, primordial('Caninos', [58, 59])],
+  caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
+    id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
+    goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos',
+    evolutions: [
+      { act: 2, dex: 59, name: 'Arcanin', types: ['feu'], hp: 12 },
+      { act: 3, dex: 9059, name: 'Arcanâme', types: ['feu', 'spectre'], hp: 8 },
+    ],
+  }],
   mew: [SHINY_GOAL],
 } as Record<CharacterId, SkinDef[]>;
 

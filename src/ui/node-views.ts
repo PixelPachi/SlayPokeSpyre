@@ -576,12 +576,12 @@ function evolutionHtml(run: Run): string {
     return `<div class="act-evo"><img src="${asset(babySprite(run.skin))}" alt=""><p>Le Bébé grandit : <b>+3 PV max</b> pour lui à chaque combat.</p></div>`;
   }
   if (!evo) return '';
-  const gain = CHARACTERS[run.character].evolutions!.find((e) => e.act === run.act)!.hp;
+  const gain = run.evolutions.find((e) => e.act === run.act)!.hp;
   return `
     <div class="act-evo">
-      <img class="evo-from" src="${asset(`sprites/pokemon/front/${evo.from.dex}.png`)}" alt="">
+      <img class="evo-from" src="${asset(skinSprite(evo.from.dex, run.skin))}" alt="">
       <span class="evo-arrow">➜</span>
-      <img class="evo-to" src="${asset(`sprites/pokemon/front/${evo.to.dex}.png`)}" alt="">
+      <img class="evo-to" src="${asset(skinSprite(evo.to.dex, run.skin))}" alt="">
       <p><b>${esc(evo.from.name)} évolue en ${esc(evo.to.name)} !</b><br>PV max +${gain}${evo.to.types.length > evo.from.types.length ? ` · nouveau type : ${evo.to.types.slice(evo.from.types.length).map((t) => TYPE_LABELS[t]).join(', ')}` : ''}</p>
     </div>`;
 }

@@ -1,3 +1,4 @@
+import { skinDef } from '../data/skins';
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
 import type { Form, Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
@@ -155,17 +156,22 @@ export class Run {
     return (this.act - 1) * (MAP_ROWS + 1) + (this.pos ? this.pos.row + 1 : 0);
   }
 
+  /** Lignée d'évolution (un skin peut la remplacer, ex. Arcanâme). */
+  get evolutions() {
+    return skinDef(this.character, this.skin)?.evolutions ?? CHARACTERS[this.character].evolutions ?? [];
+  }
+
   /** Stade d'évolution actuel (le Pokémon évolue au début de certains actes). */
   get form(): Form {
     const ch = CHARACTERS[this.character];
-    const evo = (ch.evolutions ?? []).filter((e) => e.act <= this.act).pop();
+    const evo = this.evolutions.filter((e) => e.act <= this.act).pop();
     return evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
   }
 
   /** Évolution qui vient d'avoir lieu en entrant dans cet acte. */
   get justEvolved(): { from: Form; to: Form } | null {
     const ch = CHARACTERS[this.character];
-    const evos = ch.evolutions ?? [];
+    const evos = this.evolutions;
     const i = evos.findIndex((e) => e.act === this.act);
     if (i < 0) return null;
     const prev = i > 0 ? evos[i - 1] : null;
@@ -242,7 +248,7 @@ export class Run {
   /** Passe à l'acte suivant : nouvelle zone, nouvelle carte, PV restaurés. */
   nextAct(): void {
     this.act++;
-    const evo = CHARACTERS[this.character].evolutions?.find((e) => e.act === this.act);
+    const evo = this.evolutions.find((e) => e.act === this.act);
     if (evo) this.maxHp += evo.hp;
     this.zone = this.rng.pick(zonesOfAct(this.act));
     this.map = generateMap(this.rng);
