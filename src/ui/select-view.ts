@@ -20,11 +20,11 @@ const ICONS: Partial<Record<string, string>> = Object.fromEntries(Object.entries
 
 const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
 const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
-  riolu: 'illustrations/riolu.png',
-  vipelierre: 'illustrations/vipelierre.png',
-  kangourex: 'illustrations/kangourex.png',
-  caninos: 'illustrations/caninos.png',
-  mew: 'illustrations/mew.png',
+  riolu: 'illustrations/riolu.webp',
+  vipelierre: 'illustrations/vipelierre.webp',
+  kangourex: 'illustrations/kangourex.webp',
+  caninos: 'illustrations/caninos.webp',
+  mew: 'illustrations/mew.webp',
 };
 const UNLOCK_TEXT: Record<CharacterId, string> = {
   riolu: '',
