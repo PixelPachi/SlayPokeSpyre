@@ -5,7 +5,7 @@ import { ENCHANTS, canFuse, cardDef, enchantId, fusionId } from '../data/cards';
 import { BERRY_DEFS } from '../data/berries';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
-import { bindDeck, shell } from './node-views';
+import { bindDeck, shell, shopScene } from './node-views';
 import { openDeckOverlay, relicCard, berryCard, topbar } from './run-ui';
 import { asset, esc } from './util';
 import { sfx } from '../audio/audio';
@@ -182,24 +182,26 @@ export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void
     const k = run.rng.pick(ok.length ? ok : ['garde']);
     return { id: enchantId(k, id), k, price: Math.round(cardPrice(id) * 1.6), sold: false };
   });
+  let open = false;
   const draw = () => {
-    root.innerHTML = shell(run, label, `
-      <div class="kecleon-head black-market">
-        <img class="kecleon purple" src="${asset('sprites/pokemon/front/352.png')}" alt="Kecleon violet">
-        <div>
-          <h1 class="node-title">Marché noir</h1>
-          <p class="node-sub">« Psst… Des capacités <b>enchantées</b>, introuvables ailleurs. C’est plus cher, mais ça vaut le détour… »</p>
-        </div>
-      </div>
+    const carpet = `
+      <div class="carpet-head"><h2>Capacités enchantées</h2><button class="btn close-carpet">← Retour à l’échoppe</button></div>
       <div class="card-row shop">${offers.map((o, i) => `
         <div class="shop-item ${o.sold ? 'sold' : ''} ${!o.sold && run.money < o.price ? 'poor' : ''}" data-i="${i}">
           ${renderCard(cardDef(o.id))}
           <div class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</div>
           <small class="ench-tag">✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
-        </div>`).join('')}</div>
-      <div class="shop-actions"><button class="btn leave">Repartir</button></div>`, 'shop-screen black-market-screen');
+        </div>`).join('')}</div>`;
+    root.innerHTML = shell(run, label, shopScene({
+      keeper: asset('sprites/pokemon/front/352.png'), keeperCls: 'purple', theme: 'dark', title: 'Marché noir',
+      bubble: 'Psst… Des capacités enchantées, introuvables ailleurs. Clique sur moi…',
+      actions: '<button class="btn primary leave">Repartir</button>', carpet: open ? carpet : '',
+    }), 'shop-screen shop-place');
     bindDeck(root, run);
-    root.querySelector('.leave')!.addEventListener('click', done);
+    root.querySelector('.leave')?.addEventListener('click', done);
+    root.querySelector('.shop-keeper')?.addEventListener('click', () => { open = true; draw(); });
+    root.querySelector('.shop-stall')?.addEventListener('click', () => { open = true; draw(); });
+    root.querySelector('.close-carpet')?.addEventListener('click', () => { open = false; draw(); });
     root.querySelectorAll<HTMLElement>('.shop-item').forEach((el) => el.addEventListener('click', () => {
       const o = offers[Number(el.dataset.i)];
       if (o.sold || run.money < o.price) return;

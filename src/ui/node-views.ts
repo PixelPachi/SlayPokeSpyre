@@ -125,19 +125,13 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
   let removed = false;
   let picked: number | null = null;
 
+  let carpetOpen = false;
   const draw = () => {
     const removeCost = looted ? 0 : price(75 + 25 * run.removals);
-    root.innerHTML = shell(run, 'Marché Kecleon', `
-      <div class="kecleon-head ${shiny ? 'shiny' : ''}">
-        ${looted ? '<div class="kecleon-gone">!</div>' : `<img class="kecleon" src="${asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`)}" alt="Kecleon">`}
-        <div>
-          <h1 class="node-title">${looted ? 'Marché Kecleon… pillé !' : 'Marché Kecleon'}</h1>
-          <p class="node-sub">${looted
-            ? '<b class="shiny-note">Kecleon a pris la fuite. Sers-toi : tout est gratuit… mais il s’en souviendra.</b>'
-            : shiny
-              ? '<b class="shiny-note">★ Kecleon chromatique ! Tous les prix sont divisés par deux.</b>'
-              : '« Bienvenue ! Des capacités et des objets venus de toutes les régions ! »'}</p>
-        </div>
+    const carpet = `
+      <div class="carpet-head">
+        <h2>${looted ? 'Sers-toi : tout est gratuit !' : shiny ? '★ Tout est à moitié prix !' : 'Les articles de Kecleon'}</h2>
+        <button class="btn close-carpet">← Retour à l’échoppe</button>
       </div>
       <div class="card-row shop">
         ${offers.map((o, i) => `
@@ -147,6 +141,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
             ${picked === i && !o.sold ? `<button class="btn primary buy" ${run.money < o.price ? 'disabled' : ''}>${run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
           </div>`).join('')}
       </div>
+      <div class="carpet-bottom">
       ${items.length ? `<div class="shop-relics">${items.map((o, i) => `
         <div class="shop-relic ${o.sold ? 'sold' : ''} ${pickedItem === i ? 'picked' : ''}" data-i="${i}">
           ${relicCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
@@ -157,13 +152,20 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
           ${berryCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
           ${pickedBerry === i && !o.sold ? `<button class="btn primary buy-berry" ${run.money < o.price || run.berries.length >= MAX_BERRIES ? 'disabled' : ''}>${run.berries.length >= MAX_BERRIES ? 'Sac plein' : run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
         </div>`).join('')}</div>
-      <div class="shop-actions">
         <button class="choice remove" ${removed || run.money < removeCost ? 'disabled' : ''}>
           <b>Oublier une capacité</b><span>${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
         </button>
-        ${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}
-        <button class="btn leave">Quitter le marché</button>
-      </div>`, 'shop-screen');
+      </div>`;
+    root.innerHTML = shell(run, 'Marché Kecleon', shopScene({
+      keeper: looted ? '' : asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`),
+      bubble: looted ? 'Kecleon a pris la fuite… Les étals sont à toi (clique dessus).' : shiny ? '★ Kecleon chromatique ! Tout est à moitié prix. Clique sur moi !' : 'Bienvenue ! Clique sur moi pour voir mes articles !',
+      title: looted ? 'Marché Kecleon… pillé !' : 'Marché Kecleon',
+      actions: `${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}<button class="btn primary leave">Quitter le marché</button>`,
+      carpet: carpetOpen ? carpet : '',
+    }), 'shop-screen shop-place');
+    root.querySelector('.shop-keeper')?.addEventListener('click', () => { carpetOpen = true; draw(); });
+    root.querySelector('.shop-stall')?.addEventListener('click', () => { carpetOpen = true; draw(); });
+    root.querySelector('.close-carpet')?.addEventListener('click', () => { carpetOpen = false; picked = pickedItem = pickedBerry = null; draw(); });
     root.querySelectorAll<HTMLElement>('.shop-berry').forEach((el) =>
       el.addEventListener('click', (ev) => {
         const i = Number(el.dataset.i);
@@ -228,7 +230,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
         }
         draw();
       }));
-    root.querySelector('.remove')!.addEventListener('click', () =>
+    root.querySelector('.remove')?.addEventListener('click', () =>
       openDeckOverlay(root, {
         title: 'Quelle capacité oublier ?', cancelLabel: 'Retour',
         onPick: (uid) => {
@@ -239,9 +241,50 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
           draw();
         },
       }, run));
-    root.querySelector('.leave')!.addEventListener('click', done);
+    root.querySelector('.leave')?.addEventListener('click', done);
   };
   draw();
+}
+
+/** Place du marché : décor d'échoppe, le marchand à droite (on clique dessus pour ouvrir le tapis d'articles). */
+export function shopScene(o: { keeper: string; keeperCls?: string; bubble: string; title: string; actions: string; carpet: string; theme?: string }): string {
+  return `
+    <div class="shop-scene ${o.theme ?? ''}">
+      <svg class="shop-decor" viewBox="0 0 1280 640" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="wood" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--wood1)"/><stop offset="1" stop-color="var(--wood2)"/></linearGradient>
+          <pattern id="stripes" width="80" height="80" patternUnits="userSpaceOnUse"><rect width="40" height="80" fill="var(--awn1)"/><rect x="40" width="40" height="80" fill="var(--awn2)"/></pattern>
+        </defs>
+        <rect y="470" width="1280" height="170" fill="var(--ground)"/>
+        <ellipse cx="640" cy="560" rx="560" ry="40" fill="#0005"/>
+        <!-- Échoppe -->
+        <rect x="160" y="150" width="20" height="340" fill="url(#wood)"/><rect x="1100" y="150" width="20" height="340" fill="url(#wood)"/>
+        <path d="M120 150 L1160 150 L1120 250 L160 250 Z" fill="url(#stripes)" stroke="#2a1606" stroke-width="6"/>
+        <path d="M160 250 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0 q32 30 64 0" fill="var(--awn1)" stroke="#2a1606" stroke-width="5"/>
+        <rect x="200" y="300" width="880" height="34" rx="6" fill="url(#wood)" stroke="#2a1606" stroke-width="5"/>
+        <rect x="220" y="334" width="840" height="150" fill="var(--wood2)" stroke="#2a1606" stroke-width="5"/>
+        <g stroke="#2a1606" stroke-width="3" opacity="0.5"><line x1="220" y1="384" x2="1060" y2="384"/><line x1="220" y1="434" x2="1060" y2="434"/></g>
+        <!-- Marchandises sur le comptoir -->
+        <g stroke="#2a1606" stroke-width="4">
+          <circle cx="290" cy="280" r="22" fill="#e8483f"/><path d="M268 280h44" /><circle cx="290" cy="280" r="7" fill="#fff"/>
+          <rect x="340" y="250" width="56" height="50" rx="6" fill="#c9a061"/><rect x="420" y="262" width="40" height="38" rx="5" fill="#7ab8e8"/>
+          <circle cx="510" cy="284" r="16" fill="#5b9bff"/><circle cx="545" cy="286" r="14" fill="#f5c84c"/><circle cx="578" cy="284" r="15" fill="#ff7aa8"/>
+          <rect x="620" y="240" width="30" height="60" rx="8" fill="#9de0c8"/><rect x="664" y="252" width="30" height="48" rx="8" fill="#ffd27a"/>
+        </g>
+        <!-- Lanternes -->
+        <g class="lanterns"><line x1="300" y1="250" x2="300" y2="290" stroke="#2a1606" stroke-width="3"/><circle cx="300" cy="300" r="0" fill="none"/>
+          <ellipse class="lantern" cx="230" cy="290" rx="16" ry="22" fill="var(--lamp)" stroke="#2a1606" stroke-width="4"/>
+          <ellipse class="lantern" cx="1050" cy="290" rx="16" ry="22" fill="var(--lamp)" stroke="#2a1606" stroke-width="4"/></g>
+        <!-- Caisses -->
+        <g stroke="#2a1606" stroke-width="5"><rect x="60" y="420" width="110" height="90" fill="url(#wood)"/><path d="M60 420l110 90M170 420l-110 90" stroke-width="3"/>
+          <rect x="1150" y="440" width="90" height="72" fill="url(#wood)"/></g>
+      </svg>
+      <div class="shop-title"><h1 class="node-title">${o.title}</h1></div>
+      <div class="shop-stall" title="Voir les articles"></div>
+      ${o.keeper ? `<button class="shop-keeper ${o.keeperCls ?? ''}"><img src="${o.keeper}" alt=""><span class="shop-bubble">${o.bubble}</span></button>` : `<p class="shop-bubble alone">${o.bubble}</p>`}
+      <div class="shop-scene-actions">${o.actions}</div>
+      ${o.carpet ? `<div class="carpet-wrap"><div class="carpet">${o.carpet}</div></div>` : ''}
+    </div>`;
 }
 
 /** Événement mystère. */
