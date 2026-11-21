@@ -2,11 +2,10 @@
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
 import { ENCHANTS, canFuse, cardDef, enchantId, fusionId } from '../data/cards';
-import { BERRY_DEFS } from '../data/berries';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
-import { bindDeck, shell, shopScene } from './node-views';
-import { openDeckOverlay, relicCard, berryCard, topbar } from './run-ui';
+import { bindDeck, renderReward, shell, shopScene } from './node-views';
+import { openDeckOverlay, topbar } from './run-ui';
 import { asset, esc } from './util';
 import { sfx } from '../audio/audio';
 
@@ -20,12 +19,11 @@ const refreshBar = (root: HTMLElement, run: Run, label: string) => {
 
 /** Coffre mystère : Pokédollars + objet tenu ou baie (parfois un gros trésor). */
 export function renderChest(root: HTMLElement, run: Run, done: Done): void {
-  const cursed = false;
   const big = run.rng.next() < 0.25;
   root.innerHTML = shell(run, 'Coffre mystère', `
-    <div class="chest ${cursed ? 'cursed' : ''}">${chestSvg()}</div>
+    <div class="chest">${chestSvg()}</div>
     <h1 class="node-title">Un coffre mystère</h1>
-    <p class="node-sub">${cursed ? 'Une étrange aura violette s’en échappe… ou est-ce ton imagination ?' : 'Il a l’air ancien. Des Pokédollars tintent à l’intérieur… peut-être.'}</p>
+    <p class="node-sub">Il a l’air ancien. Quelque chose tinte à l’intérieur…</p>
     <div class="choice-row">
       <button class="choice open"><b>Ouvrir le coffre</b><span>Que peut-il bien contenir ?</span></button>
       <button class="choice leave-chest"><b>Le laisser</b><span>Prudence est mère de sûreté</span></button>
@@ -33,33 +31,13 @@ export function renderChest(root: HTMLElement, run: Run, done: Done): void {
   bindDeck(root, run);
   root.querySelector('.leave-chest')!.addEventListener('click', done);
   root.querySelector('.open')!.addEventListener('click', () => {
-    const lines: string[] = [];
-    let relic: string | undefined;
-    let berry: string | undefined;
     const money = run.rng.int(big ? 60 : 25, big ? 110 : 55);
-    run.money += money;
-    if (cursed || big || run.rng.next() < 0.5) {
-      relic = run.rollRelics(1)[0];
-      if (relic) run.addRelic(relic);
-    } else {
-      berry = run.rollBerry();
-      if (!run.addBerry(berry)) { run.heal(6); berry = undefined; lines.push('Ton sac de baies est plein : tu manges la baie (+6 PV).'); }
-    }
-    const curse: string | undefined = undefined;
+    const withRelic = big || run.rng.next() < 0.5;
+    renderReward(root, run, {
+      money, cards: [], relic: withRelic ? run.rollRelics(1)[0] : undefined, berry: withRelic ? undefined : run.rollBerry(),
+      title: big ? 'Un gros trésor !' : 'Le coffre s’ouvre…', label: 'Coffre mystère',
+    }, done);
     sfx('victoire');
-    root.querySelector('.node-body')!.innerHTML = `
-      <div class="chest open ${cursed ? 'cursed' : ''}">${chestSvg(true)}</div>
-      <h1 class="node-title">${cursed ? 'Le coffre était maudit !' : big ? 'Un gros trésor !' : 'Le coffre s’ouvre…'}</h1>
-      <div class="reward-line">
-        <div class="reward-money">+${money} ₽</div>
-        ${relic ? relicCard(relic, '<em>Objet tenu obtenu !</em>') : ''}
-        ${berry ? berryCard(berry, `<em>${esc(BERRY_DEFS[berry].name)} ramassée !</em>`) : ''}
-        ${curse ? `<div class="curse-card">${renderCard(cardDef(curse))}<em>Malédiction ajoutée à ton deck (oublie-la au Marché Kecleon).</em></div>` : ''}
-      </div>
-      ${lines.length ? `<p class="node-sub">${lines.join(' ')}</p>` : ''}
-      <button class="btn primary leave">Continuer</button>`;
-    refreshBar(root, run, 'Coffre mystère');
-    root.querySelector('.leave')!.addEventListener('click', done);
   });
 }
 

@@ -14,7 +14,9 @@ import { MAX_BERRIES, berryPrice } from '../data/berries';
 import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
 import { CHARACTER_COLORS } from './labels';
-import { openDeckOverlay, relicCard, topbar, berryCard } from './run-ui';
+import { openDeckOverlay, relicCard, relicIcon, topbar, berryCard, berryIcon } from './run-ui';
+import { relicDef } from '../data/relics';
+import { BERRY_DEFS } from '../data/berries';
 import { relicPrice } from '../data/relics';
 import { asset, esc } from './util';
 import { weatherParticles } from './combat-view';
@@ -33,40 +35,60 @@ export function bindDeck(root: HTMLElement, run: Run): void {
 export function renderReward(
   root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string; berry?: string }, done: Done,
 ): void {
-  run.money += o.money;
-  if (o.relic) run.addRelic(o.relic);
-  const berryKept = o.berry ? run.addBerry(o.berry) : false;
-  root.innerHTML = shell(run, o.label, `
-    <h1 class="node-title">${esc(o.title)}</h1>
-    <div class="reward-line">
-      <div class="reward-money">+${o.money} ₽</div>
-      ${o.relic ? relicCard(o.relic, '<em>Objet tenu obtenu !</em>') : ''}
-      ${o.berry ? berryCard(o.berry, berryKept ? '<em>Baie ramassée !</em>' : '<em>Sac plein : la baie reste sur place.</em>') : ''}
-    </div>
-    <p class="node-sub">Choisis une capacité à apprendre :</p>
-    <div class="card-row">${o.cards.map((id) => renderCard(cardDef(id), { classes: 'pickable' }).replace('class="card', `data-id="${id}" class="card`)).join('')}</div>
-    <div class="reward-actions">
-      <button class="btn primary take" disabled>Choisis une carte</button>
-      <button class="btn skip">Passer</button>
-    </div>`, 'reward');
-  bindDeck(root, run);
-  // Un clic choisit la carte, « Apprendre » confirme
-  let picked: string | null = null;
-  const take = root.querySelector<HTMLButtonElement>('.take')!;
-  root.querySelector('.card-row')!.addEventListener('click', (ev) => {
-    const c = (ev.target as HTMLElement).closest<HTMLElement>('.card');
-    if (!c) return;
-    picked = c.dataset.id!;
-    root.querySelectorAll('.card-row .card').forEach((x) => x.classList.toggle('picked', x === c));
-    take.disabled = false;
-    take.textContent = `Apprendre ${cardDef(picked).name}`;
-  });
-  take.addEventListener('click', () => {
-    if (!picked) return;
-    run.addCard(picked);
-    done();
-  });
-  root.querySelector('.skip')!.addEventListener('click', done);
+  // Butin façon Slay the Spire : une liste de récompenses, on clique sur chacune pour la prendre
+  const loot: { kind: 'money' | 'relic' | 'berry' | 'cards'; taken: boolean }[] = [];
+  if (o.money > 0) loot.push({ kind: 'money', taken: false });
+  if (o.relic) loot.push({ kind: 'relic', taken: false });
+  if (o.berry) loot.push({ kind: 'berry', taken: false });
+  if (o.cards.length) loot.push({ kind: 'cards', taken: false });
+  const row = (k: typeof loot[number]['kind']): string => {
+    switch (k) {
+      case 'money':
+        return `<span class="loot-icon money">₽</span><span><b>${o.money} Pokédollars</b></span>`;
+      case 'relic':
+        return `${relicIcon(o.relic!, 'loot-icon')}<span><b>${esc(relicDef(o.relic!).name)}</b><small>${esc(relicDef(o.relic!).text)}</small></span>`;
+      case 'berry': {
+        const b = BERRY_DEFS[o.berry!];
+        const full = run.berries.length >= MAX_BERRIES;
+        return `${berryIcon(o.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${full ? 'Sac plein : mange ou jette une baie pour la prendre' : esc(b.text)}</small></span>`;
+      }
+      case 'cards':
+        return `<span class="loot-icon cards">🂠</span><span><b>Apprendre une capacité</b><small>Choisis 1 carte parmi ${o.cards.length}</small></span>`;
+    }
+  };
+  const draw = () => {
+    root.innerHTML = shell(run, o.label, `
+      <div class="loot-panel">
+        <h1 class="node-title">${esc(o.title)}</h1>
+        <div class="loot-list">${loot.map((l, i) => l.taken ? '' : `<button class="loot-row" data-i="${i}">${row(l.kind)}</button>`).join('') || '<p class="node-sub">Tout est ramassé !</p>'}</div>
+        <button class="btn primary proceed">Continuer ›</button>
+      </div>`, 'reward');
+    bindDeck(root, run);
+    root.querySelectorAll<HTMLElement>('.loot-row').forEach((b) => b.addEventListener('click', () => {
+      const l = loot[Number(b.dataset.i)];
+      if (l.kind === 'money') { run.money += o.money; l.taken = true; sfx('baie'); }
+      if (l.kind === 'relic') { run.addRelic(o.relic!); l.taken = true; sfx('soin'); }
+      if (l.kind === 'berry') { if (!run.addBerry(o.berry!)) return; l.taken = true; sfx('baie'); }
+      if (l.kind === 'cards') return openCards(l);
+      draw();
+    }));
+    root.querySelector('.proceed')!.addEventListener('click', done);
+  };
+  const openCards = (l: typeof loot[number]) => {
+    const box = document.createElement('div');
+    box.className = 'card-choice';
+    box.innerHTML = `<div class="card-choice-title">Choisis une capacité</div>
+      <div class="card-row card-choice-row">${o.cards.map((id) => renderCard(cardDef(id), { classes: 'pickable' }).replace('<div class="card', `<div data-pick="${id}" class="card`)).join('')}</div>
+      <button class="btn skip-cards">Passer</button>`;
+    box.addEventListener('click', (ev) => {
+      const t = ev.target as HTMLElement;
+      const c = t.closest<HTMLElement>('[data-pick]');
+      if (c) { run.addCard(c.dataset.pick!); l.taken = true; sfx('carte'); box.remove(); return draw(); }
+      if (t.closest('.skip-cards')) box.remove();
+    });
+    root.querySelector('.node-screen')!.appendChild(box);
+  };
+  draw();
 }
 
 /** Centre Pokémon : soigner 30 % des PV max OU améliorer une carte. */
@@ -387,19 +409,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
 /** Trésor : une Poké Ball qui contient un objet tenu et quelques Pokédollars. */
 export function renderTreasure(root: HTMLElement, run: Run, done: Done): void {
   const relic = run.rollRelics(1)[0];
-  const money = run.rng.int(20, 40);
-  run.money += money;
-  if (relic) run.addRelic(relic);
-  root.innerHTML = shell(run, 'Trésor', `
-    <img class="treasure-ball" src="${asset('sprites/items/poke-ball.png')}" alt="">
-    <h1 class="node-title">Une Poké Ball scintillante !</h1>
-    <div class="reward-line">
-      <div class="reward-money">+${money} ₽</div>
-      ${relic ? relicCard(relic, '<em>Objet tenu obtenu !</em>') : '<p class="node-sub">Elle ne contenait que des Pokédollars.</p>'}
-    </div>
-    <button class="btn primary leave">Continuer</button>`, 'reward');
-  bindDeck(root, run);
-  root.querySelector('.leave')!.addEventListener('click', done);
+  renderReward(root, run, { money: run.rng.int(20, 40), cards: [], relic, title: 'Une Poké Ball scintillante !', label: 'Trésor' }, done);
 }
 
 /** Fin de run : défaite ou gardien vaincu, avec l'EXP gagnée et les cartes débloquées. */
