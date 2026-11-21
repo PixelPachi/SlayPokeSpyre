@@ -1173,3 +1173,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .loot-icon.money { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3b0, #f5c84c 50%, #b07a1a); color: #5a3a05; font-family: 'Lilita One', sans-serif; font-size: 24px; border: 3px solid #3b2a05; width: 40px; height: 40px; margin: 4px; }
 .loot-icon.cards { font-size: 40px; color: #9fc4ff; }
 .loot-panel .proceed { align-self: center; margin-top: 6px; min-width: 200px; }
+.card.enchanted.ench-rare { filter: drop-shadow(0 0 8px #4aa8ff) drop-shadow(0 0 3px #9fd6ff); }
+.card.enchanted.ench-rare::after { content: '◆'; color: #9fd6ff; text-shadow: 0 0 8px #4aa8ff, 0 1px 0 #000; }
+.card.enchanted.ench-legendaire { animation: legendGlow 1.6s ease-in-out infinite; }
+.card.enchanted.ench-legendaire::after { content: '★'; color: #ffd76a; font-size: 22px; text-shadow: 0 0 10px #ffb300, 0 1px 0 #000; }
+@keyframes legendGlow { 0%, 100% { filter: drop-shadow(0 0 8px #ffb300) drop-shadow(0 0 2px #fff3b0); } 50% { filter: drop-shadow(0 0 16px #ffd76a) drop-shadow(0 0 4px #fff); } }
+.ench-tag.rare { color: #9fd6ff; }
+.ench-tag.legendaire { color: #ffd76a; text-shadow: 0 0 8px #ffb30088; }

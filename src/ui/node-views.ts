@@ -370,7 +370,8 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
         else if (p.pick === 'dupliquer') { run.addCard(card.defId, card.upgraded); results.push(`${name} est dupliquée.`); }
         else if (p.pick === 'enchanter') {
           const k = run.enchantCard(uid);
-          results.push(k ? `${name} est enchantée : ✦ ${ENCHANTS[k].name} (${ENCHANTS[k].text}) !` : `${name} ne peut pas être enchantée.`);
+          const tier = k ? (ENCHANTS[k].rarity === 'legendaire' ? ' ★ LÉGENDAIRE !' : ENCHANTS[k].rarity === 'rare' ? ' ◆ Rare !' : '') : '';
+          results.push(k ? `${name} est enchantée : ✦ ${ENCHANTS[k].name} (${ENCHANTS[k].text})${tier}` : `${name} ne peut pas être enchantée.`);
         }
         else if (p.pick === 'monde') {
           run.removeCard(uid);

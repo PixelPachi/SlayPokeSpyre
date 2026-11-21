@@ -1065,3 +1065,20 @@ describe('enchantement par événement', () => {
     expect(r.enchantCard(c.uid)).toBeNull();
   });
 });
+
+describe('enchantements rares et légendaires', () => {
+  it('les légendaires sortent environ 2 fois sur 100, les rares 13 fois', async () => {
+    const { rollEnchant, ENCHANTS, cardDef, enchantId } = await import('../src/data/cards');
+    const d = cardDef('aurasphere');
+    let rnd = 1;
+    const rand = () => { rnd = (rnd * 16807) % 2147483647; return (rnd - 1) / 2147483646; };
+    const n = { commun: 0, rare: 0, legendaire: 0 } as Record<string, number>;
+    for (let i = 0; i < 10000; i++) n[ENCHANTS[rollEnchant(d, rand)!].rarity ?? 'commun']++;
+    expect(n.legendaire).toBeGreaterThan(100);
+    expect(n.legendaire).toBeLessThan(350);
+    expect(n.rare).toBeGreaterThan(1000);
+    expect(n.rare).toBeLessThan(1700);
+    expect(cardDef(enchantId('echo', 'ruse')).effects.length).toBe(cardDef('ruse').effects.length * 2);
+    expect(cardDef(enchantId('gratuit', 'aurasphere')).cost).toBe(0);
+  });
+});

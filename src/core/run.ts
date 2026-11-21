@@ -2,7 +2,7 @@
 import type { Form, Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
 import { BERRIES, MAX_BERRIES } from '../data/berries';
-import { allCards, CARD_DEFS, ENCHANTS, cardDef, enchantId, neutralPool, rewardPool } from '../data/cards';
+import { allCards, CARD_DEFS, cardDef, enchantId, neutralPool, rewardPool, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, ZONES, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
@@ -269,9 +269,8 @@ export class Run {
     const c = this.deck.find((x) => x.uid === uid);
     if (!c || c.defId.startsWith('ench:')) return null;
     const d = cardDef(c.defId, c.upgraded);
-    const ok = Object.keys(ENCHANTS).filter((k) => ENCHANTS[k].ok(d));
-    if (!ok.length) return null;
-    const k = this.rng.pick(ok);
+    const k = rollEnchant(d, () => this.rng.next());
+    if (!k) return null;
     c.defId = enchantId(k, c.defId);
     return k;
   }

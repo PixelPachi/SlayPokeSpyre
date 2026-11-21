@@ -144,7 +144,8 @@ function fusionDef(defId: string, upgraded: boolean): CardDef {
 }
 
 /** Enchantements du Marché noir : un bonus ajouté à une carte. */
-export const ENCHANTS: Record<string, { name: string; text: string; ok: (d: CardDef) => boolean; apply: (d: CardDef) => CardDef }> = {
+export type EnchantRarity = 'commun' | 'rare' | 'legendaire';
+export const ENCHANTS: Record<string, { name: string; text: string; rarity?: EnchantRarity; ok: (d: CardDef) => boolean; apply: (d: CardDef) => CardDef }> = {
   vif: { name: 'Vif', text: 'coûte 1 PA de moins', ok: (d) => d.cost > 0, apply: (d) => ({ ...d, cost: d.cost - 1 }) },
   force: {
     name: 'Puissant', text: '+3 dégâts', ok: (d) => d.effects.some((e) => e.kind === 'degats'),
@@ -163,7 +164,42 @@ export const ENCHANTS: Record<string, { name: string; text: string; ok: (d: Card
     name: 'Éternel', text: 'reste en main à la fin du tour', ok: (d) => !d.keywords?.includes('conservee'),
     apply: (d) => ({ ...d, keywords: [...(d.keywords ?? []), 'conservee'] }),
   },
+  // ——— Rares ———
+  vampire: { name: 'Vampirique', rarity: 'rare', text: 'récupère 3 PV', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'soin', amount: 3 }] }) },
+  energique: { name: 'Énergique', rarity: 'rare', text: 'rend 1 PA', ok: (d) => d.cost > 0, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'pa', amount: 1 }] }) },
+  brulant: {
+    name: 'Brûlant', rarity: 'rare', text: '+3 Brûlure', ok: (d) => d.target !== 'soi',
+    apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'brulure', stacks: 3, on: d.target === 'tous' ? 'tous' : 'cible' }] }),
+  },
+  fortifiant: { name: 'Fortifiant', rarity: 'rare', text: '+1 Attaque', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'attaque', stacks: 1, on: 'soi' }] }) },
+  // ——— Légendaires ———
+  echo: { name: 'Écho', rarity: 'legendaire', text: 'ses effets s’appliquent deux fois', ok: (d) => !d.effects.some((e) => e.kind === 'decouverte'), apply: (d) => ({ ...d, effects: [...d.effects, ...d.effects] }) },
+  gratuit: { name: 'Divin', rarity: 'legendaire', text: 'coûte 0 PA', ok: (d) => d.cost > 1, apply: (d) => ({ ...d, cost: 0 }) },
+  titan: {
+    name: 'Titanesque', rarity: 'legendaire', text: '+8 dégâts et +8 Protection', ok: (d) => d.effects.some((e) => e.kind === 'degats'),
+    apply: (d) => {
+      let done = false;
+      return { ...d, effects: [...d.effects.map((e) => (!done && e.kind === 'degats' ? ((done = true), { ...e, amount: e.amount + 8 }) : e)), { kind: 'protection', amount: 8 }] };
+    },
+  },
 };
+
+/** Chances d'obtenir un enchantement de chaque rareté. */
+export const ENCHANT_ODDS: Record<EnchantRarity, number> = { commun: 0.85, rare: 0.13, legendaire: 0.02 };
+
+/** Tire un enchantement qui convient à la carte : les rares et légendaires sont bien plus rares. */
+export function rollEnchant(d: CardDef, rand: () => number): string | null {
+  const ok = Object.keys(ENCHANTS).filter((k) => ENCHANTS[k].ok(d));
+  if (!ok.length) return null;
+  const x = rand();
+  const want: EnchantRarity = x < ENCHANT_ODDS.legendaire ? 'legendaire' : x < ENCHANT_ODDS.legendaire + ENCHANT_ODDS.rare ? 'rare' : 'commun';
+  const order: EnchantRarity[] = want === 'legendaire' ? ['legendaire', 'rare', 'commun'] : want === 'rare' ? ['rare', 'commun'] : ['commun', 'rare'];
+  for (const r of order) {
+    const pool = ok.filter((k) => (ENCHANTS[k].rarity ?? 'commun') === r);
+    if (pool.length) return pool[Math.floor(rand() * pool.length)];
+  }
+  return ok[0];
+}
 
 export function enchantId(enchant: string, defId: string): string {
   return `ench:${enchant}:${defId}`;

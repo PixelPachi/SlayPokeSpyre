@@ -1,7 +1,7 @@
 // Nouveaux nœuds de la carte : Coffre mystère, Pension Pokémon (fusion de cartes), Marchand de CT.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
-import { ENCHANTS, canFuse, cardDef, enchantId, fusionId } from '../data/cards';
+import { ENCHANTS, canFuse, cardDef, enchantId, fusionId, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
 import { bindDeck, renderReward, shell, shopScene } from './node-views';
@@ -153,11 +153,9 @@ export function mysteryScreen(root: HTMLElement, run: Run, title: string, text: 
 /** Marché noir (dans les « ? ») : un Kecleon violet vend 3 cartes enchantées, plus chères. */
 export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void {
   const label = 'Marché noir';
-  const keys = Object.keys(ENCHANTS);
   const offers = run.cardChoices('boutique', 3).map((id) => {
     const base = cardDef(id);
-    const ok = keys.filter((k) => ENCHANTS[k].ok(base));
-    const k = run.rng.pick(ok.length ? ok : ['garde']);
+    const k = rollEnchant(base, () => run.rng.next()) ?? 'garde';
     return { id: enchantId(k, id), k, price: Math.round(cardPrice(id) * 1.6), sold: false };
   });
   let open = false;
@@ -168,7 +166,7 @@ export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void
         <div class="shop-item ${o.sold ? 'sold' : ''} ${!o.sold && run.money < o.price ? 'poor' : ''}" data-i="${i}">
           ${renderCard(cardDef(o.id))}
           <div class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</div>
-          <small class="ench-tag">✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
+          <small class="ench-tag ${ENCHANTS[o.k].rarity ?? 'commun'}">${ENCHANTS[o.k].rarity === 'legendaire' ? '★ Légendaire — ' : ENCHANTS[o.k].rarity === 'rare' ? '◆ Rare — ' : ''}✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
         </div>`).join('')}</div>`;
     root.innerHTML = shell(run, label, shopScene({
       keeper: asset('sprites/pokemon/front/352.png'), keeperCls: 'purple', theme: 'dark', title: 'Marché noir',
