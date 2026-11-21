@@ -350,7 +350,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
           screen, run,
           {
             money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), label: labels.boss,
-            title: `Gardien de ${run.zone.name} vaincu !`, relic: run.rollBossRelic(), berry: run.rollBerry(),
+            title: `Gardien de ${run.zone.name} vaincu !`, relicChoices: run.bossRelicChoices(), berry: run.rollBerry(),
           },
           () => {
             if (last) return endRun(run, true);

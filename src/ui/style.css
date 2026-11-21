@@ -1335,3 +1335,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .event-gained .gained-n { position: absolute; right: -4px; top: -6px; background: var(--gold); color: #1b1b1b; font-weight: 900; border-radius: 10px; padding: 1px 7px; z-index: 3; }
 @keyframes gainedIn { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
 .welcome-choices .event-gained { align-items: flex-start; }
+
+/* Gardien : 1 objet tenu parmi 3 */
+.loot-icon.relics { display: flex; gap: 2px; width: auto; }
+.loot-icon.relics img { width: 30px; height: 30px; }
+.relic-choice-row { display: flex; gap: 18px; justify-content: center; }
+.relic-pick { background: none; border: none; padding: 0; cursor: pointer; transition: transform 0.15s; width: 240px; }
+.relic-pick:hover { transform: translateY(-6px) scale(1.04); }

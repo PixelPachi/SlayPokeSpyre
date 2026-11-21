@@ -27,6 +27,9 @@ const PATHS = 6;
 export const BOSS_ROW = MAP_ROWS;
 /** Dernier acte : le sommet de la Tour du Temps (acte 4), avec Dialga Primal. */
 export const LAST_ACT = 4;
+/** PA de départ et maximum (les reliques de gardien donnent +1 PA chacune). */
+export const BASE_PA = 3;
+export const MAX_PA = 5;
 /** Acte secret après Dialga (Rouage du Temps + Rouage de l'Espace) : la Salle Originelle, avec Arceus. */
 export const SECRET_ACT = 5;
 /** Étages de la carte de l'acte secret (plus courte que les autres). */
@@ -389,6 +392,18 @@ export class Run {
       .filter((r) => r.rarity !== 'depart' && r.rarity !== 'gardien' && r.rarity !== 'quete' && (r.owner === 'commun' || (r.owner === this.character && (r.free || this.unlockedRelics.includes(r.id)))))
       .filter((r) => !this.relics.includes(r.id))
       .map((r) => r.id);
+  }
+
+  /** Gardien : 3 objets tenus au choix, dont au plus un qui donne des PA (et aucun si tu as déjà 5 PA). */
+  bossRelicChoices(): string[] {
+    const paOwned = this.relics.filter((id) => allRelics().find((r) => r.id === id)?.rarity === 'gardien').length;
+    const out: string[] = [];
+    if (BASE_PA + paOwned < MAX_PA) {
+      const pa = allRelics().filter((r) => r.rarity === 'gardien' && !this.relics.includes(r.id)).map((r) => r.id);
+      if (pa.length) out.push(this.rng.pick(pa));
+    }
+    for (const id of this.rollRelics(6)) if (out.length < 3 && !out.includes(id)) out.push(id);
+    return this.rng.shuffle ? this.rng.shuffle(out) : out;
   }
 
   /** Relique de gardien (+1 PA avec contrepartie) pas encore possédée ; sinon un objet normal. */

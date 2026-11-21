@@ -227,7 +227,7 @@ export class Combat {
 
     // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
     const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
-    this.player.maxEnergy += bossRelics.length;
+    this.player.maxEnergy = Math.min(5, this.player.maxEnergy + bossRelics.length); // 5 PA au maximum
     this.player.energy = this.player.maxEnergy;
     if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
     if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);

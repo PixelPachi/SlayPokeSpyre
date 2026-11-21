@@ -36,12 +36,13 @@ export function bindDeck(root: HTMLElement, run: Run): void {
 
 /** Récompenses après un combat : Pokédollars puis 1 carte parmi 3 (ou passer). */
 export function renderReward(
-  root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string; berry?: string }, done: Done,
+  root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string; relicChoices?: string[]; berry?: string }, done: Done,
 ): void {
   // Butin façon Slay the Spire : une liste de récompenses, on clique sur chacune pour la prendre
-  const loot: { kind: 'money' | 'relic' | 'berry' | 'cards'; taken: boolean; berry?: string }[] = [];
+  const loot: { kind: 'money' | 'relic' | 'relics' | 'berry' | 'cards'; taken: boolean; berry?: string }[] = [];
   if (o.money > 0) loot.push({ kind: 'money', taken: false });
   if (o.relic) loot.push({ kind: 'relic', taken: false });
+  if (o.relicChoices?.length) loot.push({ kind: 'relics', taken: false });
   // Baies : celle du butin + celles trouvées sans place pendant le combat (Don Naturel…)
   for (const b of [...(o.berry ? [o.berry] : []), ...run.pendingBerries.splice(0)]) loot.push({ kind: 'berry', taken: false, berry: b });
   if (o.cards.length) loot.push({ kind: 'cards', taken: false });
@@ -51,6 +52,8 @@ export function renderReward(
         return `<span class="loot-icon money">₽</span><span><b>${o.money} Pokédollars</b></span>`;
       case 'relic':
         return `${relicIcon(o.relic!, 'loot-icon')}<span><b>${esc(relicDef(o.relic!).name)}</b><small>${esc(relicDef(o.relic!).text)}</small></span>`;
+      case 'relics':
+        return `<span class="loot-icon relics">${o.relicChoices!.map((id) => relicIcon(id)).join('')}</span><span><b>Choisis un objet tenu</b><small>1 parmi ${o.relicChoices!.length}</small></span>`;
       case 'berry': {
         const b = BERRY_DEFS[l.berry!];
         const full = run.berries.length >= MAX_BERRIES;
@@ -91,9 +94,24 @@ export function renderReward(
         l.taken = true; sfx('baie');
       }
       if (l.kind === 'cards') return openCards(l);
+      if (l.kind === 'relics') return openRelics(l);
       draw();
     }));
     root.querySelector('.proceed')!.addEventListener('click', done);
+  };
+  const openRelics = (l: typeof loot[number]) => {
+    const box = document.createElement('div');
+    box.className = 'card-choice relic-choice';
+    box.innerHTML = `<div class="card-choice-title">Choisis un objet tenu</div>
+      <div class="relic-choice-row">${o.relicChoices!.map((id) => `<button class="relic-pick" data-relic="${id}">${relicCard(id)}</button>`).join('')}</div>
+      <button class="btn skip-cards">Plus tard</button>`;
+    box.addEventListener('click', (ev) => {
+      const t = ev.target as HTMLElement;
+      const r = t.closest<HTMLElement>('[data-relic]');
+      if (r) { run.addRelic(r.dataset.relic!); l.taken = true; sfx('soin'); box.remove(); return draw(); }
+      if (t.closest('.skip-cards')) box.remove();
+    });
+    (layer ?? root.querySelector('.node-screen')!).appendChild(box);
   };
   const openCards = (l: typeof loot[number]) => {
     const box = document.createElement('div');
@@ -352,6 +370,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     root.querySelector('.tb-money')!.textContent = `${run.money} ₽`;
     root.querySelector('.tb-deck')!.textContent = `Deck ${run.deck.length}`;
     root.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
+    root.querySelectorAll('.tb-relics').forEach((el) => (el.innerHTML = run.relics.map((id) => relicIcon(id)).join('')));
   };
   const showResult = (text: string) => {
     // Cartes ajoutées, transformées ou enchantées par l'événement : on les montre

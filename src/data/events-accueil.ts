@@ -3,6 +3,7 @@
 import type { Run } from '../core/run';
 import { CHARACTERS } from './characters';
 import { allCards, cardDef } from './cards';
+import { relicDef } from './relics';
 import type { EventChoice, GameEvent } from './events';
 
 type Option = EventChoice & { weight: number };
@@ -21,7 +22,7 @@ const OPTIONS: Option[] = [
       const id = r.rollRelics(1)[0];
       if (start) r.relics = r.relics.filter((x) => x !== start);
       if (id) r.addRelic(id);
-      return id ? 'Pijako fouille dans le trésor de la Guilde et te tend un nouvel objet !' : 'Pijako ne trouve rien de mieux… tu gardes ton objet.';
+      return id ? `Pijako fouille dans le trésor de la Guilde et échange ${start ? relicDef(start).name : 'ton objet'} contre : ${relicDef(id).name} ! (${relicDef(id).text})` : 'Pijako ne trouve rien de mieux… tu gardes ton objet.';
     },
   },
   {
