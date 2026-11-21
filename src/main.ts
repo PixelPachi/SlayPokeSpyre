@@ -77,6 +77,13 @@ stage.addEventListener('click', (ev) => {
     run.berries.splice(i, 1);
     menu.remove();
     document.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
+    // Une place s'est libérée : les baies du butin redeviennent ramassables
+    document.querySelectorAll<HTMLElement>('.loot-row.full').forEach((el) => {
+      el.classList.remove('full');
+      const small = el.querySelector('small');
+      if (small) small.textContent = 'Clique pour la ranger dans ton sac';
+    });
+    persist(run, run.inNode);
   });
   menu.addEventListener('click', (e) => e.stopPropagation());
   stage.appendChild(menu);

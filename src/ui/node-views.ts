@@ -14,7 +14,7 @@ import { MAX_BERRIES, berryPrice } from '../data/berries';
 import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
 import { CHARACTER_COLORS } from './labels';
-import { openDeckOverlay, relicCard, relicIcon, swapBerries, topbar, berryCard, berryIcon } from './run-ui';
+import { openDeckOverlay, relicCard, relicIcon, topbar, berryCard, berryIcon, berrySlots } from './run-ui';
 import { relicDef } from '../data/relics';
 import { BERRY_DEFS } from '../data/berries';
 import { relicPrice } from '../data/relics';
@@ -36,21 +36,22 @@ export function renderReward(
   root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string; berry?: string }, done: Done,
 ): void {
   // Butin façon Slay the Spire : une liste de récompenses, on clique sur chacune pour la prendre
-  const loot: { kind: 'money' | 'relic' | 'berry' | 'cards'; taken: boolean }[] = [];
+  const loot: { kind: 'money' | 'relic' | 'berry' | 'cards'; taken: boolean; berry?: string }[] = [];
   if (o.money > 0) loot.push({ kind: 'money', taken: false });
   if (o.relic) loot.push({ kind: 'relic', taken: false });
-  if (o.berry) loot.push({ kind: 'berry', taken: false });
+  // Baies : celle du butin + celles trouvées sans place pendant le combat (Don Naturel…)
+  for (const b of [...(o.berry ? [o.berry] : []), ...run.pendingBerries.splice(0)]) loot.push({ kind: 'berry', taken: false, berry: b });
   if (o.cards.length) loot.push({ kind: 'cards', taken: false });
-  const row = (k: typeof loot[number]['kind']): string => {
-    switch (k) {
+  const row = (l: typeof loot[number]): string => {
+    switch (l.kind) {
       case 'money':
         return `<span class="loot-icon money">₽</span><span><b>${o.money} Pokédollars</b></span>`;
       case 'relic':
         return `${relicIcon(o.relic!, 'loot-icon')}<span><b>${esc(relicDef(o.relic!).name)}</b><small>${esc(relicDef(o.relic!).text)}</small></span>`;
       case 'berry': {
-        const b = BERRY_DEFS[o.berry!];
+        const b = BERRY_DEFS[l.berry!];
         const full = run.berries.length >= MAX_BERRIES;
-        return `${berryIcon(o.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${full ? 'Sac plein : clique pour choisir une baie à jeter' : esc(b.text)}</small></span>`;
+        return `${berryIcon(l.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${full ? 'Sac plein : jette une baie (clic sur une baie en haut) pour la prendre' : esc(b.text)}</small></span>`;
       }
       case 'cards':
         return `<span class="loot-icon cards">🂠</span><span><b>Apprendre une capacité</b><small>Choisis 1 carte parmi ${o.cards.length}</small></span>`;
@@ -60,7 +61,7 @@ export function renderReward(
     root.innerHTML = shell(run, o.label, `
       <div class="loot-panel">
         <h1 class="node-title">${esc(o.title)}</h1>
-        <div class="loot-list">${loot.map((l, i) => l.taken ? '' : `<button class="loot-row" data-i="${i}">${row(l.kind)}</button>`).join('') || '<p class="node-sub">Tout est ramassé !</p>'}</div>
+        <div class="loot-list">${loot.map((l, i) => l.taken ? '' : `<button class="loot-row ${l.kind === 'berry' && run.berries.length >= MAX_BERRIES ? 'full' : ''}" data-i="${i}">${row(l)}</button>`).join('') || '<p class="node-sub">Tout est ramassé !</p>'}</div>
         <button class="btn primary proceed">Continuer ›</button>
       </div>`, 'reward');
     bindDeck(root, run);
@@ -69,10 +70,7 @@ export function renderReward(
       if (l.kind === 'money') { run.money += o.money; l.taken = true; sfx('baie'); }
       if (l.kind === 'relic') { run.addRelic(o.relic!); l.taken = true; sfx('soin'); }
       if (l.kind === 'berry') {
-        if (!run.addBerry(o.berry!)) {
-          run.pendingBerries.push(o.berry!);
-          return swapBerries(root, run, (kept) => { if (kept.length) { l.taken = true; sfx('baie'); } draw(); });
-        }
+        if (!run.addBerry(l.berry!)) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return draw(); }
         l.taken = true; sfx('baie');
       }
       if (l.kind === 'cards') return openCards(l);
@@ -334,12 +332,33 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     root.querySelector('.tb-hp')!.textContent = `PV ${run.hp}/${run.maxHp}`;
     root.querySelector('.tb-money')!.textContent = `${run.money} ₽`;
     root.querySelector('.tb-deck')!.textContent = `Deck ${run.deck.length}`;
+    root.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
   };
   const showResult = (text: string) => {
     root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p><button class="btn primary leave">Continuer</button>`;
     root.querySelector('.leave')!.addEventListener('click', done);
     refreshBar();
-    if (run.pendingBerries.length) swapBerries(root, run, () => refreshBar());
+    if (run.pendingBerries.length) {
+      // Baies données par l'événement sans place dans le sac : à ramasser si on libère un emplacement
+      const list = run.pendingBerries.splice(0);
+      const box = document.createElement('div');
+      box.className = 'loot-list event-loot';
+      const drawLoot = () => {
+        box.innerHTML = list.map((id, i) => `<button class="loot-row ${run.berries.length >= MAX_BERRIES ? 'full' : ''}" data-i="${i}">${berryIcon(id, 'loot-icon')}<span><b>${esc(BERRY_DEFS[id].name)}</b><small>${run.berries.length >= MAX_BERRIES ? 'Sac plein : jette une baie (clic sur une baie en haut) pour la prendre' : 'Clique pour la ranger dans ton sac'}</small></span></button>`).join('');
+      };
+      box.addEventListener('click', (ev) => {
+        const b = (ev.target as HTMLElement).closest<HTMLElement>('.loot-row');
+        if (!b) return;
+        const i = Number(b.dataset.i);
+        if (!run.addBerry(list[i])) { drawLoot(); return; }
+        list.splice(i, 1);
+        sfx('baie');
+        refreshBar();
+        drawLoot();
+      });
+      drawLoot();
+      root.querySelector('.event-result')!.after(box);
+    }
   };
   const art = ev.tarot
     ? (ev.image

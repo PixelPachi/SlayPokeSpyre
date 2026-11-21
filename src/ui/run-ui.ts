@@ -108,33 +108,3 @@ export function openDeckOverlay(host: HTMLElement, o: DeckPickOptions, run: Run)
     }
   });
 }
-
-/** Sac de baies plein : pour chaque baie en attente, on choisit une baie à jeter… ou on laisse la nouvelle. */
-export function swapBerries(host: HTMLElement, run: Run, done: (kept: string[]) => void, kept: string[] = []): void {
-  const id = run.pendingBerries.shift();
-  if (!id) return done(kept);
-  const box = document.createElement('div');
-  box.className = 'overlay berry-swap';
-  box.innerHTML = `<div class="panel">
-    <h2>Sac de baies plein !</h2>
-    <p>Tu as trouvé :</p>
-    <div class="berry-new">${berryCard(id)}</div>
-    <p>Jette une baie pour faire de la place :</p>
-    <div class="berry-swap-list">${run.berries.map((b, i) => `<button class="berry-swap-btn" data-i="${i}">${berryIcon(b)}<span>Jeter ${esc(BERRY_DEFS[b].name)}</span></button>`).join('')}</div>
-    <button class="btn leave-berry">Laisser ${esc(BERRY_DEFS[id].name)}</button>
-  </div>`;
-  box.addEventListener('click', (ev) => {
-    const t = ev.target as HTMLElement;
-    const b = t.closest<HTMLElement>('.berry-swap-btn');
-    if (b) {
-      run.berries.splice(Number(b.dataset.i), 1);
-      run.berries.push(id);
-      kept.push(id);
-    } else if (!t.closest('.leave-berry')) return;
-    ev.stopPropagation();
-    box.remove();
-    document.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
-    swapBerries(host, run, done, kept);
-  });
-  host.appendChild(box);
-}

@@ -1188,3 +1188,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .berry-swap-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 12px; border: 2px solid #7a3a46; background: #241520; color: #fff; font-weight: 800; cursor: pointer; font: inherit; }
 .berry-swap-btn:hover { border-color: #ff8a8a; transform: translateY(-3px); }
 .berry-swap-btn img { width: 40px; height: 40px; image-rendering: pixelated; }
+.loot-row.full { opacity: 0.65; }
+.loot-row.full small { color: #ffb3a8; }
+.loot-row.shake { animation: vfxShake 0.35s; }
+.event-loot { margin: 8px auto 12px; max-width: 460px; }
