@@ -115,7 +115,7 @@ export class CombatView {
       ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
       ${fieldChips ? `<div class="field-chips">${fieldChips}</div>` : ''}
       <div class="field">
-        <div class="fighter player ${p.block > 0 ? 'has-block' : ''}" data-who="player">
+        <div class="fighter player ${p.block > 0 ? 'has-block' : ''} ${(p.statuses.sommeil ?? 0) > 0 ? 'asleep' : ''}" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
           <img class="sprite player-sprite" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}">
@@ -211,7 +211,7 @@ export class CombatView {
     if (e.hp <= 0) return `<div class="fighter enemy dead" data-who="${e.uid}"></div>`;
     const sprite = e.shiny ? `sprites/pokemon/shiny/${e.dex}.png` : `sprites/pokemon/front/${e.dex}.png`;
     return `
-      <div class="fighter enemy ${e.block > 0 ? 'has-block' : ''} ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
+      <div class="fighter enemy ${e.block > 0 ? 'has-block' : ''} ${(e.statuses.sommeil ?? 0) > 0 ? 'asleep' : ''} ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
         ${this.intentHtml(e)}
         ${this.statusRow(e, false)}
         ${ENEMY_DEFS[e.defId].gimmick ? `<div class="gimmick" data-tip="<b>${esc(ENEMY_DEFS[e.defId].gimmick!.name)}</b><br>${esc(ENEMY_DEFS[e.defId].gimmick!.text)}">★ ${esc(ENEMY_DEFS[e.defId].gimmick!.name)}</div>` : ''}

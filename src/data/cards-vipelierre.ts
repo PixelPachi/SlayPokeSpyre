@@ -33,7 +33,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('frustration', 'Frustration', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6, { revanche: true })], { effects: [dmg(9, { revanche: true })] }),
   c('vengeance', 'Vengeance', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5, { revanche: true }), prot(3)], { effects: [dmg(7, { revanche: true }), prot(4)] }),
   c('chant-canon', 'Chant Canon', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(3), draw(1)], { effects: [dmg(5), draw(1)] }),
-  c('ronflement', 'Ronflement', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('peur', 1)], { effects: [dmg(7), st('peur', 2)] }),
+  c('ronflement', 'Ronflement', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(12), st('peur', 1, 'tous')] }),
   c('rune-protect', 'Rune Protect', 'normal', 'technique', 'commune', 1, 'soi', [prot(7)], { effects: [prot(10)] }),
   c('reflet', 'Reflet', 'normal', 'technique', 'commune', 1, 'soi', [prot(4), draw(1)], { effects: [prot(6), draw(1)] }),
 
@@ -47,7 +47,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('damocles', 'Damoclès', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(20), hpLoss(5)], { effects: [dmg(26), hpLoss(5)] }),
   c('mur-lumiere', 'Mur Lumière', 'psy', 'talent', 'peu-commune', 2, 'soi', [power('racines', 3)], { effects: [power('racines', 4)] }),
   c('protection', 'Protection', 'normal', 'technique', 'peu-commune', 2, 'soi', [prot(13)], { effects: [prot(17)] }),
-  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [heal(12)], { effects: [heal(16)] }, ['epuisee']),
+  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }], { cost: 1 }, ['epuisee']),
   c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(5), prot(15)], { effects: [hpLoss(4), prot(18)] }),
   c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [multi(5, 3)], { effects: [multi(5, 4)] }),
   c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [prot(8), st('defense', -1, 'soi')], { effects: [prot(11), st('defense', -1, 'soi')] }, ['epuisee']),
@@ -85,7 +85,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('essorage', 'Essorage', 'normal', 'attaque', 'rare', 2, 'ennemi', [dmg(4, { parStatut: 'vampigraine', parStatutX: 3 })], { effects: [dmg(6, { parStatut: 'vampigraine', parStatutX: 4 })] }),
   c('plenitude', 'Plénitude', 'psy', 'technique', 'rare', 1, 'soi', [st('attaque', -2, 'soi'), st('defense', -2, 'soi')], { cost: 0 }, ['epuisee']),
   c('puissance-cachee', 'Puissance Cachée', 'normal', 'attaque', 'rare', 1, 'ennemi', [dmg(6), { kind: 'metronome' }], { cost: 0 }),
-  c('blabla-dodo', 'Blabla Dodo', 'normal', 'technique', 'rare', 0, 'soi', [{ kind: 'copie' }], { keywords: [] }, ['epuisee']),
+  c('blabla-dodo', 'Blabla Dodo', 'normal', 'technique', 'rare', 0, 'soi', [{ kind: 'blabla' }], { effects: [{ kind: 'blabla' }, { kind: 'blabla' }] }),
   c('force', 'Force', 'normal', 'attaque', 'rare', 2, 'ennemi', [dmg(16), st('attaque', -1, 'soi')], { effects: [dmg(21), st('attaque', -1, 'soi')] }),
   // ——— Aromates (créés par Aromathérapie, seulement pour le combat en cours) ———
   c('arom-rouge', 'Aromate Rouge', 'feu', 'attaque', 'depart', 0, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),

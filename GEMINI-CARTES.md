@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (307 images)
+## 2. Les illustrations des capacités (308 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -37,7 +37,7 @@ Prompt commun :
 Puis, selon la colonne « Pokémon dans l'image » :
 
 - **Capacité exclusive (170 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
-- **Capacité partagée (137 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
+- **Capacité partagée (138 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
 
@@ -243,6 +243,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `onde-folie.png` | Onde Folie | Spectre · Technique | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `onde-vide.png` | Onde Vide | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `ouragan.png` | Ouragan | Dragon · Attaque | Vipélierre | **Vipélierre** lance la capacité | énergie draconique bleue et violette, écailles | ☐ |
+| `paresse.png` | Paresse | Normal · Technique | Neutre | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `photocopie.png` | Photocopie | Normal · Technique | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `phytomixeur.png` | Phytomixeur | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `pied-bruleur.png` | Pied Brûleur | Feu · Attaque | Riolu | **Riolu** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |

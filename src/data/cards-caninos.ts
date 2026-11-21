@@ -26,7 +26,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('retour', 'Retour', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5), { kind: 'soin-par-statut', status: 'brulure', mult: 1 }], { effects: [dmg(7), { kind: 'soin-par-statut', status: 'brulure', mult: 1 }, heal(2)] }),
   c('frustration', 'Frustration', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6, { revanche: true })], { effects: [dmg(9, { revanche: true })] }, ['conservee']),
   c('reflet', 'Reflet', 'normal', 'technique', 'commune', 1, 'soi', [prot(4), draw(1)], { effects: [prot(6), draw(1)] }),
-  c('ronflement', 'Ronflement', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(4), st('peur', 1), st('brulure', 1)], { effects: [dmg(6), st('peur', 1), st('brulure', 2)] }),
+  c('ronflement', 'Ronflement', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(12), st('peur', 1, 'tous')] }),
   c('force-cachee', 'Force Cachée', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6), { kind: 'pioche-si-statut', status: 'brulure', amount: 1 }], { effects: [dmg(9), { kind: 'pioche-si-statut', status: 'brulure', amount: 1 }] }),
   c('chant-canon', 'Chant Canon', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(3), st('brulure', 1, 'tous')], { effects: [dmg(5), st('brulure', 1, 'tous'), draw(1)] }),
   c('echo', 'Écho', 'normal', 'attaque', 'commune', 0, 'ennemi', [dmg(2, { parStatut: 'brulure' })], { effects: [dmg(4, { parStatut: 'brulure' })] }, ['conservee']),
@@ -46,7 +46,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('lance-flammes', 'Lance-Flammes', 'feu', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(9), st('brulure', 3), smult('brulure', 2)], { effects: [dmg(12), st('brulure', 4), smult('brulure', 2)] }),
   c('damocles', 'Damoclès', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(20), hpLoss(5)], { effects: [dmg(26), hpLoss(5)] }),
   c('tunnel', 'Tunnel', 'sol', 'attaque', 'peu-commune', 2, 'ennemi', [prot(6), dmg(10)], { effects: [prot(8), dmg(13)] }),
-  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 1, 'ennemi', [heal(5), { kind: 'soin-par-statut', status: 'brulure', mult: 1 }], { effects: [heal(8), { kind: 'soin-par-statut', status: 'brulure', mult: 2 }] }, ['epuisee']),
+  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }], { cost: 1 }, ['epuisee']),
   c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(5), prot(15)], { effects: [hpLoss(4), prot(18)] }),
   c('larcin', 'Larcin', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6), draw(1), pa(1)], { effects: [dmg(9), draw(1), pa(1)] }, ['epuisee']),
   c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [multi(5, 3)], { effects: [multi(5, 4)] }),
@@ -70,7 +70,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('force', 'Force', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(15)], { effects: [dmg(20)] }),
   c('eboulement', 'Éboulement', 'roche', 'attaque', 'peu-commune', 2, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(11), st('peur', 1, 'tous')] }),
   c('lame-de-roc', 'Lame de Roc', 'roche', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(16)], { effects: [dmg(21)] }),
-  c('blabla-dodo', 'Blabla Dodo', 'normal', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'copie' }], { cost: 0 }, ['epuisee']),
+  c('blabla-dodo', 'Blabla Dodo', 'normal', 'technique', 'peu-commune', 0, 'soi', [{ kind: 'blabla' }], { effects: [{ kind: 'blabla' }, { kind: 'blabla' }] }),
 
   // ——— Rares (13) ———
   c('vitesse-extreme', 'Vitesse Extrême', 'normal', 'attaque', 'rare', 0, 'ennemi', [dmg(8), draw(1)], { effects: [dmg(11), draw(1)] }, ['innee']),

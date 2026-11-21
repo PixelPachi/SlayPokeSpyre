@@ -18,6 +18,9 @@ function n(
 }
 
 export const NEUTRAL_CARDS: CardDef[] = [
+  // ——— Sommeil ———
+  n('paresse', 'Paresse', 'normal', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'repos', turns: 3, healPct: 0.5 }, { kind: 'ajoute-sommeil' }], { cost: 0 }, ['epuisee']),
+
   // ——— Météo et terrains (5 tours, pour tous les Pokémon) ———
   n('danse-pluie', 'Danse Pluie', 'eau', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'pluie', turns: 5 }], { effects: [{ kind: 'meteo', id: 'pluie', turns: 5 }, draw(1)] }),
   n('tempete-sable', 'Tempête de Sable', 'roche', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'tempete-sable', turns: 5 }], { effects: [{ kind: 'meteo', id: 'tempete-sable', turns: 5 }, prot(6)] }),

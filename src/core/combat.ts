@@ -311,6 +311,10 @@ export class Combat {
     if (d.requires?.block && this.player.block < d.requires.block) return false;
     if (d.requires?.aura && this.player.aura < d.requires.aura) return false;
     if (d.requires?.notBoss && this.boss) return false;
+    // Endormi : seules les cartes qui le permettent (Ronflement, Blabla Dodo) sont jouables
+    const asleep = (this.player.statuses.sommeil ?? 0) > 0;
+    if (d.requires?.asleep && !asleep) return false;
+    if (asleep && !d.requires?.asleep && !this.sleepBypass) return false;
     if (this.has('bandeau-choix') && d.category === 'attaque' && this.attacksThisTurn >= 1) return false;
     return this.costOf(card) <= this.player.energy;
   }
@@ -390,6 +394,9 @@ export class Combat {
     if (!f || f.hp <= 0) return 0;
     return (e.siBebe ?? 0) + (e.parBebe ? f.power * e.parBebe : 0);
   }
+
+  /** Blabla Dodo joue une carte même si on dort. */
+  private sleepBypass = false;
 
   /** Le Bébé attire toutes les attaques ennemies ce tour-ci (Garde Maternelle…). */
   babyTaunt = false;
@@ -484,6 +491,10 @@ export class Combat {
     if (this.cardsThisTurn >= 5 && this.bossAlive('ailes')) this.addStatus(this.player, 'player', 'confusion', 1);
     if (this.player.energy > 0 && this.bossAlive('sol-brulant')) this.addStatus(this.player, 'player', 'brulure', this.player.energy);
     this.tickDurations(this.player);
+    if ((this.player.statuses.sommeil ?? 0) > 0) {
+      this.player.statuses.sommeil! -= 1;
+      if (this.player.statuses.sommeil! <= 0) { delete this.player.statuses.sommeil; this.events.push({ type: 'player-move', name: 'Tu te réveilles !' }); }
+    }
     this.phase = 'ennemi';
     this.player.freeTurn = false;
     this.player.hpLostEnemyTurn = 0;
@@ -506,7 +517,7 @@ export class Combat {
     }
     if (frozen && !this.boss) {
       this.events.push({ type: 'enemy-move', uid, name: 'Gelé !' });
-    } else if ((e.statuses.sommeil ?? 0) > 0) {
+    } else if ((e.statuses.sommeil ?? 0) > 0 && !ENEMY_DEFS[e.defId]?.actsAsleep) {
       e.statuses.sommeil! -= 1;
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
@@ -944,6 +955,34 @@ export class Combat {
         p.aura = Math.max(0, p.aura - eff.amount);
         this.events.push({ type: 'aura', amount: p.aura });
         return;
+      case 'repos':
+        this.healPlayer(Math.ceil(p.maxHp * (eff.healPct ?? 1)));
+        this.addStatus(p, 'player', 'sommeil', eff.turns);
+        if ((p.statuses.sommeil ?? 0) > 0) this.events.push({ type: 'player-move', name: 'Tu t’endors… Zzz' });
+        return;
+      case 'ajoute-sommeil': {
+        const pool = Object.values(CARD_DEFS).filter((x) => x.requires?.asleep);
+        if (!pool.length || this.hand.length >= MAX_HAND) return;
+        const pick = this.rng.pick(pool);
+        this.hand.push({ uid: this.nextTempUid++, defId: pick.id, upgraded: false });
+        this.events.push({ type: 'player-move', name: `Nouvelle carte : ${pick.name}` });
+        return;
+      }
+      case 'blabla': {
+        const pool = this.hand.filter((c) => { const x = this.def(c); return !x.keywords?.includes('injouable') && !x.effects.some((e) => e.kind === 'blabla'); });
+        if (!pool.length) return;
+        const pick = this.rng.pick(pool);
+        const pd = this.def(pick);
+        this.events.push({ type: 'player-move', name: `Blabla Dodo : ${pd.name} !` });
+        const wasFree = p.freeTurn;
+        this.sleepBypass = true;
+        p.freeTurn = true;
+        const alive = this.aliveEnemies();
+        this.play(pick.uid, pd.target === 'ennemi' && alive.length ? this.rng.pick(alive).uid : undefined);
+        p.freeTurn = wasFree;
+        this.sleepBypass = false;
+        return;
+      }
       case 'copie': {
         const last = this.lastPlayed;
         if (!last) return;
@@ -1166,6 +1205,11 @@ export class Combat {
       this.events.push({ type: 'player-move', name: 'Concentration perdue !' });
     }
     if (rest > 0) this.applyHpLoss(f, who, rest);
+    // Un Pokémon endormi se réveille dès qu'il subit des dégâts
+    if (rest > 0 && (f.statuses.sommeil ?? 0) > 0 && f.hp > 0) {
+      delete f.statuses.sommeil;
+      this.events.push(who === 'player' ? { type: 'player-move', name: 'Tu te réveilles !' } : { type: 'enemy-move', uid: who as number, name: 'Se réveille !' });
+    }
   }
 
   /** Perte de PV qui ignore la Protection (statuts, cartes à contrecoup). */

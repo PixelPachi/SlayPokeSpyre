@@ -1223,3 +1223,9 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .vfx-talent .talent-spark { width: 8px; height: 8px; margin: 30px 0 0 -4px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px var(--c), 0 0 4px var(--c); opacity: 0;
   animation: talentSpark 1.2s ease-out forwards; animation-delay: var(--d); }
 @keyframes talentSpark { 0% { opacity: 0; transform: translate(var(--x), 20px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(var(--x) * 0.4), -170px); } }
+
+/* Sommeil : Zzz qui flottent */
+.fighter.asleep::after { content: 'Z z z'; position: absolute; left: 58%; top: 22%; z-index: 8; font-family: 'Lilita One', sans-serif; font-size: 28px; color: #bcd0ff;
+  text-shadow: 0 2px 0 #1a2550, 0 0 10px #8fa7d9; letter-spacing: 6px; pointer-events: none; animation: zzz 2.4s ease-in-out infinite; }
+.fighter.asleep .sprite { filter: brightness(0.85) saturate(0.8); }
+@keyframes zzz { 0% { transform: translate(0, 10px) rotate(-8deg); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(24px, -36px) rotate(8deg); opacity: 0; } }

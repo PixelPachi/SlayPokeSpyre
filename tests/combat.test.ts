@@ -360,16 +360,16 @@ describe('cartes neutres', async () => {
   const { CHARACTERS } = await import('../src/data/characters');
   const { Run } = await import('../src/core/run');
 
-  it('58 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
+  it('59 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
     const neutral = neutralPool();
-    expect(neutral).toHaveLength(58);
+    expect(neutral).toHaveLength(59);
     const charTypes = new Set(Object.values(CHARACTERS).flatMap((c) => c.types));
     const otherNames = new Set(Object.values(CARD_DEFS).filter((c) => c.character !== 'normal').map((c) => c.name));
     for (const c of neutral) {
-      expect(charTypes.has(c.pokeType), c.name).toBe(false);
+      if (c.id !== 'n-paresse') expect(charTypes.has(c.pokeType), c.name).toBe(false); // Paresse reste Normal
       expect(otherNames.has(c.name), c.name).toBe(false);
     }
-    expect(new Set(neutral.map((c) => c.name)).size).toBe(58);
+    expect(new Set(neutral.map((c) => c.name)).size).toBe(59);
   });
 
   it('des cartes neutres apparaissent parfois dans les récompenses', () => {
@@ -1115,5 +1115,32 @@ describe('nouvelles mécaniques Caninos et Kangourex', () => {
     const pow = c.player.familiar!.power;
     c.play(901);
     expect(c.player.block).toBe(pow * 2);
+  });
+});
+
+describe('sommeil', () => {
+  const setup = (ids: string[]) => {
+    const c = new Combat({ character: 'vipelierre', deck: makeDeck(CHARACTERS.vipelierre.starterDeck), enemies: ['ossatueur'], seed: 'ZZ', hp: 20, maxHp: 70 });
+    c.drainEvents();
+    c.player.energy = 9;
+    c.hand = makeDeck(ids).map((x, i) => ({ ...x, uid: 950 + i }));
+    return c;
+  };
+  it('Repos soigne tout et endort ; endormi, seules Ronflement et Blabla Dodo se jouent', () => {
+    const c = setup(['vip-repos', 'vip-ronflement', 'charge']);
+    expect(c.canPlay(c.hand[1])).toBe(false);
+    c.play(950);
+    expect(c.player.hp).toBe(70);
+    expect(c.player.statuses.sommeil).toBeGreaterThan(0);
+    expect(c.canPlay(c.hand.find((x) => x.defId === 'charge')!)).toBe(false);
+    expect(c.canPlay(c.hand.find((x) => x.defId === 'vip-ronflement')!)).toBe(true);
+  });
+  it('les premiers dégâts réveillent ; Paresse soigne la moitié et donne une carte de sommeil', () => {
+    const c = setup(['n-paresse']);
+    c.play(950);
+    expect(c.player.hp).toBe(55);
+    expect(c.hand.some((x) => /ronflement|blabla/.test(x.defId))).toBe(true);
+    (c as unknown as { dealDamage(f: unknown, w: unknown, n: number, e: string): void }).dealDamage(c.player, 'player', 5, 'normal');
+    expect(c.player.statuses.sommeil ?? 0).toBe(0);
   });
 });

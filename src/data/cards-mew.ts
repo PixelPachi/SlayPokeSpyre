@@ -46,7 +46,7 @@ export const MEW_CARDS: CardDef[] = [
   c('moi-d-abord', "Moi d'Abord", 'normal', 'attaque', 'peu-commune', 0, 'ennemi', [dmg(5), addCards(1)], { effects: [dmg(8), addCards(1)] }, ['epuisee']),
   c('mur-lumiere', 'Mur Lumière', 'psy', 'technique', 'peu-commune', 2, 'soi', [prot(10), draw(1)], { effects: [prot(14), draw(1)] }),
   c('hate', 'Hâte', 'psy', 'technique', 'peu-commune', 0, 'soi', [pa(1), draw(1)], { effects: [pa(1), draw(2)] }, ['epuisee']),
-  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [heal(12)], { effects: [heal(16)] }, ['epuisee']),
+  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }], { cost: 1 }, ['epuisee']),
   c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(5), prot(15)], { effects: [hpLoss(4), prot(18)] }),
   c('ball-ombre', "Ball'Ombre", 'spectre', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(13), st('defense', -1)], { effects: [dmg(17), st('defense', -1)] }),
   c('eco-sphere', 'Éco-Sphère', 'plante', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(12), st('defense', -1)], { effects: [dmg(16), st('defense', -1)] }),

@@ -22,7 +22,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   paralysie: { label: 'Paralysie', color: '#f2cf2c', text: (n) => `Inflige 25 % de dégâts en moins pendant ${n} tour${n > 1 ? 's' : ''}.` },
   peur: { label: 'Peur', color: '#d94b4b', text: (n) => `Subit 50 % de dégâts en plus pendant ${n} tour${n > 1 ? 's' : ''}.` },
   confusion: { label: 'Confusion', color: '#c78bd9', text: (n) => `Gagne 25 % de Protection en moins pendant ${n} tour${n > 1 ? 's' : ''}.` },
-  sommeil: { label: 'Sommeil', color: '#8fa7d9', text: () => 'Saute son prochain tour.' },
+  sommeil: { label: 'Sommeil', color: '#8fa7d9', text: (n) => `Endormi (encore ${n} tour${n > 1 ? 's' : ''} au plus) : un ennemi ne peut pas agir, et toi tu ne peux jouer que Ronflement ou Blabla Dodo. Se réveille dès qu'il subit des dégâts.` },
   attaque: { label: 'Attaque', color: '#ff9b4a', text: (n) => `${n > 0 ? '+' : ''}${n} dégâts par coup.` },
   defense: { label: 'Défense', color: '#5aa5ff', text: (n) => `${n > 0 ? '+' : ''}${n} Protection par carte.` },
   tenace: { label: 'Tenace', color: '#ffd166', text: () => 'Ne peut pas tomber K.O. avant son prochain tour.' },
@@ -140,6 +140,9 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
       case 'perte-pv': parts.push(d.character === 'riolu' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+${e.amount} Aura)</span>.` : `Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
+      case 'repos': parts.push(`Récupère <b>${e.healPct ? `${Math.round(e.healPct * 100)} % de tes PV` : 'tous tes PV'}</b> et t’endors.`); break;
+      case 'ajoute-sommeil': parts.push('Ajoute une carte de sommeil à ta main.'); break;
+      case 'blabla': parts.push('Joue gratuitement une carte de ta main au hasard.'); break;
       case 'meteo': { const f = isWeather(e.id) ? WEATHER[e.id] : TERRAINS[e.id]; parts.push(`${isWeather(e.id) ? 'Météo' : 'Terrain'} <b>${f.name}</b> pendant ${e.turns} tours.`); break; }
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
@@ -150,6 +153,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
     parts.push(t.length ? `${kind}. Quand tu la pioches, ${t.join(' et ')}.` : `${kind}. Encombre ta main.`);
   }
   if (d.requires?.block) parts.push('<i>Jouable seulement avec de la Protection.</i>');
+  if (d.requires?.asleep) parts.push('<i>Jouable seulement endormi.</i>');
   if (d.requires?.aura && !d.effects.some((e) => e.kind === 'consomme-aura')) parts.push(`<i>Demande ${d.requires.aura} Aura.</i>`);
   if (d.id === 'voeu-brise') parts.push('Malédiction. À la fin de ton tour, si elle est dans ta main : perds <b class="down">2</b> PV.');
   for (const k of d.keywords ?? []) parts.push(`<i>${KEYWORD_LABELS[k]}.</i>`);

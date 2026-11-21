@@ -106,6 +106,8 @@ CARDS.push(
   bossCard('g-felure-temporelle', 'Fêlure Temporelle', 'dragon', [{ kind: 'pa', amount: -1 }]),
 );
 CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS);
+// Ronflement et Blabla Dodo ne se jouent qu'endormi
+for (const d of CARDS) if (/-(ronflement|blabla-dodo)$/.test(d.id)) d.requires = { ...d.requires, asleep: true };
 
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 

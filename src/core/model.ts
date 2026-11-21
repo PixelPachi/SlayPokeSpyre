@@ -54,6 +54,9 @@ export type Effect =
   | { kind: 'pa'; amount: number }
   | { kind: 'perte-pv'; amount: number } // se blesse soi-même (donne de l'Aura à Riolu)
   | { kind: 'aura'; amount: number }
+  | { kind: 'repos'; turns: number; healPct?: number } // récupère ses PV (tous, ou une fraction) et s'endort
+  | { kind: 'ajoute-sommeil' } // ajoute à la main une carte jouable endormi (pour ce combat)
+  | { kind: 'blabla' } // joue gratuitement une carte de la main au hasard
   | { kind: 'baie-aleatoire'; count: number } // gagne une baie au hasard (mangée tout de suite si le sac est plein)
   | { kind: 'decouverte'; pool: 'aromates'; count: number; upgraded?: boolean } // choisis 1 carte parmi N, ajoutée pour ce combat
   | { kind: 'meteo'; id: import('./weather').WeatherId | import('./weather').TerrainId; turns: number } // météo ou terrain pour N tours
@@ -108,7 +111,7 @@ export interface CardDef {
   effects: Effect[];
   keywords?: Keyword[];
   /** Conditions pour jouer la carte. */
-  requires?: { block?: number; aura?: number; notBoss?: boolean };
+  requires?: { block?: number; aura?: number; notBoss?: boolean; asleep?: boolean };
   /** Cartes de gardien : effet subi quand on la pioche. */
   onDraw?: Effect[];
   /** Illustration d'une autre carte (cartes fusionnées à la Pension). */
@@ -200,5 +203,7 @@ export interface EnemyDef {
   /** Classe CSS du sprite (ex. « primal » pour Dialga Primal). */
   look?: string;
   /** Talent propre à un gardien. */
+  /** Agit même endormi (un futur gardien Ronflex…). */
+  actsAsleep?: boolean;
   gimmick?: { id: GimmickId; name: string; text: string };
 }

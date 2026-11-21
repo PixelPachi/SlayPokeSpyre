@@ -54,7 +54,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('ball-ombre', "Ball'Ombre", 'spectre', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(13), st('defense', -1)], { effects: [dmg(17), st('defense', -1)] }),
   c('casse-brique', 'Casse-Brique', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [breakBlock, dmg(8)], { effects: [breakBlock, dmg(11)] }),
   c('lance-flammes', 'Lance-Flammes', 'feu', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(12), st('brulure', 2)], { effects: [dmg(15), st('brulure', 3)] }),
-  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [heal(10), bebeHeal(6)], { effects: [heal(14), bebeHeal(8)] }, ['epuisee']),
+  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }, bebeHeal(10)], { cost: 1 }, ['epuisee']),
   c('larcin', 'Larcin', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6), draw(1), pa(1)], { effects: [dmg(9), draw(1), pa(1)] }, ['epuisee']),
   c('degommage', 'Dégommage', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(14)], { effects: [dmg(19)] }, ['epuisee']),
   c('vampi-poing', 'Vampi-Poing', 'combat', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { drain: true }), bebeHeal(4)], { effects: [dmg(14, { drain: true }), bebeHeal(6)] }),
