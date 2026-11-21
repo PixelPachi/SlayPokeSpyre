@@ -5,6 +5,7 @@ import type { PokeType } from '../core/types';
 
 /** Musiques enregistrées (fichiers MP3) qui remplacent la musique générée pour certains combats. */
 const FILE_TRACKS: Record<string, string> = {
+  titre: 'music/titre.mp3', // écran titre (joué doucement, en fond)
   dialga: 'music/dialga.mp3',
   'foret-de-jade': 'music/foret-de-jade.mp3', // Viridian Forest (version 2)
   'salle-originelle': 'music/salle-originelle.mp3', // One Last Time : acte secret
@@ -19,7 +20,9 @@ const FILE_TRACKS: Record<string, string> = {
 export function hasTrack(id: string): boolean { return !!FILE_TRACKS[id]; }
 let fileAudio: HTMLAudioElement | null = null;
 let fileTrack: string | null = null;
-const fileVolume = () => (mode === 'tout' ? 0.5 : 0);
+/** Volume propre à certaines musiques (l'écran titre reste discret). */
+const TRACK_VOLUME: Record<string, number> = { titre: 0.18 };
+const fileVolume = () => (mode === 'tout' ? TRACK_VOLUME[fileTrack ?? ''] ?? 0.5 : 0);
 function stopFile(): void {
   if (fileAudio) { fileAudio.pause(); fileAudio = null; }
   fileTrack = null;
