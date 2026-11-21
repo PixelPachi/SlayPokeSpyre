@@ -11,7 +11,7 @@ import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, 
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
-import { equippedSkin, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
+import { addHistory, equippedSkin, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
 import { expBreakdown } from './data/unlocks';
 import { ENEMY_DEFS } from './data/enemies';
@@ -219,7 +219,7 @@ function startRun(character: CharacterId): void {
   if (params.has('boutique')) { clear(); return renderShop(screen, run, () => showMap(run), (onWin) => kecleonFight(run, onWin)); }
   // Pour tester l'écran de fin : ?fin=victoire ou ?fin=defaite (avec des statistiques d'exemple)
   if (params.get('fin')) {
-    run.act = 3; Object.assign(run, { combatsWon: 14, elitesDefeated: 3, duelsWon: 1, eventsSeen: 6, shiniesMet: 1, bossesDefeated: 3, bossNames: ['Dardargnan', 'Camérupt', 'Rayquaza'] });
+    run.act = 3; Object.assign(run, { combatsWon: 14, elitesDefeated: 3, duelsWon: 1, eventsSeen: 6, shiniesMet: 1, bossesDefeated: 3, bossNames: ['Dardargnan', 'Camérupt', 'Rayquaza'], lastEnemies: ['heatran'] });
     return endRun(run, params.get('fin') === 'victoire');
   }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
@@ -271,6 +271,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   const enemies = run.encounter(type);
   if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
   else playTheme(run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
+  run.lastEnemies = enemies;
   view = new CombatView(
     screen,
     run,
@@ -342,6 +343,7 @@ function kecleonFight(run: Run, onWin: () => void): void {
 function duel(run: Run, f: EventFight): void {
   clear();
   const power = ([1, 1, 1.7, 2.3, 2.6][run.act] ?? 2.6) * (f.power ?? 1);
+  run.lastEnemies = [f.fight];
   view = new CombatView(
     screen, run,
     { seed: `${run.seed}-${run.floor}-duel`, enemies: [f.fight], label: 'Duel', enemyPower: power },
@@ -386,6 +388,13 @@ function endRun(run: Run, victory: boolean): void {
   clearRun();
   activeRun = null;
   const { lines, total: exp } = expBreakdown(run, victory);
+  addHistory(save, {
+    date: Date.now(), character: run.character, form: run.form?.name ?? CHARACTERS[run.character].name, skin: run.skin, victory,
+    floor: run.floor, act: run.act, zone: run.zone.name,
+    killedBy: run.lastEnemies.map((id) => ({ name: ENEMY_DEFS[id]?.name ?? id, dex: ENEMY_DEFS[id]?.dex ?? 0 })),
+    deck: run.deck.map((c) => ({ id: c.defId, up: c.upgraded })), relics: [...run.relics], berries: [...run.berries],
+    exp, seed: run.seed, maxHp: run.maxHp,
+  });
   const result = grantExp(save, run.character, exp);
   const newSkins = recordRunStats(save, run.character, {
     shinies: run.shiniesMet, elites: run.elitesDefeated, bosses: run.bossesDefeated, combats: run.combatsWon, wins: victory ? 1 : 0,

@@ -19,6 +19,32 @@ export interface SaveData {
   skins?: Partial<Record<CharacterId, string>>;
   /** Gardiens vaincus par personnage (ids). */
   beaten?: Partial<Record<CharacterId, string[]>>;
+  /** Les 5 dernières parties (la plus récente en premier). */
+  history?: RunRecord[];
+}
+
+export interface RunRecord {
+  date: number;
+  character: CharacterId;
+  form: string;
+  skin?: string;
+  victory: boolean;
+  floor: number;
+  act: number;
+  zone: string;
+  /** Pokémon du dernier combat (ceux qui t'ont mis K.O. en cas de défaite). */
+  killedBy: { name: string; dex: number }[];
+  deck: { id: string; up: boolean }[];
+  relics: string[];
+  berries: string[];
+  exp: number;
+  seed: string;
+  maxHp: number;
+}
+
+export function addHistory(s: SaveData, r: RunRecord): void {
+  s.history = [r, ...(s.history ?? [])].slice(0, 5);
+  writeSave(s);
 }
 
 export function statOf(s: SaveData, c: CharacterId, stat: SkinStat): number {

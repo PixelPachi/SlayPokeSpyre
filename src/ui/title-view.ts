@@ -4,7 +4,11 @@ import type { SaveData } from '../core/save';
 import { allRelics } from '../data/relics';
 import { BERRIES } from '../data/berries';
 import { ENEMY_DEFS } from '../data/enemies';
-import { berryCard, relicCard } from './run-ui';
+import { berryCard, berryIcon, relicCard, relicIcon } from './run-ui';
+import { CHARACTERS } from '../data/characters';
+import { skinSprite } from '../data/skins';
+import { renderCard } from './card';
+import { cardDef } from '../data/cards';
 import { asset, esc } from './util';
 
 export interface TitleActions {
@@ -66,10 +70,11 @@ export function confirmBox(root: HTMLElement, title: string, text: string, ok: s
   root.appendChild(box);
 }
 
-type Tab = 'objets' | 'baies' | 'pokemon';
+type Tab = 'objets' | 'baies' | 'pokemon' | 'historique';
 
 export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => void): void {
   let tab: Tab = 'objets';
+  let openDeck = -1;
   const seen = new Set(save.seen ?? []);
   const shiny = new Set(save.seenShiny ?? []);
   // Un Pokémon par n° (les variantes de duel partagent le même Pokémon)
@@ -85,6 +90,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
         return list.length ? `<h3>${label[r]} · ${list.length}</h3><div class="gl-grid">${list.map((x) => relicCard(x.id)).join('')}</div>` : '';
       }).join('');
     }
+    if (tab === 'historique') return historyHtml(save, openDeck);
     if (tab === 'baies') {
       return `<p class="gl-note">Clique une baie dans la barre du haut pour la manger. Certaines baies sont exclusives à un personnage.</p><div class="gl-grid">${BERRIES.map((b) => berryCard(b.id)).join('')}</div>`;
     }
@@ -112,7 +118,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
           <button class="btn gl-back">← Retour</button>
           <h1>Glossaire</h1>
           <div class="gl-tabs">
-            ${(['objets', 'baies', 'pokemon'] as Tab[]).map((t) => `<button class="gl-tab ${t === tab ? 'on' : ''}" data-tab="${t}">${t === 'objets' ? 'Objets tenus' : t === 'baies' ? 'Baies' : 'Pokémon'}</button>`).join('')}
+            ${(['objets', 'baies', 'pokemon', 'historique'] as Tab[]).map((t) => `<button class="gl-tab ${t === tab ? 'on' : ''}" data-tab="${t}">${({ objets: 'Objets tenus', baies: 'Baies', pokemon: 'Pokémon', historique: 'Historique' })[t]}</button>`).join('')}
           </div>
         </div>
         <div class="gl-body">${body()}</div>
@@ -122,6 +128,8 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
     const t = ev.target as HTMLElement;
     const b = t.closest<HTMLElement>('.gl-tab');
     if (b) { tab = b.dataset.tab as Tab; return draw(); }
+    const hd = t.closest<HTMLElement>('.hist-deck-btn');
+    if (hd) { const i = Number(hd.dataset.i); openDeck = openDeck === i ? -1 : i; return draw(); }
     if (t.closest('.gl-back')) { root.onclick = null; onBack(); }
   };
   draw();
@@ -149,4 +157,30 @@ export function renderSaveScreen(root: HTMLElement, info: { hasRun: string | nul
     const f = (ev.target as HTMLInputElement).files?.[0];
     if (f) info.onImport(await f.text());
   });
+}
+
+/** Historique : les 5 dernières parties, avec le résultat, les Pokémon du dernier combat et le deck. */
+function historyHtml(save: SaveData, openDeck: number): string {
+  const list = save.history ?? [];
+  if (!list.length) return '<p class="gl-note">Aucune partie terminée pour l\'instant. Tes 5 dernières parties apparaîtront ici.</p>';
+  return `<p class="gl-note">${list.length > 1 ? `Tes ${list.length} dernières parties (la plus récente en haut).` : 'Ta dernière partie.'} L'historique garde les 5 dernières.</p>
+    <div class="hist-list">${list.map((r, i) => {
+      const dex = CHARACTERS[r.character].dex[Math.min(r.act, CHARACTERS[r.character].dex.length) - 1] ?? CHARACTERS[r.character].dex[0];
+      const date = new Date(r.date).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      const counts = new Map<string, { id: string; up: boolean; n: number }>();
+      for (const c of r.deck) { const k = c.id + (c.up ? '+' : ''); const e = counts.get(k); if (e) e.n++; else counts.set(k, { ...c, n: 1 }); }
+      return `<div class="hist-run ${r.victory ? 'win' : 'lose'}">
+        <div class="hist-top">
+          <img class="hist-sprite" src="${asset(skinSprite(dex, r.skin))}" alt="">
+          <div class="hist-main">
+            <div class="hist-title">${r.victory ? '🏆 Victoire' : '💀 Défaite'} · ${esc(r.form)}</div>
+            <div class="hist-sub">${date} · étage ${r.floor} · ${esc(r.zone)} · ${r.deck.length} cartes · ${r.maxHp} PV max · +${r.exp} EXP</div>
+            <div class="hist-killer">${r.victory ? 'Dernier adversaire :' : 'Mis K.O. par :'} ${r.killedBy.map((k) => `<span><img src="${asset(`sprites/pokemon/front/${k.dex}.png`)}" alt="">${esc(k.name)}</span>`).join('') || '—'}</div>
+          </div>
+          <button class="btn small hist-deck-btn" data-i="${i}">${openDeck === i ? 'Masquer le deck' : 'Voir le deck'}</button>
+        </div>
+        <div class="hist-items">${r.relics.map((id) => relicIcon(id)).join('')}${r.berries.map((id) => berryIcon(id)).join('')}</div>
+        ${openDeck === i ? `<div class="hist-deck">${[...counts.values()].map((c) => `<div class="hist-card">${renderCard(cardDef(c.id, c.up))}${c.n > 1 ? `<b class="hist-n">×${c.n}</b>` : ''}</div>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
 }

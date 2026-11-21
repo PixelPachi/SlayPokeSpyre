@@ -1042,3 +1042,22 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .skin-btn .skin-bar { position: absolute; left: 8px; right: 8px; bottom: 3px; height: 4px; border-radius: 2px; background: #222; overflow: hidden; }
 .skin-btn .skin-bar::after { content: ''; position: absolute; inset: 0; width: var(--p); background: #ffd76a; }
 .weather-feux-follets i { width: calc(10px * var(--s)); height: calc(10px * var(--s)); border-radius: 50%; background: radial-gradient(#e9dcff, #9b6bff 55%, transparent 70%); box-shadow: 0 0 16px #a77bff; opacity: 0.8; animation-name: drift; }
+
+/* Historique des parties (Glossaire) */
+.hist-list { display: flex; flex-direction: column; gap: 12px; }
+.hist-run { border-radius: 14px; padding: 10px 14px; background: #0c1220cc; border: 2px solid #3a4560; }
+.hist-run.win { border-color: #d6a93a; }
+.hist-run.lose { border-color: #7a3a46; }
+.hist-top { display: flex; align-items: center; gap: 12px; }
+.hist-sprite { width: 88px; height: 88px; image-rendering: pixelated; transform: scaleX(-1); margin: -8px 0; }
+.hist-main { flex: 1; }
+.hist-title { font-family: 'Lilita One', sans-serif; font-size: 22px; color: #fff3c4; }
+.hist-sub { font-size: 13px; color: #9fb0cc; font-weight: 700; }
+.hist-killer { margin-top: 4px; font-weight: 800; color: #dfe6f5; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hist-killer span { display: inline-flex; align-items: center; gap: 2px; padding: 0 8px 0 0; border-radius: 999px; background: #ffffff12; }
+.hist-killer img { width: 40px; height: 40px; image-rendering: pixelated; margin: -8px -4px; }
+.hist-items { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.hist-deck { display: flex; flex-wrap: wrap; gap: 18px 6px; margin-top: 12px; padding: 10px 0 4px 14px; }
+.hist-card { position: relative; zoom: 0.8; }
+.hist-card .card { margin: 0; transform: none; }
+.hist-n { position: absolute; right: -6px; top: -8px; z-index: 3; background: #ffd76a; color: #1a1a1a; border-radius: 999px; padding: 2px 8px; font-family: 'Lilita One', sans-serif; font-size: 18px; }
