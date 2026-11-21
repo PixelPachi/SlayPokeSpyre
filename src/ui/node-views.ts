@@ -1,3 +1,4 @@
+import { skinSprite } from '../data/skins';
 import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
 import type { Run } from '../core/run';
@@ -184,7 +185,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
         </button>
       </div>`;
     root.innerHTML = shell(run, 'Marché Kecleon', shopScene({
-      keeper: looted ? '' : asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`), bg: 'backgrounds/marche-kecleon.jpg',
+      keeper: looted ? '' : asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`), bg: 'backgrounds/marche-kecleon.jpg', hero: asset(skinSprite(run.form.dex, run.skin)),
       bubble: looted ? 'Kecleon a pris la fuite… Les étals sont à toi (clique dessus).' : shiny ? '★ Kecleon chromatique ! Tout est à moitié prix. Clique sur moi !' : 'Bienvenue ! Clique sur moi pour voir mes articles !',
       title: looted ? 'Marché Kecleon… pillé !' : 'Marché Kecleon',
       actions: `${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}<button class="btn primary leave">Quitter le marché</button>`,
@@ -274,7 +275,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
 }
 
 /** Place du marché : décor d'échoppe, le marchand à droite (on clique dessus pour ouvrir le tapis d'articles). */
-export function shopScene(o: { keeper: string; keeperCls?: string; bubble: string; title: string; actions: string; carpet: string; theme?: string; bg?: string }): string {
+export function shopScene(o: { keeper: string; keeperCls?: string; bubble: string; title: string; actions: string; carpet: string; theme?: string; bg?: string; hero?: string }): string {
   return `
     <div class="shop-scene ${o.theme ?? ''} ${o.bg ? 'has-bg' : ''}" ${o.bg ? `style="background-image:url('${asset(o.bg)}')"` : ''}>
       <svg class="shop-decor" viewBox="0 0 1280 640" preserveAspectRatio="xMidYMax slice">
@@ -308,6 +309,7 @@ export function shopScene(o: { keeper: string; keeperCls?: string; bubble: strin
       </svg>
       <div class="shop-title"><h1 class="node-title">${o.title}</h1></div>
       <div class="shop-stall" title="Voir les articles"></div>
+      ${o.hero ? `<img class="shop-hero" src="${o.hero}" alt="">` : ''}
       ${o.keeper ? `<button class="shop-keeper ${o.keeperCls ?? ''}"><img src="${o.keeper}" alt=""><span class="shop-bubble">${o.bubble}</span></button>` : `<p class="shop-bubble alone">${o.bubble}</p>`}
       <div class="shop-scene-actions">${o.actions}</div>
       ${o.carpet ? `<div class="carpet-wrap"><div class="carpet">${o.carpet}</div></div>` : ''}

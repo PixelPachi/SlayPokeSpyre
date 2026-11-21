@@ -1234,3 +1234,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .shop-scene.has-bg .shop-decor { display: none; }
 .shop-scene.has-bg .shop-title .node-title { text-shadow: 0 3px 0 #000, 0 0 18px #000; }
 .shop-scene.has-bg .shop-stall { left: 6%; right: 40%; top: 25%; height: 55%; }
+/* Notre Pokémon entre dans la boutique (à gauche, tourné vers Kecleon) */
+.shop-hero { position: absolute; left: 38%; bottom: 6%; width: 260px; height: 260px; image-rendering: pixelated;
+  transform: scaleX(-1); filter: drop-shadow(0 10px 8px #0009); pointer-events: none; z-index: 2;
+  animation: hero-enter 0.6s ease-out both; }
+@keyframes hero-enter { from { left: -10%; opacity: 0; } to { left: 38%; opacity: 1; } }

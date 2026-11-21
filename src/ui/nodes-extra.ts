@@ -1,3 +1,4 @@
+import { skinSprite } from '../data/skins';
 // Nouveaux nœuds de la carte : Coffre mystère, Pension Pokémon (fusion de cartes), Marchand de CT.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
@@ -169,7 +170,7 @@ export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void
           <small class="ench-tag ${ENCHANTS[o.k].rarity ?? 'commun'}">${ENCHANTS[o.k].rarity === 'legendaire' ? '★ Légendaire — ' : ENCHANTS[o.k].rarity === 'rare' ? '◆ Rare — ' : ''}✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
         </div>`).join('')}</div>`;
     root.innerHTML = shell(run, label, shopScene({
-      keeper: asset('sprites/pokemon/kecleon-violet.png'), keeperCls: 'hd', theme: 'dark', title: 'Marché noir', bg: 'backgrounds/marche-noir.jpg',
+      keeper: asset('sprites/pokemon/kecleon-violet.png'), keeperCls: 'hd', theme: 'dark', title: 'Marché noir', bg: 'backgrounds/marche-noir.jpg', hero: asset(skinSprite(run.form.dex, run.skin)),
       bubble: 'Psst… Des capacités enchantées, introuvables ailleurs. Clique sur moi…',
       actions: '<button class="btn primary leave">Repartir</button>', carpet: open ? carpet : '',
     }), 'shop-screen shop-place');
