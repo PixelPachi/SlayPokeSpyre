@@ -94,7 +94,32 @@ export function unlockedCards(character: CharacterId, level: number): string[] {
   return Object.entries(table).filter(([l]) => Number(l) <= level).flatMap(([, ids]) => ids);
 }
 
-/** EXP d'une run : 10 par étage atteint, 25 par Pokémon dominant, 60 par gardien vaincu. */
-export function runExp(floor: number, elites: number, bosses: number): number {
-  return floor * 10 + elites * 25 + bosses * 60;
+/** Barème de l'EXP gagnée pendant une run. */
+export const EXP_TABLE = { etage: 10, combat: 5, dominant: 25, duel: 25, gardien: 60, dialga: 150, evenement: 5, shiny: 20, victoire: 200 };
+
+export interface ExpLine { label: string; count?: number; each?: number; amount: number }
+
+/** Détail ligne par ligne de l'EXP d'une run (affiché à l'écran de fin). */
+export function expBreakdown(r: {
+  floor: number; combatsWon: number; elitesDefeated: number; duelsWon: number; bossNames: string[];
+  eventsSeen: number; shiniesMet: number; relics: string[];
+}, victory: boolean): { lines: ExpLine[]; total: number } {
+  const T = EXP_TABLE;
+  const lines: ExpLine[] = [];
+  const add = (label: string, count: number, each: number) => { if (count > 0) lines.push({ label, count, each, amount: count * each }); };
+  add('Étages montés', r.floor, T.etage);
+  add('Combats gagnés', r.combatsWon, T.combat);
+  add('Pokémon dominants vaincus', r.elitesDefeated, T.dominant);
+  add('Duels gagnés', r.duelsWon, T.duel);
+  for (const n of r.bossNames) lines.push({ label: `Gardien vaincu : ${n}`, amount: /dialga/i.test(n) ? T.dialga : T.gardien });
+  add('Événements explorés', r.eventsSeen, T.evenement);
+  add('Pokémon chromatiques croisés', r.shiniesMet, T.shiny);
+  if (victory) lines.push({ label: 'Tour du Temps conquise !', amount: T.victoire });
+  let total = lines.reduce((s, l) => s + l.amount, 0);
+  if (r.relics.includes('oeuf-chance') && total > 0) {
+    const bonus = Math.floor(total * 0.5);
+    lines.push({ label: 'Œuf Chance (+50 %)', amount: bonus });
+    total += bonus;
+  }
+  return { lines, total };
 }

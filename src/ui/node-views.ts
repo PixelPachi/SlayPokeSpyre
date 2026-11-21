@@ -1,8 +1,9 @@
+import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
 import { cardDef } from '../data/cards';
-import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
+import { LEVEL_EXP, MAX_LEVEL, levelFor, type ExpLine, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
 import { EVENTS, type EventFight, type EventPick, type GameEvent } from '../data/events';
@@ -354,14 +355,12 @@ export function renderTreasure(root: HTMLElement, run: Run, done: Done): void {
 /** Fin de run : défaite ou gardien vaincu, avec l'EXP gagnée et les cartes débloquées. */
 export function renderRunEnd(
   root: HTMLElement, run: Run, victory: boolean,
-  xp: { exp: number; before: number; after: number; newCards: string[]; newRelics: string[]; total: number },
+  xp: { exp: number; lines: ExpLine[]; before: number; after: number; newCards: string[]; newRelics: string[]; total: number },
   onMenu: Done, onRetry: Done,
 ): void {
   const name = CHARACTERS[run.character].name;
-  const lvl = xp.after;
-  const cur = LEVEL_EXP[lvl - 1];
-  const next = lvl < MAX_LEVEL ? LEVEL_EXP[lvl] : null;
-  const pct = next ? Math.round(((xp.total - cur) / (next - cur)) * 100) : 100;
+  const startTotal = xp.total - xp.exp;
+  const startLvl = xp.before;
   root.innerHTML = `
     <div class="run-end ${victory ? 'win' : 'lose'}">
       <h1>${victory ? 'Dialga Primal est apaisé !' : 'Fin de la run'}</h1>
@@ -374,9 +373,15 @@ export function renderRunEnd(
         <div><b>${run.deck.length}</b><span>cartes dans le deck</span></div>
       </div>
       <div class="exp-box">
-        <div class="exp-line"><b>+${xp.exp} EXP</b> pour ${esc(name)} · niveau ${lvl}${xp.after > xp.before ? ' <span class="lvl-up">Niveau supérieur !</span>' : ''}</div>
-        <div class="exp-bar"><div style="width:${pct}%"></div></div>
-        <div class="exp-next">${next ? `${xp.total - cur} / ${next - cur} EXP avant le niveau ${lvl + 1}` : 'Niveau maximum atteint'}</div>
+        <div class="exp-detail">${xp.lines.map((l, i) => `
+          <div class="exp-row" style="--d:${i}">
+            <span>${esc(l.label)}${l.count !== undefined ? ` <em>× ${l.count}</em>` : ''}</span>
+            <b>+${l.amount}</b>
+          </div>`).join('') || '<div class="exp-row" style="--d:0"><span>Aucune EXP cette fois…</span><b>+0</b></div>'}
+        </div>
+        <div class="exp-line"><b class="exp-total">+0 EXP</b> pour ${esc(name)} · <span class="exp-lvl">niveau ${startLvl}</span> <span class="lvl-up" hidden>Niveau supérieur !</span></div>
+        <div class="exp-bar"><div class="exp-fill"></div></div>
+        <div class="exp-next"></div>
       </div>
       ${xp.newCards.length ? `
         <p class="unlock-title">Nouvelles capacités débloquées :</p>
@@ -391,7 +396,49 @@ export function renderRunEnd(
     </div>`;
   root.querySelector('.retry')!.addEventListener('click', onRetry);
   root.querySelector('.menu')!.addEventListener('click', onMenu);
-  if (xp.after > xp.before) showLevelUp(root, run.character, xp);
+  animateExp(root, xp.lines.length, startTotal, xp.total, () => { if (xp.after > xp.before) showLevelUp(root, run.character, xp); });
+}
+
+/** Barre d'EXP animée : les lignes apparaissent une à une, le total compte, puis la barre se remplit (niveau par niveau). */
+function animateExp(root: HTMLElement, nLines: number, from: number, to: number, done: () => void): void {
+  const fill = root.querySelector<HTMLElement>('.exp-fill')!;
+  const totalEl = root.querySelector<HTMLElement>('.exp-total')!;
+  const lvlEl = root.querySelector<HTMLElement>('.exp-lvl')!;
+  const upEl = root.querySelector<HTMLElement>('.lvl-up')!;
+  const nextEl = root.querySelector<HTMLElement>('.exp-next')!;
+  const show = (v: number) => {
+    const lvl = levelFor(v);
+    const cur = LEVEL_EXP[lvl - 1];
+    const next = lvl < MAX_LEVEL ? LEVEL_EXP[lvl] : null;
+    fill.style.width = `${next ? ((v - cur) / (next - cur)) * 100 : 100}%`;
+    lvlEl.textContent = `niveau ${lvl}`;
+    nextEl.textContent = next ? `${v - cur} / ${next - cur} EXP avant le niveau ${lvl + 1}` : 'Niveau maximum atteint';
+    return lvl;
+  };
+  let lvl = show(from);
+  const startDelay = 350 * Math.max(1, nLines) + 300;
+  const gain = to - from;
+  const dur = Math.min(3200, 900 + gain * 4);
+  setTimeout(() => {
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - k, 2);
+      const v = Math.round(from + gain * e);
+      totalEl.textContent = `+${v - from} EXP`;
+      const l = show(v);
+      if (l > lvl) {
+        lvl = l;
+        upEl.hidden = false;
+        upEl.classList.remove('pop'); void upEl.offsetWidth; upEl.classList.add('pop');
+        fill.parentElement!.classList.remove('flash'); void fill.offsetWidth; fill.parentElement!.classList.add('flash');
+        sfx('soin');
+      }
+      if (k < 1) requestAnimationFrame(step);
+      else setTimeout(done, 600);
+    };
+    requestAnimationFrame(step);
+  }, startDelay);
 }
 
 /** Écran « Niveau supérieur ! » : les capacités et objets débloqués, niveau par niveau, avec le design des cartes. */

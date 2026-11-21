@@ -101,6 +101,12 @@ export class Run {
   removals = 0; // nombre de cartes oubliées au Marché Kecleon (le prix monte)
   elitesDefeated = 0;
   bossesDefeated = 0;
+  /** Pour le détail de l'EXP en fin de run. */
+  combatsWon = 0;
+  duelsWon = 0;
+  bossNames: string[] = [];
+  eventsSeen = 0;
+  shiniesMet = 0;
   /** Objets tenus (le premier est l'objet de départ). */
   relics: string[] = [];
   private nextUid = 1;

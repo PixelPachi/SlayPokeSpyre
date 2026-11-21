@@ -12,7 +12,8 @@ import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
 import { characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
-import { runExp } from './data/unlocks';
+import { expBreakdown } from './data/unlocks';
+import { ENEMY_DEFS } from './data/enemies';
 import { BERRY_DEFS } from './data/berries';
 import type { EventFight } from './data/events';
 import { berrySlots } from './ui/run-ui';
@@ -212,6 +213,11 @@ function startRun(character: CharacterId): void {
     return;
   }
   if (params.has('boutique')) { clear(); return renderShop(screen, run, () => showMap(run), (onWin) => kecleonFight(run, onWin)); }
+  // Pour tester l'écran de fin : ?fin=victoire ou ?fin=defaite (avec des statistiques d'exemple)
+  if (params.get('fin')) {
+    run.act = 3; Object.assign(run, { combatsWon: 14, elitesDefeated: 3, duelsWon: 1, eventsSeen: 6, shiniesMet: 1, bossesDefeated: 3, bossNames: ['Dardargnan', 'Camérupt', 'Rayquaza'] });
+    return endRun(run, params.get('fin') === 'victoire');
+  }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
   if (run.act >= LAST_ACT) return showSummit(run);
   showMap(run);
@@ -245,6 +251,7 @@ function enterNode(run: Run, row: number, col: number): void {
       case 'boutique':
         return renderShop(screen, run, back, (onWin) => kecleonFight(run, onWin));
       case 'evenement':
+        run.eventsSeen++;
         return renderEvent(screen, run, back, undefined, (f) => duel(run, f));
       case 'tresor':
         return renderTreasure(screen, run, back);
@@ -271,9 +278,12 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (!r.victory) return endRun(run, false);
       if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
       if (run.relics.includes('grelot-coque')) run.heal(6);
+      run.shiniesMet += r.shinies;
       if (type === 'elite') run.elitesDefeated++;
+      if (type === 'combat') run.combatsWon++;
       if (type === 'boss') {
         run.bossesDefeated++;
+        run.bossNames.push(ENEMY_DEFS[enemies[0]]?.name ?? 'Gardien');
         if (run.act >= LAST_ACT) return endRun(run, true); // Dialga Primal est apaisé
         const last = run.act >= LAST_ACT;
         return renderReward(
@@ -336,6 +346,8 @@ function duel(run: Run, f: EventFight): void {
       if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
       if (!r.victory) return endRun(run, false);
       if (r.fled) return showMap(run);
+      run.duelsWon++;
+      run.shiniesMet += r.shinies;
       renderReward(
         screen, run,
         { money: run.moneyReward('elite', r.shinies), cards: run.cardChoices('boss'), label: 'Duel', title: 'Duel remporté !', relic: f.relic ? run.rollRelics(1)[0] : undefined },
@@ -368,12 +380,11 @@ function summitStep(run: Run): void {
 function endRun(run: Run, victory: boolean): void {
   clearRun();
   activeRun = null;
-  const base = runExp(run.floor, run.elitesDefeated, run.bossesDefeated);
-  const exp = run.relics.includes('oeuf-chance') ? Math.floor(base * 1.5) : base;
+  const { lines, total: exp } = expBreakdown(run, victory);
   const result = grantExp(save, run.character, exp);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory);
   if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
-  renderRunEnd(screen, run, victory, { exp, ...result, total: save.exp[run.character] ?? 0 }, title, () => startRun(run.character));
+  renderRunEnd(screen, run, victory, { exp, lines, ...result, total: save.exp[run.character] ?? 0 }, title, () => startRun(run.character));
 }
 
 // Les paramètres de test (?tous, ?seed, ?acte, ?evenement, ?boutique) mènent directement au choix du Pokémon

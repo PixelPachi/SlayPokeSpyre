@@ -972,3 +972,15 @@ describe('météo et terrains', () => {
     expect(r.player.hp).toBe(33);
   });
 });
+
+describe('EXP de fin de run', () => {
+  it('détaille chaque source et additionne', async () => {
+    const { expBreakdown } = await import('../src/data/unlocks');
+    const r = { floor: 20, combatsWon: 8, elitesDefeated: 2, duelsWon: 1, bossNames: ['Dardargnan', 'Camérupt'], eventsSeen: 4, shiniesMet: 1, relics: ['oeuf-chance'] };
+    const { lines, total } = expBreakdown(r, false);
+    expect(lines.find((l) => l.label === 'Étages montés')!.amount).toBe(200);
+    expect(lines.filter((l) => l.label.startsWith('Gardien vaincu')).length).toBe(2);
+    const raw = 200 + 40 + 50 + 25 + 120 + 20 + 20;
+    expect(total).toBe(raw + Math.floor(raw / 2));
+  });
+});
