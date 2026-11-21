@@ -1,4 +1,4 @@
-import { skinSprite } from '../data/skins';
+import { babySprite, skinSprite } from '../data/skins';
 import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
 import type { Run } from '../core/run';
@@ -573,7 +573,7 @@ function showLevelUp(
 function evolutionHtml(run: Run): string {
   const evo = run.justEvolved;
   if (run.character === 'kangourex' && run.act <= 4) {
-    return `<div class="act-evo"><img src="${asset('sprites/pokemon/bebe-kangourex-v2.png')}" alt=""><p>Le Bébé grandit : <b>+3 PV max</b> pour lui à chaque combat.</p></div>`;
+    return `<div class="act-evo"><img src="${asset(babySprite(run.skin))}" alt=""><p>Le Bébé grandit : <b>+3 PV max</b> pour lui à chaque combat.</p></div>`;
   }
   if (!evo) return '';
   const gain = CHARACTERS[run.character].evolutions!.find((e) => e.act === run.act)!.hp;

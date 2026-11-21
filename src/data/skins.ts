@@ -14,6 +14,11 @@ export interface SkinDef {
   bosses?: string[];
   /** Formes qui ont un sprite pour ce skin (n° du Pokédex). */
   dex?: number[];
+  /** Le Bébé de Kangourex a son propre sprite pour ce skin (skins/<id>/bebe.png). */
+  baby?: boolean;
+  /** Prévu pour plus tard : le skin remplace le deck de départ et/ou l'objet tenu de départ. */
+  deck?: string[];
+  relic?: string;
 }
 
 const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id: 'shiny', name: 'Chromatique', stat, goal, goalText });
@@ -21,20 +26,37 @@ const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id
 // Même objectif pour tous : vaincre 5 Pokémon chromatiques en jouant ce Pokémon (cumulé sur toutes ses runs).
 const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouant ce Pokémon');
 
+// Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.
+const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): SkinDef => ({
+  id: 'primordial', name: 'Primordial', stat: 'bosses', goal: 1, bosses: ['dialga-primal'], dex,
+  goalText: `Vaincre Dialga Primal en jouant ${name}`, ...extra,
+});
+
 export const SKINS: Record<CharacterId, SkinDef[]> = {
   riolu: [SHINY_GOAL, {
     id: 'magma', name: 'Magma', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
     goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu',
-  }],
-  vipelierre: [SHINY_GOAL],
-  kangourex: [SHINY_GOAL],
-  caninos: [SHINY_GOAL],
+  }, primordial('Riolu', [447, 448, 10059])],
+  vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497])],
+  kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
+  caninos: [SHINY_GOAL, primordial('Caninos', [58, 59])],
   mew: [SHINY_GOAL],
 } as Record<CharacterId, SkinDef[]>;
 
 /** Chemin du sprite de combat selon le skin. */
 export function skinSprite(dex: number, skin?: string): string {
   if (skin === 'shiny') return `sprites/pokemon/shiny/${dex}.png`;
-  if (skin) return `sprites/pokemon/skins/${skin}/${dex}.png`;
+  // Une forme sans sprite pour ce skin (ex. Méga-Kangourex primordial) garde son sprite normal
+  if (skin && Object.values(SKINS).flat().some((k) => k.id === skin && (!k.dex || k.dex.includes(dex)))) return `sprites/pokemon/skins/${skin}/${dex}.png`;
   return `sprites/pokemon/front/${dex}.png`;
+}
+
+/** Sprite du Bébé de Kangourex selon le skin. */
+export function babySprite(skin?: string): string {
+  return skin && SKINS.kangourex?.some((k) => k.id === skin && k.baby) ? `sprites/pokemon/skins/${skin}/bebe.png` : 'sprites/pokemon/bebe-kangourex-v2.png';
+}
+
+/** Skin d'un personnage (pour appliquer son deck / objet de départ). */
+export function skinDef(c: CharacterId, skin?: string): SkinDef | undefined {
+  return skin ? SKINS[c]?.find((k) => k.id === skin) : undefined;
 }

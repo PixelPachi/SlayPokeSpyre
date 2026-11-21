@@ -1,3 +1,4 @@
+import { skinDef } from './data/skins';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
 import { cycleSound, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
@@ -204,13 +205,14 @@ function menu(): void {
 function startRun(character: CharacterId): void {
   const params = new URLSearchParams(location.search);
   const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character), characterRelics(save, character));
-  run.skin = equippedSkin(save, character);
+  run.applySkin(equippedSkin(save, character), skinDef(character, equippedSkin(save, character)));
   activeRun = run;
   // Pour tester : ?acte=2 commence directement à l'acte 2
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
   // Pour tester : ?zone=tour-lavanville choisit la zone de l'acte en cours
+  if (params.get('skin')) run.applySkin(params.get('skin')!, skinDef(character, params.get('skin')!)); // test : ?skin=primordial
   if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
   // Pour tester : ?cartes=vip-aromatherapie,vip-don-naturel ajoute des cartes au deck
   for (const id of (params.get('cartes') ?? '').split(',').filter(Boolean)) run.addCard(id);

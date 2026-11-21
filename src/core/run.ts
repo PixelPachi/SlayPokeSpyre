@@ -125,6 +125,14 @@ export class Run {
   private nextUid = 1;
   private rareBonus = 0; // la chance de rare monte à chaque récompense sans rare
 
+  /** Applique le skin équipé : sprite, et (plus tard) deck / objet tenu de départ propres au skin. */
+  applySkin(skin: string | undefined, def?: { deck?: string[]; relic?: string }): void {
+    this.skin = skin;
+    const ch = CHARACTERS[this.character];
+    if (def?.deck?.length) { this.deck = []; for (const id of def.deck) this.addCard(id); }
+    if (def?.relic) this.relics = [def.relic, ...this.relics.filter((r) => r !== ch.starterRelic)];
+  }
+
   /** Cartes débloquées par l'EXP du Pokémon (undefined = toutes). */
   constructor(
     readonly seed: string, character: CharacterId, readonly unlocked?: string[],
