@@ -26,7 +26,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const art = enemy ? artNoPokemon(d.name) : artUrl(d.artName ?? d.name, d.character);
   const orb = orbUrl(d.character);
   return `
-    <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+    <div class="card ${d.enchant ? 'enchanted' : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-window">

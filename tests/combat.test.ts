@@ -1033,3 +1033,22 @@ describe('pension et coffres', () => {
     for (let i = 0; i < 30; i++) expect(new Run(`K${i}`, 'riolu').map.flat().filter((n) => n.type === 'coffre').length).toBeLessThanOrEqual(2);
   });
 });
+
+describe('« ? » surprises et Marché noir', () => {
+  it('un « ? » peut cacher un combat, de plus en plus souvent', async () => {
+    const { Run } = await import('../src/core/run');
+    const r = new Run('Q', 'riolu');
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) seen.add(r.rollMystery());
+    for (const k of ['combat', 'tresor', 'marche-noir', 'evenement']) expect(seen.has(k), k).toBe(true);
+  });
+  it('une carte enchantée garde son nom et gagne son bonus', async () => {
+    const { cardDef, enchantId } = await import('../src/data/cards');
+    const base = cardDef('ruse');
+    const f = cardDef(enchantId('force', 'ruse'));
+    expect(f.name).toBe(base.name);
+    expect((f.effects[0] as { amount: number }).amount).toBe((base.effects[0] as { amount: number }).amount + 3);
+    expect(cardDef(enchantId('vif', 'aurasphere')).cost).toBe(cardDef('aurasphere').cost - 1);
+    expect(cardDef(enchantId('vif', 'aurasphere'), true).name.endsWith('+')).toBe(true);
+  });
+});

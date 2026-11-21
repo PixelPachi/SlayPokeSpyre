@@ -105,6 +105,8 @@ export interface CardDef {
   artName?: string;
   /** Carte fusionnée : les deux cartes d'origine. */
   fusion?: [string, string];
+  /** Enchantement du Marché noir (id). */
+  enchant?: string;
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

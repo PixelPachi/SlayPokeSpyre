@@ -1,7 +1,7 @@
 // Nouveaux nœuds de la carte : Coffre mystère, Pension Pokémon (fusion de cartes), Marchand de CT.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
-import { canFuse, cardDef, fusionId } from '../data/cards';
+import { ENCHANTS, canFuse, cardDef, enchantId, fusionId } from '../data/cards';
 import { BERRY_DEFS } from '../data/berries';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
@@ -146,6 +146,58 @@ export function renderTmShop(root: HTMLElement, run: Run, done: Done): void {
         </div>`;
       }).join('')}</div>
       <div class="shop-actions"><button class="btn leave">Repartir</button></div>`, 'shop-screen');
+    bindDeck(root, run);
+    root.querySelector('.leave')!.addEventListener('click', done);
+    root.querySelectorAll<HTMLElement>('.shop-item').forEach((el) => el.addEventListener('click', () => {
+      const o = offers[Number(el.dataset.i)];
+      if (o.sold || run.money < o.price) return;
+      run.money -= o.price;
+      run.addCard(o.id);
+      o.sold = true;
+      sfx('baie');
+      draw();
+    }));
+  };
+  draw();
+}
+
+/** Annonce d'un « ? » qui cache un combat, un trésor ou le Marché noir. */
+export function mysteryScreen(root: HTMLElement, run: Run, title: string, text: string, go: Done): void {
+  root.innerHTML = shell(run, 'Événement', `
+    <div class="mystery-q">?</div>
+    <h1 class="node-title">${esc(title)}</h1>
+    <p class="node-sub">${esc(text)}</p>
+    <button class="btn primary go">Continuer</button>`, 'event');
+  bindDeck(root, run);
+  root.querySelector('.go')!.addEventListener('click', go);
+}
+
+/** Marché noir (dans les « ? ») : un Kecleon violet vend 3 cartes enchantées, plus chères. */
+export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void {
+  const label = 'Marché noir';
+  const keys = Object.keys(ENCHANTS);
+  const offers = run.cardChoices('boutique', 3).map((id) => {
+    const base = cardDef(id);
+    const ok = keys.filter((k) => ENCHANTS[k].ok(base));
+    const k = run.rng.pick(ok.length ? ok : ['garde']);
+    return { id: enchantId(k, id), k, price: Math.round(cardPrice(id) * 1.6), sold: false };
+  });
+  const draw = () => {
+    root.innerHTML = shell(run, label, `
+      <div class="kecleon-head black-market">
+        <img class="kecleon purple" src="${asset('sprites/pokemon/front/352.png')}" alt="Kecleon violet">
+        <div>
+          <h1 class="node-title">Marché noir</h1>
+          <p class="node-sub">« Psst… Des capacités <b>enchantées</b>, introuvables ailleurs. C’est plus cher, mais ça vaut le détour… »</p>
+        </div>
+      </div>
+      <div class="card-row shop">${offers.map((o, i) => `
+        <div class="shop-item ${o.sold ? 'sold' : ''} ${!o.sold && run.money < o.price ? 'poor' : ''}" data-i="${i}">
+          ${renderCard(cardDef(o.id))}
+          <div class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</div>
+          <small class="ench-tag">✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
+        </div>`).join('')}</div>
+      <div class="shop-actions"><button class="btn leave">Repartir</button></div>`, 'shop-screen black-market-screen');
     bindDeck(root, run);
     root.querySelector('.leave')!.addEventListener('click', done);
     root.querySelectorAll<HTMLElement>('.shop-item').forEach((el) => el.addEventListener('click', () => {

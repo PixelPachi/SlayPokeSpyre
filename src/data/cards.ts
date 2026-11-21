@@ -118,7 +118,7 @@ export function fusionId(a: string, upA: boolean, b: string, upB: boolean): stri
 /** Deux cartes peuvent-elles fusionner ? (pas de talent, de malédiction, ni de cibles incompatibles) */
 export function canFuse(a: CardDef, b: CardDef): boolean {
   const ok = (d: CardDef) => (d.category === 'attaque' || d.category === 'technique') && !d.keywords?.includes('injouable')
-    && !d.onDraw && !d.fusion && !d.requires;
+    && !d.onDraw && !d.fusion && !d.requires && !d.enchant;
   if (!ok(a) || !ok(b)) return false;
   const t = new Set([a.target, b.target]);
   return !(t.has('ennemi') && t.has('tous'));
@@ -143,7 +143,39 @@ function fusionDef(defId: string, upgraded: boolean): CardDef {
   };
 }
 
+/** Enchantements du Marché noir : un bonus ajouté à une carte. */
+export const ENCHANTS: Record<string, { name: string; text: string; ok: (d: CardDef) => boolean; apply: (d: CardDef) => CardDef }> = {
+  vif: { name: 'Vif', text: 'coûte 1 PA de moins', ok: (d) => d.cost > 0, apply: (d) => ({ ...d, cost: d.cost - 1 }) },
+  force: {
+    name: 'Puissant', text: '+3 dégâts', ok: (d) => d.effects.some((e) => e.kind === 'degats'),
+    apply: (d) => {
+      let done = false;
+      return { ...d, effects: d.effects.map((e) => (!done && e.kind === 'degats' ? ((done = true), { ...e, amount: e.amount + 3 }) : e)) };
+    },
+  },
+  garde: { name: 'Gardien', text: '+4 Protection', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'protection', amount: 4 }] }) },
+  savoir: { name: 'Savant', text: 'pioche 1 carte', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'pioche', amount: 1 }] }) },
+  venin: {
+    name: 'Venimeux', text: '+2 Poison', ok: (d) => d.target !== 'soi',
+    apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'poison', stacks: 2, on: d.target === 'tous' ? 'tous' : 'cible' }] }),
+  },
+  eternel: {
+    name: 'Éternel', text: 'reste en main à la fin du tour', ok: (d) => !d.keywords?.includes('conservee'),
+    apply: (d) => ({ ...d, keywords: [...(d.keywords ?? []), 'conservee'] }),
+  },
+};
+
+export function enchantId(enchant: string, defId: string): string {
+  return `ench:${enchant}:${defId}`;
+}
+
 export function cardDef(defId: string, upgraded = false): CardDef {
+  if (defId.startsWith('ench:')) {
+    const [, k, ...rest] = defId.split(':');
+    const inner = cardDef(rest.join(':'), upgraded);
+    const e = ENCHANTS[k];
+    return e ? { ...e.apply(inner), id: defId, name: inner.name, artName: inner.artName ?? inner.name.replace(/\+$/, ''), enchant: k } : inner;
+  }
   if (defId.startsWith('fusion:')) return fusionDef(defId, upgraded);
   const base = CARD_DEFS[defId];
   if (!base) throw new Error(`Carte inconnue : ${defId}`);

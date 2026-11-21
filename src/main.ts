@@ -1,4 +1,4 @@
-import { renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
+import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
 import { cycleSound, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
@@ -227,6 +227,7 @@ function startRun(character: CharacterId): void {
   // Pour tester : ?noeud=coffre | pension | ct
   if (params.get('noeud') === 'coffre') { clear(); return renderChest(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'pension') { clear(); return renderPension(screen, run, () => showMap(run)); }
+  if (params.get('noeud') === 'marche-noir') { clear(); return renderBlackMarket(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'ct') { clear(); return renderTmShop(screen, run, () => showMap(run)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
   if (run.act >= LAST_ACT) return showSummit(run);
@@ -260,9 +261,14 @@ function enterNode(run: Run, row: number, col: number): void {
         return renderCentre(screen, run, back);
       case 'boutique':
         return renderShop(screen, run, back, (onWin) => kecleonFight(run, onWin));
-      case 'evenement':
+      case 'evenement': {
+        const q = run.rollMystery();
+        if (q === 'combat') return mysteryIntro(run, 'Une embuscade !', 'Des Pokémon sauvages surgissent des fourrés !', () => fight(run, 'combat'));
+        if (q === 'tresor') return mysteryIntro(run, 'Une trouvaille !', 'Quelque chose brille derrière un rocher…', () => renderTreasure(screen, run, back));
+        if (q === 'marche-noir') return mysteryIntro(run, 'Une échoppe dans l’ombre…', 'Un Kecleon violet te fait signe depuis une ruelle.', () => renderBlackMarket(screen, run, back));
         run.eventsSeen++;
         return renderEvent(screen, run, back, undefined, (f) => duel(run, f));
+      }
       case 'tresor':
         return renderTreasure(screen, run, back);
       case 'coffre':
@@ -275,6 +281,12 @@ function enterNode(run: Run, row: number, col: number): void {
         return fight(run, 'boss');
     }
   }
+}
+
+/** Petit écran d'annonce quand un « ? » cache autre chose qu'un événement. */
+function mysteryIntro(run: Run, title: string, text: string, go: () => void): void {
+  clear();
+  mysteryScreen(screen, run, title, text, go);
 }
 
 function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {

@@ -112,6 +112,10 @@ export class Run {
   duelsWon = 0;
   bossNames: string[] = [];
   bossIds: string[] = [];
+  /** Chances qu'un « ? » cache autre chose qu'un événement (augmentent à chaque fois que ça n'arrive pas). */
+  qFight = 0.1;
+  qTreasure = 0.02;
+  qShop = 0.03;
   /** Ennemis du dernier combat (pour l'historique). */
   lastEnemies: string[] = [];
   eventsSeen = 0;
@@ -245,6 +249,19 @@ export class Run {
   moveTo(row: number, col: number): void {
     this.pos = { row, col };
     this.visited.push(`${row}-${col}`);
+  }
+
+  /** Ce que cache un nœud « ? » : un combat surprise, un trésor, le Marché noir… ou un vrai événement. */
+  rollMystery(): 'combat' | 'tresor' | 'marche-noir' | 'evenement' {
+    const x = this.rng.next();
+    let out: 'combat' | 'tresor' | 'marche-noir' | 'evenement' = 'evenement';
+    if (x < this.qFight) out = 'combat';
+    else if (x < this.qFight + this.qTreasure) out = 'tresor';
+    else if (x < this.qFight + this.qTreasure + this.qShop) out = 'marche-noir';
+    this.qFight = out === 'combat' ? 0.1 : Math.min(0.6, this.qFight + 0.1);
+    this.qTreasure = out === 'tresor' ? 0.02 : Math.min(0.2, this.qTreasure + 0.02);
+    this.qShop = out === 'marche-noir' ? 0.03 : Math.min(0.2, this.qShop + 0.03);
+    return out;
   }
 
   addCard(defId: string, upgraded = false): Card {
