@@ -47,14 +47,18 @@ const CHART: Record<PokeType, Row> = {
 /** Multiplicateur d'une attaque de type `attack` contre un Pokémon de types `defender`. */
 export function typeMultiplier(attack: PokeType, defender: readonly PokeType[]): number {
   const row = CHART[attack];
-  let m = 1;
+  // Comme dans les jeux, une faiblesse et une résistance s'annulent (×2 × ½ = ×1) :
+  // on compte les faiblesses (+1) et les résistances (−1), puis on applique le bilan.
+  let net = 0;
+  let immune = false;
   for (const t of defender) {
-    if (row.imm?.includes(t)) m *= IMMUNE;
-    else if (row.se?.includes(t)) m *= SUPER_EFFECTIVE;
-    else if (row.nve?.includes(t)) m *= NOT_VERY_EFFECTIVE;
+    if (row.imm?.includes(t)) immune = true;
+    else if (row.se?.includes(t)) net++;
+    else if (row.nve?.includes(t)) net--;
   }
+  let m = net > 0 ? SUPER_EFFECTIVE ** net : net < 0 ? NOT_VERY_EFFECTIVE ** -net : 1;
   // Avec une immunité, on garde toujours au moins la moitié des dégâts (pas de combat bloqué)
-  if (defender.some((t) => row.imm?.includes(t))) m = Math.max(m, IMMUNE);
+  if (immune) m = Math.max(IMMUNE, m * IMMUNE);
   return m;
 }
 

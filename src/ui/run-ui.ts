@@ -88,14 +88,38 @@ export function openDeckOverlay(host: HTMLElement, o: DeckPickOptions, run: Run)
     <div class="deck-panel">
       <h2>${esc(o.title)}</h2>
       <div class="deck-grid">
-        ${cards.map((c) => renderCard(cardDef(c.defId, c.upgraded || !!o.upgradePreview), { uid: c.uid, classes: o.onPick ? 'pickable' : '' })).join('')}
+        ${cards.map((c) => renderCard(cardDef(c.defId, c.upgraded), { uid: c.uid, classes: o.onPick ? 'pickable' : '' })).join('')}
       </div>
       <button class="btn close">${esc(o.cancelLabel ?? 'Fermer')}</button>
     </div>`;
   host.appendChild(el);
   el.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement;
+    // Amélioration : on montre la carte de base à gauche et sa version améliorée à droite avant de confirmer
+    if (t.closest('.up-confirm')) {
+      const uid = Number((t.closest('.up-compare') as HTMLElement).dataset.uid);
+      el.remove();
+      return o.onPick?.(uid);
+    }
+    if (t.closest('.up-other')) { el.querySelector('.up-compare')?.remove(); return; }
+    if (t.closest('.up-compare')) return;
     const card = t.closest<HTMLElement>('.card');
+    if (card && o.onPick && o.upgradePreview) {
+      const c = cards.find((x) => x.uid === Number(card.dataset.uid))!;
+      el.querySelector('.up-compare')?.remove();
+      const box = document.createElement('div');
+      box.className = 'up-compare';
+      box.dataset.uid = String(c.uid);
+      box.innerHTML = `<div class="up-title">Améliorer cette carte ?</div>
+        <div class="up-row">
+          <div class="up-col"><small>Actuelle</small>${renderCard(cardDef(c.defId, false))}</div>
+          <div class="up-arrow">➜</div>
+          <div class="up-col"><small>Améliorée</small>${renderCard(cardDef(c.defId, true))}</div>
+        </div>
+        <div class="up-actions"><button class="btn primary up-confirm">Améliorer</button><button class="btn up-other">Choisir une autre carte</button></div>`;
+      el.appendChild(box);
+      return;
+    }
     if (card && o.onPick) {
       el.remove();
       return o.onPick(Number(card.dataset.uid));

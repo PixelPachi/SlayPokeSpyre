@@ -1314,3 +1314,24 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .status { cursor: help; }
 /* Mots-clés de statut dans le texte des cartes */
 .card-text .kw { text-decoration: underline dotted; text-underline-offset: 2px; cursor: help; }
+
+/* Amélioration : carte actuelle à gauche, améliorée à droite */
+.up-compare { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: rgba(6, 9, 18, 0.88); }
+.up-title { font-family: var(--font-title); font-size: 32px; color: var(--gold); text-shadow: 0 3px 0 #000; }
+.up-row { display: flex; align-items: center; gap: 36px; }
+.up-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.up-col small { font-weight: 900; color: #c9d4ea; letter-spacing: 1px; text-transform: uppercase; }
+.up-col .card { transform: scale(1.35); margin: 50px 30px; cursor: default; }
+.up-col:last-child .card .card-inner { box-shadow: 0 0 0 3px #7fe08a, 0 0 24px #7fe08a88; }
+.up-arrow { font-size: 44px; color: #7fe08a; text-shadow: 0 3px 0 #000; }
+.up-actions { display: flex; gap: 14px; }
+
+/* Cartes obtenues pendant un événement */
+.event-gained { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 6px 0 10px; }
+.event-gained small { font-weight: 900; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
+.event-gained-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.event-gained .gained { position: relative; width: 105px; height: 147px; }
+.event-gained .gained .card { transform: scale(0.7); transform-origin: top left; margin: 0; cursor: default; animation: gainedIn 0.4s ease-out both; }
+.event-gained .gained-n { position: absolute; right: -4px; top: -6px; background: var(--gold); color: #1b1b1b; font-weight: 900; border-radius: 10px; padding: 1px 7px; z-index: 3; }
+@keyframes gainedIn { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
+.welcome-choices .event-gained { align-items: flex-start; }
