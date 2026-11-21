@@ -3,6 +3,16 @@
 
 import type { PokeType } from '../core/types';
 
+/** Musiques enregistrées (fichiers MP3) qui remplacent la musique générée pour certains combats. */
+const FILE_TRACKS: Record<string, string> = { dialga: 'music/dialga.mp3' };
+let fileAudio: HTMLAudioElement | null = null;
+let fileTrack: string | null = null;
+const fileVolume = () => (mode === 'tout' ? 0.5 : 0);
+function stopFile(): void {
+  if (fileAudio) { fileAudio.pause(); fileAudio = null; }
+  fileTrack = null;
+}
+
 type Wave = OscillatorType;
 
 interface Theme {
@@ -113,6 +123,7 @@ function ensure(): AudioContext | null {
 }
 
 function applyVolumes(): void {
+  if (fileAudio) fileAudio.volume = fileVolume();
   if (!ctx) return;
   musicBus.gain.setTargetAtTime(mode === 'tout' ? 0.16 * fade : 0, ctx.currentTime, 0.05);
   sfxBus.gain.setTargetAtTime(mode === 'muet' ? 0 : 0.42, ctx.currentTime, 0.05);
@@ -311,6 +322,20 @@ function tick(): void {
 
 /** Joue le thème (ne recommence pas s'il est déjà en cours). */
 export function playTheme(id: string): void {
+  if (FILE_TRACKS[id]) {
+    // Musique enregistrée (ex. combat final contre Dialga) : la musique générée s'arrête
+    if (fileTrack === id && fileAudio) return;
+    stopFile();
+    if (song) { fade = 0; applyVolumes(); song = null; }
+    current = id;
+    fileTrack = id;
+    fileAudio = new Audio(`${import.meta.env.BASE_URL}${FILE_TRACKS[id]}`);
+    fileAudio.loop = true;
+    fileAudio.volume = fileVolume();
+    fileAudio.play().catch(() => { pending = id; current = null; fileTrack = null; fileAudio = null; });
+    return;
+  }
+  stopFile();
   if (!THEMES[id]) id = 'titre';
   if (id === current && song) return;
   const c = ensure();
@@ -333,6 +358,7 @@ export function playTheme(id: string): void {
 }
 
 export function stopMusic(): void {
+  stopFile();
   song = null;
   current = null;
 }
