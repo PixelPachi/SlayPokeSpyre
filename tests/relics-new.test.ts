@@ -69,11 +69,12 @@ describe('nouveaux objets tenus', () => {
     (evolved as unknown as { startPlayerTurn: () => void }).startPlayerTurn();
     expect(evolved.player.block).toBe(0);
   });
-  it('Boue Noire : 2 PV en fin de tour ; Encens Fleur : soin → Protection', () => {
+  it('Boue Noire : le Poison soigne au lieu de blesser ; Encens Fleur : soin → Protection', () => {
     const c = start('riolu', ['boue-noire'], ['chenipan']);
-    c.player.hp = 30; c.player.block = 999;
-    c.endPlayerTurn();
-    expect(c.player.hp).toBe(32);
+    c.player.hp = 30; c.player.statuses.poison = 4;
+    (c as unknown as { startPlayerTurn: () => void }).startPlayerTurn();
+    expect(c.player.hp).toBe(34);
+    expect(c.player.statuses.poison).toBe(3);
     const v = start('vipelierre', ['encens-fleur'], ['chenipan']);
     v.player.hp = 30; v.player.block = 0;
     (v as unknown as { healPlayer: (n: number) => void }).healPlayer(4);

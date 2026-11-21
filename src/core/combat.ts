@@ -524,7 +524,6 @@ export class Combat {
       this.events.push({ type: 'hp-loss', target: 'player', amount: Math.min(2, this.player.hp), source: 'carte' });
       this.applyHpLoss(this.player, 'player', 2);
     }
-    if (this.has('boue-noire') && this.player.hp > 0 && this.player.hp < this.player.maxHp) this.relicFired('boue-noire', () => this.healPlayer(2));
     const fam = this.player.familiar;
     if (fam && fam.hp > 0) this.familiarAttack((fam.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0));
     if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
@@ -1335,6 +1334,13 @@ export class Combat {
     for (const s of DOTS) {
       const n = f.statuses[s] ?? 0;
       if (n <= 0 || f.hp <= 0) continue;
+      // Boue Noire : le Poison que tu subis te soigne au lieu de te blesser
+      if (s === 'poison' && who === 'player' && this.has('boue-noire')) {
+        this.relicFired('boue-noire', () => this.healPlayer(n));
+        if (this.bossAlive('venin-tenace')) continue;
+        if (n - 1 <= 0) delete f.statuses[s]; else f.statuses[s] = n - 1;
+        continue;
+      }
       this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0), s);
       if (s === 'vampigraine' && who !== 'player') {
         this.healPlayer(Math.floor(n / 2));
