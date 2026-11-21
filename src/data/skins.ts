@@ -14,12 +14,15 @@ export interface SkinDef {
 
 const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id: 'shiny', name: 'Chromatique', stat, goal, goalText });
 
+// Même objectif pour tous : vaincre 5 Pokémon chromatiques en jouant ce Pokémon (cumulé sur toutes ses runs).
+const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouant ce Pokémon');
+
 export const SKINS: Record<CharacterId, SkinDef[]> = {
-  riolu: [shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques')],
-  vipelierre: [shiny('elites', 15, 'Vaincre 15 Pokémon dominants')],
-  kangourex: [shiny('bosses', 6, 'Vaincre 6 gardiens')],
-  caninos: [shiny('combats', 60, 'Gagner 60 combats')],
-  mew: [shiny('wins', 1, 'Conquérir la Tour du Temps')],
+  riolu: [SHINY_GOAL],
+  vipelierre: [SHINY_GOAL],
+  kangourex: [SHINY_GOAL],
+  caninos: [SHINY_GOAL],
+  mew: [SHINY_GOAL],
 } as Record<CharacterId, SkinDef[]>;
 
 /** Chemin du sprite de combat selon le skin. */
