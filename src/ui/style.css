@@ -137,7 +137,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
   /* Fond de la zone (image Gemini) par-dessus un dégradé de secours aux couleurs de la zone */
   background:
     linear-gradient(transparent 62%, rgba(5, 8, 6, 0.75) 100%),
-    var(--bg, none) center bottom 70px / auto 140% no-repeat, /* agrandi et calé en bas : les plateformes du décor arrivent sous les Pokémon */
+    var(--bg, none) var(--bgpos, center) / var(--bgsize, cover) no-repeat, /* agrandi et calé en bas : les plateformes du décor arrivent sous les Pokémon */
     radial-gradient(ellipse 160% 62% at 50% 100%, var(--ground, #4a7a2f) 0, color-mix(in srgb, var(--ground, #4a7a2f) 70%, #000) 70%, transparent 71%),
     radial-gradient(ellipse at 50% 15%, var(--sky, #a9dcaa) 0, color-mix(in srgb, var(--sky, #a9dcaa) 55%, var(--shade, #163322)) 30%, var(--shade, #163322) 75%);
   background-color: var(--shade, #24452f);
@@ -1144,6 +1144,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .shop-keeper { position: absolute; right: 7%; bottom: 14%; background: none; border: 0; cursor: pointer; padding: 0; }
 .shop-keeper img { width: 300px; height: 300px; image-rendering: pixelated; filter: drop-shadow(0 10px 8px #0008); transition: transform 0.15s; }
 .shop-keeper:hover img { transform: scale(1.06); filter: drop-shadow(0 0 16px #ffd76a) drop-shadow(0 10px 8px #0008); }
+.shop-keeper.hd img { image-rendering: auto; width: 260px; height: 260px; }
 .shop-keeper.purple img { filter: hue-rotate(150deg) saturate(1.4) brightness(0.9) drop-shadow(0 0 14px #b26bff88); }
 .shop-bubble { position: absolute; right: 70%; top: 10%; width: 230px; padding: 10px 14px; border-radius: 14px; background: #fffbea; color: #2a1a08; font-weight: 800; font-size: 15px; text-align: left;
   border: 3px solid #2a1606; box-shadow: 0 4px 0 #0006; animation: bubbleBob 2.6s ease-in-out infinite; }
