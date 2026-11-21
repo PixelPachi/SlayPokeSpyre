@@ -90,6 +90,7 @@ export class CombatView {
   // ——— Rendu ———
 
   private endSfx = false;
+  private lastAura = -1;
 
   private render(): void {
     const c = this.combat;
@@ -126,6 +127,9 @@ export class CombatView {
         <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : ${p.energy} sur ${p.maxEnergy}. Chaque carte coûte des PA ; ils se rechargent à chaque tour.">
           <span class="energy-num">${p.energy}</span>
         </div>
+        ${p.character === 'riolu' || p.character === 'mew' ? `<div class="aura-counter ${p.aura >= 25 ? 'high' : ''} ${p.aura !== this.lastAura ? 'bump' : ''}" data-tip="<b>Aura : ${p.aura}</b><br>Chaque point d'Aura ajoute 1 dégât à ta prochaine attaque (l'Aura est alors consommée). Tu en gagnes en jouant certaines cartes et en perdant des PV.">
+          <span class="aura-num">${p.aura}</span><small>Aura</small>
+        </div>` : ''}
         <div class="pile draw ${backUrl(p.character) ? 'has-back' : ''}" ${backUrl(p.character) ? `style="--back:url('${backUrl(p.character)}')"` : ''} data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
           <span>${c.drawPile.length}</span><small>Pioche</small>
         </div>
@@ -137,6 +141,7 @@ export class CombatView {
       </div>
       ${c.phase === 'victoire' || c.phase === 'defaite' ? this.endOverlay() : ''}
     `;
+    this.lastAura = this.combat.player.aura;
   }
 
   /** Le Bébé Kangourex, à côté de sa mère. */

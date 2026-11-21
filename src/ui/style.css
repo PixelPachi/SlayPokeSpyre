@@ -995,3 +995,15 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .energy-float.gain { color: #8affb0; }
 .energy-float small { display: block; font-family: inherit; font-size: 13px; color: #fff; }
 @keyframes energyFloat { 0% { opacity: 0; margin-top: 8px; } 15% { opacity: 1; margin-top: 0; } 75% { opacity: 1; } 100% { opacity: 0; margin-top: -30px; } }
+
+/* Compteur d'Aura (Riolu, Mew) à côté de l'énergie */
+.aura-counter { position: absolute; left: 128px; bottom: 168px; width: 66px; height: 66px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #d6f0ff 0, #4aa8ff 35%, #1a3d8f 80%); border: 3px solid #0b1430;
+  box-shadow: 0 0 14px #4aa8ffaa, inset 0 0 10px #ffffff55; color: #fff; z-index: 5; cursor: help; }
+.aura-counter .aura-num { font-family: 'Lilita One', sans-serif; font-size: 26px; line-height: 1; text-shadow: 0 2px 0 #0b1430; }
+.aura-counter small { font-size: 10px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
+.aura-counter.high { box-shadow: 0 0 22px #6fd0ff, 0 0 40px #4aa8ff88, inset 0 0 10px #ffffff77; animation: auraGlow 1.4s ease-in-out infinite; }
+.aura-counter.bump { animation: auraBump 0.45s ease-out; }
+.aura-counter.high.bump { animation: auraBump 0.45s ease-out, auraGlow 1.4s ease-in-out 0.45s infinite; }
+@keyframes auraBump { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes auraGlow { 50% { box-shadow: 0 0 30px #9fe2ff, 0 0 56px #4aa8ffaa, inset 0 0 12px #ffffffaa; } }
