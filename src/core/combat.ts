@@ -357,7 +357,30 @@ export class Combat {
       if ((this.player.statuses.brulure ?? 0) > 0) dmg *= 0.75;
       return Math.floor(Math.floor(dmg + 1e-9) * this.relicMult(false) + 1e-9);
     }
-    return this.playerDamage(base, d, target).amount;
+    let amount = this.playerDamage(base, d, target).amount;
+    // Talents de gardien qui réduisent les dégâts (aperçu, sans effet de bord)
+    const g = this.gimmickOf(target);
+    if (g === 'cuirasse' && target.flags.cuirasse !== this.turn) amount = Math.floor(amount / 2);
+    if (g === 'fantome-inconnu' && (target.flags.touches ?? 0) < 3) amount = Math.floor(amount / 2);
+    if (g === 'reine' && this.aliveEnemies().some((x) => x !== target)) amount = Math.floor(amount / 2);
+    if (g === 'multiecaille' && target.hp >= target.maxHp) amount = Math.floor(amount / 2);
+    if (g === 'torche' && d.pokeType === 'feu') amount = Math.floor(amount / 2);
+    return amount;
+  }
+
+  /** Aperçu complet sur une cible : dégâts par coup, nombre de coups, efficacité, et Protection qui absorbera. */
+  previewOn(card: Card, targetUid: number): { perHit: number; hits: string; total: number; eff: 'super' | 'normal' | 'faible' | 'immunite'; blocked: number } | null {
+    const per = this.previewCardDamage(card, targetUid);
+    const t = this.enemy(targetUid);
+    if (per === null || !t) return null;
+    const d = this.def(card);
+    const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
+    const n = hit?.hits ?? 1;
+    const hits = hit?.hitsMax && hit.hitsMax !== n ? `${n}-${hit.hitsMax}` : String(n);
+    const mult = typeMultiplier(d.pokeType, t.types);
+    const eff = effectivenessOf(mult, hasImmunity(d.pokeType, t.types));
+    const total = per * n;
+    return { perHit: per, hits, total, eff, blocked: Math.min(t.block, total) };
   }
 
   /** Façade : un statut néfaste ou une baisse de stat. */

@@ -1192,3 +1192,16 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .loot-row.full small { color: #ffb3a8; }
 .loot-row.shake { animation: vfxShake 0.35s; }
 .event-loot { margin: 8px auto 12px; max-width: 460px; }
+
+/* Aperçu des dégâts sur l'ennemi visé */
+.fighter.enemy { position: relative; }
+.dmg-preview { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); z-index: 30; pointer-events: none; text-align: center; white-space: nowrap;
+  padding: 4px 12px 5px; border-radius: 12px; background: #120c0ce6; border: 3px solid #ff6b5a; box-shadow: 0 0 14px #ff6b5a99; animation: dmgPop 0.18s ease-out; }
+.dmg-preview b { display: block; font-family: 'Lilita One', sans-serif; font-size: 34px; line-height: 1; color: #ff8a7a; text-shadow: 0 2px 0 #000; }
+.dmg-preview small { display: block; font-size: 12px; font-weight: 900; color: #fff; }
+.dmg-preview small.blk { color: #9fd6ff; }
+.dmg-preview.super { border-color: #ffd23f; box-shadow: 0 0 16px #ffd23f; }
+.dmg-preview.super b { color: #ffe36a; }
+.dmg-preview.faible, .dmg-preview.immunite { border-color: #8892a6; box-shadow: none; }
+.dmg-preview.faible b, .dmg-preview.immunite b { color: #c9d0dc; }
+@keyframes dmgPop { from { transform: translateX(-50%) scale(0.6); opacity: 0; } }

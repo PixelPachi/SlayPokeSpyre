@@ -145,6 +145,8 @@ export class CombatView {
       ${c.phase === 'victoire' || c.phase === 'defaite' ? this.endOverlay() : ''}
     `;
     this.lastAura = this.combat.player.aura;
+    // Carte choisie au toucher (sans glisser) : on montre les dégâts sur chaque ennemi
+    if (this.selected !== null && !this.drag) this.showDamageBadges(true);
   }
 
   /** Le Bébé Kangourex, à côté de sa mère. */
@@ -540,6 +542,28 @@ export class CombatView {
     const base = d.effects.find((e) => e.kind === 'degats');
     const target = this.hoverEnemy ?? undefined;
     txt.innerHTML = cardText(d, this.combat.previewCardDamage(card, target), base && base.kind === 'degats' ? base.amount : null);
+    this.showDamageBadges();
+  }
+
+  /** Pastille au-dessus de l'ennemi visé : dégâts exacts (types, résistances, talents, Protection). */
+  private showDamageBadges(forAll = false): void {
+    this.el.querySelectorAll('.dmg-preview').forEach((x) => x.remove());
+    const card = this.combat.hand.find((x) => x.uid === this.selected);
+    if (!card) return;
+    const d = this.combat.def(card);
+    const uids = forAll || (d.target === 'tous' && this.hoverEnemy !== null)
+      ? this.combat.aliveEnemies().map((e) => e.uid)
+      : this.hoverEnemy !== null ? [this.hoverEnemy] : [];
+    for (const uid of uids) {
+      const p = this.combat.previewOn(card, uid);
+      const el = this.whoEl(uid);
+      if (!p || !el) continue;
+      const b = document.createElement('div');
+      b.className = `dmg-preview ${p.eff}`;
+      const effTxt = p.eff === 'super' ? 'Super efficace !' : p.eff === 'faible' ? 'Peu efficace' : p.eff === 'immunite' ? 'Peu d’effet…' : '';
+      b.innerHTML = `<b>−${p.perHit}${p.hits !== '1' ? ` × ${p.hits}` : ''}</b>${effTxt ? `<small>${effTxt}</small>` : ''}${p.blocked ? `<small class="blk">${p.blocked} absorbé${p.blocked > 1 ? 's' : ''} par la Protection</small>` : ''}`;
+      el.appendChild(b);
+    }
   }
 
   private flashEnergy(): void {
@@ -668,6 +692,12 @@ export class CombatView {
       d.ghost.style.left = `${p.x - 75}px`;
       d.ghost.style.top = `${p.y - 105}px`;
       d.ghost.classList.toggle('will-play', p.y < PLAY_LINE);
+      const willPlay = p.y < PLAY_LINE;
+      if (willPlay !== d.ghost.classList.contains('shown-badges')) {
+        d.ghost.classList.toggle('shown-badges', willPlay);
+        if (willPlay) this.showDamageBadges(true);
+        else this.el.querySelectorAll('.dmg-preview').forEach((x) => x.remove());
+      }
     }
     if (d.mode === 'aim') {
       this.drawArrow(ev);
