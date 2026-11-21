@@ -324,14 +324,15 @@ export class Run {
   /** Une rareté tirée comme dans Slay the Spire (chances qui montent sans rare). */
   rollRarity(kind: 'combat' | 'elite' | 'boss' | 'boutique'): CardDef['rarity'] {
     if (kind === 'boss') return 'rare';
-    const rare = (kind === 'elite' ? 10 : 3) + this.rareBonus;
+    // Rares : 2 % (8 % sur un dominant), +0,5 % à chaque carte non rare proposée (max +10 %), remis à 0 quand une rare sort
+    const rare = (kind === 'elite' ? 8 : 2) + this.rareBonus;
     const unc = kind === 'elite' ? 40 : 37;
     const r = this.rng.next() * 100;
     if (r < rare) {
       this.rareBonus = 0;
       return 'rare';
     }
-    this.rareBonus = Math.min(this.rareBonus + 1, 40);
+    this.rareBonus = Math.min(this.rareBonus + 0.5, 10);
     return r < rare + unc ? 'peu-commune' : 'commune';
   }
 
@@ -340,10 +341,13 @@ export class Run {
     const own = this.character === 'mew' ? mewPool(this.unlocked) : rewardPool(this.character, this.unlocked);
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
-      const rarity = this.rollRarity(kind);
+      let rarity = this.rollRarity(kind);
       const pool = this.character === 'mew' ? [...own, ...neutralPool()] : this.rng.next() < neutralChance ? neutralPool() : own;
-      const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
-      const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id)));
+      // Une carte rare déjà dans le deck n'est plus proposée (sinon on se retrouve avec 4 Vitesse Extrême)
+      const owned = new Set(this.deck.map((c) => c.defId));
+      if (rarity === 'rare' && !pool.some((c) => c.rarity === 'rare' && !owned.has(c.id) && !out.includes(c.id))) rarity = 'peu-commune';
+      const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id) && !(c.rarity === 'rare' && owned.has(c.id)));
+      const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare'));
       if (pick) out.push(pick.id);
     }
     return out;
