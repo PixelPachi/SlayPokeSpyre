@@ -329,6 +329,9 @@ export class CombatView {
         case 'player-move':
           this.float('player', ev.name, 'move', 0);
           break;
+        case 'energy':
+          this.floatEnergy(`${ev.delta > 0 ? '+' : '−'}${Math.abs(ev.delta)} PA`, ev.reason, ev.delta > 0);
+          break;
         case 'meteo':
           this.banner(ev.name, ev.ended);
           if (!ev.ended) sfxType(({ zenith: 'feu', pluie: 'eau', 'tempete-sable': 'roche', grele: 'glace', 'champ-herbu': 'plante', 'champ-electrifie': 'electrik', 'champ-psychique': 'psy', 'champ-brumeux': 'fee' } as Record<string, PokeType>)[ev.id] ?? 'normal');
@@ -381,6 +384,21 @@ export class CombatView {
   }
 
   private lastEnemyCard = 0;
+
+  /** Petit texte qui s'envole au-dessus de l'orbe d'énergie (coût payé, PA gagnés ou perdus). */
+  private floatEnergy(text: string, reason: string, gain: boolean): void {
+    const orb = this.root.querySelector('.energy');
+    if (!orb) return;
+    const r = orb.getBoundingClientRect();
+    const s = this.root.getBoundingClientRect();
+    const f = document.createElement('div');
+    f.className = `energy-float ${gain ? 'gain' : 'loss'} ${reason ? 'why' : ''}`;
+    f.innerHTML = `${text}${reason ? `<small>${reason}</small>` : ''}`;
+    f.style.left = `${r.left - s.left + r.width / 2}px`;
+    f.style.top = `${r.top - s.top - 6 - this.fx.querySelectorAll('.energy-float').length * 26}px`;
+    this.fx.appendChild(f);
+    setTimeout(() => f.remove(), 1500);
+  }
 
   /** Grande annonce au centre (météo, terrain). */
   private banner(text: string, small = false): void {
@@ -443,7 +461,9 @@ export class CombatView {
     this.hoverEnemy = null;
     const isAttack = this.combat.def(card).category === 'attaque';
     if (isAttack) sfxType(this.combat.def(card).pokeType); else sfx('carte');
+    const cost = this.combat.costOf(card);
     this.combat.play(uid, targetUid);
+    if (cost > 0) this.floatEnergy(`−${cost} PA`, '', false);
     this.refresh();
     if (isAttack) this.whoEl('player')?.classList.add('lunge'); // petit pas en avant vers les ennemis
     // Close Combat : la carte termine le tour

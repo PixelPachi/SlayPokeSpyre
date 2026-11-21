@@ -990,3 +990,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes rainFall { to { background-position: -20px 60px, 0 0; } }
 @keyframes sandBlow { to { background-position: 80px 10px, 0 0; } }
 @keyframes hailFall { to { background-position: -10px 34px, 0 0; } }
+.energy-float { position: absolute; transform: translate(-50%, -100%); font-family: 'Lilita One', sans-serif; font-size: 24px; color: #ffd76a; text-shadow: 0 2px 0 #000, 0 0 8px #000; pointer-events: none; z-index: 40; text-align: center; white-space: nowrap; animation: energyFloat 1.5s ease-out forwards; }
+.energy-float.loss { color: #ff9a8a; }
+.energy-float.gain { color: #8affb0; }
+.energy-float small { display: block; font-family: inherit; font-size: 13px; color: #fff; }
+@keyframes energyFloat { 0% { opacity: 0; margin-top: 8px; } 15% { opacity: 1; margin-top: 0; } 75% { opacity: 1; } 100% { opacity: 0; margin-top: -30px; } }

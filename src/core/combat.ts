@@ -80,6 +80,7 @@ export type CombatEvent =
   | { type: 'enemy-move'; uid: number; name: string; move?: EnemyMove; damage?: number }
   | { type: 'player-move'; name: string }
   | { type: 'meteo'; id: string; name: string; ended?: boolean }
+  | { type: 'energy'; delta: number; reason: string }
   | { type: 'break'; target: Who }
   | { type: 'relic'; id: string }
   | { type: 'power'; power: PowerId; amount: number }
@@ -227,7 +228,7 @@ export class Combat {
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
     if (this.has('vive-griffe')) this.relicFired('vive-griffe', () => this.draw(2));
-    if (this.has('cuillere-tordue')) this.relicFired('cuillere-tordue', () => { this.player.energy += 1; });
+    if (this.has('cuillere-tordue')) this.relicFired('cuillere-tordue', () => this.changeEnergy(1, 'Cuillère Tordue'));
   }
 
   // ——— Objets tenus ———
@@ -581,8 +582,7 @@ export class Combat {
       }
     }
     if (this.bossAlive('distorsion') && this.turn === 3) {
-      this.player.energy = Math.max(0, this.player.energy - 1);
-      this.events.push({ type: 'player-move', name: 'Le temps se fige : −1 PA' });
+      this.changeEnergy(-1, 'Distorsion du Temps');
     }
     if (this.player.statuses.etourdi) {
       delete this.player.statuses.etourdi;
@@ -743,7 +743,7 @@ export class Combat {
         this.draw(eff.amount);
         return;
       case 'pa':
-        p.energy += eff.amount;
+        this.changeEnergy(eff.amount, d.name);
         return;
       case 'perte-pv':
         this.loseHp(p, 'player', eff.amount, 'carte');
@@ -978,6 +978,14 @@ export class Combat {
     }
   }
 
+  /** Gagne ou perd des PA en dehors du coût d'une carte (affiché à côté de l'orbe d'énergie). */
+  private changeEnergy(delta: number, reason: string): void {
+    const before = this.player.energy;
+    this.player.energy = Math.max(0, before + delta);
+    const real = this.player.energy - before;
+    if (real) this.events.push({ type: 'energy', delta: real, reason });
+  }
+
   /** Types d'attaques ennemies réduits de moitié (baies de résistance). */
   resists = new Set<string>();
 
@@ -991,7 +999,7 @@ export class Combat {
     if (fx.cure) for (const s of fx.cure === 'tous' ? BAD_STATUSES : fx.cure) delete p.statuses[s];
     if (fx.cure === 'tous' && (p.statuses.attaque ?? 0) < 0) delete p.statuses.attaque;
     if (fx.cure === 'tous' && (p.statuses.defense ?? 0) < 0) delete p.statuses.defense;
-    if (fx.energy) p.energy += fx.energy;
+    if (fx.energy) this.changeEnergy(fx.energy, name);
     if (fx.block) this.gainBlock(p, 'player', fx.block);
     for (const x of fx.self ?? []) this.addStatus(p, 'player', x.status, x.stacks);
     if (fx.resist) this.resists.add(fx.resist);
@@ -1016,7 +1024,7 @@ export class Combat {
     this.used.add('lucarite');
     this.relicFired('lucarite', () => {
       this.draw(2);
-      this.player.energy += 1;
+      this.changeEnergy(1, 'Lucarite');
     });
   }
 
