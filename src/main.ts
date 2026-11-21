@@ -199,6 +199,8 @@ function startRun(character: CharacterId): void {
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
+  // Pour tester : ?cartes=vip-aromatherapie,vip-don-naturel ajoute des cartes au deck
+  for (const id of (params.get('cartes') ?? '').split(',').filter(Boolean)) run.addCard(id);
   // Pour tester : ?baies=oran,sitrus remplit le sac de baies
   for (const id of (params.get('baies') ?? '').split(',').filter(Boolean)) run.addBerry(id);
   // Pour tester : ?evenement=tarot-diable ouvre directement cet événement

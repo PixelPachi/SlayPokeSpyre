@@ -124,6 +124,8 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         else parts.push(`Applique <b>${e.stacks}</b> ${s}${e.on === 'tous' ? ' à tous les ennemis' : ''}.`);
         break;
       }
+      case 'baie-aleatoire': parts.push(`Gagne <b>${e.count}</b> baie${e.count > 1 ? 's' : ''} au hasard.`); break;
+      case 'decouverte': parts.push(`Choisis 1 Aromate parmi ${e.count}${e.upgraded ? ' (améliorés)' : ''} : il rejoint ton deck jusqu'à la fin du combat.`); break;
       case 'pioche': parts.push(`Pioche <b>${e.amount}</b> carte${e.amount > 1 ? 's' : ''}.`); break;
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
       case 'perte-pv': parts.push(d.character === 'riolu' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+${e.amount} Aura)</span>.` : `Perd <b>${e.amount}</b> PV.`); break;

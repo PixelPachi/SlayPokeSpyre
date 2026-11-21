@@ -307,7 +307,7 @@ export class Combat {
   canPlay(card: Card): boolean {
     if (this.phase !== 'joueur') return false;
     const d = this.def(card);
-    if (d.keywords?.includes('injouable') || this.skipTurn) return false;
+    if (d.keywords?.includes('injouable') || this.skipTurn || this.pendingChoice) return false;
     if (d.requires?.block && this.player.block < d.requires.block) return false;
     if (d.requires?.aura && this.player.aura < d.requires.aura) return false;
     if (d.requires?.notBoss && this.boss) return false;
@@ -754,6 +754,14 @@ export class Combat {
       case 'meteo':
         this.setField(eff.id, eff.turns);
         return;
+      case 'baie-aleatoire':
+        this.berryGifts += eff.count;
+        return;
+      case 'decouverte': {
+        const pool = Object.values(CARD_DEFS).filter((x) => x.id.startsWith('vip-arom-')).map((x) => x.id);
+        this.pendingChoice = { ids: this.rng.shuffle(pool).slice(0, eff.count), upgraded: !!eff.upgraded };
+        return;
+      }
       case 'aura-mult':
         this.gainAura(p.aura * (eff.amount - 1));
         return;
@@ -976,6 +984,25 @@ export class Combat {
       this.events.push({ type: 'meteo', id: this.terrain.id, name: `${TERRAINS[this.terrain.id].name} disparaît.`, ended: true });
       this.terrain = null;
     }
+  }
+
+  /** Baies gagnées pendant le combat (l'interface les ajoute au sac). */
+  berryGifts = 0;
+  /** Choix de carte en attente (Aromathérapie) : on ne peut rien jouer tant qu'on n'a pas choisi. */
+  pendingChoice: { ids: string[]; upgraded: boolean } | null = null;
+
+  /** Message affiché au-dessus de ton Pokémon (utilisé par l'interface). */
+  announce(name: string): void {
+    this.events.push({ type: 'player-move', name });
+  }
+
+  chooseCard(defId: string): void {
+    if (!this.pendingChoice) return;
+    const up = this.pendingChoice.upgraded;
+    this.pendingChoice = null;
+    if (this.hand.length < MAX_HAND) this.hand.push({ uid: this.nextTempUid++, defId, upgraded: up });
+    else this.discardPile.push({ uid: this.nextTempUid++, defId, upgraded: up });
+    this.events.push({ type: 'player-move', name: `${cardDef(defId, up).name} !` });
   }
 
   /** Gagne ou perd des PA en dehors du coût d'une carte (affiché à côté de l'orbe d'énergie). */

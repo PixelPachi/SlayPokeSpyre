@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (299 images)
+## 2. Les illustrations des capacités (305 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -36,7 +36,7 @@ Prompt commun :
 
 Puis, selon la colonne « Pokémon dans l'image » :
 
-- **Capacité exclusive (164 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
+- **Capacité exclusive (170 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
 - **Capacité partagée (135 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
@@ -55,6 +55,12 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `aire-d-herbe.png` | Aire d'Herbe | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `amnesie.png` | Amnésie | Psy · Technique | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `aqua-jet.png` | Aqua-Jet | Eau · Attaque | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
+| `aromate-bleu.png` | Aromate Bleu | Eau · Technique | Vipélierre | **Vipélierre** lance la capacité | jets et vagues d’eau bleue, éclaboussures | ☐ |
+| `aromate-dore.png` | Aromate Doré | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `aromate-jaune.png` | Aromate Jaune | Électrik · Technique | Vipélierre | **Vipélierre** lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
+| `aromate-rose.png` | Aromate Rose | Fée · Technique | Vipélierre | **Vipélierre** lance la capacité | lumière rose et blanche, étoiles, paillettes | ☐ |
+| `aromate-rouge.png` | Aromate Rouge | Feu · Attaque | Vipélierre | **Vipélierre** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
+| `aromate-vert.png` | Aromate Vert | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `aromatherapie.png` | Aromathérapie | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `atterrissage.png` | Atterrissage | Vol · Technique | Neutre | Aucun (capacité seule) | bourrasques, plumes, courants d’air | ☐ |
 | `attraction.png` | Attraction | Normal · Technique | Vipélierre, Caninos | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
@@ -128,7 +134,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `detritus.png` | Détritus | Poison · Attaque | Neutre | Aucun (capacité seule) | liquide et fumée violets, bulles toxiques | ☐ |
 | `direct-toxik.png` | Direct Toxik | Poison · Attaque | Riolu, Mew | **Riolu** lance la capacité | liquide et fumée violets, bulles toxiques | ☐ |
 | `distorsion.png` | Distorsion | Psy · Technique | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
-| `don-naturel.png` | Don Naturel | Normal · Attaque | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `don-naturel.png` | Don Naturel | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `double-pied.png` | Double Pied | Combat · Attaque | Caninos | **Caninos** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `doux-parfum.png` | Doux Parfum | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `draco-choc.png` | Draco-Choc | Dragon · Attaque | Riolu, Vipélierre, Caninos, Mew | Aucun (capacité seule) | énergie draconique bleue et violette, écailles | ☐ |

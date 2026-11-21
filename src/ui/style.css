@@ -1007,3 +1007,11 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .aura-counter.high.bump { animation: auraBump 0.45s ease-out, auraGlow 1.4s ease-in-out 0.45s infinite; }
 @keyframes auraBump { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
 @keyframes auraGlow { 50% { box-shadow: 0 0 30px #9fe2ff, 0 0 56px #4aa8ffaa, inset 0 0 12px #ffffffaa; } }
+
+/* Choix d'une carte (Aromathérapie) */
+.card-choice { position: absolute; inset: 40px 0 0 0; background: #050914cc; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; animation: fadeIn 0.25s; }
+.card-choice-title { font-family: 'Lilita One', sans-serif; font-size: 40px; color: #ffd76a; text-shadow: 0 3px 0 #000; }
+.card-choice-row { display: flex; gap: 28px; }
+.card-choice-row { zoom: 1.35; }
+.card-choice-hint { color: #dfe6f5; font-weight: 700; }
+@keyframes fadeIn { from { opacity: 0; } }

@@ -52,6 +52,8 @@ export type Effect =
   | { kind: 'pa'; amount: number }
   | { kind: 'perte-pv'; amount: number } // se blesse soi-même (donne de l'Aura à Riolu)
   | { kind: 'aura'; amount: number }
+  | { kind: 'baie-aleatoire'; count: number } // gagne une baie au hasard (mangée tout de suite si le sac est plein)
+  | { kind: 'decouverte'; pool: 'aromates'; count: number; upgraded?: boolean } // choisis 1 carte parmi N, ajoutée pour ce combat
   | { kind: 'meteo'; id: import('./weather').WeatherId | import('./weather').TerrainId; turns: number } // météo ou terrain pour N tours
   | { kind: 'aura-mult'; amount: number } // multiplie l'Aura actuelle
   | { kind: 'degats-aura'; mult: number; consume?: boolean } // inflige Aura × mult dégâts (consomme l'Aura sauf consume: false)

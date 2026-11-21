@@ -1,3 +1,4 @@
+import { BERRY_DEFS } from '../data/berries';
 import { TERRAINS, WEATHER } from '../core/weather';
 import { sfx, sfxType } from '../audio/audio';
 import type { BerryFx } from '../data/berries';
@@ -177,7 +178,8 @@ export class CombatView {
 
   private statusRow(f: Fighter, isPlayer: boolean): string {
     const items: string[] = [];
-    if (isPlayer && this.combat.player.aura > 0) {
+    // L'Aura de Riolu et Mew est affichée dans son compteur, à côté de l'énergie
+    if (isPlayer && this.combat.player.aura > 0 && this.combat.player.character !== 'riolu' && this.combat.player.character !== 'mew') {
       const a = this.combat.player.aura;
       items.push(`<span class="status aura" data-tip="Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.">Aura ${a}</span>`);
     }
@@ -441,9 +443,43 @@ export class CombatView {
   // ——— Actions ———
 
   private refresh(): void {
+    // Baies gagnées en combat (Don Naturel) : dans le sac, ou mangées tout de suite si le sac est plein
+    while (this.combat.berryGifts > 0) {
+      this.combat.berryGifts--;
+      const id = this.run.rollBerry();
+      const b = BERRY_DEFS[id];
+      if (this.run.addBerry(id)) this.combat.announce(`${b.name} obtenue !`);
+      else {
+        this.combat.useBerry(`${b.name} (sac plein, mangée)`, b.fx);
+        if (b.fx.maxHp) this.run.maxHp += b.fx.maxHp;
+      }
+      sfx('baie');
+    }
     const events = this.combat.drainEvents();
     this.render();
     this.showEvents(events);
+    if (this.combat.pendingChoice) this.showChoice();
+  }
+
+  /** Aromathérapie : 3 Aromates au centre de l'écran, on en choisit un. */
+  private showChoice(): void {
+    const ch = this.combat.pendingChoice;
+    if (!ch || this.root.querySelector('.card-choice')) return;
+    const box = document.createElement('div');
+    box.className = 'card-choice';
+    box.innerHTML = `<div class="card-choice-title">Choisis un Aromate</div>
+      <div class="card-row card-choice-row">${ch.ids.map((id) => renderCard(cardDef(id, ch.upgraded), { classes: 'pickable' }).replace('<div class="card', `<div data-pick="${id}" class="card`)).join('')}</div>
+      <div class="card-choice-hint">Il rejoint ta main, puis ton deck jusqu'à la fin du combat.</div>`;
+    box.addEventListener('click', (ev) => {
+      const el = (ev.target as HTMLElement).closest<HTMLElement>('[data-pick]');
+      if (!el) return;
+      ev.stopPropagation();
+      this.combat.chooseCard(el.dataset.pick!);
+      box.remove();
+      sfx('carte');
+      this.refresh();
+    });
+    this.root.appendChild(box);
   }
 
   /** Manger une baie depuis la barre du haut (pendant ton tour). */
