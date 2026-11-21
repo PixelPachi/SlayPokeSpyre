@@ -107,6 +107,7 @@ export class Run {
   skin?: string;
   duelsWon = 0;
   bossNames: string[] = [];
+  bossIds: string[] = [];
   eventsSeen = 0;
   shiniesMet = 0;
   /** Objets tenus (le premier est l'objet de départ). */

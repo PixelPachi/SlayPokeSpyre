@@ -1,5 +1,5 @@
 import { SKINS, skinSprite } from '../data/skins';
-import { equipSkin, equippedSkin, skinUnlocked, statOf } from '../core/save';
+import { equipSkin, equippedSkin, skinProgress, skinUnlocked } from '../core/save';
 // Écran de sélection du personnage (section 9 du GDD : illustration plein écran + fiche à gauche).
 import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
@@ -178,10 +178,10 @@ function skinBlock(save: SaveData, c: CharacterId): string {
     <button class="skin-btn ${!cur ? 'on' : ''}" data-skin=""><img src="${asset(skinSprite(dex))}" alt=""><span>Normal</span></button>
     ${skins.map((k) => {
       const ok = skinUnlocked(save, c, k);
-      const n = Math.min(k.goal, statOf(save, c, k.stat));
-      return `<button class="skin-btn ${cur === k.id ? 'on' : ''} ${ok ? '' : 'locked'}" data-skin="${k.id}" data-tip="<b>${esc(k.name)}</b><br>${esc(k.goalText)} (${n}/${k.goal})${ok ? '<br>Débloqué !' : '<br>Se cumule sur toutes tes runs.'}">
+      const [n, goal] = skinProgress(save, c, k);
+      return `<button class="skin-btn ${cur === k.id ? 'on' : ''} ${ok ? '' : 'locked'}" data-skin="${k.id}" data-tip="<b>${esc(k.name)}</b><br>${esc(k.goalText)} (${n}/${goal})${ok ? '<br>Débloqué !' : '<br>Se cumule sur toutes tes runs.'}">
         <img src="${asset(skinSprite(dex, k.id))}" alt=""><span>${k.id === 'shiny' ? '★ ' : ''}${esc(k.name)}</span>
-        ${ok ? '' : `<small>${n}/${k.goal}</small><i class="skin-bar" style="--p:${(n / k.goal) * 100}%"></i>`}
+        ${ok ? '' : `<small>${n}/${goal}</small><i class="skin-bar" style="--p:${(n / goal) * 100}%"></i>`}
       </button>`;
     }).join('')}
   </div></div>`;

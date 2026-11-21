@@ -17,14 +17,28 @@ export interface SaveData {
   stats?: Partial<Record<CharacterId, Partial<Record<SkinStat, number>>>>;
   /** Skin choisi pour chaque personnage. */
   skins?: Partial<Record<CharacterId, string>>;
+  /** Gardiens vaincus par personnage (ids). */
+  beaten?: Partial<Record<CharacterId, string[]>>;
 }
 
 export function statOf(s: SaveData, c: CharacterId, stat: SkinStat): number {
   return s.stats?.[c]?.[stat] ?? 0;
 }
 
+/** Gardiens déjà vaincus avec ce personnage (toutes runs confondues). */
+export function beatenBosses(s: SaveData, c: CharacterId): string[] {
+  return s.beaten?.[c] ?? [];
+}
+
+/** Progression d'un skin : [fait, objectif]. */
+export function skinProgress(s: SaveData, c: CharacterId, skin: SkinDef): [number, number] {
+  if (skin.bosses) return [skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length, skin.bosses.length];
+  return [Math.min(skin.goal, statOf(s, c, skin.stat)), skin.goal];
+}
+
 export function skinUnlocked(s: SaveData, c: CharacterId, skin: SkinDef): boolean {
-  return statOf(s, c, skin.stat) >= skin.goal;
+  const [n, goal] = skinProgress(s, c, skin);
+  return n >= goal;
 }
 
 /** Skin porté (seulement s'il est débloqué). */
@@ -40,11 +54,12 @@ export function equipSkin(s: SaveData, c: CharacterId, id: string | undefined): 
 }
 
 /** Ajoute les statistiques d'une run ; renvoie les skins qui viennent d'être débloqués. */
-export function recordRunStats(s: SaveData, c: CharacterId, add: Partial<Record<SkinStat, number>>): SkinDef[] {
+export function recordRunStats(s: SaveData, c: CharacterId, add: Partial<Record<SkinStat, number>>, bossIds: string[] = []): SkinDef[] {
   const before = (SKINS[c] ?? []).filter((k) => skinUnlocked(s, c, k)).map((k) => k.id);
   const cur = { ...s.stats?.[c] };
   for (const [k, v] of Object.entries(add)) cur[k as SkinStat] = (cur[k as SkinStat] ?? 0) + (v ?? 0);
   s.stats = { ...s.stats, [c]: cur };
+  s.beaten = { ...s.beaten, [c]: [...new Set([...beatenBosses(s, c), ...bossIds])] };
   writeSave(s);
   return (SKINS[c] ?? []).filter((k) => skinUnlocked(s, c, k) && !before.includes(k.id));
 }

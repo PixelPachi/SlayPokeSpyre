@@ -998,3 +998,17 @@ describe('skins', () => {
     expect(equippedSkin(s, 'riolu')).toBe('shiny');
   });
 });
+
+describe('skin Magma', () => {
+  it('se débloque après avoir vaincu Camérupt et Heatran avec Riolu (sur plusieurs runs)', async () => {
+    const { recordRunStats, skinUnlocked } = await import('../src/core/save');
+    const { SKINS } = await import('../src/data/skins');
+    const magma = SKINS.riolu.find((k) => k.id === 'magma')!;
+    const s = { exp: {}, runs: 0 } as never;
+    recordRunStats(s, 'riolu', {}, ['dardargnan', 'camerupt']);
+    expect(skinUnlocked(s, 'riolu', magma)).toBe(false);
+    recordRunStats(s, 'caninos', {}, ['heatran']);
+    expect(skinUnlocked(s, 'riolu', magma)).toBe(false);
+    expect(recordRunStats(s, 'riolu', {}, ['heatran']).map((k) => k.id)).toEqual(['magma']);
+  });
+});

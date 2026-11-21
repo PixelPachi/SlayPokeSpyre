@@ -285,6 +285,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (type === 'boss') {
         run.bossesDefeated++;
         run.bossNames.push(ENEMY_DEFS[enemies[0]]?.name ?? 'Gardien');
+        run.bossIds.push(...enemies);
         if (run.act >= LAST_ACT) return endRun(run, true); // Dialga Primal est apaisé
         const last = run.act >= LAST_ACT;
         return renderReward(
@@ -385,7 +386,7 @@ function endRun(run: Run, victory: boolean): void {
   const result = grantExp(save, run.character, exp);
   const newSkins = recordRunStats(save, run.character, {
     shinies: run.shiniesMet, elites: run.elitesDefeated, bosses: run.bossesDefeated, combats: run.combatsWon, wins: victory ? 1 : 0,
-  });
+  }, run.bossIds);
   for (const k of newSkins) setTimeout(() => toast(`Skin débloqué : ${CHARACTERS[run.character].name} ${k.name.toLowerCase()} ! Choisis-le sur l'écran de sélection.`), 1200);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory);
   if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
