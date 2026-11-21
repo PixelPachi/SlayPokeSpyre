@@ -187,6 +187,16 @@ export class Run {
     return true;
   }
 
+  /** Baies trouvées alors que le sac est plein : le joueur choisira laquelle jeter (comme les potions de Slay the Spire). */
+  pendingBerries: string[] = [];
+
+  /** Donne une baie : dans le sac, ou en attente de choix si le sac est plein. Renvoie true si elle est déjà rangée. */
+  giveBerry(id: string): boolean {
+    if (this.addBerry(id)) return true;
+    this.pendingBerries.push(id);
+    return false;
+  }
+
   /** Tire une baie (65 % commune, 30 % peu commune, 5 % rare). */
   rollBerry(): string {
     const r = this.rng.next();

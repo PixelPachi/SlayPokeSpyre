@@ -1,3 +1,4 @@
+import { swapBerries } from './run-ui';
 import { playVfx } from './vfx';
 import { skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
@@ -466,17 +467,14 @@ export class CombatView {
       this.combat.berryGifts--;
       const id = this.run.rollBerry();
       const b = BERRY_DEFS[id];
-      if (this.run.addBerry(id)) this.combat.announce(`${b.name} obtenue !`);
-      else {
-        this.combat.useBerry(`${b.name} (sac plein, mangée)`, b.fx);
-        if (b.fx.maxHp) this.run.maxHp += b.fx.maxHp;
-      }
+      if (this.run.giveBerry(id)) this.combat.announce(`${b.name} obtenue !`);
       sfx('baie');
     }
     const events = this.combat.drainEvents();
     this.render();
     this.showEvents(events);
     if (this.combat.pendingChoice) this.showChoice();
+    if (this.run.pendingBerries.length && !this.root.querySelector('.berry-swap')) swapBerries(this.root, this.run, () => this.refresh());
   }
 
   /** Aromathérapie : 3 Aromates au centre de l'écran, on en choisit un. */

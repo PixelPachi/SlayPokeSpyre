@@ -40,16 +40,10 @@ export const EVENTS: GameEvent[] = [
     text: 'Au détour d’un sentier, un buisson ploie sous les Baies Oran. Elles brillent étrangement, comme si le temps s’était arrêté autour d’elles.',
     choices: [
       {
-        label: 'Cueillir les baies', detail: 'Gagne 3 Baies Oran (celles qui ne rentrent pas dans le sac sont mangées : +10 PV chacune)',
+        label: 'Cueillir les baies', detail: 'Gagne 3 Baies Oran (si ton sac est plein, tu choisis lesquelles jeter)',
         apply: (r) => {
-          let kept = 0;
-          let healed = 0;
-          for (let i = 0; i < 3; i++) {
-            if (r.addBerry('oran')) kept++;
-            else healed += r.heal(10);
-          }
-          return kept === 3 ? 'Tu cueilles 3 Baies Oran !'
-            : `Tu ranges ${kept} Baie${kept > 1 ? 's' : ''} Oran dans ton sac et manges les autres (+${healed} PV).`;
+          for (let i = 0; i < 3; i++) r.giveBerry('oran');
+          return 'Tu cueilles 3 Baies Oran !';
         },
       },
     ],

@@ -14,7 +14,7 @@ import { MAX_BERRIES, berryPrice } from '../data/berries';
 import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
 import { CHARACTER_COLORS } from './labels';
-import { openDeckOverlay, relicCard, relicIcon, topbar, berryCard, berryIcon } from './run-ui';
+import { openDeckOverlay, relicCard, relicIcon, swapBerries, topbar, berryCard, berryIcon } from './run-ui';
 import { relicDef } from '../data/relics';
 import { BERRY_DEFS } from '../data/berries';
 import { relicPrice } from '../data/relics';
@@ -50,7 +50,7 @@ export function renderReward(
       case 'berry': {
         const b = BERRY_DEFS[o.berry!];
         const full = run.berries.length >= MAX_BERRIES;
-        return `${berryIcon(o.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${full ? 'Sac plein : mange ou jette une baie pour la prendre' : esc(b.text)}</small></span>`;
+        return `${berryIcon(o.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${full ? 'Sac plein : clique pour choisir une baie à jeter' : esc(b.text)}</small></span>`;
       }
       case 'cards':
         return `<span class="loot-icon cards">🂠</span><span><b>Apprendre une capacité</b><small>Choisis 1 carte parmi ${o.cards.length}</small></span>`;
@@ -68,7 +68,13 @@ export function renderReward(
       const l = loot[Number(b.dataset.i)];
       if (l.kind === 'money') { run.money += o.money; l.taken = true; sfx('baie'); }
       if (l.kind === 'relic') { run.addRelic(o.relic!); l.taken = true; sfx('soin'); }
-      if (l.kind === 'berry') { if (!run.addBerry(o.berry!)) return; l.taken = true; sfx('baie'); }
+      if (l.kind === 'berry') {
+        if (!run.addBerry(o.berry!)) {
+          run.pendingBerries.push(o.berry!);
+          return swapBerries(root, run, (kept) => { if (kept.length) { l.taken = true; sfx('baie'); } draw(); });
+        }
+        l.taken = true; sfx('baie');
+      }
       if (l.kind === 'cards') return openCards(l);
       draw();
     }));
@@ -333,6 +339,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p><button class="btn primary leave">Continuer</button>`;
     root.querySelector('.leave')!.addEventListener('click', done);
     refreshBar();
+    if (run.pendingBerries.length) swapBerries(root, run, () => refreshBar());
   };
   const art = ev.tarot
     ? (ev.image

@@ -1180,3 +1180,11 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes legendGlow { 0%, 100% { filter: drop-shadow(0 0 8px #ffb300) drop-shadow(0 0 2px #fff3b0); } 50% { filter: drop-shadow(0 0 16px #ffd76a) drop-shadow(0 0 4px #fff); } }
 .ench-tag.rare { color: #9fd6ff; }
 .ench-tag.legendaire { color: #ffd76a; text-shadow: 0 0 8px #ffb30088; }
+
+/* Sac de baies plein : jeter une baie */
+.berry-swap .panel { max-width: 560px; text-align: center; }
+.berry-swap .berry-new { display: flex; justify-content: center; margin: 6px 0 10px; }
+.berry-swap-list { display: flex; gap: 10px; justify-content: center; margin: 8px 0 14px; flex-wrap: wrap; }
+.berry-swap-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 12px; border: 2px solid #7a3a46; background: #241520; color: #fff; font-weight: 800; cursor: pointer; font: inherit; }
+.berry-swap-btn:hover { border-color: #ff8a8a; transform: translateY(-3px); }
+.berry-swap-btn img { width: 40px; height: 40px; image-rendering: pixelated; }

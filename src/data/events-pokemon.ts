@@ -19,9 +19,8 @@ const giveRelic = (r: Run): string => {
 };
 const giveBerry = (r: Run): string => {
   const id = r.rollBerry();
-  if (r.addBerry(id)) return BERRY_DEFS[id].name;
-  r.heal(6);
-  return `${BERRY_DEFS[id].name} (sac plein : tu la manges, +6 PV)`;
+  r.giveBerry(id);
+  return BERRY_DEFS[id].name;
 };
 const giveCard = (r: Run, kind: 'combat' | 'elite' | 'boss'): string => {
   const id = r.cardChoices(kind, 1)[0];
