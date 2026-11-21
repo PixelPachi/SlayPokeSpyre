@@ -657,6 +657,12 @@ export class Combat {
     let { amount, effectiveness } = this.playerDamage(base, d, t);
     const g = this.gimmickOf(t);
     if (g === 'cuirasse' && t.flags.cuirasse !== this.turn) { t.flags.cuirasse = this.turn; amount = Math.floor(amount / 2); }
+    if (g === 'fantome-inconnu') {
+      const hits = (t.flags.touches ?? 0) + 1;
+      t.flags.touches = hits;
+      if (hits <= 3) amount = Math.floor(amount / 2);
+      if (hits === 3) this.events.push({ type: 'enemy-move', uid: t.uid, name: 'Le spectre est révélé !' });
+    }
     if (g === 'reine' && this.aliveEnemies().some((x) => x !== t)) amount = Math.floor(amount / 2);
     if (g === 'multiecaille' && t.hp >= t.maxHp) amount = Math.floor(amount / 2);
     if (g === 'torche' && d.pokeType === 'feu') { amount = Math.floor(amount / 2); this.addStatus(t, t.uid, 'attaque', 1); }

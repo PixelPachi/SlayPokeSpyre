@@ -59,6 +59,42 @@ const ENEMIES: EnemyDef[] = [
     ],
   },
 
+  // ——— Tour Pokémon de Lavanville (Kanto) ———
+  {
+    id: 'fantominus', name: 'Fantominus', dex: 92, types: ['spectre', 'poison'], hp: [16, 20],
+    moves: [
+      { id: 'lechouille', name: 'Léchouille', weight: 40, intent: 'attaque', pokeType: 'spectre', damage: 5, playerStatus: { status: 'paralysie', stacks: 1 } },
+      { id: 'onde-folie', name: 'Onde Folie', weight: 25, intent: 'handicap', playerStatus: { status: 'confusion', stacks: 1 } },
+      { id: 'pistolet-poison', name: 'Purédpois', weight: 35, intent: 'attaque', pokeType: 'poison', damage: 4, playerStatus: { status: 'poison', stacks: 2 } },
+    ],
+  },
+  {
+    id: 'osselait', name: 'Osselait', dex: 104, types: ['sol'], hp: [18, 22],
+    moves: [
+      { id: 'massd-os', name: "Massd'Os", weight: 40, intent: 'attaque', pokeType: 'sol', damage: 7 },
+      { id: 'osmerang', name: 'Osmerang', weight: 35, intent: 'attaque', pokeType: 'sol', damage: 3, hits: 2 },
+      { id: 'rugissement', name: 'Rugissement', weight: 25, intent: 'handicap', playerStatus: { status: 'attaque', stacks: -1 } },
+    ],
+  },
+  {
+    id: 'spectrum', name: 'Spectrum', dex: 93, types: ['spectre', 'poison'], hp: [52, 56],
+    moves: [
+      { id: 'ombre-portee', name: 'Ombre Portée', weight: 30, intent: 'attaque', pokeType: 'spectre', damage: 5, hits: 2 },
+      { id: 'poing-ombre', name: 'Poing Ombre', weight: 30, intent: 'attaque', pokeType: 'spectre', damage: 11 },
+      { id: 'onde-folie', name: 'Onde Folie', weight: 20, intent: 'handicap', playerStatus: { status: 'confusion', stacks: 2 } },
+      { id: 'malediction', name: 'Malédiction', weight: 20, intent: 'handicap', playerStatus: { status: 'poison', stacks: 4 } },
+    ],
+  },
+  {
+    id: 'ossatueur-gardien', name: 'Ossatueur', dex: 105, types: ['sol', 'spectre'], hp: [92, 92],
+    moves: [
+      { id: 'massd-os', name: "Massd'Os", weight: 30, intent: 'attaque', pokeType: 'sol', damage: 11 },
+      { id: 'osmerang', name: 'Osmerang', weight: 25, intent: 'attaque', pokeType: 'sol', damage: 5, hits: 2 },
+      { id: 'ombre-portee', name: 'Ombre Portée', weight: 25, intent: 'attaque', pokeType: 'spectre', damage: 8, playerStatus: { status: 'peur', stacks: 1 } },
+      { id: 'groz-yeux', name: "Groz'Yeux", weight: 20, intent: 'handicap', playerStatus: { status: 'defense', stacks: -2 }, block: 10 },
+    ],
+  },
+
   // ——— Bois aux Chênes (Johto) ———
   {
     id: 'hoothoot', name: 'Hoothoot', dex: 163, types: ['normal', 'vol'], hp: [14, 18],

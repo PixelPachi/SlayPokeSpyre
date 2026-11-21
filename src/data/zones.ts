@@ -21,7 +21,7 @@ export interface ZoneDef {
   /** Particules animées par-dessus le fond. */
   weather: 'pollen' | 'petales' | 'feuilles-rouges' | 'feuilles-or' | 'neige'
     | 'cristaux' | 'gouttes' | 'cendres' | 'poussiere' | 'etincelles'
-    | 'braises' | 'blizzard' | 'vent' | 'orage' | 'temps';
+    | 'braises' | 'blizzard' | 'vent' | 'orage' | 'temps' | 'feux-follets';
 }
 
 export const ZONES: ZoneDef[] = [
@@ -62,6 +62,13 @@ export const ZONES: ZoneDef[] = [
   },
 
   // ——— Acte 2 : le cœur de la tour (grottes et montagnes) ———
+  {
+    id: 'tour-lavanville', name: 'Tour Pokémon de Lavanville', region: 'Kanto', act: 1,
+    encounters: [['fantominus'], ['osselait', 'fantominus'], ['fantominus', 'fantominus'], ['osselait', 'osselait'], ['nosferapti']],
+    elites: [['spectrum']], boss: 'ossatueur-gardien',
+    background: 'backgrounds/tour-lavanville.jpg', palette: ['#6b5a8f', '#2e2440', '#120c1d'], mood: 'spectre',
+    season: 'Nuit de brume et de feux follets', weather: 'feux-follets',
+  },
   {
     id: 'mont-selenite', name: 'Mont Sélénite', region: 'Kanto', act: 2,
     encounters: [['nosferapti', 'nosferapti'], ['racaillou', 'paras'], ['melofee'], ['nosferapti', 'racaillou'], ['paras', 'paras', 'nosferapti']],

@@ -5,6 +5,10 @@ import { ENEMY_DEFS } from './enemies';
 type Spec = { gimmick: NonNullable<EnemyDef['gimmick']>; moves: EnemyMove[] };
 
 const SPECS: Record<string, Spec> = {
+  'ossatueur-gardien': {
+    gimmick: { id: 'fantome-inconnu', name: 'Fantôme Inconnu', text: 'Une silhouette spectrale le protège : il subit moitié moins de dégâts tant que tu ne l\'as pas touché 3 fois (le spectre est alors révélé).' },
+    moves: [{ id: 'charge-os-spectrale', name: 'Charge Os Spectrale', weight: 30, intent: 'attaque', pokeType: 'spectre', damage: 4, hits: 3, playerStatus: { status: 'peur', stacks: 1 }, signature: true }],
+  },
   dardargnan: {
     gimmick: { id: 'venin-tenace', name: 'Venin Tenace', text: 'Tant qu\'il est en vie, ton Poison ne diminue plus.' },
     moves: [{ id: 'assaut-venimeux', name: 'Assaut Venimeux', weight: 30, intent: 'attaque', pokeType: 'poison', damage: 8, signature: true,

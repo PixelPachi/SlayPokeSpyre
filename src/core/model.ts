@@ -168,7 +168,7 @@ export interface EnemyMove {
 
 export type GimmickId =
   | 'venin-tenace' | 'cuirasse' | 'ailes' | 'reine' | 'boule-de-neige' | 'clair-de-lune' | 'regard-royal' | 'sol-brulant'
-  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'distorsion';
+  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'distorsion' | 'fantome-inconnu';
 
 export interface EnemyDef {
   id: string;

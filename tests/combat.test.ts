@@ -339,11 +339,11 @@ describe('zones', async () => {
     }
   });
 
-  it('l’acte 1 a 5 zones et la zone change selon la run', () => {
-    expect(zonesOfAct(1)).toHaveLength(5);
+  it('l’acte 1 a 6 zones et la zone change selon la run', () => {
+    expect(zonesOfAct(1)).toHaveLength(6);
     const seen = new Set<string>();
-    for (let i = 0; i < 40; i++) seen.add(new Run(`Z${i}`, 'riolu').zone.id);
-    expect(seen.size).toBe(5);
+    for (let i = 0; i < 60; i++) seen.add(new Run(`Z${i}`, 'riolu').zone.id);
+    expect(seen.size).toBe(6);
   });
 
   it('les rencontres viennent de la zone de la run', () => {

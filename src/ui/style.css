@@ -1041,3 +1041,4 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .skin-btn small { color: #9fb0cc; font-size: 11px; }
 .skin-btn .skin-bar { position: absolute; left: 8px; right: 8px; bottom: 3px; height: 4px; border-radius: 2px; background: #222; overflow: hidden; }
 .skin-btn .skin-bar::after { content: ''; position: absolute; inset: 0; width: var(--p); background: #ffd76a; }
+.weather-feux-follets i { width: calc(10px * var(--s)); height: calc(10px * var(--s)); border-radius: 50%; background: radial-gradient(#e9dcff, #9b6bff 55%, transparent 70%); box-shadow: 0 0 16px #a77bff; opacity: 0.8; animation-name: drift; }

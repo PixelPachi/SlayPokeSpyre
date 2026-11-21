@@ -1,3 +1,4 @@
+import { ZONES } from './data/zones';
 import { cycleSound, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
@@ -201,6 +202,8 @@ function startRun(character: CharacterId): void {
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
   if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
+  // Pour tester : ?zone=tour-lavanville choisit la zone de l'acte en cours
+  if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
   // Pour tester : ?cartes=vip-aromatherapie,vip-don-naturel ajoute des cartes au deck
   for (const id of (params.get('cartes') ?? '').split(',').filter(Boolean)) run.addCard(id);
   // Pour tester : ?baies=oran,sitrus remplit le sac de baies
