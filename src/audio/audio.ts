@@ -7,7 +7,10 @@ import type { PokeType } from '../core/types';
 const FILE_TRACKS: Record<string, string> = {
   dialga: 'music/dialga.mp3',
   'foret-de-jade': 'music/foret-de-jade.mp3', // Viridian Forest (version 2)
-  'salle-originelle': 'music/salle-originelle.mp3', // One Last Time : acte secret et Arceus
+  'salle-originelle': 'music/salle-originelle.mp3', // One Last Time : acte secret
+  arceus: 'music/arceus.mp3', // combat contre Arceus
+  'tour-lavanville': 'music/tour-lavanville.mp3', // Lavender Town
+  'puits-ramoloss': 'music/puits-ramoloss.mp3', // Slowpoke Well
   'bois-aux-chenes': 'music/bois-aux-chenes.mp3', // Ilex Forest
   'bois-clematis': 'music/bois-clematis.mp3', // Bois Clémenti (Hoenn)
   'foret-de-vestigion': 'music/foret-de-vestigion.mp3', // Eterna Forest

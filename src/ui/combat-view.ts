@@ -303,7 +303,7 @@ export class CombatView {
 
   private enemyHtml(e: EnemyState, targeting: boolean): string {
     if (e.hp <= 0) return `<div class="fighter enemy dead" data-who="${e.uid}"></div>`;
-    const sprite = e.shiny ? `sprites/pokemon/shiny/${e.dex}.png` : `sprites/pokemon/front/${e.dex}.png`;
+    const sprite = e.form ? `sprites/pokemon/${e.shiny ? 'shiny' : 'front'}/arceus/${e.form}.png` : e.shiny ? `sprites/pokemon/shiny/${e.dex}.png` : `sprites/pokemon/front/${e.dex}.png`;
     return `
       <div class="fighter enemy ${e.block > 0 ? 'has-block' : ''} ${(e.statuses.sommeil ?? 0) > 0 ? 'asleep' : ''} ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
         ${this.intentHtml(e)}

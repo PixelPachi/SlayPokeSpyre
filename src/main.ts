@@ -305,7 +305,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   clear();
   const labels = { combat: 'Combat', elite: 'Pokémon dominant', boss: 'Gardien' };
   const enemies = run.encounter(type);
-  if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : run.act > LAST_ACT ? 'salle-originelle' : `gardien-${Math.min(3, run.act)}`);
+  if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : run.act > LAST_ACT ? 'arceus' : `gardien-${Math.min(3, run.act)}`);
   else {
     const zt = run.act === LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id;
     playTheme(hasTrack(`${zt}-combat`) ? `${zt}-combat` : zt); // musique de combat propre à la zone si elle existe

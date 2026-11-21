@@ -25,7 +25,14 @@ it('Arceus utilise des copies renforcées des cartes du joueur, et Jugement tous
   const names: string[] = [];
   for (let t = 0; t < 8 && c.phase === 'joueur'; t++) {
     names.push(c.enemies[0].intent.name);
+    const used = c.enemies[0].intent.pokeType;
     c.endPlayerTurn();
+    for (const e of c.aliveEnemies()) c.enemyAct(e.uid);
+    if (used) { expect(c.enemies[0].types).toEqual([used]); if (used !== 'normal') expect(c.enemies[0].form).toBe(used); }
+    if ((c.phase as string) === 'ennemi') c.endEnemyTurn();
+    c.drainEvents();
+    c.player.hp = 200;
+    continue;
     for (const e of c.aliveEnemies()) c.enemyAct(e.uid);
     if ((c.phase as string) === 'ennemi') c.endEnemyTurn();
     c.drainEvents();

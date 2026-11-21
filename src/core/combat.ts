@@ -66,6 +66,8 @@ export interface EnemyState extends Fighter {
   step: number;
   /** Compteurs propres (talents de gardien). */
   flags: Record<string, number>;
+  /** Forme affichée (Arceus : la plaque du type de sa dernière carte copiée). */
+  form?: string;
 }
 
 /** Cible d'un événement : le joueur, ou l'uid d'un ennemi. */
@@ -112,6 +114,8 @@ export interface CombatOptions {
   /** Skin équipé (le skin primordial ajoute le type Dragon). */
   skin?: string;
 }
+
+const TYPE_NAMES: Record<string, string> = { normal: 'Normal', feu: 'Feu', eau: 'Eau', plante: 'Plante', electrik: 'Électrik', glace: 'Glace', combat: 'Combat', poison: 'Poison', sol: 'Sol', vol: 'Vol', psy: 'Psy', insecte: 'Insecte', roche: 'Roche', spectre: 'Spectre', dragon: 'Dragon', tenebres: 'Ténèbres', acier: 'Acier', fee: 'Fée' };
 
 /** Gemmes : la première attaque de ce type à chaque tour inflige 5 dégâts de plus. */
 const GEMS: Partial<Record<PokeType, string>> = { combat: 'gemme-combat', plante: 'gemme-plante', normal: 'gemme-normal', feu: 'gemme-feu', psy: 'gemme-psy' };
@@ -574,6 +578,12 @@ export class Combat {
       const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
       this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal')) : undefined });
       if (m.meteo) this.setField(m.meteo);
+      // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
+      if (this.gimmickOf(e) === 'miroir-originel' && m.pokeType && e.types[0] !== m.pokeType) {
+        e.types = [m.pokeType];
+        e.form = m.pokeType;
+        this.events.push({ type: 'enemy-move', uid, name: `Arceus devient de type ${TYPE_NAMES[m.pokeType] ?? m.pokeType} !` });
+      }
       if (m.block) this.gainBlock(e, uid, m.block);
       if (m.heal) this.healEnemy(e, m.heal);
       const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
@@ -638,7 +648,8 @@ export class Combat {
   private mirrorMove(e: EnemyState): EnemyMove {
     const def = ENEMY_DEFS[e.defId];
     e.step++;
-    if (e.step % 4 === 0) return def.moves.find((m) => m.id === 'jugement')!;
+    // Jugement prend le type de la plaque actuelle d'Arceus
+    if (e.step % 4 === 0) return { ...def.moves.find((m) => m.id === 'jugement')!, pokeType: e.types[0] ?? 'normal' };
     const pool = [...this.hand, ...this.drawPile, ...this.discardPile, ...this.exhaustPile];
     const card = pool.length ? this.rng.pick(pool) : null;
     if (!card) return def.moves[0];
