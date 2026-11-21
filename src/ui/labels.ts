@@ -29,6 +29,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   gel: { label: 'Gel', color: '#9fe3ff', text: (n) => `${n}/3. À 3 Gel, passe son tour (un gardien n'inflige que la moitié de ses dégâts).` },
   concentration: { label: 'Concentration', color: '#ff8a5c', text: (n) => `Au début du prochain tour, inflige ${n} dégâts… si aucun dégât n'est subi d'ici là.` },
   etourdi: { label: 'Étourdi', color: '#c9c9c9', text: () => 'Passe son prochain tour.' },
+  abri: { label: 'Abri', color: '#9fe7a8', text: () => 'Le prochain coup subi est entièrement annulé.' },
   rage: { label: 'Rage', color: '#e5484d', text: (n) => `${n} Rage. Kangourex en gagne 1 chaque fois qu’il perd des PV ; les cartes de Rage s’en servent.` },
   elan: { label: 'Élan', color: '#ffb84d', text: (n) => `Tes attaques infligent ${n} dégât${n > 1 ? 's' : ''} de plus. L’Élan est divisé par deux à la fin de ton tour.` },
 };

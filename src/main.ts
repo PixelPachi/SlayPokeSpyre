@@ -242,6 +242,12 @@ function startRun(character: CharacterId): void {
   if (params.get('noeud') === 'marche-noir') { clear(); return renderBlackMarket(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'ct') { clear(); return renderTmShop(screen, run, () => showMap(run)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
+  // Début de run : Grodoudou et Pijako accueillent le joueur et lui proposent leur aide
+  if (run.act === 1 && !params.get('combat') && !params.get('boutique') && !params.has('noeud') && !params.get('fin')) {
+    clear();
+    persist(run, false);
+    return renderEvent(screen, run, () => showMap(run), 'accueil', (f) => duel(run, f));
+  }
   if (run.act === LAST_ACT) return showSummit(run);
   showMap(run);
 }
@@ -314,12 +320,13 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   view = new CombatView(
     screen,
     run,
-    { seed: `${run.seed}-${run.floor}`, enemies, label: labels[type], boss: type === 'boss' },
+    { seed: `${run.seed}-${run.floor}`, enemies, label: labels[type], boss: type === 'boss', oneHp: run.zenFights > 0 },
     (r) => {
       clear();
       run.hp = r.hp;
       if (r.consumed?.length) run.relics = run.relics.filter((id) => !r.consumed!.includes(id));
       if (!r.victory) return endRun(run, false);
+      if (run.zenFights > 0 && --run.zenFights === 0) run.relics = run.relics.filter((id) => id !== 'encens-zen'); // l'Encens Zen s'est consumé
       if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
       if (run.relics.includes('grelot-coque')) run.heal(6);
       run.shiniesMet += r.shinies;

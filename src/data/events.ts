@@ -22,6 +22,8 @@ export interface GameEvent {
   title: string;
   /** Image à afficher : sprite PokeAPI, ou carte de tarot (public/tarot) si tarot est vrai. */
   image: string;
+  /** Plusieurs Pokémon côte à côte (ex. Grodoudou et Pijako). */
+  images?: string[];
   /** Arcane majeur : la carte s'affiche en grand à gauche, les choix à droite. */
   tarot?: boolean;
   /** Sprite de secours quand l'arcane n'a pas encore d'illustration. */

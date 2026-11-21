@@ -47,13 +47,13 @@ export class CombatView {
   constructor(
     private root: HTMLElement,
     private run: Run,
-    private opts: { seed: string; enemies: string[]; label: string; enemyPower?: number; boss?: boolean },
+    private opts: { seed: string; enemies: string[]; label: string; enemyPower?: number; boss?: boolean; oneHp?: boolean },
     private onEnd: (r: CombatResult) => void,
   ) {
     this.combat = new Combat({
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
-      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin,
+      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin, oneHp: opts.oneHp,
     });
     this.combat.drainEvents();
     saveHooks.encounter?.(this.combat.enemies.map((e) => ({ dex: e.dex, shiny: e.shiny })));

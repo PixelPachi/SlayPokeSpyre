@@ -18,6 +18,7 @@ export type StatusId =
   | 'concentration' // Mitra-Poing : frappe au début du prochain tour si aucun dégât n'est subi d'ici là
   | 'etourdi' // passe son prochain tour
   | 'rage' // Kangourex : gagnée en perdant des PV, renforce les cartes de Rage
+  | 'abri' // annule entièrement le prochain coup subi
   | 'elan'; // Caninos : +1 dégât par point à toutes ses attaques, divisé par deux à la fin du tour
 
 export type Statuses = Partial<Record<StatusId, number>>;

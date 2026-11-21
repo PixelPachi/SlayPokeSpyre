@@ -1,3 +1,4 @@
+import { welcomeEvent } from '../data/events-accueil';
 import { babySprite, skinSprite } from '../data/skins';
 import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
@@ -337,7 +338,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   const tarot = fresh(TAROT_EVENTS), classic = fresh(EVENTS);
   const pool = tarot.length && (run.rng.next() < 0.4 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
   const forced = forcedId?.replace(/-inverse$/, '');
-  const ev: GameEvent = [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
+  const ev: GameEvent = forced === 'accueil' ? welcomeEvent(run) : [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
   run.seenEvents.push(ev.id);
   // Arcane inversé (1 chance sur 4) : la carte est retournée, avec des effets extrêmes
   const reversed = !!ev.reversed && (forcedId ? forcedId.endsWith('-inverse') : run.rng.next() < 0.25);
@@ -380,6 +381,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     ? (ev.image
       ? `<img class="tarot-card ${reversed ? 'reversed' : ''}" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
       : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
+    : ev.images ? `<div class="event-duo">${ev.images.map((im) => `<img class="event-img poke" src="${asset(im)}" alt="">`).join('')}</div>`
     : `<img class="event-img ${ev.image.includes('sprites/pokemon') ? 'poke' : ''}" src="${asset(ev.image)}" alt="">`;
   root.innerHTML = shell(run, 'Événement', `
     <div class="event-panel ${ev.tarot ? 'tarot' : ''} ${reversed ? 'is-reversed' : ''}">

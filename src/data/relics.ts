@@ -108,6 +108,9 @@ const RELICS: RelicDef[] = [
   { id: 'rouage-espace', name: 'Rouage de l’Espace', sprite: 'rouage-espace', rarity: 'quete', owner: 'commun',
     text: 'Un rouage nacré qui déforme l’espace. Aucun effet… mais avec le Rouage du Temps, un passage s’ouvre après Dialga Primal.' },
 
+  { id: 'encens-zen', name: 'Encens Zen', sprite: 'sea-incense', rarity: 'quete', owner: 'commun',
+    text: 'Cadeau de Grodoudou : les ennemis de tes 3 prochains combats n’ont qu’1 PV. Disparaît ensuite.' },
+
   // ——— Communs à tous ———
   { id: 'metronome', name: 'Métronome', sprite: 'metronome', rarity: 'commun', owner: 'commun',
     text: 'Chaque attaque inflige 1 dégât de plus par attaque déjà jouée ce tour.' },

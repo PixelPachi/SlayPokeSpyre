@@ -201,6 +201,8 @@ export class Run {
   kecleonHostile = false;
   /** Dialga apaisé avec au moins 3 Pokémon : les Rouages du Temps et de l'Espace peuvent apparaître. */
   cogsUnlocked = false;
+  /** Combats restants avec l'Encens Zen (ennemis à 1 PV). */
+  zenFights = 0;
   /** Vrai si le joueur possède les deux Rouages (l'acte secret s'ouvre après Dialga). */
   get hasCogs(): boolean { return this.relics.includes('rouage-temps') && this.relics.includes('rouage-espace'); }
 

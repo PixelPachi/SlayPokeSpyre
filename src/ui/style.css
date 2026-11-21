@@ -1277,3 +1277,15 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .skin-btn { width: 76px !important; padding-bottom: 6px !important; }
 .sheet-actions { padding-top: 8px; gap: 6px; }
 .sheet-actions .btn { padding-top: 8px; padding-bottom: 8px; }
+
+/* Accueil : Grodoudou et Pijako côte à côte */
+.event-duo { display: flex; align-items: flex-end; justify-content: center; gap: 0; }
+.event-duo .event-img { width: 210px; height: 210px; margin: 0 -24px; }
+.event-duo .event-img:last-child { width: 150px; height: 150px; margin-bottom: 60px; }
+.event-duo .event-img { width: 150px !important; height: 150px !important; margin: 0 -18px !important; }
+.event-duo .event-img:last-child { width: 110px !important; height: 110px !important; margin-bottom: 40px !important; }
+.event-panel:has(.event-duo) .node-title { font-size: 34px; margin: 2px 0 6px; }
+.event-panel:has(.event-duo) .event-text { font-size: 15px; line-height: 1.4; margin: 0 0 10px; }
+.event-panel:has(.event-duo) .event-choices { gap: 8px; }
+.event-panel:has(.event-duo) .choice { padding: 8px 18px; }
+.event-panel:has(.event-duo) .event-duo { margin-top: -10px; }

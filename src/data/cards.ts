@@ -7,6 +7,7 @@ import { CANINOS_CARDS } from './cards-caninos';
 import { MEW_CARDS } from './cards-mew';
 import { RIOLU_CARDS } from './cards-riolu';
 import { NEUTRAL_CARDS } from './cards-neutres';
+import { RONDOUDOU_CARDS } from './cards-rondoudou';
 
 const CARDS: CardDef[] = [
   // ——— Carte bouclier de départ (commune à Vipélierre, Kangourex et Caninos) ———
@@ -105,7 +106,7 @@ CARDS.push(
   bossCard('g-electrocution', 'Électrocution', 'electrik', [{ kind: 'perte-pv', amount: 4 }]),
   bossCard('g-felure-temporelle', 'Fêlure Temporelle', 'dragon', [{ kind: 'pa', amount: -1 }]),
 );
-CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS);
+CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS, ...RONDOUDOU_CARDS);
 // Ronflement et Blabla Dodo ne se jouent qu'endormi
 for (const d of CARDS) if (/-(ronflement|blabla-dodo)$/.test(d.id) || ['n-devoreve', 'n-cauchemar', 'n-baillement'].includes(d.id)) d.requires = { ...d.requires, asleep: true };
 

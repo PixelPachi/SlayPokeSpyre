@@ -113,6 +113,8 @@ export interface CombatOptions {
   boss?: boolean;
   /** Skin équipé (le skin primordial ajoute le type Dragon). */
   skin?: string;
+  /** Encens Zen : les ennemis commencent à 1 PV. */
+  oneHp?: boolean;
 }
 
 const TYPE_NAMES: Record<string, string> = { normal: 'Normal', feu: 'Feu', eau: 'Eau', plante: 'Plante', electrik: 'Électrik', glace: 'Glace', combat: 'Combat', poison: 'Poison', sol: 'Sol', vol: 'Vol', psy: 'Psy', insecte: 'Insecte', roche: 'Roche', spectre: 'Spectre', dragon: 'Dragon', tenebres: 'Ténèbres', acier: 'Acier', fee: 'Fée' };
@@ -208,6 +210,8 @@ export class Combat {
     if (skinDef(ch.id, opts.skin)?.addDragon) this.player.types = primordialTypes(this.player.types);
     this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
+    // Encens Zen (offert par Grodoudou) : les ennemis n'ont qu'1 PV
+    if (opts.oneHp) for (const e of this.enemies) e.hp = 1;
     if (opts.enemyPower && opts.enemyPower > 1) {
       for (const e of this.enemies) e.statuses.attaque = Math.round((opts.enemyPower - 1) * 4);
     }
@@ -1313,6 +1317,13 @@ export class Combat {
   }
 
   private dealDamage(f: Fighter, who: Who, amount: number, effectiveness: Effectiveness): void {
+    // Abri : le prochain coup subi est entièrement annulé
+    if (amount > 0 && (f.statuses.abri ?? 0) > 0) {
+      f.statuses.abri! -= 1;
+      if (!f.statuses.abri) delete f.statuses.abri;
+      this.events.push(who === 'player' ? { type: 'player-move', name: 'Abri !' } : { type: 'enemy-move', uid: who as number, name: 'Abri !' });
+      return;
+    }
     const blocked = Math.min(f.block, amount);
     f.block -= blocked;
     const rest = amount - blocked;
