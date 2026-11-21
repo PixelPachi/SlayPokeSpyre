@@ -123,7 +123,7 @@ export function computeDamage(base: number, attacker: Fighter, defender: Fighter
   if ((attacker.statuses.brulure ?? 0) > 0) dmg *= 0.75;
   if ((defender.statuses.peur ?? 0) > 0) dmg *= 1.5;
   return {
-    amount: Math.floor(dmg + 1e-9),
+    amount: base > 0 ? Math.max(1, Math.floor(dmg + 1e-9)) : Math.floor(dmg + 1e-9), // au moins 1 dégât
     effectiveness: effectivenessOf(mult, hasImmunity(type, defender.types)),
   };
 }

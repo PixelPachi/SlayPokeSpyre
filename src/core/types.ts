@@ -17,7 +17,7 @@ export const TYPE_LABELS: Record<PokeType, string> = {
 /** Multiplicateurs de la section 4 du GDD. */
 export const SUPER_EFFECTIVE = 1.5;
 export const NOT_VERY_EFFECTIVE = 0.5;
-export const IMMUNE = 0.25; // jamais 0, pour qu'aucune carte ne soit morte
+export const IMMUNE = 0.5; // jamais 0 : une « immunité » divise seulement les dégâts par deux
 export const SAME_TYPE_BONUS = 1.25;
 
 type Row = { se?: PokeType[]; nve?: PokeType[]; imm?: PokeType[] };
@@ -53,6 +53,8 @@ export function typeMultiplier(attack: PokeType, defender: readonly PokeType[]):
     else if (row.se?.includes(t)) m *= SUPER_EFFECTIVE;
     else if (row.nve?.includes(t)) m *= NOT_VERY_EFFECTIVE;
   }
+  // Avec une immunité, on garde toujours au moins la moitié des dégâts (pas de combat bloqué)
+  if (defender.some((t) => row.imm?.includes(t))) m = Math.max(m, IMMUNE);
   return m;
 }
 

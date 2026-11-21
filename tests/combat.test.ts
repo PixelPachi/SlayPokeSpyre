@@ -12,7 +12,8 @@ describe('table des types', () => {
   it('applique super efficace, résistance, immunité réduite et double faiblesse', () => {
     expect(typeMultiplier('feu', ['plante'])).toBe(1.5);
     expect(typeMultiplier('feu', ['eau'])).toBe(0.5);
-    expect(typeMultiplier('normal', ['spectre'])).toBe(0.25);
+    expect(typeMultiplier('normal', ['spectre'])).toBe(0.5);
+    expect(typeMultiplier('combat', ['spectre', 'poison'])).toBe(0.5); // immunité + résistance : jamais moins de la moitié
     expect(typeMultiplier('glace', ['sol', 'vol'])).toBe(2.25);
     expect(typeMultiplier('combat', ['insecte', 'poison'])).toBe(0.25);
   });
@@ -387,11 +388,11 @@ describe('cartes neutres', async () => {
     c.player.aura = 0;
     c.player.energy = 9;
     c.hand = makeDeck(['n-chatiment', 'n-chatiment']).map((x, i) => ({ ...x, uid: 800 + i }));
-    c.play(800, rat.uid); // 9 ×0,25 (Spectre contre Normal) = 2
-    expect(rat.hp).toBe(298);
+    c.play(800, rat.uid); // 9 ×0,5 (Spectre contre Normal) = 4
+    expect(rat.hp).toBe(296);
     rat.statuses.poison = 2;
-    c.play(801, rat.uid); // 18 ×0,25 = 4
-    expect(rat.hp).toBe(294);
+    c.play(801, rat.uid); // 18 ×0,5 = 9
+    expect(rat.hp).toBe(287);
   });
 });
 
