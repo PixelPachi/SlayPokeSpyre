@@ -96,8 +96,24 @@ export class CombatView {
   private endSfx = false;
   private lastAura = -1;
 
+  /** Victoire : pas d'écran « Victoire ! », le butin s'affiche directement par-dessus la scène. */
+  private ended = false;
+  private finish(): void {
+    if (this.ended) return;
+    this.ended = true;
+    this.onEnd({
+      victory: this.combat.phase === 'victoire',
+      hp: this.combat.player.hp,
+      consumed: this.combat.consumedRelics,
+      shinies: this.combat.enemies.filter((e) => e.shiny).length,
+      fled: this.combat.fled,
+    });
+  }
+
   private render(): void {
+    if (this.ended) return;
     const c = this.combat;
+    if (c.phase === 'victoire' && !c.fled && !this.endSfx) setTimeout(() => this.finish(), 1300);
     if ((c.phase === 'victoire' || c.phase === 'defaite') && !this.endSfx) {
       this.endSfx = true;
       setTimeout(() => sfx(c.phase === 'victoire' ? 'victoire' : 'defaite'), 500);
@@ -143,7 +159,7 @@ export class CombatView {
         </div>
         <button class="end-turn" ${c.phase !== 'joueur' || this.busy ? 'disabled' : ''}>${c.phase === 'ennemi' ? 'Tour ennemi…' : 'Fin du tour <kbd>E</kbd>'}</button>
       </div>
-      ${c.phase === 'victoire' || c.phase === 'defaite' ? this.endOverlay() : ''}
+      ${(c.phase === 'victoire' && !c.fled) ? '' : c.phase === 'victoire' || c.phase === 'defaite' ? this.endOverlay() : ''}
     `;
     this.lastAura = this.combat.player.aura;
     // Carte choisie au toucher (sans glisser) : on montre les dégâts sur chaque ennemi
@@ -773,15 +789,7 @@ export class CombatView {
     this.el.addEventListener('click', (ev) => {
       const t = ev.target as HTMLElement;
       if (t.closest('.end-turn')) return void this.endTurn();
-      if (t.closest('.next')) {
-        return this.onEnd({
-          victory: this.combat.phase === 'victoire',
-          hp: this.combat.player.hp,
-          consumed: this.combat.consumedRelics,
-          shinies: this.combat.enemies.filter((e) => e.shiny).length,
-          fled: this.combat.fled,
-        });
-      }
+      if (t.closest('.next') && !this.ended) return this.finish();
       if (t.closest('.tb-deck')) return openDeckOverlay(this.root, { title: 'Ton deck' }, this.run);
     });
 

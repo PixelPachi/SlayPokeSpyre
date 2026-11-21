@@ -58,13 +58,27 @@ export function renderReward(
         return `<span class="loot-icon cards">🂠</span><span><b>Apprendre une capacité</b><small>Choisis 1 carte parmi ${o.cards.length}</small></span>`;
     }
   };
-  const draw = () => {
-    root.innerHTML = shell(run, o.label, `
+  // Après un combat gagné, le butin s'affiche par-dessus la scène (Pokémon, zone) au lieu d'un nouvel écran
+  const combatEl = root.querySelector<HTMLElement>('.combat');
+  let layer: HTMLElement | null = null;
+  if (combatEl) {
+    combatEl.classList.add('rewarding');
+    layer = document.createElement('div');
+    layer.className = 'reward-layer';
+    combatEl.appendChild(layer);
+  }
+  const panel = () => `
       <div class="loot-panel">
         <h1 class="node-title">${esc(o.title)}</h1>
         <div class="loot-list">${loot.map((l, i) => l.taken ? '' : `<button class="loot-row ${l.kind === 'berry' && run.berries.length >= MAX_BERRIES ? 'full' : ''}" data-i="${i}">${row(l)}</button>`).join('') || '<p class="node-sub">Tout est ramassé !</p>'}</div>
         <button class="btn primary proceed">Continuer ›</button>
-      </div>`, 'reward');
+      </div>`;
+  const draw = () => {
+    if (layer) {
+      layer.innerHTML = panel();
+      const bar = root.querySelector('.topbar');
+      if (bar) bar.outerHTML = topbar(run, o.label);
+    } else root.innerHTML = shell(run, o.label, panel(), 'reward');
     bindDeck(root, run);
     root.querySelectorAll<HTMLElement>('.loot-row').forEach((b) => b.addEventListener('click', () => {
       const l = loot[Number(b.dataset.i)];
@@ -91,7 +105,7 @@ export function renderReward(
       if (c) { run.addCard(c.dataset.pick!); l.taken = true; sfx('carte'); box.remove(); return draw(); }
       if (t.closest('.skip-cards')) box.remove();
     });
-    root.querySelector('.node-screen')!.appendChild(box);
+    (layer ?? root.querySelector('.node-screen')!).appendChild(box);
   };
   draw();
 }
