@@ -74,6 +74,11 @@ export const TAROT_EVENTS: GameEvent[] = [
           return `Abracadabra ! Améliorées : ${upgradeRandom(r, 2)}.`;
         },
       },
+      {
+        label: 'Demander un tour enchanté', detail: 'Perd 40 ₽, enchante une carte de ton choix',
+        available: (r) => r.money >= 40,
+        apply: (r) => { r.money -= 40; return { pick: 'enchanter', text: 'Alakazam agite ses cuillères… Quelle carte doit-il enchanter ?' }; },
+      },
       { label: 'Passer ton chemin', detail: 'Rien ne se passe', apply: () => 'Alakazam hausse les épaules et reprend son numéro.' },
     ],
   },
@@ -87,6 +92,7 @@ export const TAROT_EVENTS: GameEvent[] = [
         apply: () => ({ pick: 'ameliorer', text: 'Quelle technique veux-tu perfectionner ?' }),
       },
       { label: 'Recopier une page', detail: 'Gagne une carte peu commune ou rare', apply: (r) => `Tu apprends ${addRandomCard(r, 'elite')}.` },
+      { label: 'Déchiffrer les runes', detail: 'Enchante une carte de ton choix', apply: () => ({ pick: 'enchanter', text: 'Les runes s’illuminent. Sur quelle carte les graves-tu ?' }) },
     ],
   },
   {
@@ -187,6 +193,7 @@ export const TAROT_EVENTS: GameEvent[] = [
         apply: () => ({ pick: 'ameliorer', text: 'Sa lumière révèle une technique à perfectionner.' }),
       },
       { label: 'Méditer à ses côtés', detail: 'Récupère 18 PV', apply: (r) => `Le silence te repose : +${r.heal(18)} PV.` },
+      { label: 'Approcher la flamme de la lanterne', detail: '−6 PV, enchante une carte de ton choix', available: (r) => r.hp > 6, apply: (r) => (hurt(r, 6), { pick: 'enchanter', text: 'La flamme bleue danse. Quelle carte lui présentes-tu ?' }) },
     ],
   },
   {

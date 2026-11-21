@@ -81,6 +81,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     choices: [
       { label: 'Se baigner', detail: '+5 PV max et récupère 10 PV', apply: (r) => { gainMax(r, 5); r.heal(10); return 'Tes muscles se détendent. +5 PV max.'; } },
       { label: 'Y tremper tes cartes', detail: 'Améliore une carte', available: canUpgrade, apply: () => ({ pick: 'ameliorer', text: 'La vapeur renforce une capacité. Laquelle ?' }) },
+      { label: 'Plonger au fond de la source', detail: '−5 PV, enchante une carte', available: (r) => r.hp > 5, apply: (r) => { hurt(r, 5); return { pick: 'enchanter', text: 'Au fond, une pierre luit. Quelle carte y poses-tu ?' }; } },
     ],
   },
   {
@@ -97,6 +98,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     choices: [
       { label: 'Offrir ta vitalité', detail: '−8 PV max, gagne un objet tenu', available: (r) => r.maxHp > 20, apply: (r) => { loseMax(r, 8); return `L’autel accepte. Tu reçois : ${giveRelic(r)}.`; } },
       { label: 'Prier', detail: 'Améliore 2 cartes au hasard', available: canUpgrade, apply: (r) => `Une douce chaleur t’envahit. Améliorées : ${upgradeRandom(r, 2)}.` },
+      { label: 'Graver une rune', detail: 'Enchante une carte de ton choix', apply: () => ({ pick: 'enchanter', text: 'Les runes violettes attendent. Sur quelle carte les graves-tu ?' }) },
       { label: 'Ne rien toucher', detail: 'Rien ne se passe', apply: () => 'Mieux vaut ne pas jouer avec ces choses-là.' },
     ],
   },
@@ -225,6 +227,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     text: 'Un grand miroir reflète une version de toi aux capacités étranges. Ton reflet tend la main à travers la vitre.',
     choices: [
       { label: 'Toucher le reflet', detail: 'Transforme 2 cartes de ton deck', apply: () => ({ pick: 'transformer', text: 'Le reflet échange une de tes capacités. Laquelle ?', count: 2 }) },
+      { label: 'Fixer ton reflet', detail: 'Enchante une carte de ton choix', apply: () => ({ pick: 'enchanter', text: 'Ton reflet sourit. Quelle capacité veut-il sublimer ?' }) },
       { label: 'Briser le miroir', detail: '−4 PV, gagne 50 ₽', apply: (r) => { hurt(r, 4); r.money += 50; return 'Des éclats volent… et des pièces tombent du cadre. −4 PV, +50 ₽.'; } },
     ],
   },

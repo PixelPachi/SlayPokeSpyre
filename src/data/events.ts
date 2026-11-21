@@ -12,7 +12,7 @@ export interface EventChoice {
   available?: (run: Run) => boolean;
 }
 
-export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer' | 'monde';
+export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer' | 'monde' | 'enchanter';
 export interface EventPick { pick: PickKind; text: string; count?: number; then?: PickKind }
 /** Duel : lance un combat contre ce Pokémon ; victoire = une carte rare au choix et des ₽. */
 export interface EventFight { fight: string; text: string; /** PV et Attaque de l'adversaire multipliés en plus. */ power?: number; /** La victoire rapporte aussi un objet tenu. */ relic?: boolean }

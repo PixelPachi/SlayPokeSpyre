@@ -2,7 +2,7 @@
 import type { Form, Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
 import { BERRIES, MAX_BERRIES } from '../data/berries';
-import { allCards, CARD_DEFS, neutralPool, rewardPool } from '../data/cards';
+import { allCards, CARD_DEFS, ENCHANTS, cardDef, enchantId, neutralPool, rewardPool } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, ZONES, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
@@ -262,6 +262,18 @@ export class Run {
     this.qTreasure = out === 'tresor' ? 0.02 : Math.min(0.2, this.qTreasure + 0.02);
     this.qShop = out === 'marche-noir' ? 0.03 : Math.min(0.2, this.qShop + 0.03);
     return out;
+  }
+
+  /** Enchante une carte du deck (enchantement au hasard parmi ceux qui lui conviennent). Renvoie l'enchantement. */
+  enchantCard(uid: number): string | null {
+    const c = this.deck.find((x) => x.uid === uid);
+    if (!c || c.defId.startsWith('ench:')) return null;
+    const d = cardDef(c.defId, c.upgraded);
+    const ok = Object.keys(ENCHANTS).filter((k) => ENCHANTS[k].ok(d));
+    if (!ok.length) return null;
+    const k = this.rng.pick(ok);
+    c.defId = enchantId(k, c.defId);
+    return k;
   }
 
   addCard(defId: string, upgraded = false): Card {

@@ -9,6 +9,7 @@ import { CHARACTERS } from '../data/characters';
 import { EVENTS, type EventFight, type EventPick, type GameEvent } from '../data/events';
 import { TAROT_EVENTS } from '../data/events-tarot';
 import { renderCard } from './card';
+import { ENCHANTS } from '../data/cards';
 import { MAX_BERRIES, berryPrice } from '../data/berries';
 import { TYPE_LABELS } from '../core/types';
 import { SHINY_CHANCE } from '../core/combat';
@@ -333,7 +334,9 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   bindDeck(root, run);
   const results: string[] = [];
   const doPick = (p: EventPick, left: number) => {
-    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise') : run.deck;
+    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise')
+      : p.pick === 'enchanter' ? run.deck.filter((c) => { const d = cardDef(c.defId, c.upgraded); return !d.enchant && d.category !== 'statut' && !d.keywords?.includes('injouable'); })
+      : run.deck;
     if (!cards.length) return showResult([...results, 'Aucune carte ne convient.'].join(' '));
     openDeckOverlay(root, {
       title: p.text, cards, upgradePreview: p.pick === 'ameliorer', cancelLabel: results.length || p.pick === 'monde' ? 'Terminer' : 'Annuler',
@@ -343,6 +346,10 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
         if (p.pick === 'ameliorer') { run.upgradeCard(uid); results.push(`${name} est améliorée !`); }
         else if (p.pick === 'retirer') { run.removeCard(uid); results.push(`Tu as oublié ${name}.`); }
         else if (p.pick === 'dupliquer') { run.addCard(card.defId, card.upgraded); results.push(`${name} est dupliquée.`); }
+        else if (p.pick === 'enchanter') {
+          const k = run.enchantCard(uid);
+          results.push(k ? `${name} est enchantée : ✦ ${ENCHANTS[k].name} (${ENCHANTS[k].text}) !` : `${name} ne peut pas être enchantée.`);
+        }
         else if (p.pick === 'monde') {
           run.removeCard(uid);
           const id = run.foreignCard();

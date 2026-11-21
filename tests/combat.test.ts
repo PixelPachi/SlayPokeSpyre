@@ -621,7 +621,7 @@ describe('arcanes majeurs', async () => {
         run.money = 200;
         const before = run.maxHp;
         const r = c.apply(run);
-        expect(typeof r === 'string' || 'fight' in r || ['retirer', 'ameliorer', 'dupliquer', 'transformer', 'monde'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
+        expect(typeof r === 'string' || 'fight' in r || ['retirer', 'ameliorer', 'dupliquer', 'transformer', 'monde', 'enchanter'].includes(r.pick), `${ev.id} ${c.label}`).toBe(true);
         expect(run.hp, ev.id).toBeGreaterThan(0);
         expect(run.hp, ev.id).toBeLessThanOrEqual(run.maxHp);
         if (ev.id === 'tarot-diable' && i < 3) expect(run.maxHp).toBeLessThan(before);
@@ -1050,5 +1050,18 @@ describe('« ? » surprises et Marché noir', () => {
     expect((f.effects[0] as { amount: number }).amount).toBe((base.effects[0] as { amount: number }).amount + 3);
     expect(cardDef(enchantId('vif', 'aurasphere')).cost).toBe(cardDef('aurasphere').cost - 1);
     expect(cardDef(enchantId('vif', 'aurasphere'), true).name.endsWith('+')).toBe(true);
+  });
+});
+
+describe('enchantement par événement', () => {
+  it('enchantCard ajoute un enchantement qui convient à la carte', async () => {
+    const { Run } = await import('../src/core/run');
+    const { cardDef } = await import('../src/data/cards');
+    const r = new Run('ENC', 'riolu');
+    const c = r.deck[0];
+    const k = r.enchantCard(c.uid);
+    expect(k).toBeTruthy();
+    expect(cardDef(c.defId).enchant).toBe(k);
+    expect(r.enchantCard(c.uid)).toBeNull();
   });
 });
