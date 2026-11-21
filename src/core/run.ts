@@ -63,6 +63,7 @@ export function generateMap(rng: Rng): MapNode[][] {
   const rows = grid.map((row) => row.filter((n): n is MapNode => n !== null));
   const parents = (n: MapNode) => (n.row === 0 ? [] : rows[n.row - 1].filter((p) => p.next.includes(n.col)));
 
+  let chests = 0;
   for (const row of rows) {
     for (const n of row) {
       if (n.row === 0) n.type = 'combat';
@@ -73,9 +74,11 @@ export function generateMap(rng: Rng): MapNode[][] {
           const t = rng.weighted(WEIGHTS.map(([type, weight]) => ({ type, weight }))).type;
           if ((t === 'elite' || t === 'centre') && n.row < 5) continue; // pas avant le 6e étage
           if ((t === 'pension' || t === 'ct') && n.row < 3) continue;
+          if (t === 'coffre' && chests >= 2) continue; // 2 coffres au plus par acte
           if (t === 'centre' && n.row === MAP_ROWS - 2) continue; // le 15e est déjà un Centre
           if ((t === 'centre' || t === 'boutique' || t === 'elite' || t === 'coffre' || t === 'pension' || t === 'ct') && parents(n).some((p) => p.type === t)) continue;
           n.type = t;
+          if (t === 'coffre') chests++;
           break;
         }
       }

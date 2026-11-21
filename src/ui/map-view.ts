@@ -18,7 +18,7 @@ export const NODE_INFO: Record<NodeType, { label: string; text: string }> = {
   boutique: { label: 'Marché Kecleon', text: 'Acheter des cartes et des objets, oublier une carte. Si Kecleon est chromatique, tout est à moitié prix !' },
   elite: { label: 'Pokémon dominant', text: 'Un ennemi très fort, de meilleures récompenses.' },
   tresor: { label: 'Trésor', text: 'Une Poké Ball pleine de surprises.' },
-  coffre: { label: 'Coffre mystère', text: 'Un coffre à ouvrir… ou à laisser. Certains sont maudits !' },
+  coffre: { label: 'Coffre mystère', text: 'Un coffre au trésor : Pokédollars et un objet tenu ou une baie. 2 au plus par acte.' },
   pension: { label: 'Pension Pokémon', text: 'Fusionne deux cartes de ton deck en une seule.' },
   ct: { label: 'Marchand de CT', text: 'Achète des capacités apprises par d’autres Pokémon.' },
   boss: { label: 'Gardien', text: 'Le boss de la zone.' },

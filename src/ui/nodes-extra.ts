@@ -1,7 +1,7 @@
 // Nouveaux nœuds de la carte : Coffre mystère, Pension Pokémon (fusion de cartes), Marchand de CT.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
-import { CURSES, canFuse, cardDef, fusionId } from '../data/cards';
+import { canFuse, cardDef, fusionId } from '../data/cards';
 import { BERRY_DEFS } from '../data/berries';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
@@ -18,9 +18,9 @@ const refreshBar = (root: HTMLElement, run: Run, label: string) => {
   bindDeck(root, run);
 };
 
-/** Coffre mystère : on l'ouvre ou on le laisse. 1 coffre sur 3 est maudit (objet tenu + malédiction). */
+/** Coffre mystère : Pokédollars + objet tenu ou baie (parfois un gros trésor). */
 export function renderChest(root: HTMLElement, run: Run, done: Done): void {
-  const cursed = run.rng.next() < 0.33;
+  const cursed = false;
   const big = run.rng.next() < 0.25;
   root.innerHTML = shell(run, 'Coffre mystère', `
     <div class="chest ${cursed ? 'cursed' : ''}">${chestSvg()}</div>
@@ -45,12 +45,8 @@ export function renderChest(root: HTMLElement, run: Run, done: Done): void {
       berry = run.rollBerry();
       if (!run.addBerry(berry)) { run.heal(6); berry = undefined; lines.push('Ton sac de baies est plein : tu manges la baie (+6 PV).'); }
     }
-    let curse: string | undefined;
-    if (cursed) {
-      curse = run.rng.pick(CURSES);
-      run.addCard(curse);
-      sfx('defaite');
-    } else sfx('victoire');
+    const curse: string | undefined = undefined;
+    sfx('victoire');
     root.querySelector('.node-body')!.innerHTML = `
       <div class="chest open ${cursed ? 'cursed' : ''}">${chestSvg(true)}</div>
       <h1 class="node-title">${cursed ? 'Le coffre était maudit !' : big ? 'Un gros trésor !' : 'Le coffre s’ouvre…'}</h1>

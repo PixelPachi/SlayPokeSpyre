@@ -1030,5 +1030,6 @@ describe('pension et coffres', () => {
     const types = new Set<string>();
     for (let i = 0; i < 20; i++) for (const row of new Run(`N${i}`, 'riolu').map) for (const n of row) types.add(n.type);
     for (const t of ['coffre', 'pension', 'ct']) expect(types.has(t), t).toBe(true);
+    for (let i = 0; i < 30; i++) expect(new Run(`K${i}`, 'riolu').map.flat().filter((n) => n.type === 'coffre').length).toBeLessThanOrEqual(2);
   });
 });
