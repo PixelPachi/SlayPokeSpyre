@@ -18,6 +18,9 @@ export const NODE_INFO: Record<NodeType, { label: string; text: string }> = {
   boutique: { label: 'Marché Kecleon', text: 'Acheter des cartes et des objets, oublier une carte. Si Kecleon est chromatique, tout est à moitié prix !' },
   elite: { label: 'Pokémon dominant', text: 'Un ennemi très fort, de meilleures récompenses.' },
   tresor: { label: 'Trésor', text: 'Une Poké Ball pleine de surprises.' },
+  coffre: { label: 'Coffre mystère', text: 'Un coffre à ouvrir… ou à laisser. Certains sont maudits !' },
+  pension: { label: 'Pension Pokémon', text: 'Fusionne deux cartes de ton deck en une seule.' },
+  ct: { label: 'Marchand de CT', text: 'Achète des capacités apprises par d’autres Pokémon.' },
   boss: { label: 'Gardien', text: 'Le boss de la zone.' },
 };
 
@@ -41,6 +44,12 @@ export function nodeIcon(type: NodeType, bossDex = 15): string {
       return '<svg viewBox="0 0 40 40"><path d="M6 10l7 6 7-10 7 10 7-6-3 22H9z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5" stroke-linejoin="round"/><circle cx="15" cy="23" r="2.5" fill="#fff"/><circle cx="25" cy="23" r="2.5" fill="#fff"/></svg>';
     case 'tresor':
       return `<img src="${asset('sprites/items/poke-ball.png')}" alt="">`;
+    case 'coffre':
+      return '<svg viewBox="0 0 40 40"><rect x="6" y="16" width="28" height="18" rx="2" fill="#a0642c" stroke="#3b2208" stroke-width="2.5"/><path d="M6 18c0-8 6-11 14-11s14 3 14 11z" fill="#c07a36" stroke="#3b2208" stroke-width="2.5"/><rect x="6" y="17" width="28" height="4" fill="#f5c84c" stroke="#3b2208" stroke-width="1.5"/><rect x="17" y="18" width="6" height="8" rx="1" fill="#f5c84c" stroke="#3b2208" stroke-width="1.5"/></svg>';
+    case 'pension':
+      return `<img src="${asset('sprites/items/lucky-egg.png')}" alt="">`;
+    case 'ct':
+      return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#7a8fd8" stroke="#16204a" stroke-width="2.5"/><circle cx="20" cy="20" r="9" fill="#b9c6ff" stroke="#16204a" stroke-width="1.5"/><circle cx="20" cy="20" r="3" fill="#16204a"/><text x="20" y="13" text-anchor="middle" font-size="7" font-weight="900" fill="#16204a" font-family="Nunito, sans-serif">CT</text></svg>';
     case 'boss':
       return `<img src="${asset(`sprites/pokemon/front/${bossDex}.png`)}" alt="">`;
   }
@@ -97,7 +106,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
       <div class="map-legend">
         <h3>Tour du Temps</h3>
         <p>Acte ${run.act} · ${zone.name}<br><small>Une faille venue de ${zone.region}</small></p>
-        ${(['combat', 'evenement', 'centre', 'boutique', 'elite', 'tresor'] as NodeType[])
+        ${(['combat', 'evenement', 'centre', 'boutique', 'elite', 'tresor', 'coffre', 'pension', 'ct'] as NodeType[])
           .map((t) => `<div class="legend-row"><span class="legend-icon node-${t}">${nodeIcon(t)}</span>${NODE_INFO[t].label}</div>`).join('')}
         <p class="legend-hint">Clique sur un nœud qui brille pour avancer.</p>
       </div>

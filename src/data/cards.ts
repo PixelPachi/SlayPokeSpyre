@@ -82,6 +82,16 @@ CARDS.push({
   cost: 0, target: 'soi', effects: [], keywords: ['injouable', 'conservee'],
   upgrade: { effects: [] },
 });
+// Malédictions des coffres maudits : injouables, elles restent dans le deck (oublie-les au Marché Kecleon)
+CARDS.push({
+  id: 'cauchemar', name: 'Cauchemar', character: 'normal', pokeType: 'spectre', category: 'statut', rarity: 'depart',
+  cost: 0, target: 'soi', effects: [], keywords: ['injouable'], onDraw: [{ kind: 'pa', amount: -1 }], upgrade: {},
+});
+CARDS.push({
+  id: 'poisse', name: 'Poisse', character: 'normal', pokeType: 'tenebres', category: 'statut', rarity: 'depart',
+  cost: 0, target: 'soi', effects: [], keywords: ['injouable'], onDraw: [{ kind: 'statut', status: 'confusion', stacks: 1, on: 'soi' }], upgrade: {},
+});
+export const CURSES = ['voeu-brise', 'cauchemar', 'poisse'];
 // Cartes de gardien : glissées dans ton deck pendant un combat de gardien, injouables, elles agissent quand on les pioche
 const bossCard = (id: string, name: string, pokeType: CardDef['pokeType'], onDraw: CardDef['onDraw']): CardDef => ({
   id, name, character: 'normal', pokeType, category: 'statut', rarity: 'depart', cost: 0, target: 'soi', effects: [],
@@ -100,7 +110,41 @@ CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_C
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 
 /** Définition d'une carte, version améliorée appliquée si besoin. */
+/** Id d'une carte fusionnée à la Pension (les « + » marquent les cartes améliorées). */
+export function fusionId(a: string, upA: boolean, b: string, upB: boolean): string {
+  return `fusion:${a}${upA ? '+' : ''}|${b}${upB ? '+' : ''}`;
+}
+
+/** Deux cartes peuvent-elles fusionner ? (pas de talent, de malédiction, ni de cibles incompatibles) */
+export function canFuse(a: CardDef, b: CardDef): boolean {
+  const ok = (d: CardDef) => (d.category === 'attaque' || d.category === 'technique') && !d.keywords?.includes('injouable')
+    && !d.onDraw && !d.fusion && !d.requires;
+  if (!ok(a) || !ok(b)) return false;
+  const t = new Set([a.target, b.target]);
+  return !(t.has('ennemi') && t.has('tous'));
+}
+
+const RANK = { depart: 0, commune: 1, 'peu-commune': 2, rare: 3 } as Record<string, number>;
+
+function fusionDef(defId: string, upgraded: boolean): CardDef {
+  const [ra, rb] = defId.slice(7).split('|');
+  const A = cardDef(ra.replace(/\+$/, ''), ra.endsWith('+') || upgraded);
+  const B = cardDef(rb.replace(/\+$/, ''), rb.endsWith('+') || upgraded);
+  const target = A.target === 'soi' ? B.target : A.target;
+  const kw = [...new Set([...(A.keywords ?? []), ...(B.keywords ?? [])])];
+  return {
+    id: defId, name: `${A.name.replace(/\+$/, '')} & ${B.name.replace(/\+$/, '')}${upgraded ? '+' : ''}`,
+    character: A.character, pokeType: A.pokeType,
+    category: A.category === 'attaque' || B.category === 'attaque' ? 'attaque' : 'technique',
+    rarity: (RANK[A.rarity] ?? 0) >= (RANK[B.rarity] ?? 0) ? A.rarity : B.rarity,
+    cost: Math.max(A.cost, B.cost, A.cost + B.cost - 1), target,
+    effects: [...A.effects, ...B.effects], keywords: kw.length ? kw : undefined,
+    upgrade: {}, artName: A.name.replace(/\+$/, ''), fusion: [ra, rb],
+  };
+}
+
 export function cardDef(defId: string, upgraded = false): CardDef {
+  if (defId.startsWith('fusion:')) return fusionDef(defId, upgraded);
   const base = CARD_DEFS[defId];
   if (!base) throw new Error(`Carte inconnue : ${defId}`);
   if (!upgraded) return base;

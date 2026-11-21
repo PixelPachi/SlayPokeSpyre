@@ -1061,3 +1061,62 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .hist-card { position: relative; zoom: 0.8; }
 .hist-card .card { margin: 0; transform: none; }
 .hist-n { position: absolute; right: -6px; top: -8px; z-index: 3; background: #ffd76a; color: #1a1a1a; border-radius: 999px; padding: 2px 8px; font-family: 'Lilita One', sans-serif; font-size: 18px; }
+
+/* Coffre mystère, Pension, Marchand de CT */
+.chest { width: 180px; margin: 0 auto -6px; filter: drop-shadow(0 6px 10px #000a); }
+.chest svg { width: 100%; }
+.chest .lid { transition: transform 0.4s; }
+.chest:not(.open) { animation: chestWiggle 2.2s ease-in-out infinite; }
+.chest.cursed.open { filter: drop-shadow(0 0 24px #a46bff) drop-shadow(0 6px 10px #000a); }
+.chest.open:not(.cursed) { filter: drop-shadow(0 0 24px #ffd76a) drop-shadow(0 6px 10px #000a); }
+@keyframes chestWiggle { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-4deg); } 90% { transform: rotate(4deg); } 95% { transform: rotate(-2deg); } }
+.curse-card { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 220px; text-align: center; }
+.curse-card em { color: #d9b8ff; font-size: 13px; }
+.pension-egg { width: 120px; image-rendering: pixelated; margin: 0 auto -10px; display: block; }
+.fusion-result { zoom: 1.4; justify-content: center; }
+.tm-from { color: #b9c6ff; font-weight: 800; }
+
+/* ——— Animations d'attaque par type ——— */
+.vfx { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 45; }
+.vfx > * { position: absolute; left: 0; top: 0; }
+.vfx-p { width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); background: var(--c); opacity: 0;
+  animation-name: vfxBurst; animation-timing-function: cubic-bezier(.2,.7,.3,1); animation-fill-mode: both; filter: drop-shadow(0 0 8px var(--c)); }
+.vfx-p.swirl { animation-name: vfxSwirl; }
+.vfx-p.fall { animation-name: vfxFall; animation-timing-function: cubic-bezier(.55,0,.9,.5); }
+.vfx-p.dot, .vfx-p.bubble { border-radius: 50%; }
+.vfx-p.bubble { background: radial-gradient(circle at 35% 30%, #fff8 0 18%, var(--c) 40%, transparent 72%); }
+.vfx-p.drop { border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: radial-gradient(circle at 60% 40%, #fffc 0 15%, var(--c) 45%); }
+.vfx-p.leaf { border-radius: 0 100% 0 100%; }
+.vfx-p.shard { clip-path: polygon(50% 0, 70% 50%, 50% 100%, 30% 50%); height: calc(var(--s) * 1.8); }
+.vfx-p.rock { clip-path: polygon(20% 0, 80% 10%, 100% 55%, 70% 100%, 15% 90%, 0 40%); }
+.vfx-p.star { clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0 50%, 39% 38%); }
+.vfx-p.spark { width: calc(var(--s) * 0.35); height: calc(var(--s) * 2.2); border-radius: 3px; }
+.vfx-p.wisp { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; filter: blur(2px) drop-shadow(0 0 10px var(--c)); }
+@keyframes vfxBurst {
+  0% { opacity: 0; transform: translate(var(--sx), var(--sy)) rotate(var(--rot)) scale(0.4); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(calc(var(--rot) + 140deg)) scale(1); }
+}
+@keyframes vfxSwirl {
+  0% { opacity: 0; transform: rotate(0) translateX(10px) rotate(var(--rot)) scale(0.4); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(320deg) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); }
+}
+@keyframes vfxFall {
+  0% { opacity: 0; transform: translate(var(--sx), var(--sy)) rotate(var(--rot)); }
+  10% { opacity: 1; }
+  85% { opacity: 1; transform: translate(var(--dx), var(--dy)) rotate(calc(var(--rot) + 200deg)); }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 10px)) rotate(calc(var(--rot) + 220deg)) scale(0.6); }
+}
+.vfx-ring { width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; border: 5px solid var(--c); box-shadow: 0 0 18px var(--c); animation: vfxRing 0.7s ease-out forwards; }
+@keyframes vfxRing { 0% { transform: scale(0.2); opacity: 1; } 100% { transform: scale(4.2); opacity: 0; border-width: 1px; } }
+.vfx-flash { width: 360px; height: 360px; margin: -180px 0 0 -180px; border-radius: 50%; background: radial-gradient(circle, var(--c) 0, transparent 65%); opacity: 0; animation: vfxFlash 0.45s ease-out forwards; mix-blend-mode: screen; }
+@keyframes vfxFlash { 0% { opacity: 0; transform: scale(0.5); } 25% { opacity: 0.9; } 100% { opacity: 0; transform: scale(1.3); } }
+.vfx-bolt { width: 60px; height: 220px; margin: -230px 0 0 -30px; filter: drop-shadow(0 0 12px #fff27a); animation: vfxBolt 0.45s steps(2) forwards; }
+@keyframes vfxBolt { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: 0.3; } 60% { opacity: 1; } 100% { opacity: 0; } }
+.vfx-slash { width: 320px; height: 14px; margin: -7px 0 0 -160px; border-radius: 50%; background: linear-gradient(90deg, transparent, var(--c), transparent); box-shadow: 0 0 14px var(--c);
+  transform: rotate(var(--a)) scaleX(0); opacity: 0; animation: vfxSlash 0.42s ease-out forwards; animation-delay: var(--d); }
+.vfx-tenebres .vfx-slash { box-shadow: 0 0 16px #8a5cd6; }
+@keyframes vfxSlash { 0% { opacity: 0; transform: rotate(var(--a)) scaleX(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) scaleX(1.2); } }
+.vfx-shake { animation: vfxShake 0.35s; }
+@keyframes vfxShake { 20% { transform: translate(-6px, 2px); } 40% { transform: translate(5px, -3px); } 60% { transform: translate(-4px, 2px); } 80% { transform: translate(3px, -1px); } }

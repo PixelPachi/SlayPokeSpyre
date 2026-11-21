@@ -1,3 +1,4 @@
+import { playVfx } from './vfx';
 import { skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
 import { TERRAINS, WEATHER } from '../core/weather';
@@ -279,6 +280,20 @@ export class CombatView {
 
   // ——— Événements visuels ———
 
+  /** Pour tester les animations depuis la console : window.__vfx('feu'). */
+  demoVfx(type: PokeType, onPlayer = false): void {
+    this.vfxOn(onPlayer ? 'player' : this.combat.aliveEnemies()[0].uid, type);
+  }
+
+  /** Animation d'attaque (par type) sur un combattant. */
+  private vfxOn(who: Who, type: PokeType, strength = 1): void {
+    const el = this.whoEl(who)?.querySelector('.sprite') ?? this.whoEl(who);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const s = this.root.getBoundingClientRect();
+    playVfx(this.fx, r.left - s.left + r.width / 2, r.top - s.top + r.height * 0.55, type, strength);
+  }
+
   private whoEl(who: Who): HTMLElement | null {
     return this.el.querySelector(`.fighter[data-who="${who}"]`);
   }
@@ -324,7 +339,7 @@ export class CombatView {
         case 'enemy-move': {
           const el = this.whoEl(ev.uid);
           el?.classList.add('lunge');
-          if (ev.move?.damage !== undefined) sfxType(ev.move.pokeType ?? 'normal', 1.2);
+          if (ev.move?.damage !== undefined) { sfxType(ev.move.pokeType ?? 'normal', 1.2); setTimeout(() => this.vfxOn('player', ev.move!.pokeType ?? 'normal', (ev.move!.hits ?? 1) > 1 ? 1.3 : 1), 180); }
           else if (ev.move) sfx('statut');
           if (ev.move && (ev.move.damage !== undefined || ev.move.signature)) this.showEnemyCard(ev.uid, ev.move, ev.damage ?? ev.move.damage ?? 0);
           else this.float(ev.uid, ev.name, 'move', 0);
@@ -504,7 +519,10 @@ export class CombatView {
     const isAttack = this.combat.def(card).category === 'attaque';
     if (isAttack) sfxType(this.combat.def(card).pokeType); else sfx('carte');
     const cost = this.combat.costOf(card);
+    const d0 = this.combat.def(card);
+    const targets = isAttack ? (d0.target === 'tous' ? this.combat.aliveEnemies().map((e) => e.uid) : [targetUid ?? this.combat.aliveEnemies()[0]?.uid]) : [];
     this.combat.play(uid, targetUid);
+    for (const t of targets) if (t !== undefined) setTimeout(() => this.vfxOn(t, d0.pokeType), 120);
     if (cost > 0) this.floatEnergy(`−${cost} PA`, '', false);
     this.refresh();
     if (isAttack) this.whoEl('player')?.classList.add('lunge'); // petit pas en avant vers les ennemis

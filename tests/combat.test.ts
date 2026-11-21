@@ -1012,3 +1012,23 @@ describe('skin Magma', () => {
     expect(recordRunStats(s, 'riolu', {}, ['heatran']).map((k) => k.id)).toEqual(['magma']);
   });
 });
+
+describe('pension et coffres', () => {
+  it('une carte fusionnée cumule les effets et coûte la somme moins 1', async () => {
+    const { cardDef, fusionId, canFuse } = await import('../src/data/cards');
+    const a = cardDef('ruse'), b = cardDef('detection');
+    expect(canFuse(a, b)).toBe(true);
+    const f = cardDef(fusionId('ruse', false, 'detection', true));
+    expect(f.effects.length).toBe(a.effects.length + cardDef('detection', true).effects.length);
+    expect(f.cost).toBe(Math.max(a.cost, b.cost, a.cost + b.cost - 1));
+    expect(f.category).toBe('attaque');
+    const up = cardDef(f.id, true);
+    expect(up.name.endsWith('+')).toBe(true);
+  });
+  it('les nouveaux nœuds apparaissent sur la carte', async () => {
+    const { Run } = await import('../src/core/run');
+    const types = new Set<string>();
+    for (let i = 0; i < 20; i++) for (const row of new Run(`N${i}`, 'riolu').map) for (const n of row) types.add(n.type);
+    for (const t of ['coffre', 'pension', 'ct']) expect(types.has(t), t).toBe(true);
+  });
+});

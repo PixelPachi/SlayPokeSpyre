@@ -7,7 +7,7 @@ import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, ZONES, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
 
-export type NodeType = 'combat' | 'evenement' | 'centre' | 'boutique' | 'elite' | 'tresor' | 'boss';
+export type NodeType = 'combat' | 'evenement' | 'centre' | 'boutique' | 'elite' | 'tresor' | 'coffre' | 'pension' | 'ct' | 'boss';
 
 export interface MapNode {
   row: number;
@@ -31,7 +31,7 @@ export const SUMMIT_STEPS = ['elite', 'centre', 'boutique', 'boss'] as const;
 
 /** Parts du GDD (le trésor et le Centre Pokémon d'avant-boss sont placés à part). */
 const WEIGHTS: [NodeType, number][] = [
-  ['combat', 45], ['evenement', 22], ['centre', 12], ['boutique', 5], ['elite', 8],
+  ['combat', 40], ['evenement', 20], ['centre', 11], ['boutique', 5], ['elite', 8], ['coffre', 6], ['pension', 4], ['ct', 4],
 ];
 
 /** Carte à embranchements façon Slay the Spire : chemins qui montent sans se croiser. */
@@ -72,8 +72,9 @@ export function generateMap(rng: Rng): MapNode[][] {
         for (let tries = 0; tries < 30; tries++) {
           const t = rng.weighted(WEIGHTS.map(([type, weight]) => ({ type, weight }))).type;
           if ((t === 'elite' || t === 'centre') && n.row < 5) continue; // pas avant le 6e étage
+          if ((t === 'pension' || t === 'ct') && n.row < 3) continue;
           if (t === 'centre' && n.row === MAP_ROWS - 2) continue; // le 15e est déjà un Centre
-          if ((t === 'centre' || t === 'boutique' || t === 'elite') && parents(n).some((p) => p.type === t)) continue;
+          if ((t === 'centre' || t === 'boutique' || t === 'elite' || t === 'coffre' || t === 'pension' || t === 'ct') && parents(n).some((p) => p.type === t)) continue;
           n.type = t;
           break;
         }

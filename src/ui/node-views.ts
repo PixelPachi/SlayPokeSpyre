@@ -20,11 +20,11 @@ import { weatherParticles } from './combat-view';
 
 type Done = () => void;
 
-function shell(run: Run, label: string, body: string, cls = ''): string {
+export function shell(run: Run, label: string, body: string, cls = ''): string {
   return `<div class="node-screen ${cls}">${topbar(run, label)}<div class="node-body">${body}</div></div>`;
 }
 
-function bindDeck(root: HTMLElement, run: Run): void {
+export function bindDeck(root: HTMLElement, run: Run): void {
   root.querySelector('.tb-deck')?.addEventListener('click', () => openDeckOverlay(root, { title: 'Ton deck' }, run));
 }
 

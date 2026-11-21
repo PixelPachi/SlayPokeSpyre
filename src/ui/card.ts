@@ -23,7 +23,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const text = o.text ?? cardText(d, null, null);
   const enemy = d.id.startsWith('ennemi-');
   const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character);
-  const art = enemy ? artNoPokemon(d.name) : artUrl(d.name, d.character);
+  const art = enemy ? artNoPokemon(d.name) : artUrl(d.artName ?? d.name, d.character);
   const orb = orbUrl(d.character);
   return `
     <div class="card rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}

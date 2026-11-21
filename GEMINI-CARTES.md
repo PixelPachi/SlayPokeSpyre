@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (305 images)
+## 2. Les illustrations des capacités (307 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -37,7 +37,7 @@ Prompt commun :
 Puis, selon la colonne « Pokémon dans l'image » :
 
 - **Capacité exclusive (170 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
-- **Capacité partagée (135 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
+- **Capacité partagée (137 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
 
@@ -88,6 +88,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `canon-graine.png` | Canon Graine | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `cascade.png` | Cascade | Eau · Attaque | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
 | `casse-brique.png` | Casse-Brique | Combat · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | poings et coups, aura bleue, impact martial | ☐ |
+| `cauchemar.png` | Cauchemar | Spectre · Statut | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `cendres.png` | Cendres | Feu · Statut | Neutre | Aucun (capacité seule) | flammes orange et rouges, braises, chaleur | ☐ |
 | `champ-brumeux.png` | Champ Brumeux | Fée · Technique | Neutre | Aucun (capacité seule) | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `champ-electrifie.png` | Champ Électrifié | Électrik · Technique | Neutre | Aucun (capacité seule) | éclairs jaunes, étincelles, arcs électriques | ☐ |
@@ -259,6 +260,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `poing-glace.png` | Poing Glace | Glace · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | cristaux de glace, givre, brume froide bleutée | ☐ |
 | `poing-meteore.png` | Poing Météore | Acier · Attaque | Riolu | **Riolu** lance la capacité | métal brillant, reflets argentés, étincelles | ☐ |
 | `poing-karate.png` | Poing-Karaté | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
+| `poisse.png` | Poisse | Ténèbres · Statut | Neutre | Aucun (capacité seule) | ténèbres, griffes d’ombre, lueurs rouges | ☐ |
 | `possessif.png` | Possessif | Psy · Technique | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `poudreuse.png` | Poudreuse | Glace · Attaque | Neutre | Aucun (capacité seule) | cristaux de glace, givre, brume froide bleutée | ☐ |
 | `poursuite.png` | Poursuite | Ténèbres · Attaque | Vipélierre | **Vipélierre** lance la capacité | ténèbres, griffes d’ombre, lueurs rouges | ☐ |

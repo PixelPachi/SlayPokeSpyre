@@ -136,7 +136,8 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
   }
   if (d.onDraw) {
     const t = d.onDraw.map((e) => e.kind === 'statut' ? `tu subis ${e.stacks} ${STATUS_INFO[e.status].label}` : e.kind === 'pa' ? `tu perds ${-e.amount} PA` : e.kind === 'perte-pv' ? `tu perds <b class="down">${e.amount}</b> PV` : '').filter(Boolean);
-    parts.push(t.length ? `Carte de gardien. Quand tu la pioches, ${t.join(' et ')}.` : 'Carte de gardien. Encombre ta main.');
+    const kind = d.id.startsWith('g-') ? 'Carte de gardien' : 'Malédiction';
+    parts.push(t.length ? `${kind}. Quand tu la pioches, ${t.join(' et ')}.` : `${kind}. Encombre ta main.`);
   }
   if (d.requires?.block) parts.push('<i>Jouable seulement avec de la Protection.</i>');
   if (d.requires?.aura && !d.effects.some((e) => e.kind === 'consomme-aura')) parts.push(`<i>Demande ${d.requires.aura} Aura.</i>`);

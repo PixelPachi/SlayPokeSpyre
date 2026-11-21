@@ -101,6 +101,10 @@ export interface CardDef {
   requires?: { block?: number; aura?: number; notBoss?: boolean };
   /** Cartes de gardien : effet subi quand on la pioche. */
   onDraw?: Effect[];
+  /** Illustration d'une autre carte (cartes fusionnées à la Pension). */
+  artName?: string;
+  /** Carte fusionnée : les deux cartes d'origine. */
+  fusion?: [string, string];
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

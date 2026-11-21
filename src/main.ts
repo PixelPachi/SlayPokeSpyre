@@ -1,3 +1,4 @@
+import { renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
 import { cycleSound, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
@@ -213,6 +214,7 @@ function startRun(character: CharacterId): void {
   if (params.get('combat')) {
     clear();
     playTheme(params.get('combat')!.startsWith('dialga') ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
+    (window as unknown as { __vfx: (t: string, p?: boolean) => void }).__vfx = (t, p) => view?.demoVfx(t as never, p);
     view = new CombatView(screen, run, { seed: `${run.seed}-test`, enemies: params.get('combat')!.split(','), label: 'Test', boss: true }, () => showMap(run));
     return;
   }
@@ -222,6 +224,10 @@ function startRun(character: CharacterId): void {
     run.act = 3; Object.assign(run, { combatsWon: 14, elitesDefeated: 3, duelsWon: 1, eventsSeen: 6, shiniesMet: 1, bossesDefeated: 3, bossNames: ['Dardargnan', 'Camérupt', 'Rayquaza'], lastEnemies: ['heatran'] });
     return endRun(run, params.get('fin') === 'victoire');
   }
+  // Pour tester : ?noeud=coffre | pension | ct
+  if (params.get('noeud') === 'coffre') { clear(); return renderChest(screen, run, () => showMap(run)); }
+  if (params.get('noeud') === 'pension') { clear(); return renderPension(screen, run, () => showMap(run)); }
+  if (params.get('noeud') === 'ct') { clear(); return renderTmShop(screen, run, () => showMap(run)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
   if (run.act >= LAST_ACT) return showSummit(run);
   showMap(run);
@@ -259,6 +265,12 @@ function enterNode(run: Run, row: number, col: number): void {
         return renderEvent(screen, run, back, undefined, (f) => duel(run, f));
       case 'tresor':
         return renderTreasure(screen, run, back);
+      case 'coffre':
+        return renderChest(screen, run, back);
+      case 'pension':
+        return renderPension(screen, run, back);
+      case 'ct':
+        return renderTmShop(screen, run, back);
       case 'boss':
         return fight(run, 'boss');
     }
