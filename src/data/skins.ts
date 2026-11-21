@@ -15,6 +15,8 @@ export interface SkinDef {
   bosses?: string[];
   /** Formes qui ont un sprite pour ce skin (n° du Pokédex). */
   dex?: number[];
+  /** Skin primordial : le Pokémon gagne le type Dragon (Acier devient Dragon). */
+  addDragon?: boolean;
   /** Le Bébé de Kangourex a son propre sprite pour ce skin (skins/<id>/bebe.png). */
   baby?: boolean;
   /** Prévu pour plus tard : le skin remplace le deck de départ et/ou l'objet tenu de départ. */
@@ -32,7 +34,7 @@ const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouan
 // Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.
 const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): SkinDef => ({
   id: 'primordial', name: 'Primordial', stat: 'bosses', goal: 1, bosses: ['dialga-primal'], dex,
-  goalText: `Vaincre Dialga Primal en jouant ${name}`, ...extra,
+  goalText: `Vaincre Dialga Primal en jouant ${name}. Le Pokémon gagne le type Dragon.`, addDragon: true, ...extra,
 });
 
 export const SKINS: Record<CharacterId, SkinDef[]> = {
@@ -69,4 +71,11 @@ export function babySprite(skin?: string): string {
 /** Skin d'un personnage (pour appliquer son deck / objet de départ). */
 export function skinDef(c: CharacterId, skin?: string): SkinDef | undefined {
   return skin ? SKINS[c]?.find((k) => k.id === skin) : undefined;
+}
+
+/** Types d'un Pokémon primordial : Acier devient Dragon, sinon Dragon s'ajoute. */
+export function primordialTypes(types: PokeType[]): PokeType[] {
+  if (types.includes('dragon')) return [...types];
+  if (types.includes('acier')) return ['dragon', ...types.filter((t) => t !== 'acier')];
+  return [...types, 'dragon'];
 }

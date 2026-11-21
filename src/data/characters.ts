@@ -24,7 +24,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
   kangourex: {
     id: 'kangourex', name: 'Kangourex', dex: [115], types: ['normal'], maxHp: 85,
     mega: { stone: 'kangourexite', dex: 10039, name: 'Méga-Kangourex', types: ['normal'], fromAct: 1 },
-    talent: { name: 'Instinct maternel', text: 'Le Bébé Kangourex apparaît au début de chaque combat.' },
+    talent: { name: 'Instinct maternel', text: 'Le Bébé Kangourex apparaît au début de chaque combat. Chaque fois que Kangourex perd des PV, il gagne 1 Rage.' },
     starterRelic: 'lait-meumeu',
     starterDeck: ['ecras-face', 'ecras-face', 'ecras-face', 'ecras-face', 'abri', 'abri', 'abri', 'abri', 'kan-coup-main', 'kan-coup-double'],
   },

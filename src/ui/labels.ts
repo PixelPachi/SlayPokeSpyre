@@ -29,6 +29,8 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   gel: { label: 'Gel', color: '#9fe3ff', text: (n) => `${n}/3. À 3 Gel, passe son tour (un gardien n'inflige que la moitié de ses dégâts).` },
   concentration: { label: 'Concentration', color: '#ff8a5c', text: (n) => `Au début du prochain tour, inflige ${n} dégâts… si aucun dégât n'est subi d'ici là.` },
   etourdi: { label: 'Étourdi', color: '#c9c9c9', text: () => 'Passe son prochain tour.' },
+  rage: { label: 'Rage', color: '#e5484d', text: (n) => `${n} Rage. Kangourex en gagne 1 chaque fois qu’il perd des PV ; les cartes de Rage s’en servent.` },
+  elan: { label: 'Élan', color: '#ffb84d', text: (n) => `Tes attaques infligent ${n} dégât${n > 1 ? 's' : ''} de plus. L’Élan est divisé par deux à la fin de ton tour.` },
 };
 
 export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => string }> = {
@@ -40,6 +42,8 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   'amour-filial': { label: 'Amour Filial', text: (n) => `Le Bébé attaque ${n} fois de plus à la fin de chaque tour.` },
   eveil: { label: 'Éveil', text: (n) => `Au début de chaque tour, le Bébé gagne ${n} Puissance.` },
   zenith: { label: 'Zénith', text: (n) => `Tes attaques Feu infligent ${n} dégâts de plus.` },
+  rancune: { label: 'Rancune', text: (n) => `Chaque fois que tu perds des PV, gagne ${n} Rage de plus.` },
+  turbo: { label: 'Turbo', text: (n) => `Au début de chaque tour, gagne ${n} Élan.` },
   braises: { label: 'Braises', text: (n) => `Au début de chaque tour, applique ${n} Brûlure à tous les ennemis.` },
   souvenir: { label: 'Souvenir', text: (n) => `Au début de chaque tour, ajoute ${n} carte${n > 1 ? 's' : ''} de n'importe quel Pokémon au hasard dans ta main.` },
   telekinesie: { label: 'Télékinésie', text: (n) => `Au début de chaque tour, pioche ${n} carte${n > 1 ? 's' : ''} de plus.` },
@@ -78,6 +82,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         if (e.contreStatut) parts.push('Double si la cible a un statut.');
         if (e.parStatut) parts.push(`+${e.parStatutX ?? 1} par ${STATUS_INFO[e.parStatut].label} sur la cible.`);
         if (e.siBebe) parts.push(`+${e.siBebe} si le Bébé est debout.`);
+        if (e.parSoi) parts.push(`+${e.parSoiX ?? 1} par ${STATUS_INFO[e.parSoi].label}.`);
         if (e.parBebe) parts.push(`+${e.parBebe === 1 ? '' : `${e.parBebe} × `}la Puissance du Bébé.`);
         break;
       }
@@ -110,6 +115,9 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
       case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main.`); break;
       case 'bebe-attaque': parts.push(`${e.times > 1 ? `Le Bébé attaque ${e.times} fois` : 'Le Bébé attaque'}${e.status ? ` et inflige ${e.stacks} ${STATUS_INFO[e.status].label}` : ''}.`); break;
+      case 'protection-par-soi': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}ta ${STATUS_INFO[e.status].label} en Protection.`); break;
+      case 'perd-statut': parts.push(`Consomme toute ta ${STATUS_INFO[e.status].label}.`); break;
+      case 'pioche-par-soi': parts.push(`Pioche 1 carte par ${e.per} ${STATUS_INFO[e.status].label}.`); break;
       case 'protection-par-statut': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en Protection.`); break;
       case 'soin-par-statut': parts.push(`Récupère ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en PV.`); break;
       case 'detonation': parts.push(`Consomme la ${STATUS_INFO[e.status].label} ${d.target === 'tous' ? 'de tous les ennemis' : 'de la cible'} : <b>${e.per}</b> dégâts par point.`); break;
@@ -138,7 +146,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'decouverte': parts.push(`Choisis 1 Aromate parmi ${e.count}${e.upgraded ? ' (améliorés)' : ''} : il rejoint ton deck jusqu'à la fin du combat.`); break;
       case 'pioche': parts.push(`Pioche <b>${e.amount}</b> carte${e.amount > 1 ? 's' : ''}.`); break;
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
-      case 'perte-pv': parts.push(d.character === 'riolu' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+${e.amount} Aura)</span>.` : `Perd <b>${e.amount}</b> PV.`); break;
+      case 'perte-pv': parts.push(d.character === 'riolu' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+${e.amount} Aura)</span>.` : d.character === 'kangourex' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+1 Rage)</span>.` : `Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
       case 'repos': parts.push(`Récupère <b>${e.healPct ? `${Math.round(e.healPct * 100)} % de tes PV` : 'tous tes PV'}</b> et t’endors.`); break;
       case 'ajoute-sommeil': parts.push('Ajoute une carte de sommeil au hasard à ta main.'); break;

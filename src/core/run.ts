@@ -1,4 +1,4 @@
-import { skinDef } from '../data/skins';
+import { primordialTypes, skinDef } from '../data/skins';
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
 import type { Form, Card, CardDef, CharacterId } from './model';
 import { Rng } from './rng';
@@ -165,7 +165,8 @@ export class Run {
   get form(): Form {
     const ch = CHARACTERS[this.character];
     const evo = this.evolutions.filter((e) => e.act <= this.act).pop();
-    return evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
+    const f = evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
+    return skinDef(this.character, this.skin)?.addDragon ? { ...f, types: primordialTypes(f.types) } : f;
   }
 
   /** Évolution qui vient d'avoir lieu en entrant dans cet acte. */

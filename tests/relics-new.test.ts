@@ -48,17 +48,17 @@ describe('nouveaux objets tenus', () => {
   });
   it('Herbe Pouvoir : une seule capacité à 2 PA gratuite par combat', () => {
     const c = start('kangourex', ['herbe-pouvoir'], ['onix']);
-    const big = give(c, 'kan-giga-impact');
+    const big = give(c, 'kan-dynamo-poing');
     expect(c.costOf(big)).toBe(0);
     c.player.energy = 3;
     c.play(big.uid, c.aliveEnemies()[0]?.uid);
     expect(c.player.energy).toBe(3);
-    expect(c.costOf(give(c, 'kan-giga-impact'))).toBeGreaterThanOrEqual(2);
+    expect(c.costOf(give(c, 'kan-dynamo-poing'))).toBeGreaterThanOrEqual(2);
   });
   it('Encens Bizarre : la première capacité d’un autre Pokémon coûte 1 PA de moins (Mew)', () => {
     const c = start('mew', ['encens-bizarre'], ['onix']);
-    const other = give(c, 'kan-giga-impact');
-    const base = start('mew', [], ['onix']).costOf({ uid: 1, defId: 'kan-giga-impact', upgraded: false });
+    const other = give(c, 'kan-dynamo-poing');
+    const base = start('mew', [], ['onix']).costOf({ uid: 1, defId: 'kan-dynamo-poing', upgraded: false });
     expect(c.costOf(other)).toBe(Math.max(0, base - 1));
   });
   it('Évoluroc : 3 Protection par tour avant évolution seulement', () => {
@@ -94,5 +94,41 @@ describe('nouveaux objets tenus', () => {
     c.player.familiar!.hp = 2;
     (c as unknown as { startPlayerTurn: () => void }).startPlayerTurn();
     expect(c.player.familiar!.hp).toBe(4);
+  });
+});
+
+describe('Rage, Élan et skin primordial', () => {
+  it('Kangourex gagne 1 Rage par perte de PV ; Frénésie en profite ; Dégommage la consomme', () => {
+    const c = start('kangourex', [], ['onix']);
+    (c as unknown as { loseHp: (...a: unknown[]) => void }).loseHp(c.player, 'player', 3, 'carte');
+    (c as unknown as { loseHp: (...a: unknown[]) => void }).loseHp(c.player, 'player', 3, 'carte');
+    expect(c.player.statuses.rage).toBe(2);
+    const fr = give(c, 'kan-frenesie');
+    const ref = start('kangourex', [], ['onix']);
+    expect((c.previewCardDamage(fr) ?? 0) - (ref.previewCardDamage(give(ref, 'kan-frenesie')) ?? 0)).toBeGreaterThanOrEqual(4);
+    c.player.energy = 9;
+    c.play(give(c, 'kan-degommage').uid, c.aliveEnemies()[0].uid);
+    expect(c.player.statuses.rage ?? 0).toBe(0);
+  });
+  it('Caninos : l’Élan renforce les attaques puis est divisé par deux en fin de tour', () => {
+    const c = start('caninos', [], ['onix']);
+    const before = c.previewCardDamage(give(c, 'can-roue-de-feu')) ?? 0;
+    c.player.energy = 9;
+    c.play(give(c, 'can-hate').uid);
+    expect(c.player.statuses.elan).toBe(3);
+    expect(c.previewCardDamage(give(c, 'can-roue-de-feu'))).toBeGreaterThan(before);
+    c.endPlayerTurn();
+    expect(c.player.statuses.elan).toBe(1);
+  });
+  it('Skin primordial : type Dragon (Lucario devient Dragon/Combat)', async () => {
+    const { Run } = await import('../src/core/run');
+    const { skinDef } = await import('../src/data/skins');
+    const r = new Run('P', 'riolu'); r.applySkin('primordial', skinDef('riolu', 'primordial'));
+    expect(r.form.types).toEqual(['combat', 'dragon']);
+    r.nextAct(); expect(r.form.types.sort()).toEqual(['combat', 'dragon']);
+    const v = new Run('P', 'vipelierre'); v.applySkin('primordial', skinDef('vipelierre', 'primordial'));
+    expect(v.form.types).toEqual(['plante', 'dragon']);
+    const mega = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['onix'], seed: 'M', relics: ['lucarite'], act: 2, skin: 'primordial', form: r.form });
+    expect(mega.player.types.sort()).toEqual(['combat', 'dragon']);
   });
 });

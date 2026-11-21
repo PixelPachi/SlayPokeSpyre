@@ -16,7 +16,9 @@ export type StatusId =
   | 'tenace' // ne peut pas tomber K.O. jusqu'à son prochain tour
   | 'gel' // à 3 Gel : passe son tour (un gardien inflige seulement la moitié de ses dégâts)
   | 'concentration' // Mitra-Poing : frappe au début du prochain tour si aucun dégât n'est subi d'ici là
-  | 'etourdi'; // passe son prochain tour
+  | 'etourdi' // passe son prochain tour
+  | 'rage' // Kangourex : gagnée en perdant des PV, renforce les cartes de Rage
+  | 'elan'; // Caninos : +1 dégât par point à toutes ses attaques, divisé par deux à la fin du tour
 
 export type Statuses = Partial<Record<StatusId, number>>;
 
@@ -26,8 +28,8 @@ export type Target = 'ennemi' | 'tous' | 'aleatoire' | 'soi';
 export type PowerId =
   | 'plenitude' | 'lire-esprit' // Riolu
   | 'champ-herbu' | 'racines' | 'zenith-plante' // Vipélierre
-  | 'amour-filial' | 'eveil' // Kangourex
-  | 'zenith' | 'braises' // Caninos
+  | 'amour-filial' | 'eveil' | 'rancune' // Kangourex
+  | 'zenith' | 'braises' | 'turbo' // Caninos
   | 'souvenir' | 'telekinesie'; // Mew
 
 export type Effect =
@@ -47,6 +49,8 @@ export type Effect =
       recul?: number; // le lanceur perd ce nombre de PV si la cible avait de la Protection
       siBebe?: number; // + ces dégâts si le Bébé Kangourex est debout
       parBebe?: number; // + Puissance du Bébé × ce nombre
+      parSoi?: StatusId; // + parSoiX dégâts par point de ce statut sur le lanceur (Rage, Élan)
+      parSoiX?: number;
     }
   | { kind: 'protection'; amount: number }
   | { kind: 'statut'; status: StatusId; stacks: number; on: 'cible' | 'soi' | 'tous' }
@@ -74,6 +78,9 @@ export type Effect =
   | { kind: 'ajoute-carte'; from: 'tous' | 'neutre'; count: number } // ajoute des cartes au hasard dans la main (pour ce combat)
   | { kind: 'bebe-attaque'; times: number; status?: StatusId; stacks?: number } // le Bébé Kangourex attaque tout de suite (et peut infliger un statut)
   | { kind: 'protection-par-statut'; status: StatusId; mult: number } // Protection = statut de la cible × mult
+  | { kind: 'protection-par-soi'; status: StatusId; mult: number } // Protection = ton propre statut × mult (Rage)
+  | { kind: 'perd-statut'; status: StatusId } // le lanceur perd tout ce statut (consomme la Rage / l'Élan)
+  | { kind: 'pioche-par-soi'; status: StatusId; per: number } // pioche 1 carte par tranche de « per » points de ton statut
   | { kind: 'soin-par-statut'; status: StatusId; mult: number } // soin = statut de la cible × mult
   | { kind: 'detonation'; status: StatusId; per: number } // consomme le statut de la cible : dégâts = statut × per
   | { kind: 'propage-statut'; status: StatusId } // copie le statut de la cible sur tous les autres ennemis

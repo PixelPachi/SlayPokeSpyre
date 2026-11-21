@@ -7,6 +7,7 @@ import {
 } from './types';
 import { CARD_DEFS, cardDef } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
+import { primordialTypes, skinDef } from '../data/skins';
 import { ENEMY_DEFS } from '../data/enemies';
 import '../data/boss-gimmicks';
 import '../data/balance';
@@ -108,6 +109,8 @@ export interface CombatOptions {
   act?: number;
   /** Combat contre un gardien (Hurlement ne fait pas fuir, le Gel ne fait pas passer le tour). */
   boss?: boolean;
+  /** Skin équipé (le skin primordial ajoute le type Dragon). */
+  skin?: string;
 }
 
 /** Gemmes : la première attaque de ce type à chaque tour inflige 5 dégâts de plus. */
@@ -197,6 +200,8 @@ export class Combat {
       this.player.types = [...mega.types];
       this.player.isMega = true;
     }
+    // Skin primordial : gagne le type Dragon (remplace Acier)
+    if (skinDef(ch.id, opts.skin)?.addDragon) this.player.types = primordialTypes(this.player.types);
     this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
     if (opts.enemyPower && opts.enemyPower > 1) {
@@ -264,6 +269,7 @@ export class Combat {
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
     if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
     if (this.has('metronome')) b += this.attacksThisTurn;
+    b += this.player.statuses.elan ?? 0; // Élan (Caninos)
     if (this.has('loupe') && d.target === 'tous') b += 2;
     const gem = GEMS[d.pokeType];
     if (gem && this.has(gem) && !this.gemsUsed.has(d.pokeType)) b += 5;
@@ -348,6 +354,7 @@ export class Combat {
           let base = e.amount + (e.parProtection ? p.block : 0) + (e.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
           if (e.facade && this.hasBadStatus()) base *= 2;
           if (e.revanche && p.hpLostEnemyTurn > 0) base *= 2;
+          if (e.parSoi) base += (p.statuses[e.parSoi] ?? 0) * (e.parSoiX ?? 1);
           return base + (e.noAura ? 0 : p.aura * (mult ? mult.amount : 1));
         }
         case 'degats-aura':
@@ -529,6 +536,10 @@ export class Combat {
     if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
     if (this.cardsThisTurn >= 5 && this.bossAlive('ailes')) this.addStatus(this.player, 'player', 'confusion', 1);
     if (this.player.energy > 0 && this.bossAlive('sol-brulant')) this.addStatus(this.player, 'player', 'brulure', this.player.energy);
+    if ((this.player.statuses.elan ?? 0) > 0) {
+      const half = Math.floor(this.player.statuses.elan! / 2);
+      this.addStatus(this.player, 'player', 'elan', half - this.player.statuses.elan!);
+    }
     this.tickDurations(this.player);
     if ((this.player.statuses.sommeil ?? 0) > 0) {
       this.player.statuses.sommeil! -= 1;
@@ -691,6 +702,7 @@ export class Combat {
     if (pw['champ-herbu']) this.healPlayer(pw['champ-herbu']);
     if (pw.racines) this.gainBlock(this.player, 'player', pw.racines);
     if (pw.eveil && this.player.familiar) this.player.familiar.power += pw.eveil;
+    if (pw.turbo) this.addStatus(this.player, 'player', 'elan', pw.turbo);
     if (pw.braises) for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'brulure', pw.braises);
     if (pw.souvenir) this.resolve({ kind: 'ajoute-carte', from: 'tous', count: pw.souvenir }, cardDef('abri'), undefined);
     if (pw.telekinesie) this.draw(pw.telekinesie);
@@ -775,6 +787,7 @@ export class Combat {
         let base = eff.amount + (eff.parProtection ? p.block : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
         if (eff.facade && this.hasBadStatus()) base *= 2;
         if (eff.revanche && p.hpLostEnemyTurn > 0) base *= 2;
+        if (eff.parSoi) base += (p.statuses[eff.parSoi] ?? 0) * (eff.parSoiX ?? 1);
         let dealt = 0;
         let recoil = false;
         for (let i = 0; i < hits && this.phase === 'joueur'; i++) {
@@ -875,6 +888,21 @@ export class Combat {
         p.powers[eff.power] = (p.powers[eff.power] ?? 0) + eff.amount;
         this.events.push({ type: 'power', power: eff.power, amount: p.powers[eff.power]! });
         return;
+      case 'protection-par-soi': {
+        const n = (p.statuses[eff.status] ?? 0) * eff.mult;
+        if (n > 0) this.gainBlock(p, 'player', n);
+        return;
+      }
+      case 'perd-statut': {
+        const v = p.statuses[eff.status] ?? 0;
+        if (v) { delete p.statuses[eff.status]; this.events.push({ type: 'status', target: 'player', status: eff.status, stacks: -v }); }
+        return;
+      }
+      case 'pioche-par-soi': {
+        const n = Math.floor((p.statuses[eff.status] ?? 0) / eff.per);
+        if (n > 0) this.draw(n);
+        return;
+      }
       case 'protection-par-statut': {
         const n = target ? (target.statuses[eff.status] ?? 0) * eff.mult : 0;
         if (n > 0) this.gainBlock(p, 'player', n);
@@ -1292,6 +1320,10 @@ export class Combat {
       this.events.push({ type: 'relic', id: 'rappel-max' } as CombatEvent);
       this.events.push({ type: 'heal', target: 'player', amount: f.hp });
       this.events.push({ type: 'player-move', name: 'Rappel Max ! Ton Pokémon se relève !' });
+    }
+    if (who === 'player' && lost > 0 && this.player.character === 'kangourex' && f.hp > 0) {
+      // Rage (Kangourex) : chaque perte de PV donne 1 Rage (Rancune en ajoute)
+      this.addStatus(this.player, 'player', 'rage', 1 + (this.player.powers.rancune ?? 0));
     }
     if (who === 'player' && lost > 0) {
       this.ceintureBonus = true;

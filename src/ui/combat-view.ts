@@ -53,7 +53,7 @@ export class CombatView {
     this.combat = new Combat({
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
-      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss,
+      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin,
     });
     this.combat.drainEvents();
     saveHooks.encounter?.(this.combat.enemies.map((e) => ({ dex: e.dex, shiny: e.shiny })));
