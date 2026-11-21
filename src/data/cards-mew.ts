@@ -83,7 +83,7 @@ export const MEW_CARDS: CardDef[] = [
   c('aurasphere', 'Aurasphère', 'combat', 'attaque', 'rare', 2, 'ennemi', [dmg(18)], { effects: [dmg(24)] }, ['conservee']),
   c('prescience', 'Prescience', 'psy', 'attaque', 'rare', 3, 'ennemi', [dmg(30)], { effects: [dmg(40)] }),
   c('machination', 'Machination', 'tenebres', 'technique', 'rare', 1, 'soi', [st('attaque', 2, 'soi'), draw(1)], { cost: 0 }, ['epuisee']),
-  c('champ-psychique', 'Champ Psychique', 'psy', 'talent', 'rare', 2, 'soi', [power('telekinesie', 1), st('defense', 1, 'soi')], { cost: 1 }),
+  c('champ-psychique', 'Champ Psychique', 'psy', 'talent', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'champ-psychique', turns: 5 }, power('telekinesie', 1), st('defense', 1, 'soi')], { cost: 1 }),
   c('distorsion', 'Distorsion', 'psy', 'technique', 'rare', 2, 'tous', [st('paralysie', 2, 'tous'), st('confusion', 1, 'tous')], { cost: 1 }, ['epuisee']),
   c('ultralaser', 'Ultralaser', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(34)], { effects: [dmg(44)] }, ['ephemere']),
   c('giga-impact', 'Giga Impact', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(30), st('defense', -2, 'soi')], { effects: [dmg(38), st('defense', -2, 'soi')] }),

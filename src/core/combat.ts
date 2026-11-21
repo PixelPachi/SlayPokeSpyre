@@ -10,6 +10,8 @@ import { CHARACTERS } from '../data/characters';
 import { ENEMY_DEFS } from '../data/enemies';
 import '../data/boss-gimmicks';
 import '../data/balance';
+import '../data/weather-moves';
+import { TERRAINS, WEATHER, isWeather, type TerrainId, type WeatherId } from './weather';
 import { BAD_STATUSES, type BerryFx } from '../data/berries';
 
 export const HAND_SIZE = 5;
@@ -77,6 +79,7 @@ export type CombatEvent =
   | { type: 'aura'; amount: number }
   | { type: 'enemy-move'; uid: number; name: string; move?: EnemyMove; damage?: number }
   | { type: 'player-move'; name: string }
+  | { type: 'meteo'; id: string; name: string; ended?: boolean }
   | { type: 'break'; target: Who }
   | { type: 'relic'; id: string }
   | { type: 'power'; power: PowerId; amount: number }
@@ -219,6 +222,7 @@ export class Combat {
     });
 
     for (const e of this.enemies) if (this.gimmickOf(e) === 'mur-roc') this.gainBlock(e, e.uid, 12);
+    if (this.enemies.some((e) => this.gimmickOf(e) === 'tempete-sable')) this.setField('tempete-sable', 99);
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
@@ -266,7 +270,7 @@ export class Combat {
   /** Dégâts d'une attaque du joueur, objets compris. */
   private playerDamage(base: number, d: CardDef, t: Fighter) {
     const r = computeDamage(base + this.relicFlat(d), this.player, t, d.pokeType);
-    return { amount: Math.floor(r.amount * this.relicMult(r.effectiveness === 'super') + 1e-9), effectiveness: r.effectiveness };
+    return { amount: Math.floor(r.amount * this.relicMult(r.effectiveness === 'super') * this.fieldMult(d.pokeType) + 1e-9), effectiveness: r.effectiveness };
   }
 
   // ——— Lecture ———
@@ -434,7 +438,6 @@ export class Combat {
       else this.discardPile.push(c);
     }
     this.hand = this.hand.filter((c) => this.def(c).keywords?.includes('conservee'));
-    if (this.has('restes') && this.player.hp < this.player.maxHp) this.relicFired('restes', () => this.healPlayer(2));
     // Vœu Brisé (malédiction) : 2 PV perdus par carte restée en main
     for (const c of this.hand) if (c.defId === 'voeu-brise' && this.player.hp > 0) {
       this.events.push({ type: 'hp-loss', target: 'player', amount: Math.min(2, this.player.hp), source: 'carte' });
@@ -473,7 +476,8 @@ export class Combat {
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
       const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
-      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount : undefined });
+      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal')) : undefined });
+      if (m.meteo) this.setField(m.meteo);
       if (m.block) this.gainBlock(e, uid, m.block);
       if (m.heal) this.healEnemy(e, m.heal);
       const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
@@ -485,10 +489,11 @@ export class Combat {
         for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
           if (atBaby && fam!.hp > 0) {
             const { amount, effectiveness } = computeDamage(m.damage, e, BABY_FIGHTER, m.pokeType ?? 'normal');
-            this.hitFamiliar(amount, effectiveness);
+            this.hitFamiliar(Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal')), effectiveness);
             continue;
           }
           let { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
+          amount = Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal'));
           if (this.resists.has(m.pokeType ?? 'normal')) amount = Math.floor(amount / 2);
           // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
           const hidden = m.pierce ? this.player.block : this.gimmickOf(e) === 'teravolt' ? Math.ceil(this.player.block / 2) : 0;
@@ -513,6 +518,8 @@ export class Combat {
 
   endEnemyTurn(): void {
     if (this.phase !== 'ennemi') return;
+    this.tickField();
+    if ((this.phase as string) !== 'ennemi') return;
     this.startPlayerTurn();
   }
 
@@ -572,11 +579,6 @@ export class Combat {
         this.checkEnd();
         if (this.phase !== 'joueur') return;
       }
-    }
-    if (this.bossAlive('tempete-sable')) {
-      this.events.push({ type: 'player-move', name: 'Tempête de Sable !' });
-      this.loseHp(this.player, 'player', 2, 'carte');
-      if (this.player.hp <= 0) return this.checkEnd();
     }
     if (this.bossAlive('distorsion') && this.turn === 3) {
       this.player.energy = Math.max(0, this.player.energy - 1);
@@ -749,6 +751,9 @@ export class Combat {
       case 'aura':
         this.gainAura(eff.amount);
         return;
+      case 'meteo':
+        this.setField(eff.id, eff.turns);
+        return;
       case 'aura-mult':
         this.gainAura(p.aura * (eff.amount - 1));
         return;
@@ -919,6 +924,60 @@ export class Combat {
     this.events.push({ type: 'heal', target: 'player', amount: heal });
   }
 
+  /** Météo et terrain en cours (tours restants). */
+  weather: { id: WeatherId; turns: number } | null = null;
+  terrain: { id: TerrainId; turns: number } | null = null;
+
+  /** Air Lock (Rayquaza) annule les effets de la météo. */
+  weatherActive(): WeatherId | null {
+    return this.weather && !this.bossAlive('air-lock') ? this.weather.id : null;
+  }
+
+  /** Multiplicateur de dégâts dû à la météo et au terrain. */
+  fieldMult(type: PokeType): number {
+    const w = this.weatherActive();
+    return (w ? WEATHER[w].mult[type] ?? 1 : 1) * (this.terrain ? TERRAINS[this.terrain.id].mult[type] ?? 1 : 1);
+  }
+
+  setField(id: WeatherId | TerrainId, turns = 5): void {
+    if (isWeather(id)) {
+      this.weather = { id, turns };
+      this.events.push({ type: 'meteo', id, name: `${WEATHER[id].icon} ${WEATHER[id].name} !` });
+    } else {
+      this.terrain = { id, turns };
+      this.events.push({ type: 'meteo', id, name: `${TERRAINS[id].icon} ${TERRAINS[id].name} !` });
+    }
+  }
+
+  /** Fin d'un tour complet : dégâts de météo, soin du Champ Herbu, puis les tours restants diminuent. */
+  private tickField(): void {
+    const w = this.weatherActive();
+    const chip = w ? WEATHER[w].chip : undefined;
+    const fighters: [Fighter, Who][] = [[this.player, 'player'], ...this.aliveEnemies().map((e) => [e, e.uid] as [Fighter, Who])];
+    if (chip) for (const [f, who] of fighters) {
+      if (f.hp <= 0 || f.types.some((t) => chip.immune.includes(t))) continue;
+      const n = Math.min(chip.dmg, f.hp);
+      this.events.push({ type: 'hp-loss', target: who, amount: n, source: 'carte' });
+      this.applyHpLoss(f, who, chip.dmg);
+    }
+    this.checkEnd();
+    if (this.phase === 'victoire' || this.phase === 'defaite') return;
+    if (this.terrain?.id === 'champ-herbu') {
+      this.healPlayer(3);
+      for (const e of this.aliveEnemies()) this.healEnemy(e, 3);
+      const fam = this.player.familiar;
+      if (fam && fam.hp > 0) fam.hp = Math.min(fam.maxHp, fam.hp + 3);
+    }
+    if (this.weather && --this.weather.turns <= 0) {
+      this.events.push({ type: 'meteo', id: this.weather.id, name: `${WEATHER[this.weather.id].name} se dissipe.`, ended: true });
+      this.weather = null;
+    }
+    if (this.terrain && --this.terrain.turns <= 0) {
+      this.events.push({ type: 'meteo', id: this.terrain.id, name: `${TERRAINS[this.terrain.id].name} disparaît.`, ended: true });
+      this.terrain = null;
+    }
+  }
+
   /** Types d'attaques ennemies réduits de moitié (baies de résistance). */
   resists = new Set<string>();
 
@@ -1043,6 +1102,8 @@ export class Combat {
     // Contestation (Vipélierre) : ses baisses de stats deviennent des hausses, et inversement
     if (who === 'player' && this.player.character === 'vipelierre' && (status === 'attaque' || status === 'defense')) s = -s;
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
+    if (s > 0 && this.terrain?.id === 'champ-brumeux' && BAD_STATUSES.includes(status)) return;
+    if (s > 0 && this.terrain?.id === 'champ-electrifie' && status === 'sommeil') return;
     if (who === 'player' && s > 0 && (status === 'attaque' || status === 'defense') && this.bossAlive('air-lock')) {
       this.events.push({ type: 'player-move', name: 'Air Lock bloque la hausse !' });
       return;
@@ -1126,7 +1187,10 @@ export class Combat {
   private checkEnd(): void {
     if (this.phase === 'victoire' || this.phase === 'defaite') return;
     if (this.player.hp <= 0) this.phase = 'defaite';
-    else if (this.aliveEnemies().length === 0) this.phase = 'victoire';
+    else if (this.aliveEnemies().length === 0) {
+      this.phase = 'victoire';
+      if (this.has('restes') && this.player.hp < this.player.maxHp) this.relicFired('restes', () => this.healPlayer(3));
+    }
   }
 }
 

@@ -55,7 +55,7 @@ const SPECS: Record<string, Spec> = {
     moves: [{ id: 'plongeon-draconique', name: 'Plongeon Draconique', weight: 25, intent: 'attaque', pokeType: 'dragon', damage: 24, signature: true }],
   },
   tyranocif: {
-    gimmick: { id: 'tempete-sable', name: 'Tempête de Sable', text: 'Au début de chacun de tes tours, tu perds 2 PV.' },
+    gimmick: { id: 'tempete-sable', name: 'Tempête de Sable', text: 'Déclenche une Tempête de Sable qui dure tout le combat.' },
     moves: [{ id: 'avalanche-pierres', name: 'Avalanche de Pierres', weight: 30, intent: 'attaque', pokeType: 'roche', damage: 7, hits: 3, signature: true,
       playerStatus: { status: 'peur', stacks: 1 } }],
   },

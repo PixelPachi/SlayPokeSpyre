@@ -77,7 +77,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('boutefeu', 'Boutefeu', 'feu', 'attaque', 'rare', 2, 'ennemi', [dmg(22), st('brulure', 2), hpLoss(5)], { effects: [dmg(28), st('brulure', 3), hpLoss(5)] }),
   c('surchauffe', 'Surchauffe', 'feu', 'attaque', 'rare', 2, 'ennemi', [dmg(26), st('attaque', -2, 'soi')], { effects: [dmg(33), st('attaque', -2, 'soi')] }),
   c('deflagration', 'Déflagration', 'feu', 'attaque', 'rare', 3, 'ennemi', [dmg(22), st('brulure', 3)], { effects: [dmg(28), st('brulure', 4)] }),
-  c('zenith', 'Zénith', 'feu', 'talent', 'rare', 2, 'soi', [power('zenith', 3)], { effects: [power('zenith', 4)] }),
+  c('zenith', 'Zénith', 'feu', 'talent', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'zenith', turns: 5 }, power('zenith', 2)], { effects: [{ kind: 'meteo', id: 'zenith', turns: 5 }, power('zenith', 3)] }),
   c('danse-flammes', 'Danse Flammes', 'feu', 'talent', 'rare', 2, 'soi', [power('braises', 2)], { effects: [power('braises', 3)] }),
   c('giga-impact', 'Giga Impact', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(30), st('defense', -2, 'soi')], { effects: [dmg(38), st('defense', -2, 'soi')] }),
   c('ultralaser', 'Ultralaser', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(34)], { effects: [dmg(44)] }, ['ephemere']),

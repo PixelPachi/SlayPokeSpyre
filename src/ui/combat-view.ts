@@ -1,3 +1,4 @@
+import { TERRAINS, WEATHER } from '../core/weather';
 import { sfx, sfxType } from '../audio/audio';
 import type { BerryFx } from '../data/berries';
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
@@ -99,8 +100,16 @@ export class CombatView {
     const p = c.player;
     const targeting = false;
 
+    const scene = this.root.querySelector('.scene');
+    if (scene) scene.className = scene.className.replace(/ ?field-[wt]-[a-z-]+/g, '') +
+      (c.weatherActive() ? ` field-w-${c.weatherActive()}` : '') + (c.terrain ? ` field-t-${c.terrain.id}` : '');
+    const fieldChips = [
+      c.weather ? `<div class="field-chip ${c.weatherActive() ? '' : 'off'}" data-tip="<b>${WEATHER[c.weather.id].name}</b><br>${WEATHER[c.weather.id].text}${c.weatherActive() ? '' : '<br><i>Annulée par Air Lock.</i>'}">${WEATHER[c.weather.id].icon} ${WEATHER[c.weather.id].name}${c.weather.turns < 50 ? ` · ${c.weather.turns}` : ''}</div>` : '',
+      c.terrain ? `<div class="field-chip terrain" data-tip="<b>${TERRAINS[c.terrain.id].name}</b><br>${TERRAINS[c.terrain.id].text}">${TERRAINS[c.terrain.id].icon} ${TERRAINS[c.terrain.id].name} · ${c.terrain.turns}</div>` : '',
+    ].join('');
     this.el.innerHTML = `
       ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
+      ${fieldChips ? `<div class="field-chips">${fieldChips}</div>` : ''}
       <div class="field">
         <div class="fighter player" data-who="player">
           ${this.statusRow(p, true)}
@@ -320,6 +329,10 @@ export class CombatView {
         case 'player-move':
           this.float('player', ev.name, 'move', 0);
           break;
+        case 'meteo':
+          this.banner(ev.name, ev.ended);
+          if (!ev.ended) sfxType(({ zenith: 'feu', pluie: 'eau', 'tempete-sable': 'roche', grele: 'glace', 'champ-herbu': 'plante', 'champ-electrifie': 'electrik', 'champ-psychique': 'psy', 'champ-brumeux': 'fee' } as Record<string, PokeType>)[ev.id] ?? 'normal');
+          break;
         case 'break':
           this.float(ev.target, 'Protection brisée !', 'eff weak', at(ev.target));
           break;
@@ -368,6 +381,15 @@ export class CombatView {
   }
 
   private lastEnemyCard = 0;
+
+  /** Grande annonce au centre (météo, terrain). */
+  private banner(text: string, small = false): void {
+    const b = document.createElement('div');
+    b.className = `field-banner ${small ? 'small' : ''}`;
+    b.textContent = text;
+    this.fx.appendChild(b);
+    setTimeout(() => b.remove(), 1800);
+  }
 
   private float(who: Who, text: string, cls: string, offset: number, color?: string): void {
     const target = this.whoEl(who)?.querySelector('.sprite') ?? this.whoEl(who);

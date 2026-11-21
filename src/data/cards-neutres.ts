@@ -18,6 +18,13 @@ function n(
 }
 
 export const NEUTRAL_CARDS: CardDef[] = [
+  // ——— Météo et terrains (5 tours, pour tous les Pokémon) ———
+  n('danse-pluie', 'Danse Pluie', 'eau', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'pluie', turns: 5 }], { effects: [{ kind: 'meteo', id: 'pluie', turns: 5 }, draw(1)] }),
+  n('tempete-sable', 'Tempête de Sable', 'roche', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'tempete-sable', turns: 5 }], { effects: [{ kind: 'meteo', id: 'tempete-sable', turns: 5 }, prot(6)] }),
+  n('grele', 'Grêle', 'glace', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'grele', turns: 5 }], { effects: [{ kind: 'meteo', id: 'grele', turns: 5 }, prot(6)] }),
+  n('champ-electrifie', 'Champ Électrifié', 'electrik', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'champ-electrifie', turns: 5 }], { effects: [{ kind: 'meteo', id: 'champ-electrifie', turns: 5 }, draw(1)] }),
+  n('champ-brumeux', 'Champ Brumeux', 'fee', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'champ-brumeux', turns: 5 }], { effects: [{ kind: 'meteo', id: 'champ-brumeux', turns: 5 }, prot(6)] }),
+
   // ——— Eau ———
   n('pistolet-a-o', 'Pistolet à O', 'eau', 'attaque', 'commune', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),
   n('aqua-jet', 'Aqua-Jet', 'eau', 'attaque', 'commune', 0, 'ennemi', [dmg(4)], { effects: [dmg(6)] }),

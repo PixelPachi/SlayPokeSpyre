@@ -82,7 +82,7 @@ const RELICS: RelicDef[] = [
 
   // ——— Communs à tous ———
   { id: 'restes', name: 'Restes', sprite: 'leftovers', rarity: 'commun', owner: 'commun',
-    text: 'À la fin de ton tour, récupère 2 PV.' },
+    text: 'À la fin de chaque combat gagné, récupère 3 PV.' },
   { id: 'vive-griffe', name: 'Vive Griffe', sprite: 'quick-claw', rarity: 'commun', owner: 'commun',
     text: 'Au premier tour de chaque combat, pioche 2 cartes de plus.' },
   { id: 'bandeau-muscle', name: 'Bandeau Muscle', sprite: 'muscle-band', rarity: 'commun', owner: 'commun',

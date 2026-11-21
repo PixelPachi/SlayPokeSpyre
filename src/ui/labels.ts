@@ -1,3 +1,4 @@
+import { TERRAINS, WEATHER, isWeather } from '../core/weather';
 // Textes et couleurs affichés à l'écran.
 import type { CardDef, Effect, PowerId, StatusId } from '../core/model';
 import type { PokeType } from '../core/types';
@@ -127,6 +128,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'pa': parts.push(`Gagne <b>${e.amount}</b> PA.`); break;
       case 'perte-pv': parts.push(d.character === 'riolu' ? `Perd <b>${e.amount}</b> PV <span class="aura-note">(+${e.amount} Aura)</span>.` : `Perd <b>${e.amount}</b> PV.`); break;
       case 'aura': parts.push(`Gagne <b>${e.amount}</b> Aura.`); break;
+      case 'meteo': { const f = isWeather(e.id) ? WEATHER[e.id] : TERRAINS[e.id]; parts.push(`${isWeather(e.id) ? 'Météo' : 'Terrain'} <b>${f.name}</b> pendant ${e.turns} tours.`); break; }
       case 'aura-mult': parts.push(e.amount === 2 ? 'Double ton Aura.' : `Multiplie ton Aura par ${e.amount}.`); break;
     }
   }

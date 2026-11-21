@@ -359,16 +359,16 @@ describe('cartes neutres', async () => {
   const { CHARACTERS } = await import('../src/data/characters');
   const { Run } = await import('../src/core/run');
 
-  it('53 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
+  it('58 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
     const neutral = neutralPool();
-    expect(neutral).toHaveLength(53);
+    expect(neutral).toHaveLength(58);
     const charTypes = new Set(Object.values(CHARACTERS).flatMap((c) => c.types));
     const otherNames = new Set(Object.values(CARD_DEFS).filter((c) => c.character !== 'normal').map((c) => c.name));
     for (const c of neutral) {
       expect(charTypes.has(c.pokeType), c.name).toBe(false);
       expect(otherNames.has(c.name), c.name).toBe(false);
     }
-    expect(new Set(neutral.map((c) => c.name)).size).toBe(53);
+    expect(new Set(neutral.map((c) => c.name)).size).toBe(58);
   });
 
   it('des cartes neutres apparaissent parfois dans les récompenses', () => {
@@ -937,5 +937,38 @@ describe('événements Pokémon', () => {
       expect(out).toBeTruthy();
       expect(r.hp).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('météo et terrains', () => {
+  const mk = (enemies = ['dardargnan']) => new Combat({ character: 'caninos', deck: makeDeck(CHARACTERS.caninos.starterDeck), enemies, seed: 'm' });
+  it('Zénith booste le Feu et affaiblit l’Eau, puis se dissipe après 5 tours', () => {
+    const c = mk();
+    c.setField('zenith', 5);
+    expect(c.fieldMult('feu')).toBe(1.5);
+    expect(c.fieldMult('eau')).toBe(0.5);
+    for (let i = 0; i < 5; i++) { c.endPlayerTurn(); for (const e of c.aliveEnemies()) c.enemyAct(e.uid); c.endEnemyTurn(); if (c.phase !== 'joueur') break; }
+    if (c.phase === 'joueur') expect(c.weather).toBeNull();
+  });
+  it('Champ Herbu soigne tout le monde de 3 PV en fin de tour', () => {
+    const c = mk();
+    c.setField('champ-herbu', 5);
+    c.player.hp -= 20;
+    const e = c.enemies[0]; e.hp -= 20;
+    (c as unknown as { tickField(): void }).tickField();
+    expect(c.player.hp).toBe(c.player.maxHp - 17);
+    expect(e.hp).toBe(e.maxHp - 17);
+  });
+  it('Champ Brumeux bloque les statuts négatifs ; Restes soignent 3 PV en fin de combat', () => {
+    const c = mk();
+    c.setField('champ-brumeux', 5);
+    (c as unknown as { addStatus(f: unknown, w: unknown, s: string, n: number): void }).addStatus(c.player, 'player', 'poison', 3);
+    expect(c.player.statuses.poison ?? 0).toBe(0);
+    const r = new Combat({ character: 'caninos', deck: makeDeck(CHARACTERS.caninos.starterDeck), enemies: ['chenipan'], seed: 'm', relics: ['restes'], hp: 30, maxHp: 70 });
+    for (const e of r.enemies) e.hp = 1;
+    (r as unknown as { dealDamage(f: unknown, w: unknown, n: number, e: string): void }).dealDamage(r.enemies[0], r.enemies[0].uid, 5, 'normal');
+    (r as unknown as { checkEnd(): void }).checkEnd();
+    expect(r.phase).toBe('victoire');
+    expect(r.player.hp).toBe(33);
   });
 });

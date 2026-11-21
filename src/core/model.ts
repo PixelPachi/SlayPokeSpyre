@@ -52,6 +52,7 @@ export type Effect =
   | { kind: 'pa'; amount: number }
   | { kind: 'perte-pv'; amount: number } // se blesse soi-même (donne de l'Aura à Riolu)
   | { kind: 'aura'; amount: number }
+  | { kind: 'meteo'; id: import('./weather').WeatherId | import('./weather').TerrainId; turns: number } // météo ou terrain pour N tours
   | { kind: 'aura-mult'; amount: number } // multiplie l'Aura actuelle
   | { kind: 'degats-aura'; mult: number; consume?: boolean } // inflige Aura × mult dégâts (consomme l'Aura sauf consume: false)
   | { kind: 'aura-protection'; mult: number } // convertit l'Aura en Protection
@@ -147,6 +148,8 @@ export interface EnemyMove {
   playerStatus?: { status: StatusId; stacks: number };
   /** Capacité exclusive d'un gardien (carte dorée). */
   signature?: boolean;
+  /** Déclenche une météo ou un terrain (5 tours). */
+  meteo?: import('./weather').WeatherId | import('./weather').TerrainId;
   /** Ajoute des cartes de gardien dans le deck du joueur pour ce combat. */
   addCards?: { id: string; count: number; to: 'pioche' | 'defausse' | 'main' };
   /** Ignore la Protection du joueur. */
