@@ -77,6 +77,8 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         if (e.drain) parts.push('Récupère la moitié des dégâts infligés.');
         if (e.contreStatut) parts.push('Double si la cible a un statut.');
         if (e.parStatut) parts.push(`+${e.parStatutX ?? 1} par ${STATUS_INFO[e.parStatut].label} sur la cible.`);
+        if (e.siBebe) parts.push(`+${e.siBebe} si le Bébé est debout.`);
+        if (e.parBebe) parts.push(`+${e.parBebe === 1 ? '' : `${e.parBebe} × `}la Puissance du Bébé.`);
         break;
       }
       case 'degats-aura':
@@ -107,7 +109,15 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
       case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
       case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main.`); break;
-      case 'bebe-attaque': parts.push(e.times > 1 ? `Le Bébé attaque ${e.times} fois.` : 'Le Bébé attaque.'); break;
+      case 'bebe-attaque': parts.push(`${e.times > 1 ? `Le Bébé attaque ${e.times} fois` : 'Le Bébé attaque'}${e.status ? ` et inflige ${e.stacks} ${STATUS_INFO[e.status].label}` : ''}.`); break;
+      case 'protection-par-statut': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en Protection.`); break;
+      case 'soin-par-statut': parts.push(`Récupère ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en PV.`); break;
+      case 'detonation': parts.push(`Consomme la ${STATUS_INFO[e.status].label} ${d.target === 'tous' ? 'de tous les ennemis' : 'de la cible'} : <b>${e.per}</b> dégâts par point.`); break;
+      case 'propage-statut': parts.push(`Copie la ${STATUS_INFO[e.status].label} de la cible sur tous les autres ennemis.`); break;
+      case 'pioche-si-statut': parts.push(`Si la cible a de la ${STATUS_INFO[e.status].label}, pioche ${e.amount}.`); break;
+      case 'protection-par-bebe': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}la Puissance du Bébé en Protection.`); break;
+      case 'bebe-garde': parts.push('Ce tour-ci, le Bébé attire toutes les attaques ennemies.'); break;
+      case 'bebe-vers-joueur': parts.push('Gagne autant de Protection que le Bébé.'); break;
       case 'bebe-puissance': parts.push(`Le Bébé gagne <b>${e.amount}</b> Puissance.`); break;
       case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
       case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;

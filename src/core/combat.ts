@@ -349,6 +349,7 @@ export class Combat {
     const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
     if (hit?.contreStatut && target && hasAnyStatus(target)) base += hit.amount;
     if (hit?.parStatut && target) base += (target.statuses[hit.parStatut] ?? 0) * (hit.parStatutX ?? 1);
+    if (hit) base += this.babyBonus(hit);
     if (!target) {
       // Sans cible : bonus de type et statuts du joueur seulement
       let dmg = Math.max(0, base + this.relicFlat(d) + (this.player.statuses.attaque ?? 0));
@@ -382,6 +383,16 @@ export class Combat {
     const total = per * n;
     return { perHit: per, hits, total, eff, blocked: Math.min(t.block, total) };
   }
+
+  /** Bonus de dégâts liés au Bébé Kangourex (s'il est debout). */
+  private babyBonus(e: Extract<Effect, { kind: 'degats' }>): number {
+    const f = this.player.familiar;
+    if (!f || f.hp <= 0) return 0;
+    return (e.siBebe ?? 0) + (e.parBebe ? f.power * e.parBebe : 0);
+  }
+
+  /** Le Bébé attire toutes les attaques ennemies ce tour-ci (Garde Maternelle…). */
+  babyTaunt = false;
 
   /** Façade : un statut néfaste ou une baisse de stat. */
   private hasBadStatus(): boolean {
@@ -509,7 +520,7 @@ export class Combat {
       if (m.damage !== undefined) {
         // Le Bébé Kangourex peut être visé (3 chances sur 10)
         const fam = this.player.familiar;
-        const atBaby = !!fam && fam.hp > 0 && this.rng.next() < 0.3;
+        const atBaby = !!fam && fam.hp > 0 && (this.babyTaunt || this.rng.next() < 0.3);
         for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
           if (atBaby && fam!.hp > 0) {
             const { amount, effectiveness } = computeDamage(m.damage, e, BABY_FIGHTER, m.pokeType ?? 'normal');
@@ -542,6 +553,7 @@ export class Combat {
 
   endEnemyTurn(): void {
     if (this.phase !== 'ennemi') return;
+    this.babyTaunt = false;
     this.tickField();
     if ((this.phase as string) !== 'ennemi') return;
     this.startPlayerTurn();
@@ -713,6 +725,7 @@ export class Combat {
           for (const t of targets) {
             let b = eff.contreStatut && hasAnyStatus(t) ? base * 2 : base;
             if (eff.parStatut) b += (t.statuses[eff.parStatut] ?? 0) * (eff.parStatutX ?? 1);
+            b += this.babyBonus(eff);
             if (eff.recul && t.block > 0) recoil = true;
             dealt += this.strike(t, b + bonus, d);
             if (eff.peurChance && t.hp > 0 && this.rng.next() < eff.peurChance) this.addStatus(t, t.uid, 'peur', 1);
@@ -801,6 +814,45 @@ export class Combat {
         p.powers[eff.power] = (p.powers[eff.power] ?? 0) + eff.amount;
         this.events.push({ type: 'power', power: eff.power, amount: p.powers[eff.power]! });
         return;
+      case 'protection-par-statut': {
+        const n = target ? (target.statuses[eff.status] ?? 0) * eff.mult : 0;
+        if (n > 0) this.gainBlock(p, 'player', n);
+        return;
+      }
+      case 'soin-par-statut': {
+        const n = target ? (target.statuses[eff.status] ?? 0) * eff.mult : 0;
+        if (n > 0) this.healPlayer(n);
+        return;
+      }
+      case 'detonation': {
+        for (const t of d.target === 'tous' ? this.aliveEnemies() : target ? [target] : []) {
+          const v = t.statuses[eff.status] ?? 0;
+          if (v <= 0) continue;
+          delete t.statuses[eff.status];
+          this.strike(t, v * eff.per, d);
+        }
+        this.checkEnd();
+        return;
+      }
+      case 'propage-statut': {
+        const v = target ? target.statuses[eff.status] ?? 0 : 0;
+        if (v > 0) for (const e of this.aliveEnemies()) if (e !== target) this.addStatus(e, e.uid, eff.status, v);
+        return;
+      }
+      case 'pioche-si-statut':
+        if (target && (target.statuses[eff.status] ?? 0) > 0) this.draw(eff.amount);
+        return;
+      case 'protection-par-bebe': {
+        const f = p.familiar;
+        if (f && f.hp > 0) this.gainBlock(p, 'player', f.power * eff.mult);
+        return;
+      }
+      case 'bebe-garde':
+        if (p.familiar && p.familiar.hp > 0) { this.babyTaunt = true; this.events.push({ type: 'player-move', name: 'Le Bébé protège sa maman !' }); }
+        return;
+      case 'bebe-vers-joueur':
+        if (p.familiar && p.familiar.block > 0) this.gainBlock(p, 'player', p.familiar.block);
+        return;
       case 'statut-mult': {
         for (const t of eff.on === 'tous' ? this.aliveEnemies() : target ? [target] : []) {
           const v = t.statuses[eff.status] ?? 0;
@@ -820,7 +872,7 @@ export class Combat {
         return;
       }
       case 'bebe-attaque':
-        this.familiarAttack(eff.times, target);
+        this.familiarAttack(eff.times, target, eff.status, eff.stacks);
         return;
       case 'bebe-puissance':
         if (p.familiar) {
@@ -912,7 +964,7 @@ export class Combat {
   }
 
   /** Le Bébé Kangourex attaque (Puissance + Attaque de sa mère, type Normal). */
-  private familiarAttack(times: number, target?: EnemyState): void {
+  private familiarAttack(times: number, target?: EnemyState, status?: StatusId, stacks?: number): void {
     const f = this.player.familiar;
     if (!f || f.hp <= 0) return;
     for (let i = 0; i < times; i++) {
@@ -923,6 +975,7 @@ export class Combat {
       const { amount, effectiveness } = computeDamage(f.power, baby, t, 'normal');
       this.events.push({ type: 'player-move', name: 'Le Bébé attaque !' });
       this.dealDamage(t, t.uid, amount, effectiveness);
+      if (status && stacks && t.hp > 0) this.addStatus(t, t.uid, status, stacks);
       this.checkEnd();
     }
   }

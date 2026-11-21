@@ -1083,3 +1083,37 @@ describe('enchantements rares et légendaires', () => {
     expect(cardDef(enchantId('gratuit', 'aurasphere')).cost).toBe(0);
   });
 });
+
+describe('nouvelles mécaniques Caninos et Kangourex', () => {
+  const setup = (ch: 'caninos' | 'kangourex', ids: string[]) => {
+    const c = new Combat({ character: ch, deck: makeDeck(CHARACTERS[ch].starterDeck), enemies: ['ossatueur'], seed: 'NM' });
+    c.drainEvents();
+    c.player.energy = 9;
+    c.enemies[0].hp = c.enemies[0].maxHp = 200;
+    c.hand = makeDeck(ids).map((x, i) => ({ ...x, uid: 900 + i }));
+    return c;
+  };
+  it('Crocs Feu : 2 dégâts, puis la Brûlure de la cible en Protection', () => {
+    const c = setup('caninos', ['can-crocs-feu']);
+    c.enemies[0].statuses.brulure = 3;
+    c.play(900, c.enemies[0].uid);
+    expect(c.player.block).toBe(5);
+  });
+  it('Déflagration consomme les Brûlures en dégâts', () => {
+    const c = setup('caninos', ['can-deflagration']);
+    const e = c.enemies[0];
+    e.statuses.brulure = 5;
+    const before = e.hp;
+    c.play(900);
+    expect(e.statuses.brulure ?? 0).toBe(0);
+    expect(before - e.hp).toBeGreaterThan(15);
+  });
+  it('Ténacité : le Bébé attire les attaques ; Rune Protect donne la Puissance du Bébé en Protection', () => {
+    const c = setup('kangourex', ['kan-tenacite', 'kan-rune-protect']);
+    c.play(900);
+    expect(c.babyTaunt).toBe(true);
+    const pow = c.player.familiar!.power;
+    c.play(901);
+    expect(c.player.block).toBe(pow * 2);
+  });
+});
