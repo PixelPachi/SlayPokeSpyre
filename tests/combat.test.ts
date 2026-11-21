@@ -360,16 +360,16 @@ describe('cartes neutres', async () => {
   const { CHARACTERS } = await import('../src/data/characters');
   const { Run } = await import('../src/core/run');
 
-  it('59 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
+  it('62 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
     const neutral = neutralPool();
-    expect(neutral).toHaveLength(59);
+    expect(neutral).toHaveLength(62);
     const charTypes = new Set(Object.values(CHARACTERS).flatMap((c) => c.types));
     const otherNames = new Set(Object.values(CARD_DEFS).filter((c) => c.character !== 'normal').map((c) => c.name));
     for (const c of neutral) {
-      if (c.id !== 'n-paresse') expect(charTypes.has(c.pokeType), c.name).toBe(false); // Paresse reste Normal
+      if (c.id !== 'n-paresse' && !c.requires?.asleep) expect(charTypes.has(c.pokeType), c.name).toBe(false); // les cartes de sommeil gardent leur vrai type
       expect(otherNames.has(c.name), c.name).toBe(false);
     }
-    expect(new Set(neutral.map((c) => c.name)).size).toBe(59);
+    expect(new Set(neutral.map((c) => c.name)).size).toBe(62);
   });
 
   it('des cartes neutres apparaissent parfois dans les récompenses', () => {
@@ -1139,7 +1139,7 @@ describe('sommeil', () => {
     const c = setup(['n-paresse']);
     c.play(950);
     expect(c.player.hp).toBe(55);
-    expect(c.hand.some((x) => /ronflement|blabla/.test(x.defId))).toBe(true);
+    expect(c.hand.some((x) => /ronflement|blabla|devoreve|cauchemar|baillement/.test(x.defId))).toBe(true);
     (c as unknown as { dealDamage(f: unknown, w: unknown, n: number, e: string): void }).dealDamage(c.player, 'player', 5, 'normal');
     expect(c.player.statuses.sommeil ?? 0).toBe(0);
   });

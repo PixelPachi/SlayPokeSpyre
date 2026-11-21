@@ -20,6 +20,10 @@ function n(
 export const NEUTRAL_CARDS: CardDef[] = [
   // ——— Sommeil ———
   n('paresse', 'Paresse', 'normal', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'repos', turns: 3, healPct: 0.5 }, { kind: 'ajoute-sommeil' }], { cost: 0 }, ['epuisee']),
+  // Jouables seulement endormi
+  n('devoreve', 'Dévorêve', 'psy', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(10, { drain: true })], { effects: [dmg(14, { drain: true })] }),
+  n('cauchemar', 'Cauchemar', 'spectre', 'attaque', 'peu-commune', 1, 'tous', [dmg(4), st('confusion', 2, 'tous')], { effects: [dmg(6), st('confusion', 2, 'tous'), st('peur', 1, 'tous')] }),
+  n('baillement', 'Bâillement', 'normal', 'technique', 'commune', 1, 'ennemi', [st('sommeil', 2)], { effects: [st('sommeil', 2), draw(1)] }),
 
   // ——— Météo et terrains (5 tours, pour tous les Pokémon) ———
   n('danse-pluie', 'Danse Pluie', 'eau', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'pluie', turns: 5 }], { effects: [{ kind: 'meteo', id: 'pluie', turns: 5 }, draw(1)] }),

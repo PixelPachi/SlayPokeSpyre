@@ -107,7 +107,7 @@ CARDS.push(
 );
 CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS);
 // Ronflement et Blabla Dodo ne se jouent qu'endormi
-for (const d of CARDS) if (/-(ronflement|blabla-dodo)$/.test(d.id)) d.requires = { ...d.requires, asleep: true };
+for (const d of CARDS) if (/-(ronflement|blabla-dodo)$/.test(d.id) || ['n-devoreve', 'n-cauchemar', 'n-baillement'].includes(d.id)) d.requires = { ...d.requires, asleep: true };
 
 export const CARD_DEFS: Record<string, CardDef> = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 
