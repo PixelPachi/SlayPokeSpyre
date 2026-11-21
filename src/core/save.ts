@@ -1,6 +1,7 @@
 // Progression sauvegardée dans le navigateur (EXP de chaque Pokémon).
 import type { CharacterId } from './model';
 import { levelFor, unlockedCards, unlockedRelics } from '../data/unlocks';
+import { SKINS, type SkinDef, type SkinStat } from '../data/skins';
 
 const KEY = 'slaypokespyre-save-v1';
 
@@ -12,6 +13,40 @@ export interface SaveData {
   /** Pokédex : n° des Pokémon croisés en combat, et de ceux croisés en chromatique. */
   seen?: number[];
   seenShiny?: number[];
+  /** Statistiques cumulées sur toutes les runs, par personnage (objectifs des skins). */
+  stats?: Partial<Record<CharacterId, Partial<Record<SkinStat, number>>>>;
+  /** Skin choisi pour chaque personnage. */
+  skins?: Partial<Record<CharacterId, string>>;
+}
+
+export function statOf(s: SaveData, c: CharacterId, stat: SkinStat): number {
+  return s.stats?.[c]?.[stat] ?? 0;
+}
+
+export function skinUnlocked(s: SaveData, c: CharacterId, skin: SkinDef): boolean {
+  return statOf(s, c, skin.stat) >= skin.goal;
+}
+
+/** Skin porté (seulement s'il est débloqué). */
+export function equippedSkin(s: SaveData, c: CharacterId): string | undefined {
+  const id = s.skins?.[c];
+  const def = SKINS[c]?.find((k) => k.id === id);
+  return def && skinUnlocked(s, c, def) ? id : undefined;
+}
+
+export function equipSkin(s: SaveData, c: CharacterId, id: string | undefined): void {
+  s.skins = { ...s.skins, [c]: id };
+  writeSave(s);
+}
+
+/** Ajoute les statistiques d'une run ; renvoie les skins qui viennent d'être débloqués. */
+export function recordRunStats(s: SaveData, c: CharacterId, add: Partial<Record<SkinStat, number>>): SkinDef[] {
+  const before = (SKINS[c] ?? []).filter((k) => skinUnlocked(s, c, k)).map((k) => k.id);
+  const cur = { ...s.stats?.[c] };
+  for (const [k, v] of Object.entries(add)) cur[k as SkinStat] = (cur[k as SkinStat] ?? 0) + (v ?? 0);
+  s.stats = { ...s.stats, [c]: cur };
+  writeSave(s);
+  return (SKINS[c] ?? []).filter((k) => skinUnlocked(s, c, k) && !before.includes(k.id));
 }
 
 const RUN_KEY = 'slaypokespyre-run-v1';

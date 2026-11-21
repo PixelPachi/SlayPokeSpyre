@@ -10,7 +10,7 @@ import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, 
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
-import { characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
+import { equippedSkin, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
 import { expBreakdown } from './data/unlocks';
 import { ENEMY_DEFS } from './data/enemies';
@@ -195,6 +195,7 @@ function menu(): void {
 function startRun(character: CharacterId): void {
   const params = new URLSearchParams(location.search);
   const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character), characterRelics(save, character));
+  run.skin = equippedSkin(save, character);
   activeRun = run;
   // Pour tester : ?acte=2 commence directement à l'acte 2
   const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
@@ -382,6 +383,10 @@ function endRun(run: Run, victory: boolean): void {
   activeRun = null;
   const { lines, total: exp } = expBreakdown(run, victory);
   const result = grantExp(save, run.character, exp);
+  const newSkins = recordRunStats(save, run.character, {
+    shinies: run.shiniesMet, elites: run.elitesDefeated, bosses: run.bossesDefeated, combats: run.combatsWon, wins: victory ? 1 : 0,
+  });
+  for (const k of newSkins) setTimeout(() => toast(`Skin débloqué : ${CHARACTERS[run.character].name} ${k.name.toLowerCase()} ! Choisis-le sur l'écran de sélection.`), 1200);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory);
   if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
   renderRunEnd(screen, run, victory, { exp, lines, ...result, total: save.exp[run.character] ?? 0 }, title, () => startRun(run.character));

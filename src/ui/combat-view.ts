@@ -1,3 +1,4 @@
+import { skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
 import { TERRAINS, WEATHER } from '../core/weather';
 import { sfx, sfxType } from '../audio/audio';
@@ -116,7 +117,7 @@ export class CombatView {
         <div class="fighter player" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
-          <img class="sprite player-sprite" src="${asset(`sprites/pokemon/front/${p.dex}.png`)}" alt="${esc(p.name)}">
+          <img class="sprite player-sprite" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}">
           ${this.hpBar(p)}
         </div>
         ${p.familiar ? this.babyHtml(p.familiar) : ''}

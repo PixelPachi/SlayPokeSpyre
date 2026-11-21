@@ -1,3 +1,5 @@
+import { SKINS, skinSprite } from '../data/skins';
+import { equipSkin, equippedSkin, skinUnlocked, statOf } from '../core/save';
 // Écran de sélection du personnage (section 9 du GDD : illustration plein écran + fiche à gauche).
 import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
@@ -56,6 +58,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
             ${ch.starterRelic ? `<div class="sheet-row sheet-relic">${relicIcon(ch.starterRelic)}<div><b>Objet — ${esc(relicDef(ch.starterRelic).name)}</b><br>${esc(relicDef(ch.starterRelic).text)}</div></div>` : ''}
             <div class="sheet-row"><b>Deck de départ</b><br>${deck}</div>
             ${expBlock(save, current)}
+            ${skinBlock(save, current)}
             <button class="btn primary start">Grimper la Tour du Temps</button>
             <button class="btn collection">Voir les capacités</button>`}
         </div>
@@ -75,6 +78,12 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
     const r = t.closest<HTMLElement>('.roster');
     if (r) {
       current = r.dataset.id as CharacterId;
+      return draw();
+    }
+    const sk = t.closest<HTMLElement>('.skin-btn');
+    if (sk) {
+      if (sk.classList.contains('locked')) return;
+      equipSkin(save, current, sk.dataset.skin || undefined);
       return draw();
     }
     if (t.closest('.collection')) return openCollection(root, save, current);
@@ -157,4 +166,23 @@ function relicsFor(c: CharacterId, lvl: number): string {
     const tag = r.rarity === 'depart' ? 'Objet de départ' : r.owner === 'commun' ? 'Commun à tous' : n > lvl ? `Niveau ${n}` : `Débloqué (niveau ${n})`;
     return `<div class="collect-relic ${n > lvl ? 'locked' : ''}">${relicCard(r.id, `<em>${tag}</em>`)}</div>`;
   }).join('');
+}
+
+/** Skins du personnage : normal + skins à débloquer (objectifs cumulés sur toutes les runs). */
+function skinBlock(save: SaveData, c: CharacterId): string {
+  const skins = SKINS[c] ?? [];
+  if (!skins.length) return '';
+  const dex = CHARACTERS[c].dex[0];
+  const cur = equippedSkin(save, c);
+  return `<div class="sheet-row sheet-skins"><b>Skins</b><div class="skin-list">
+    <button class="skin-btn ${!cur ? 'on' : ''}" data-skin=""><img src="${asset(skinSprite(dex))}" alt=""><span>Normal</span></button>
+    ${skins.map((k) => {
+      const ok = skinUnlocked(save, c, k);
+      const n = Math.min(k.goal, statOf(save, c, k.stat));
+      return `<button class="skin-btn ${cur === k.id ? 'on' : ''} ${ok ? '' : 'locked'}" data-skin="${k.id}" data-tip="<b>${esc(k.name)}</b><br>${esc(k.goalText)} (${n}/${k.goal})${ok ? '<br>Débloqué !' : '<br>Se cumule sur toutes tes runs.'}">
+        <img src="${asset(skinSprite(dex, k.id))}" alt=""><span>${k.id === 'shiny' ? '★ ' : ''}${esc(k.name)}</span>
+        ${ok ? '' : `<small>${n}/${k.goal}</small><i class="skin-bar" style="--p:${(n / k.goal) * 100}%"></i>`}
+      </button>`;
+    }).join('')}
+  </div></div>`;
 }

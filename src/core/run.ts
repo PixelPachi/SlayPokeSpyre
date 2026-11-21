@@ -103,6 +103,8 @@ export class Run {
   bossesDefeated = 0;
   /** Pour le détail de l'EXP en fin de run. */
   combatsWon = 0;
+  /** Skin du personnage (ex. « shiny »). */
+  skin?: string;
   duelsWon = 0;
   bossNames: string[] = [];
   eventsSeen = 0;

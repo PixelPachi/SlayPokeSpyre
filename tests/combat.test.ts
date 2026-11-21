@@ -984,3 +984,17 @@ describe('EXP de fin de run', () => {
     expect(total).toBe(raw + Math.floor(raw / 2));
   });
 });
+
+describe('skins', () => {
+  it('le skin chromatique de Riolu se débloque après 5 chromatiques vaincus, cumulés sur plusieurs runs', async () => {
+    const { recordRunStats, skinUnlocked, equippedSkin, equipSkin } = await import('../src/core/save');
+    const { SKINS } = await import('../src/data/skins');
+    const s = { exp: {}, runs: 0 } as never;
+    expect(recordRunStats(s, 'riolu', { shinies: 3 })).toEqual([]);
+    expect(skinUnlocked(s, 'riolu', SKINS.riolu[0])).toBe(false);
+    equipSkin(s, 'riolu', 'shiny');
+    expect(equippedSkin(s, 'riolu')).toBeUndefined();
+    expect(recordRunStats(s, 'riolu', { shinies: 2 }).map((k) => k.id)).toEqual(['shiny']);
+    expect(equippedSkin(s, 'riolu')).toBe('shiny');
+  });
+});
