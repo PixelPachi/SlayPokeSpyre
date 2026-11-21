@@ -1239,3 +1239,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
   transform: scaleX(-1); filter: drop-shadow(0 10px 8px #0009); pointer-events: none; z-index: 2;
   animation: hero-enter 0.6s ease-out both; }
 @keyframes hero-enter { from { left: -10%; opacity: 0; } to { left: 38%; opacity: 1; } }
+/* Icônes Gemini (statuts, Aura, talents, Protection, intentions) */
+.status .ico { width: 16px; height: 16px; vertical-align: -3px; margin-right: 3px; image-rendering: auto; filter: drop-shadow(0 1px 1px #000); }
+.aura-counter .aura-ico { position: absolute; width: 36px; height: 36px; top: -30px; left: 50%; transform: translateX(-50%); filter: drop-shadow(0 2px 2px #000); }
+.block-badge.has-ico { background: var(--ico) center / contain no-repeat; clip-path: none; border: none; width: 36px; height: 36px; left: -34px; top: -12px; text-shadow: 0 0 3px #000, 0 2px 2px #000; }
+.intent .intent-ico { width: 34px; height: 34px; filter: drop-shadow(0 2px 2px #000); }

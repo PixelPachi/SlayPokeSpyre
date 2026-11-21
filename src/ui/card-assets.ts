@@ -54,3 +54,16 @@ export function artNoPokemon(name: string): string | undefined {
   }
   return undefined;
 }
+
+// Icônes Gemini des statuts, de l'Aura, des talents, de la Protection et des intentions ennemies.
+const ICONS = import.meta.glob<string>('../assets/ui/statuts/*.png', { eager: true, query: '?url', import: 'default' });
+const ICON_URLS = byName(ICONS);
+/** Icône d'un statut / élément d'interface (undefined si l'image n'existe pas encore). */
+export function iconUrl(name: string): string | undefined {
+  return ICON_URLS.get(name);
+}
+/** Balise <img> de l'icône, ou chaîne vide. */
+export function iconImg(name: string, cls = 'ico'): string {
+  const u = ICON_URLS.get(name);
+  return u ? `<img class="${cls}" src="${u}" alt="">` : '';
+}

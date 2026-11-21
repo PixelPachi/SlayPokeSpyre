@@ -7,7 +7,7 @@ import { sfx, sfxType } from '../audio/audio';
 import type { BerryFx } from '../data/berries';
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
 import { saveHooks } from '../core/save';
-import { backUrl, orbUrl } from './card-assets';
+import { backUrl, iconImg, iconUrl, orbUrl } from './card-assets';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, CardDef, Effect, EnemyMove, PowerId, StatusId } from '../core/model';
@@ -132,7 +132,7 @@ export class CombatView {
           <span class="energy-num">${p.energy}</span>
         </div>
         ${p.character === 'riolu' || p.character === 'mew' ? `<div class="aura-counter ${p.aura >= 25 ? 'high' : ''} ${p.aura !== this.lastAura ? 'bump' : ''}" data-tip="<b>Aura : ${p.aura}</b><br>Chaque point d'Aura ajoute 1 dégât à ta prochaine attaque (l'Aura est alors consommée). Tu en gagnes en jouant certaines cartes et en perdant des PV.">
-          <span class="aura-num">${p.aura}</span><small>Aura</small>
+          ${iconImg('aura', 'aura-ico')}<span class="aura-num">${p.aura}</span><small>Aura</small>
         </div>` : ''}
         <div class="pile draw ${backUrl(p.character) ? 'has-back' : ''}" ${backUrl(p.character) ? `style="--back:url('${backUrl(p.character)}')"` : ''} data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
           <span>${c.drawPile.length}</span><small>Pioche</small>
@@ -159,7 +159,7 @@ export class CombatView {
         <div class="bebe-power">Puissance ${f.power}</div>
         <img class="sprite bebe-sprite" src="${asset(babySprite(this.run.skin))}" alt="Bébé">
         <div class="hpbar small">
-          ${f.block > 0 ? `<div class="block-badge">${f.block}</div>` : ''}
+          ${f.block > 0 ? `<div class="block-badge ${iconUrl('protection') ? 'has-ico' : ''}" ${iconUrl('protection') ? `style="--ico:url('${iconUrl('protection')}')"` : ''}>${f.block}</div>` : ''}
           <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:var(--hp-green)"></div></div>
           <div class="hp-text">${f.hp}/${f.maxHp}</div>
         </div>
@@ -171,7 +171,7 @@ export class CombatView {
     const color = pct > 50 ? 'var(--hp-green)' : pct > 20 ? 'var(--hp-yellow)' : 'var(--hp-red)';
     return `
       <div class="hpbar">
-        ${f.block > 0 ? `<div class="block-badge" data-tip="Protection : absorbe les dégâts avant les PV. Disparaît au début de ton tour.">${f.block}</div>` : ''}
+        ${f.block > 0 ? `<div class="block-badge ${iconUrl('protection') ? 'has-ico' : ''}" ${iconUrl('protection') ? `style="--ico:url('${iconUrl('protection')}')"` : ''} data-tip="Protection : absorbe les dégâts avant les PV. Disparaît au début de ton tour.">${f.block}</div>` : ''}
         <div class="hp-track ${f.block > 0 ? 'shielded' : ''}"><div class="hp-fill" style="width:${pct}%;background:${color}"></div></div>
         <div class="hp-text">${f.hp}/${f.maxHp}</div>
       </div>`;
@@ -186,12 +186,12 @@ export class CombatView {
     // L'Aura de Riolu et Mew est affichée dans son compteur, à côté de l'énergie
     if (isPlayer && this.combat.player.aura > 0 && this.combat.player.character !== 'riolu' && this.combat.player.character !== 'mew') {
       const a = this.combat.player.aura;
-      items.push(`<span class="status aura" data-tip="Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.">Aura ${a}</span>`);
+      items.push(`<span class="status aura" data-tip="Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.">${iconImg('aura')}Aura ${a}</span>`);
     }
     if (isPlayer) {
       for (const [k, v] of Object.entries(this.combat.player.powers) as [PowerId, number][]) {
         const info = POWER_INFO[k];
-        items.push(`<span class="status power" data-tip="<b>Talent — ${esc(info.label)}</b><br>${esc(info.text(v))}">${info.label}</span>`);
+        items.push(`<span class="status power" data-tip="<b>Talent — ${esc(info.label)}</b><br>${esc(info.text(v))}">${iconImg('talent')}${info.label}</span>`);
       }
       if (this.combat.player.freeTurn) items.push('<span class="status free" data-tip="Lire-Esprit : tes cartes coûtent 0 PA ce tour.">0 PA !</span>');
     }
@@ -199,7 +199,7 @@ export class CombatView {
       if (!v) continue;
       const info = STATUS_INFO[k];
       const n = k === 'attaque' || k === 'defense' ? (v > 0 ? `+${v}` : `−${-v}`) : `${v}`;
-      items.push(`<span class="status" style="--c:${info.color}" data-tip="${esc(info.label)} : ${esc(info.text(v))}">${info.label} ${n}</span>`);
+      items.push(`<span class="status" style="--c:${info.color}" data-tip="${esc(info.label)} : ${esc(info.text(v))}">${iconImg(k)}${info.label} ${n}</span>`);
     }
     return `
       <div class="nameplate">
@@ -246,7 +246,7 @@ export class CombatView {
     const color = m.pokeType ? TYPE_COLORS[m.pokeType] : '#888';
     return `
       <div class="intent intent-${m.intent}" data-tip="${tip}" style="--tc:${color}">
-        ${INTENT_ICONS[m.intent]}<span>${label}</span>
+        ${iconImg(`intent-${m.intent}`, 'intent-ico') || INTENT_ICONS[m.intent]}<span>${label}</span>
       </div>`;
   }
 
