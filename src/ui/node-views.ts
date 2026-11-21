@@ -607,9 +607,9 @@ export function renderActIntro(root: HTMLElement, run: Run, done: Done): void {
   const z = run.zone;
   root.innerHTML = `
     <div class="act-intro" style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]}">
-      <p class="act-num">${run.act >= 4 ? 'Dernière étape' : `Acte ${run.act}`}</p>
-      <h1>${esc(ACT_TITLES[run.act] ?? '')}</h1>
-      <p class="act-zone">Une faille temporelle mène à <b>${esc(z.name)}</b><br><small>${esc(z.region)} · ${esc(z.season)}</small></p>
+      <p class="act-num">${run.act > 4 ? 'Acte secret' : run.act >= 4 ? 'Dernière étape' : `Acte ${run.act}`}</p>
+      <h1>${esc(run.act > 4 ? 'Au-delà du temps et de l’espace' : ACT_TITLES[run.act] ?? '')}</h1>
+      <p class="act-zone">${run.act > 4 ? 'Les deux Rouages résonnent : un escalier de lumière monte vers' : 'Une faille temporelle mène à'} <b>${esc(z.name)}</b><br><small>${esc(z.region)} · ${esc(z.season)}</small></p>
       ${evolutionHtml(run)}
       <p class="act-heal">${esc(run.form.name)} reprend son souffle : PV restaurés (${run.hp}/${run.maxHp}).</p>
       <button class="btn primary go">Continuer l'ascension</button>

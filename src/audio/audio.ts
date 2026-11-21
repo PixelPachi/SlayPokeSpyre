@@ -6,8 +6,8 @@ import type { PokeType } from '../core/types';
 /** Musiques enregistrées (fichiers MP3) qui remplacent la musique générée pour certains combats. */
 const FILE_TRACKS: Record<string, string> = {
   dialga: 'music/dialga.mp3',
-  'foret-de-jade': 'music/foret-de-jade.mp3', // Viridian Forest
-  'foret-de-jade-combat': 'music/foret-de-jade-combat.mp3', // Viridian Forest 2 (combats)
+  'foret-de-jade': 'music/foret-de-jade.mp3', // Viridian Forest (version 2)
+  'salle-originelle': 'music/salle-originelle.mp3', // One Last Time : acte secret et Arceus
   'bois-aux-chenes': 'music/bois-aux-chenes.mp3', // Ilex Forest
   'bois-clematis': 'music/bois-clematis.mp3', // Bois Clémenti (Hoenn)
   'foret-de-vestigion': 'music/foret-de-vestigion.mp3', // Eterna Forest

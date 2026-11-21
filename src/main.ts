@@ -6,14 +6,14 @@ import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
 import { randomSeed } from './core/rng';
-import { BOSS_ROW, LAST_ACT, Run, SUMMIT_STEPS } from './core/run';
+import { BOSS_ROW, LAST_ACT, Run, SECRET_ACT, SUMMIT_STEPS } from './core/run';
 import { CombatView } from './ui/combat-view';
 import { renderMap } from './ui/map-view';
 import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
-import { addHistory, equippedSkin, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
+import { addHistory, beatenBosses, equippedSkin, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
 import { expBreakdown } from './data/unlocks';
 import { ENEMY_DEFS } from './data/enemies';
@@ -104,7 +104,7 @@ function savedRunSummary(): string | null {
   if (!data) return null;
   try {
     const run = Run.fromJSON(data);
-    return `${run.form.name} · acte ${Math.min(run.act, LAST_ACT)} · étage ${run.floor} · ${run.hp}/${run.maxHp} PV`;
+    return `${run.form.name} · ${run.act > LAST_ACT ? 'Salle Originelle' : `acte ${run.act}`} · étage ${run.floor} · ${run.hp}/${run.maxHp} PV`;
   } catch {
     return null;
   }
@@ -191,7 +191,7 @@ function continueRun(): void {
     return title();
   }
   activeRun = run;
-  if (run.act >= LAST_ACT) return run.inNode ? summitStep(run) : showSummit(run);
+  if (run.act === LAST_ACT) return run.inNode ? summitStep(run) : showSummit(run);
   if (run.inNode && run.pos) return enterNode(run, run.pos.row, run.pos.col);
   showMap(run);
 }
@@ -207,10 +207,13 @@ function startRun(character: CharacterId): void {
   const run = new Run(params.get('seed') ?? randomSeed(), character, characterUnlocks(save, character), characterRelics(save, character));
   run.applySkin(equippedSkin(save, character), skinDef(character, equippedSkin(save, character)));
   activeRun = run;
-  // Pour tester : ?acte=2 commence directement à l'acte 2
-  const startAct = Math.min(LAST_ACT, Number(params.get('acte') ?? 1));
+  // Rouages du Temps et de l'Espace : seulement après avoir apaisé Dialga Primal avec au moins 3 Pokémon différents
+  const dialgaWins = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as CharacterId[]).filter((c) => beatenBosses(save, c).includes('dialga-primal')).length;
+  run.cogsUnlocked = dialgaWins >= 3 || params.has('rouages');
+  // Pour tester : ?acte=2 commence directement à l'acte 2 (?acte=5 : la Salle Originelle)
+  const startAct = Math.min(SECRET_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();
-  if (run.act >= LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
+  if (run.act === LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
   // Pour tester : ?zone=tour-lavanville choisit la zone de l'acte en cours
   if (params.get('skin')) run.applySkin(params.get('skin')!, skinDef(character, params.get('skin')!)); // test : ?skin=primordial
   if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
@@ -239,14 +242,14 @@ function startRun(character: CharacterId): void {
   if (params.get('noeud') === 'marche-noir') { clear(); return renderBlackMarket(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'ct') { clear(); return renderTmShop(screen, run, () => showMap(run)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
-  if (run.act >= LAST_ACT) return showSummit(run);
+  if (run.act === LAST_ACT) return showSummit(run);
   showMap(run);
 }
 
 function showMap(run: Run): void {
   clear();
-  playTheme(run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
-  if (run.act >= LAST_ACT) return showSummit(run);
+  playTheme(run.act === LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
+  if (run.act === LAST_ACT) return showSummit(run);
   persist(run, false);
   renderMap(screen, run, (row, col) => {
     run.moveTo(row, col);
@@ -302,9 +305,9 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
   clear();
   const labels = { combat: 'Combat', elite: 'Pokémon dominant', boss: 'Gardien' };
   const enemies = run.encounter(type);
-  if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
+  if (type === 'boss') playTheme(enemies.some((id) => id.startsWith('dialga')) ? 'dialga' : run.act > LAST_ACT ? 'salle-originelle' : `gardien-${Math.min(3, run.act)}`);
   else {
-    const zt = run.act >= LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id;
+    const zt = run.act === LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id;
     playTheme(hasTrack(`${zt}-combat`) ? `${zt}-combat` : zt); // musique de combat propre à la zone si elle existe
   }
   run.lastEnemies = enemies;
@@ -326,8 +329,16 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
         run.bossesDefeated++;
         run.bossNames.push(ENEMY_DEFS[enemies[0]]?.name ?? 'Gardien');
         run.bossIds.push(...enemies);
-        if (run.act >= LAST_ACT) return endRun(run, true); // Dialga Primal est apaisé
-        const last = run.act >= LAST_ACT;
+        if (run.act > LAST_ACT) return endRun(run, true); // Arceus est vaincu : la vraie fin
+        if (run.act === LAST_ACT && !run.hasCogs) return endRun(run, true); // Dialga Primal est apaisé
+        if (run.act === LAST_ACT) {
+          // Les deux Rouages résonnent : un escalier de lumière s'ouvre vers la Salle Originelle
+          return renderReward(screen, run, {
+            money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), label: labels.boss,
+            title: 'Les Rouages résonnent… un escalier de lumière apparaît !', berry: run.rollBerry(),
+          }, () => { run.nextAct(); clear(); renderActIntro(screen, run, () => showMap(run)); });
+        }
+        const last = false;
         return renderReward(
           screen, run,
           {
@@ -347,7 +358,8 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
         {
           money: run.moneyReward(type, r.shinies), cards: run.cardChoices(type), label: labels[type],
           title: type === 'elite' ? 'Pokémon dominant vaincu !' : 'Victoire !',
-          relic: type === 'elite' ? run.rollRelics(1)[0] : undefined,
+          // Premier Pokémon dominant vaincu : le Rouage de l'Espace (si Dialga a été apaisé avec 3 Pokémon)
+          relic: type === 'elite' ? (run.cogsUnlocked && !run.relics.includes('rouage-espace') ? 'rouage-espace' : run.rollRelics(1)[0]) : undefined,
           berry: run.rng.next() < (type === 'elite' ? 0.6 : 0.35) ? run.rollBerry() : undefined,
         },
         () => showMap(run),

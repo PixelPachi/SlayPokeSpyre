@@ -149,6 +149,15 @@ export const ZONES: ZoneDef[] = [
     background: 'backgrounds/sommet-tour-du-temps.jpg', palette: ['#4a3a8a', '#4a4560', '#0a0618'], mood: 'dragon',
     season: 'Le temps se désagrège', weather: 'temps',
   },
+
+  // ——— Acte secret : la Salle Originelle (Rouage du Temps + Rouage de l'Espace) ———
+  {
+    id: 'salle-originelle', name: 'Salle Originelle', region: 'Au-delà du temps et de l’espace', act: 5,
+    encounters: [['maganon'], ['elekable'], ['momartik'], ['bouldeneu'], ['maganon', 'momartik'], ['elekable', 'bouldeneu']],
+    elites: [['gallame-mega']], boss: 'arceus',
+    background: 'backgrounds/salle-originelle.jpg', palette: ['#c9a85a', '#e8e0c8', '#2a1f3a'], mood: 'normal',
+    season: 'L’escalier vers le ciel', weather: 'vent',
+  },
 ];
 
 export function zonesOfAct(act: number): ZoneDef[] {

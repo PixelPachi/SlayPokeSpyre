@@ -17,5 +17,6 @@ export const ZONE_BG: Record<string, [number, number]> = {
   'route-victoire': [1288, -129],
   'sommet-tour-du-temps': [1280, -119],
   'tour-dragospire': [1280, -111],
+  'salle-originelle': [1400, -4],
   'tour-lavanville': [1280, -96],
 };

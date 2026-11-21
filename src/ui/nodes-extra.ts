@@ -34,8 +34,10 @@ export function renderChest(root: HTMLElement, run: Run, done: Done): void {
   root.querySelector('.open')!.addEventListener('click', () => {
     const money = run.rng.int(big ? 60 : 25, big ? 110 : 55);
     const withRelic = big || run.rng.next() < 0.5;
+    const cog = run.cogsUnlocked && !run.relics.includes('rouage-temps');
     renderReward(root, run, {
-      money, cards: [], relic: withRelic ? run.rollRelics(1)[0] : undefined, berry: withRelic ? undefined : run.rollBerry(),
+      // Premier coffre ouvert : le Rouage du Temps (si Dialga a été apaisé avec 3 Pokémon)
+      money, cards: [], relic: cog ? 'rouage-temps' : withRelic ? run.rollRelics(1)[0] : undefined, berry: withRelic || cog ? undefined : run.rollBerry(),
       title: big ? 'Un gros trésor !' : 'Le coffre s’ouvre…', label: 'Coffre mystère',
     }, done);
     sfx('victoire');

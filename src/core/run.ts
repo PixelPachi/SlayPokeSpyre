@@ -27,6 +27,10 @@ const PATHS = 6;
 export const BOSS_ROW = MAP_ROWS;
 /** Dernier acte : le sommet de la Tour du Temps (acte 4), avec Dialga Primal. */
 export const LAST_ACT = 4;
+/** Acte secret après Dialga (Rouage du Temps + Rouage de l'Espace) : la Salle Originelle, avec Arceus. */
+export const SECRET_ACT = 5;
+/** Étages de la carte de l'acte secret (plus courte que les autres). */
+export const SECRET_ROWS = 8;
 /** Le sommet n'a pas de carte : Noctunoir, un Centre Pokémon, le Marché Kecleon, puis Dialga Primal. */
 export const SUMMIT_STEPS = ['elite', 'centre', 'boutique', 'boss'] as const;
 
@@ -36,8 +40,8 @@ const WEIGHTS: [NodeType, number][] = [
 ];
 
 /** Carte à embranchements façon Slay the Spire : chemins qui montent sans se croiser. */
-export function generateMap(rng: Rng): MapNode[][] {
-  const grid: (MapNode | null)[][] = Array.from({ length: MAP_ROWS }, () => Array(MAP_COLS).fill(null));
+export function generateMap(rng: Rng, ROWS = MAP_ROWS): MapNode[][] {
+  const grid: (MapNode | null)[][] = Array.from({ length: ROWS }, () => Array(MAP_COLS).fill(null));
   const edges: [number, number, number][] = []; // [rang, colonne de départ, colonne d'arrivée]
   const node = (r: number, c: number) =>
     (grid[r][c] ??= { row: r, col: c, type: 'combat', next: [], dx: rng.int(-16, 16), dy: rng.int(-10, 10) });
@@ -48,7 +52,7 @@ export function generateMap(rng: Rng): MapNode[][] {
     if (p === 1) while (c === firstStart) c = rng.int(0, MAP_COLS - 1); // au moins 2 départs différents
     if (p === 0) firstStart = c;
     node(0, c);
-    for (let r = 0; r < MAP_ROWS - 1; r++) {
+    for (let r = 0; r < ROWS - 1; r++) {
       const options = [c - 1, c, c + 1].filter((n) => n >= 0 && n < MAP_COLS).filter(
         (n) => !edges.some(([er, a, b]) => er === r && ((a < c && b > n) || (a > c && b < n))),
       );
@@ -68,15 +72,15 @@ export function generateMap(rng: Rng): MapNode[][] {
   for (const row of rows) {
     for (const n of row) {
       if (n.row === 0) n.type = 'combat';
-      else if (n.row === 8) n.type = 'tresor';
-      else if (n.row === MAP_ROWS - 1) n.type = 'centre';
+      else if (n.row === (ROWS === MAP_ROWS ? 8 : Math.floor(ROWS / 2))) n.type = 'tresor';
+      else if (n.row === ROWS - 1) n.type = 'centre';
       else {
         for (let tries = 0; tries < 30; tries++) {
           const t = rng.weighted(WEIGHTS.map(([type, weight]) => ({ type, weight }))).type;
-          if ((t === 'elite' || t === 'centre') && n.row < 5) continue; // pas avant le 6e étage
+          if ((t === 'elite' || t === 'centre') && n.row < (ROWS === MAP_ROWS ? 5 : 2)) continue; // pas avant le 6e étage
           if ((t === 'pension' || t === 'ct') && n.row < 3) continue;
           if (t === 'coffre' && chests >= 2) continue; // 2 coffres au plus par acte
-          if (t === 'centre' && n.row === MAP_ROWS - 2) continue; // le 15e est déjà un Centre
+          if (t === 'centre' && n.row === ROWS - 2) continue; // le 15e est déjà un Centre
           if ((t === 'centre' || t === 'boutique' || t === 'elite' || t === 'coffre' || t === 'pension' || t === 'ct') && parents(n).some((p) => p.type === t)) continue;
           n.type = t;
           if (t === 'coffre') chests++;
@@ -152,7 +156,8 @@ export class Run {
 
   /** Étage de la tour, compté depuis la base (16 étages par acte, gardien compris). */
   get floor(): number {
-    if (this.act >= LAST_ACT) return (this.act - 1) * (MAP_ROWS + 1) + this.summitStep;
+    if (this.act === LAST_ACT) return (this.act - 1) * (MAP_ROWS + 1) + this.summitStep;
+    if (this.act > LAST_ACT) return (LAST_ACT - 1) * (MAP_ROWS + 1) + SUMMIT_STEPS.length + (this.pos ? this.pos.row + 1 : 0);
     return (this.act - 1) * (MAP_ROWS + 1) + (this.pos ? this.pos.row + 1 : 0);
   }
 
@@ -194,6 +199,10 @@ export class Run {
   berries: string[] = [];
   /** Kecleon a été attaqué : les Marchés Kecleon suivants sont vides. */
   kecleonHostile = false;
+  /** Dialga apaisé avec au moins 3 Pokémon : les Rouages du Temps et de l'Espace peuvent apparaître. */
+  cogsUnlocked = false;
+  /** Vrai si le joueur possède les deux Rouages (l'acte secret s'ouvre après Dialga). */
+  get hasCogs(): boolean { return this.relics.includes('rouage-temps') && this.relics.includes('rouage-espace'); }
 
   /** Ajoute une baie si un emplacement est libre ; renvoie false sinon. */
   addBerry(id: string): boolean {
@@ -252,7 +261,8 @@ export class Run {
     const evo = this.evolutions.find((e) => e.act === this.act);
     if (evo) this.maxHp += evo.hp;
     this.zone = this.rng.pick(zonesOfAct(this.act));
-    this.map = generateMap(this.rng);
+    // Acte secret (Salle Originelle) : une carte plus courte
+    this.map = generateMap(this.rng, this.act > LAST_ACT ? SECRET_ROWS : MAP_ROWS);
     this.pos = null;
     this.visited = [];
     this.hp = this.maxHp;
@@ -265,7 +275,7 @@ export class Run {
   /** Nœuds où l'on peut aller maintenant. */
   available(): MapNode[] | 'boss' {
     if (!this.pos) return this.map[0];
-    if (this.pos.row === MAP_ROWS - 1) return 'boss';
+    if (this.pos.row === this.map.length - 1) return 'boss';
     if (this.pos.row === BOSS_ROW) return [];
     const here = this.nodeAt(this.pos.row, this.pos.col)!;
     return this.map[this.pos.row + 1].filter((n) => here.next.includes(n.col));
@@ -374,7 +384,7 @@ export class Run {
   /** Objets qu'on peut encore obtenir : communs + ceux du Pokémon débloqués, sans ceux déjà tenus. */
   relicPool(): string[] {
     return allRelics()
-      .filter((r) => r.rarity !== 'depart' && r.rarity !== 'gardien' && (r.owner === 'commun' || (r.owner === this.character && (r.free || this.unlockedRelics.includes(r.id)))))
+      .filter((r) => r.rarity !== 'depart' && r.rarity !== 'gardien' && r.rarity !== 'quete' && (r.owner === 'commun' || (r.owner === this.character && (r.free || this.unlockedRelics.includes(r.id)))))
       .filter((r) => !this.relics.includes(r.id))
       .map((r) => r.id);
   }

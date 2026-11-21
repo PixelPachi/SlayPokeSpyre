@@ -9,7 +9,9 @@ const COL_W = 104;
 const LEFT = 330; // marge à gauche (légende)
 const BOTTOM = 90;
 const BOSS_GAP = 170;
-const HEIGHT = BOTTOM + (MAP_ROWS - 1) * ROW_H + BOSS_GAP + 150;
+// Nombre d'étages de la carte affichée (l'acte secret en a moins)
+let ROWS = MAP_ROWS;
+let HEIGHT = BOTTOM + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
 
 export const NODE_INFO: Record<NodeType, { label: string; text: string }> = {
   combat: { label: 'Combat', text: 'Des Pokémon sauvages de la zone.' },
@@ -28,7 +30,7 @@ const pos = (n: { row: number; col: number; dx?: number; dy?: number }) => ({
   x: LEFT + n.col * COL_W + (n.dx ?? 0),
   y: HEIGHT - BOTTOM - n.row * ROW_H + (n.dy ?? 0),
 });
-const BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (MAP_ROWS - 1) * ROW_H - BOSS_GAP };
+let BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (ROWS - 1) * ROW_H - BOSS_GAP };
 
 export function nodeIcon(type: NodeType, bossDex = 15): string {
   switch (type) {
@@ -56,6 +58,9 @@ export function nodeIcon(type: NodeType, bossDex = 15): string {
 }
 
 export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void): void {
+  ROWS = run.map.length || MAP_ROWS;
+  HEIGHT = BOTTOM + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
+  BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (ROWS - 1) * ROW_H - BOSS_GAP };
   const zone = run.zone;
   const boss = ENEMY_DEFS[zone.boss];
   const avail = run.available();
@@ -68,10 +73,10 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
   for (const row of run.map) {
     for (const n of row) {
       const a = pos(n);
-      const targets = n.row === MAP_ROWS - 1 ? [BOSS_POS] : n.next.map((c) => pos(run.nodeAt(n.row + 1, c)!));
-      const nextCols = n.row === MAP_ROWS - 1 ? [-1] : n.next;
+      const targets = n.row === ROWS - 1 ? [BOSS_POS] : n.next.map((c) => pos(run.nodeAt(n.row + 1, c)!));
+      const nextCols = n.row === ROWS - 1 ? [-1] : n.next;
       targets.forEach((b, i) => {
-        const walked = visited(n.row, n.col) && (n.row === MAP_ROWS - 1 ? visited(BOSS_ROW, 0) : visited(n.row + 1, nextCols[i]));
+        const walked = visited(n.row, n.col) && (n.row === ROWS - 1 ? visited(BOSS_ROW, 0) : visited(n.row + 1, nextCols[i]));
         const fromHere = current && current.row === n.row && current.col === n.col;
         lines.push(`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="path ${walked ? 'walked' : ''} ${fromHere ? 'open' : ''}"/>`);
       });
@@ -95,7 +100,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
 
   root.innerHTML = `
     <div class="map-screen">
-      ${topbar(run, `${zone.name} · acte ${run.act}`)}
+      ${topbar(run, `${zone.name} · ${run.act > 4 ? "acte secret" : `acte ${run.act}`}`)}
       <div class="map-scroll">
         <div class="map-canvas" style="height:${HEIGHT}px">
           <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien : ${boss.name}</div>
@@ -104,8 +109,8 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
         </div>
       </div>
       <div class="map-legend">
-        <h3>Tour du Temps</h3>
-        <p>Acte ${run.act} · ${zone.name}<br><small>Une faille venue de ${zone.region}</small></p>
+        <h3>${run.act > 4 ? 'Au-delà du temps' : 'Tour du Temps'}</h3>
+        <p>${run.act > 4 ? 'Acte secret' : `Acte ${run.act}`} · ${zone.name}<br><small>${run.act > 4 ? 'L’escalier qui monte vers Arceus' : `Une faille venue de ${zone.region}`}</small></p>
         ${(['combat', 'evenement', 'centre', 'boutique', 'elite', 'tresor', 'coffre', 'pension', 'ct'] as NodeType[])
           .map((t) => `<div class="legend-row"><span class="legend-icon node-${t}">${nodeIcon(t)}</span>${NODE_INFO[t].label}</div>`).join('')}
         <p class="legend-hint">Clique sur un nœud qui brille pour avancer.</p>
@@ -114,7 +119,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
 
   // Défilement : montrer l'étage actuel
   const scroll = root.querySelector<HTMLElement>('.map-scroll')!;
-  const focusY = current ? pos({ row: Math.min(current.row, MAP_ROWS - 1), col: 0 }).y : HEIGHT;
+  const focusY = current ? pos({ row: Math.min(current.row, ROWS - 1), col: 0 }).y : HEIGHT;
   scroll.scrollTop = Math.max(0, focusY - scroll.clientHeight + 160);
 
   root.onclick = (ev) => {

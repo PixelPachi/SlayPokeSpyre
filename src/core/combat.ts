@@ -634,8 +634,35 @@ export class Combat {
   }
 
   /** Choix pondéré, sans jamais répéter la même action 3 fois de suite. */
+  /** Arceus (Miroir Originel) : il copie une carte du deck du joueur, en plus fort ; Jugement tous les 4 tours. */
+  private mirrorMove(e: EnemyState): EnemyMove {
+    const def = ENEMY_DEFS[e.defId];
+    e.step++;
+    if (e.step % 4 === 0) return def.moves.find((m) => m.id === 'jugement')!;
+    const pool = [...this.hand, ...this.drawPile, ...this.discardPile, ...this.exhaustPile];
+    const card = pool.length ? this.rng.pick(pool) : null;
+    if (!card) return def.moves[0];
+    const d = this.def(card);
+    let damage = 0, hits = 1, block = 0;
+    let playerStatus: EnemyMove['playerStatus'];
+    let selfStatus: EnemyMove['selfStatus'];
+    for (const eff of d.effects) {
+      if (eff.kind === 'degats') { damage += eff.amount; hits = Math.max(hits, eff.hits ?? 1); }
+      else if (eff.kind === 'degats-aura' || eff.kind === 'degats-pv-perdus' || eff.kind === 'concentration') damage += 12;
+      else if (eff.kind === 'protection') block += eff.amount;
+      else if (eff.kind === 'statut' && eff.on !== 'soi' && eff.stacks > 0 && !playerStatus) playerStatus = { status: eff.status, stacks: eff.stacks };
+      else if (eff.kind === 'statut' && eff.on === 'soi' && eff.stacks > 0 && !selfStatus && (eff.status === 'attaque' || eff.status === 'defense')) selfStatus = { status: eff.status, stacks: eff.stacks };
+    }
+    const name = `${d.name} (copie)`;
+    // Plus fort que la carte d'origine : ×1,6 sur les dégâts, ×2 sur la Protection
+    if (damage > 0) return { id: `miroir-${d.id}`, name, weight: 0, intent: 'attaque', pokeType: d.pokeType, damage: Math.max(8, Math.round(damage * 1.6 / hits)), hits, playerStatus, selfStatus, block: block ? block * 2 : undefined, signature: true };
+    if (playerStatus) return { id: `miroir-${d.id}`, name, weight: 0, intent: 'handicap', pokeType: d.pokeType, playerStatus: { status: playerStatus.status, stacks: playerStatus.stacks + 1 }, signature: true };
+    return { id: `miroir-${d.id}`, name, weight: 0, intent: 'boost', block: Math.max(16, block * 2), selfStatus: selfStatus ?? { status: 'attaque', stacks: 1 }, signature: true };
+  }
+
   private rollIntent(e: EnemyState): void {
     const def = ENEMY_DEFS[e.defId];
+    if (def.gimmick?.id === 'miroir-originel') { e.intent = this.mirrorMove(e); return; }
     const order = e.phase === 2 && def.phase2 ? def.phase2.pattern : def.pattern;
     if (order) {
       const id = order[e.step % order.length];

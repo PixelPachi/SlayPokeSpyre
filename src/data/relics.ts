@@ -2,7 +2,7 @@
 // Les effets sont appliqués par le moteur (core/combat.ts) et la run (main.ts) d'après l'id de l'objet.
 import type { CharacterId } from '../core/model';
 
-export type RelicRarity = 'depart' | 'commun' | 'peu-commun' | 'rare' | 'gardien';
+export type RelicRarity = 'depart' | 'commun' | 'peu-commun' | 'rare' | 'gardien' | 'quete';
 
 export interface RelicDef {
   id: string;
@@ -101,6 +101,12 @@ const RELICS: RelicDef[] = [
     text: 'Ta première attaque de type Psy à chaque tour inflige 5 dégâts de plus.' },
   { id: 'encens-bizarre', name: 'Encens Bizarre', sprite: 'odd-incense', rarity: 'peu-commun', owner: 'mew', free: true,
     text: 'La première capacité d’un autre Pokémon que tu joues à chaque tour coûte 1 PA de moins.' },
+
+  // ——— Objets de quête (après avoir apaisé Dialga avec 3 Pokémon différents) ———
+  { id: 'rouage-temps', name: 'Rouage du Temps', sprite: 'rouage-temps', rarity: 'quete', owner: 'commun',
+    text: 'Un rouage venu du futur. Aucun effet… mais avec le Rouage de l’Espace, un passage s’ouvre après Dialga Primal.' },
+  { id: 'rouage-espace', name: 'Rouage de l’Espace', sprite: 'rouage-espace', rarity: 'quete', owner: 'commun',
+    text: 'Un rouage nacré qui déforme l’espace. Aucun effet… mais avec le Rouage du Temps, un passage s’ouvre après Dialga Primal.' },
 
   // ——— Communs à tous ———
   { id: 'metronome', name: 'Métronome', sprite: 'metronome', rarity: 'commun', owner: 'commun',
