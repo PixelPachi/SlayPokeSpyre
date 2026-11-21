@@ -110,6 +110,9 @@ export interface CombatOptions {
   boss?: boolean;
 }
 
+/** Gemmes : la première attaque de ce type à chaque tour inflige 5 dégâts de plus. */
+const GEMS: Partial<Record<PokeType, string>> = { combat: 'gemme-combat', plante: 'gemme-plante', normal: 'gemme-normal', feu: 'gemme-feu', psy: 'gemme-psy' };
+
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
 const DURATIONS: StatusId[] = ['paralysie', 'peur', 'confusion'];
 
@@ -149,6 +152,11 @@ export class Combat {
   readonly relics: Set<string>;
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
   private attacksThisTurn = 0;
+  /** Objets « une fois par tour » : gemmes déjà utilisées, techniques jouées, Spray Gorge, Encens Bizarre. */
+  private gemsUsed = new Set<string>();
+  private techsThisTurn = 0;
+  private sprayUsed = false;
+  private oddUsed = false;
   private cardsThisTurn = 0;
   private firstAttackDone = false;
   private boss = false;
@@ -255,6 +263,10 @@ export class Combat {
     if (this.has('plaque-esprit') && d.pokeType === 'psy') b += 2;
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
     if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
+    if (this.has('metronome')) b += this.attacksThisTurn;
+    if (this.has('loupe') && d.target === 'tous') b += 2;
+    const gem = GEMS[d.pokeType];
+    if (gem && this.has(gem) && !this.gemsUsed.has(d.pokeType)) b += 5;
     return b;
   }
 
@@ -301,7 +313,14 @@ export class Combat {
 
   /** Coût réel d'une carte (0 pendant un tour de Lire-Esprit). */
   costOf(card: Card): number {
-    return this.player.freeTurn ? 0 : this.def(card).cost;
+    if (this.player.freeTurn) return 0;
+    const d = this.def(card);
+    let cost = d.cost;
+    // Herbe Pouvoir : une fois par combat, la première carte à 2 PA ou plus est gratuite
+    if (cost >= 2 && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) return 0;
+    // Encens Bizarre (Mew) : la première capacité d'un autre Pokémon de chaque tour coûte 1 PA de moins
+    if (cost > 0 && this.has('encens-bizarre') && !this.oddUsed && d.character !== 'mew' && d.character !== 'normal') cost -= 1;
+    return Math.max(0, cost);
   }
 
   canPlay(card: Card): boolean {
@@ -429,7 +448,14 @@ export class Combat {
       if (!target || target.hp <= 0) return false;
     }
 
-    this.player.energy -= this.costOf(card);
+    const paid = this.costOf(card);
+    if (d.cost >= 2 && paid === 0 && !this.player.freeTurn && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) {
+      this.used.add('herbe-pouvoir'); this.relicFired('herbe-pouvoir');
+    }
+    if (paid < d.cost && this.has('encens-bizarre') && !this.oddUsed && d.character !== 'mew' && d.character !== 'normal' && !this.player.freeTurn) {
+      this.oddUsed = true; this.relicFired('encens-bizarre');
+    }
+    this.player.energy -= paid;
     this.hand.splice(idx, 1);
 
     // Photocopie : la prochaine carte est jouée deux fois
@@ -455,7 +481,20 @@ export class Combat {
       this.loseHp(this.player, 'player', 2, 'carte');
     }
     if (d.category === 'technique') for (const e of this.aliveEnemies()) if (this.gimmickOf(e) === 'regard-royal') this.gainBlock(e, e.uid, 3);
+    if (d.category === 'technique') {
+      this.techsThisTurn++;
+      if (this.has('encens-pur') && this.phase === 'joueur') this.relicFired('encens-pur', () => this.gainAura(2));
+      if (this.techsThisTurn >= 3 && this.has('spray-gorge') && !this.sprayUsed && this.phase === 'joueur') {
+        this.sprayUsed = true;
+        this.relicFired('spray-gorge', () => this.changeEnergy(1, 'Spray Gorge'));
+      }
+    }
     if (d.category === 'attaque') {
+      if (GEMS[d.pokeType] && this.has(GEMS[d.pokeType]!)) this.gemsUsed.add(d.pokeType);
+      if (this.has('roche-royale') && this.phase === 'joueur') {
+        const victims = d.target === 'tous' ? this.aliveEnemies() : target && target.hp > 0 ? [target] : [];
+        for (const v of victims) if (this.rng.next() < 0.2) this.relicFired('roche-royale', () => this.addStatus(v, v.uid, 'peur', 1));
+      }
       this.attacksThisTurn++;
       this.firstAttackDone = true;
       if (this.has('orbe-vie') && this.phase === 'joueur') this.relicFired('orbe-vie', () => this.loseHp(this.player, 'player', 1, 'carte'));
@@ -485,6 +524,7 @@ export class Combat {
       this.events.push({ type: 'hp-loss', target: 'player', amount: Math.min(2, this.player.hp), source: 'carte' });
       this.applyHpLoss(this.player, 'player', 2);
     }
+    if (this.has('boue-noire') && this.player.hp > 0 && this.player.hp < this.player.maxHp) this.relicFired('boue-noire', () => this.healPlayer(2));
     const fam = this.player.familiar;
     if (fam && fam.hp > 0) this.familiarAttack((fam.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0));
     if ((this.phase as string) === 'victoire') return; // le Bébé a gagné le combat
@@ -604,8 +644,19 @@ export class Combat {
     this.phase = 'joueur';
     this.attacksThisTurn = 0;
     this.cardsThisTurn = 0;
+    this.techsThisTurn = 0;
+    this.sprayUsed = false;
+    this.oddUsed = false;
+    this.gemsUsed.clear();
     if (this.player.familiar) this.player.familiar.block = 0;
-    this.player.block = 0;
+    // Lumargile : la Protection n'est que divisée par deux au lieu de disparaître
+    this.player.block = this.has('lumargile') ? Math.floor(this.player.block / 2) : 0;
+    // Évoluroc : tant que le Pokémon n'a pas évolué, 3 Protection à chaque tour
+    const chDef = CHARACTERS[this.player.character];
+    if (this.has('evoluroc') && (chDef.evolutions?.length ?? 0) > 0 && this.player.dex === chDef.dex[0]) this.relicFired('evoluroc', () => this.gainBlock(this.player, 'player', 3));
+    // Encens Doux (Kangourex) : le Bébé récupère 2 PV
+    const fam0 = this.player.familiar;
+    if (this.has('encens-doux') && fam0 && fam0.hp > 0 && fam0.hp < fam0.maxHp) { fam0.hp = Math.min(fam0.maxHp, fam0.hp + 2); this.relicFired('encens-doux'); }
     this.player.energy = this.player.maxEnergy;
     if (this.player.statuses.tenace) {
       delete this.player.statuses.tenace;
@@ -1051,6 +1102,8 @@ export class Combat {
     if (heal <= 0) return;
     this.player.hp += heal;
     this.events.push({ type: 'heal', target: 'player', amount: heal });
+    // Encens Fleur (Vipélierre) : chaque soin donne aussi de la Protection (5 max)
+    if (this.has('encens-fleur')) this.relicFired('encens-fleur', () => this.gainBlock(this.player, 'player', Math.min(5, heal)));
   }
 
   /** Météo et terrain en cours (tours restants). */
@@ -1264,6 +1317,8 @@ export class Combat {
     if (who === 'player' && this.player.character === 'vipelierre' && (status === 'attaque' || status === 'defense')) s = -s;
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
     if (s > 0 && this.terrain?.id === 'champ-brumeux' && BAD_STATUSES.includes(status)) return;
+    if (who === 'player' && s > 0 && this.has('carapace-mue') && (status === 'peur' || status === 'paralysie')) return void this.relicFired('carapace-mue');
+    if (who === 'player' && s > 0 && this.has('grosses-bottes') && status === 'brulure') return void this.relicFired('grosses-bottes');
     if (s > 0 && this.terrain?.id === 'champ-electrifie' && status === 'sommeil') return;
     if (who === 'player' && s > 0 && (status === 'attaque' || status === 'defense') && this.bossAlive('air-lock')) {
       this.events.push({ type: 'player-move', name: 'Air Lock bloque la hausse !' });
@@ -1280,7 +1335,7 @@ export class Combat {
     for (const s of DOTS) {
       const n = f.statuses[s] ?? 0;
       if (n <= 0 || f.hp <= 0) continue;
-      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0), s);
+      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0), s);
       if (s === 'vampigraine' && who !== 'player') {
         this.healPlayer(Math.floor(n / 2));
       }
