@@ -4,7 +4,11 @@
 import type { PokeType } from '../core/types';
 
 /** Musiques enregistrées (fichiers MP3) qui remplacent la musique générée pour certains combats. */
-const FILE_TRACKS: Record<string, string> = { dialga: 'music/dialga.mp3' };
+const FILE_TRACKS: Record<string, string> = {
+  dialga: 'music/dialga.mp3',
+  'foret-de-jade': 'music/foret-de-jade.mp3', // Viridian Forest
+  'bois-clematis': 'music/bois-clematis.mp3', // Bois Clémenti (Hoenn)
+};
 let fileAudio: HTMLAudioElement | null = null;
 let fileTrack: string | null = null;
 const fileVolume = () => (mode === 'tout' ? 0.5 : 0);
