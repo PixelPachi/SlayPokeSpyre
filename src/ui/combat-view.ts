@@ -291,7 +291,8 @@ export class CombatView {
     if (!el) return;
     const r = el.getBoundingClientRect();
     const s = this.root.getBoundingClientRect();
-    playVfx(this.fx, r.left - s.left + r.width / 2, r.top - s.top + r.height * 0.55, type, strength);
+    const k = s.width / this.root.offsetWidth || 1; // le jeu est mis à l'échelle de l'écran
+    playVfx(this.fx, (r.left - s.left + r.width / 2) / k, (r.top - s.top + r.height * 0.55) / k, type, strength);
   }
 
   private whoEl(who: Who): HTMLElement | null {
@@ -417,8 +418,9 @@ export class CombatView {
     const f = document.createElement('div');
     f.className = `energy-float ${gain ? 'gain' : 'loss'} ${reason ? 'why' : ''}`;
     f.innerHTML = `${text}${reason ? `<small>${reason}</small>` : ''}`;
-    f.style.left = `${r.left - s.left + r.width / 2}px`;
-    f.style.top = `${r.top - s.top - 6 - this.fx.querySelectorAll('.energy-float').length * 26}px`;
+    const k = s.width / this.root.offsetWidth || 1;
+    f.style.left = `${(r.left - s.left + r.width / 2) / k}px`;
+    f.style.top = `${(r.top - s.top) / k - 6 - this.fx.querySelectorAll('.energy-float').length * 26}px`;
     this.fx.appendChild(f);
     setTimeout(() => f.remove(), 1500);
   }
