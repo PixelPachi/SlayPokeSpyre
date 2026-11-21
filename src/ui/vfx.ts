@@ -78,3 +78,37 @@ export function playVfx(layer: HTMLElement, x: number, y: number, type: PokeType
   }
   setTimeout(() => box.remove(), 1700);
 }
+
+/** Bouclier qui apparaît sur un Pokémon quand il gagne de la Protection. */
+export function playShield(layer: HTMLElement, x: number, y: number, size: number): void {
+  const box = document.createElement('div');
+  box.className = 'vfx vfx-shield';
+  box.style.left = `${x}px`;
+  box.style.top = `${y}px`;
+  box.style.setProperty('--size', `${size}px`);
+  box.innerHTML = `<svg class="shield-hex" viewBox="0 0 100 110"><path d="M50 4 L92 22 L92 58 C92 82 72 98 50 106 C28 98 8 82 8 58 L8 22 Z"
+      fill="url(#shg)" stroke="#bfe6ff" stroke-width="4"/><defs><radialGradient id="shg" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#e8f6ff" stop-opacity="0.45"/>
+      <stop offset="0.6" stop-color="#5bb8ff" stop-opacity="0.35"/><stop offset="1" stop-color="#2a6fd6" stop-opacity="0.15"/></radialGradient></defs></svg>
+    <i class="shield-ring"></i>`;
+  layer.appendChild(box);
+  setTimeout(() => box.remove(), 1100);
+}
+
+/** Activation d'un talent : cercle runique et lumière qui monte, à la couleur du type. */
+export function playTalent(layer: HTMLElement, x: number, y: number, color: string): void {
+  const box = document.createElement('div');
+  box.className = 'vfx vfx-talent';
+  box.style.left = `${x}px`;
+  box.style.top = `${y}px`;
+  box.style.setProperty('--c', color);
+  let sparks = '';
+  for (let i = 0; i < 16; i++) {
+    sparks += `<i class="talent-spark" style="--x:${Math.round(Math.cos((i / 16) * Math.PI * 2) * 70)}px;--d:${i * 30}ms"></i>`;
+  }
+  box.innerHTML = `<svg class="talent-circle" viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--c)" stroke-width="4"/>
+      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--c)" stroke-width="2" stroke-dasharray="6 10"/>
+      <path d="M100 18 L171 141 L29 141 Z M100 182 L29 59 L171 59 Z" fill="none" stroke="var(--c)" stroke-width="2.5" opacity="0.8"/></svg>
+    <i class="talent-pillar"></i>${sparks}`;
+  layer.appendChild(box);
+  setTimeout(() => box.remove(), 1500);
+}

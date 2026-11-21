@@ -221,7 +221,7 @@ function startRun(character: CharacterId): void {
   if (params.get('combat')) {
     clear();
     playTheme(params.get('combat')!.startsWith('dialga') ? 'dialga' : `gardien-${Math.min(3, run.act)}`);
-    (window as unknown as { __vfx: (t: string, p?: boolean) => void }).__vfx = (t, p) => view?.demoVfx(t as never, p);
+    (window as unknown as { __vfx: (t: string, p?: boolean) => void }).__vfx = (t, p) => (t === 'bouclier' ? view?.demoShield() : t === 'talent' ? view?.demoTalent() : view?.demoVfx(t as never, p));
     view = new CombatView(screen, run, { seed: `${run.seed}-test`, enemies: params.get('combat')!.split(','), label: 'Test', boss: true }, () => showMap(run));
     return;
   }

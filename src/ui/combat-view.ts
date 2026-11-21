@@ -1,4 +1,4 @@
-import { playVfx } from './vfx';
+import { playShield, playTalent, playVfx } from './vfx';
 import { skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
 import { TERRAINS, WEATHER } from '../core/weather';
@@ -115,7 +115,7 @@ export class CombatView {
       ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
       ${fieldChips ? `<div class="field-chips">${fieldChips}</div>` : ''}
       <div class="field">
-        <div class="fighter player" data-who="player">
+        <div class="fighter player ${p.block > 0 ? 'has-block' : ''}" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
           <img class="sprite player-sprite" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}">
@@ -211,7 +211,7 @@ export class CombatView {
     if (e.hp <= 0) return `<div class="fighter enemy dead" data-who="${e.uid}"></div>`;
     const sprite = e.shiny ? `sprites/pokemon/shiny/${e.dex}.png` : `sprites/pokemon/front/${e.dex}.png`;
     return `
-      <div class="fighter enemy ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
+      <div class="fighter enemy ${e.block > 0 ? 'has-block' : ''} ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
         ${this.intentHtml(e)}
         ${this.statusRow(e, false)}
         ${ENEMY_DEFS[e.defId].gimmick ? `<div class="gimmick" data-tip="<b>${esc(ENEMY_DEFS[e.defId].gimmick!.name)}</b><br>${esc(ENEMY_DEFS[e.defId].gimmick!.text)}">★ ${esc(ENEMY_DEFS[e.defId].gimmick!.name)}</div>` : ''}
@@ -286,6 +286,21 @@ export class CombatView {
   demoVfx(type: PokeType, onPlayer = false): void {
     this.vfxOn(onPlayer ? 'player' : this.combat.aliveEnemies()[0].uid, type);
   }
+  demoShield(): void { this.fxAt('player', (x, y, w) => playShield(this.fx, x, y, w)); }
+  demoTalent(): void { this.fxAt('player', (x, y) => playTalent(this.fx, x, y, '#c9a6ff')); }
+
+  /** Position (dans le calque d'effets) du centre d'un combattant, mise à l'échelle de l'écran comprise. */
+  private fxAt(who: Who, fn: (x: number, y: number, w: number) => void): void {
+    const el = this.whoEl(who)?.querySelector('.sprite') ?? this.whoEl(who);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const s = this.root.getBoundingClientRect();
+    const k = s.width / this.root.offsetWidth || 1;
+    fn((r.left - s.left + r.width / 2) / k, (r.top - s.top + r.height * 0.55) / k, r.width / k);
+  }
+
+  /** Type de la dernière carte jouée (couleur de l'effet de talent). */
+  private lastPlayedType: PokeType = 'normal';
 
   /** Animation d'attaque (par type) sur un combattant. */
   private vfxOn(who: Who, type: PokeType, strength = 1): void {
@@ -327,7 +342,7 @@ export class CombatView {
           break;
         case 'block':
           this.float(ev.target, `+${ev.amount}`, 'block', at(ev.target));
-          if (ev.amount > 0) sfx('protection');
+          if (ev.amount > 0) { sfx('protection'); this.fxAt(ev.target, (x, y, w) => playShield(this.fx, x, y, w)); }
           break;
         case 'heal':
           this.float(ev.target, `+${ev.amount}`, 'heal', at(ev.target));
@@ -367,6 +382,8 @@ export class CombatView {
           break;
         case 'power':
           this.float('player', POWER_INFO[ev.power].label, 'status', at('player'), '#c9a6ff');
+          this.fxAt('player', (x, y) => playTalent(this.fx, x, y, TYPE_COLORS[this.lastPlayedType] ?? '#c9a6ff'));
+          sfx('soin');
           break;
         case 'relic': {
           this.float('player', relicDef(ev.id).name, 'status', at('player'), '#ffe08a');
@@ -521,6 +538,7 @@ export class CombatView {
     if (isAttack) sfxType(this.combat.def(card).pokeType); else sfx('carte');
     const cost = this.combat.costOf(card);
     const d0 = this.combat.def(card);
+    this.lastPlayedType = d0.pokeType;
     const targets = isAttack ? (d0.target === 'tous' ? this.combat.aliveEnemies().map((e) => e.uid) : [targetUid ?? this.combat.aliveEnemies()[0]?.uid]) : [];
     this.combat.play(uid, targetUid);
     for (const t of targets) if (t !== undefined) setTimeout(() => this.vfxOn(t, d0.pokeType), 120);
