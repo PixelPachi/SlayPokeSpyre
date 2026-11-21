@@ -935,6 +935,11 @@ export class Combat {
         p.powers[eff.power] = (p.powers[eff.power] ?? 0) + eff.amount;
         this.events.push({ type: 'power', power: eff.power, amount: p.powers[eff.power]! });
         return;
+      case 'protection-aura': {
+        const n = Math.floor(p.aura / eff.per);
+        if (n > 0) this.gainBlock(p, 'player', n);
+        return;
+      }
       case 'protection-par-soi': {
         const n = (p.statuses[eff.status] ?? 0) * eff.mult;
         if (n > 0) this.gainBlock(p, 'player', n);

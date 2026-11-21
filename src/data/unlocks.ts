@@ -10,7 +10,7 @@ export const MAX_LEVEL = LEVEL_EXP.length;
 /** Cartes débloquées à chaque niveau. Le niveau 1 = cartes disponibles dès la première run. */
 export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
   riolu: {
-    1: ['mach-punch', 'vive-attaque', 'riposte', 'balayette', 'tenacite', 'forte-paume', 'pisto-poing', 'onde-vide',
+    1: ['garde-aura', 'garde-large', 'protection', 'bouclier-royal', 'mach-punch', 'vive-attaque', 'riposte', 'balayette', 'tenacite', 'forte-paume', 'pisto-poing', 'onde-vide',
       'eclate-roc', 'prevention', 'vibrobscur', 'coup-croix', 'gonflette', 'vitesse-extreme'],
     2: ['griffe-acier', 'riolu-morsure', 'grincement', 'coup-main', 'casse-brique', 'balayage', 'contre', 'close-combat', 'plenitude'],
     3: ['tomberoche', 'pietisol', 'meteores', 'facade', 'affilage', 'poing-boost', 'vampi-poing', 'lire-esprit'],
@@ -23,7 +23,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['metalaser', 'ultralaser'],
   },
   vipelierre: {
-    1: ['vip-vege-attaque', 'vip-lame-feuille', 'vip-enroulement', 'vip-giga-sangsue', 'vip-suc-digestif', 'vip-fouet-lianes', 'vip-ligotage', 'vip-groz-yeux', 'vip-croissance', 'vip-feuille-magik', 'vip-mega-sangsue', 'vip-souplesse', 'vip-balle-graine', 'vip-aeropique'],
+    1: ['vip-garde-florale', 'vip-cotogarde', 'vip-pico-defense', 'vip-vege-attaque', 'vip-lame-feuille', 'vip-enroulement', 'vip-giga-sangsue', 'vip-suc-digestif', 'vip-fouet-lianes', 'vip-ligotage', 'vip-groz-yeux', 'vip-croissance', 'vip-feuille-magik', 'vip-mega-sangsue', 'vip-souplesse', 'vip-balle-graine', 'vip-aeropique'],
     2: ['vip-danse-lames', 'vip-belier', 'vip-damocles', 'vip-mur-lumiere', 'vip-plaquage', 'vip-meteores', 'vip-grimace', 'vip-facade', 'vip-coup-main'],
     3: ['vip-lance-soleil', 'vip-protection', 'vip-repos', 'vip-clonage', 'vip-colere', 'vip-gliss-herbe', 'vip-abattage', 'vip-doux-parfum'],
     4: ['vip-giga-impact', 'vip-tenacite', 'vip-provoc', 'vip-canon-graine', 'vip-draco-choc', 'vip-siffl-herbe', 'vip-poursuite', 'vip-ouragan'],
@@ -35,7 +35,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['vip-blabla-dodo', 'vip-force'],
   },
   kangourex: {
-    1: ['kan-mega-evolution', 'kan-puissance', 'kan-machouille', 'kan-tenacite', 'kan-contre', 'kan-mimi-queue', 'kan-rugissement', 'kan-bluff', 'kan-morsure', 'kan-ecrasement', 'kan-coup-d-boule', 'kan-tomberoche', 'kan-aeropique', 'kan-facade'],
+    1: ['kan-garde-large', 'kan-boul-armure', 'kan-protection', 'kan-mur-de-fer', 'kan-mega-evolution', 'kan-puissance', 'kan-machouille', 'kan-tenacite', 'kan-contre', 'kan-mimi-queue', 'kan-rugissement', 'kan-bluff', 'kan-morsure', 'kan-ecrasement', 'kan-coup-d-boule', 'kan-tomberoche', 'kan-aeropique', 'kan-facade'],
     2: ['kan-colere', 'kan-hurlement', 'kan-queue-de-fer', 'kan-tunnel', 'kan-coupe', 'kan-eclate-roc', 'kan-pietisol', 'kan-onde-de-choc', 'kan-vibraqua'],
     3: ['kan-dynamo-poing', 'kan-ball-ombre', 'kan-casse-brique', 'kan-lance-flammes', 'kan-repos', 'kan-griffe-ombre', 'kan-poing-comete', 'kan-uppercut'],
     4: ['kan-dernier-recours', 'kan-larcin', 'kan-degommage', 'kan-vampi-poing', 'kan-avalanche', 'kan-frenesie', 'kan-plaquage', 'kan-balayage'],
@@ -47,7 +47,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['kan-ultimawashi', 'kan-damocles'],
   },
   caninos: {
-    1: ['can-vitesse-extreme', 'can-grondement', 'can-machouille', 'can-contre', 'can-hate', 'can-rugissement', 'can-groz-yeux', 'can-flair', 'can-coup-main', 'can-roue-de-feu', 'can-crocs-feu', 'can-crocs-eclair', 'can-plaquage', 'can-meteores'],
+    1: ['can-garde-large', 'can-detection', 'can-rempart-brulant', 'can-vitesse-extreme', 'can-grondement', 'can-machouille', 'can-contre', 'can-hate', 'can-rugissement', 'can-groz-yeux', 'can-flair', 'can-coup-main', 'can-roue-de-feu', 'can-crocs-feu', 'can-crocs-eclair', 'can-plaquage', 'can-meteores'],
     2: ['can-hurlement', 'can-belier', 'can-lance-flammes', 'can-damocles', 'can-grimace', 'can-facade', 'can-aeropique', 'can-pietisol', 'can-nitrocharge'],
     3: ['can-boutefeu', 'can-tunnel', 'can-repos', 'can-clonage', 'can-larcin', 'can-double-pied', 'can-vengeance', 'can-retour'],
     4: ['can-surchauffe', 'can-colere', 'can-tenacite', 'can-canicule', 'can-feu-follet', 'can-frustration', 'can-reflet', 'can-ronflement'],

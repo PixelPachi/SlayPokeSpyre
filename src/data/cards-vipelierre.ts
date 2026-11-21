@@ -8,6 +8,9 @@ const c = cardMaker('vipelierre', 'vip');
 
 export const VIPELIERRE_CARDS: CardDef[] = [
   // ——— Communes (28) ———
+  c('garde-florale', 'Garde Florale', 'fee', 'technique', 'commune', 1, 'soi', [prot(6), heal(2)], { effects: [prot(8), heal(3)] }),
+  c('cotogarde', 'Cotogarde', 'plante', 'technique', 'peu-commune', 1, 'soi', [prot(8), st('defense', -1, 'soi')], { effects: [prot(11), st('defense', -1, 'soi')] }),
+  c('pico-defense', 'Pico-Défense', 'plante', 'technique', 'peu-commune', 2, 'soi', [prot(10), st('vampigraine', 1, 'tous')], { effects: [prot(14), st('vampigraine', 2, 'tous')] }),
   c('fouet-lianes', 'Fouet Lianes', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(7)], { effects: [dmg(10)] }),
   c('ligotage', 'Ligotage', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(4), st('paralysie', 1)], { effects: [dmg(6), st('paralysie', 2)] }),
   c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)] }),

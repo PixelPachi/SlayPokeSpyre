@@ -27,6 +27,10 @@ export const RIOLU_CARDS: CardDef[] = [
   c('aurasphere', 'Aurasphère', 'combat', 'attaque', 'depart', 3, 'ennemi', [{ kind: 'degats-aura', mult: 2 }], { cost: 2 }),
 
   // ——— Communes ———
+  c('garde-aura', 'Garde Aura', 'combat', 'technique', 'commune', 1, 'soi', [prot(5), eff('protection-aura', { per: 3 })], { effects: [prot(7), eff('protection-aura', { per: 2 })] }),
+  c('garde-large', 'Garde Large', 'normal', 'technique', 'commune', 1, 'soi', [prot(6), aura(2)], { effects: [prot(9), aura(3)] }),
+  c('protection', 'Protection', 'normal', 'technique', 'peu-commune', 1, 'soi', [prot(9), draw(1)], { effects: [prot(12), draw(1)] }),
+  c('bouclier-royal', 'Bouclier Royal', 'acier', 'technique', 'rare', 2, 'soi', [prot(13), st('attaque', -1, 'tous')], { effects: [prot(17), st('attaque', -1, 'tous')] }),
   c('mach-punch', 'Mach Punch', 'combat', 'attaque', 'commune', 0, 'ennemi', [dmg(3), draw(1)], { effects: [dmg(5), draw(1)] }),
   c('vive-attaque', 'Vive-Attaque', 'normal', 'attaque', 'commune', 0, 'ennemi', [dmg(6)], { effects: [dmg(6), draw(1)] }),
   c('riposte', 'Riposte', 'combat', 'technique', 'commune', 1, 'soi', [prot(4), aura(4)], { effects: [prot(6), aura(6)] }),

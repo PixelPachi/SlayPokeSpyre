@@ -270,8 +270,8 @@ describe('objets tenus', async () => {
     return c;
   };
 
-  it('Riolu a 75 cartes possibles en récompense', () => {
-    expect(rewardPool('riolu')).toHaveLength(75);
+  it('Riolu a 79 cartes possibles en récompense', () => {
+    expect(rewardPool('riolu')).toHaveLength(79);
   });
 
   it('chaque objet a un sprite et un texte', () => {
@@ -402,14 +402,16 @@ describe('cartes de tous les personnages', async () => {
   const { Run } = await import('../src/core/run');
   const chars = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as const;
 
-  it('75 cartes de récompense par personnage, toutes débloquables et sans doublon de nom', () => {
+  it('toutes les cartes de récompense sont débloquables, sans doublon de nom (75 + cartes de Protection ajoutées)', () => {
+    const extra: Record<string, number> = { riolu: 4, vipelierre: 3, kangourex: 4, caninos: 3, mew: 0 };
     for (const ch of chars) {
+      const n = 75 + extra[ch];
       const pool = rewardPool(ch);
-      expect(pool, ch).toHaveLength(75);
+      expect(pool, ch).toHaveLength(n);
       const unlockIds = Object.values(UNLOCKS[ch]!).flat();
-      expect(new Set(unlockIds).size, ch).toBe(75);
+      expect(new Set(unlockIds).size, ch).toBe(n);
       for (const c of pool) expect(unlockIds, `${ch} ${c.id}`).toContain(c.id);
-      expect(new Set(pool.map((c) => c.name)).size, ch).toBe(75);
+      expect(new Set(pool.map((c) => c.name)).size, ch).toBe(n);
     }
   });
 

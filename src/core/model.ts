@@ -79,6 +79,7 @@ export type Effect =
   | { kind: 'ajoute-carte'; from: 'tous' | 'neutre'; count: number } // ajoute des cartes au hasard dans la main (pour ce combat)
   | { kind: 'bebe-attaque'; times: number; status?: StatusId; stacks?: number } // le Bébé Kangourex attaque tout de suite (et peut infliger un statut)
   | { kind: 'protection-par-statut'; status: StatusId; mult: number } // Protection = statut de la cible × mult
+  | { kind: 'protection-aura'; per: number } // Protection +1 par tranche de « per » Aura (l'Aura n'est pas consommée)
   | { kind: 'protection-par-soi'; status: StatusId; mult: number } // Protection = ton propre statut × mult (Rage)
   | { kind: 'perd-statut'; status: StatusId } // le lanceur perd tout ce statut (consomme la Rage / l'Élan)
   | { kind: 'pioche-par-soi'; status: StatusId; per: number } // pioche 1 carte par tranche de « per » points de ton statut

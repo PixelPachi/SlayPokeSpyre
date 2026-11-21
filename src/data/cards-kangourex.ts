@@ -15,6 +15,10 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('coup-double', 'Coup Double', 'normal', 'attaque', 'depart', 1, 'ennemi', [multi(4, 2)], { effects: [multi(6, 2)] }),
 
   // ——— Communes (28) ———
+  c('garde-large', 'Garde Large', 'normal', 'technique', 'commune', 1, 'soi', [prot(6), bebeProt(6)], { effects: [prot(8), bebeProt(8)] }),
+  c('boul-armure', "Boul'Armure", 'normal', 'technique', 'commune', 0, 'soi', [prot(4), st('rage', 1, 'soi')], { effects: [prot(6), st('rage', 1, 'soi')] }),
+  c('protection', 'Protection', 'normal', 'technique', 'peu-commune', 1, 'soi', [prot(8), { kind: 'bebe-garde' }], { effects: [prot(11), { kind: 'bebe-garde' }] }),
+  c('mur-de-fer', 'Mur de Fer', 'acier', 'technique', 'peu-commune', 2, 'soi', [prot(12), st('defense', 1, 'soi')], { effects: [prot(16), st('defense', 1, 'soi')] }),
   c('mimi-queue', 'Mimi-Queue', 'normal', 'technique', 'commune', 0, 'tous', [st('defense', -1, 'tous'), bebeAtk()], { effects: [st('defense', -2, 'tous'), bebeAtk()] }),
   c('rugissement', 'Rugissement', 'normal', 'technique', 'commune', 1, 'tous', [st('attaque', -1, 'tous'), bebeProt(4)], { effects: [st('attaque', -1, 'tous'), bebeProt(7)] }),
   c('bluff', 'Bluff', 'normal', 'attaque', 'commune', 0, 'ennemi', [dmg(3), st('peur', 2)], { effects: [dmg(5), st('peur', 3)] }, ['epuisee', 'innee']),

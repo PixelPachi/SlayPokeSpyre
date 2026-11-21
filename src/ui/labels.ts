@@ -116,6 +116,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
       case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main.`); break;
       case 'bebe-attaque': parts.push(`${e.times > 1 ? `Le Bébé attaque ${e.times} fois` : 'Le Bébé attaque'}${e.status ? ` et inflige ${e.stacks} ${STATUS_INFO[e.status].label}` : ''}.`); break;
+      case 'protection-aura': parts.push(`+1 Protection par ${e.per} Aura <i>(sans la consommer)</i>.`); break;
       case 'protection-par-soi': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}ta ${STATUS_INFO[e.status].label} en Protection.`); break;
       case 'perd-statut': parts.push(`Consomme toute ta ${STATUS_INFO[e.status].label}.`); break;
       case 'pioche-par-soi': parts.push(`Pioche 1 carte par ${e.per} ${STATUS_INFO[e.status].label}.`); break;

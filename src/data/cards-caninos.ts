@@ -9,6 +9,9 @@ const c = cardMaker('caninos', 'can');
 
 export const CANINOS_CARDS: CardDef[] = [
   // ——— Communes (28) ———
+  c('garde-large', 'Garde Large', 'normal', 'technique', 'commune', 1, 'soi', [prot(6), st('elan', 1, 'soi')], { effects: [prot(9), st('elan', 2, 'soi')] }),
+  c('detection', 'Détection', 'combat', 'technique', 'commune', 1, 'soi', [prot(5), draw(1)], { effects: [prot(8), draw(1)] }),
+  c('rempart-brulant', 'Rempart Brûlant', 'feu', 'technique', 'rare', 2, 'soi', [prot(13), st('brulure', 2, 'tous')], { effects: [prot(17), st('brulure', 3, 'tous')] }),
   c('rugissement', 'Rugissement', 'normal', 'technique', 'commune', 0, 'tous', [st('attaque', -1, 'tous'), st('brulure', 1, 'tous')], { effects: [st('attaque', -1, 'tous'), st('brulure', 2, 'tous')] }, ['epuisee']),
   c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), { kind: 'pioche-si-statut', status: 'brulure', amount: 1 }], { effects: [st('defense', -2), { kind: 'pioche-si-statut', status: 'brulure', amount: 2 }] }),
   c('flair', 'Flair', 'normal', 'technique', 'commune', 1, 'ennemi', [st('defense', -2), { kind: 'protection-par-statut', status: 'brulure', mult: 1 }], { effects: [st('defense', -3), { kind: 'protection-par-statut', status: 'brulure', mult: 2 }] }),
