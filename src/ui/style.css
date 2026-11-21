@@ -1254,3 +1254,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .reward-layer .node-title { font-size: 30px; margin: 0 0 8px; }
 .reward-layer .card-choice { position: absolute; inset: 0; }
 @keyframes rewardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+/* Cartes en vol (pioche → main, main → défausse) */
+.fx-layer .card.flying { position: absolute; margin: 0; transform: none; transition: none; z-index: 70; pointer-events: none; }

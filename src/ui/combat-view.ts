@@ -96,6 +96,81 @@ export class CombatView {
   private endSfx = false;
   private lastAura = -1;
 
+  // ——— Cartes qui volent : pioche → main, main → défausse ———
+  private dropRect: { uid: number; x: number; y: number; w: number; h: number } | null = null;
+
+  /** Position (coordonnées de la scène) et HTML des cartes en main avant un nouveau rendu. */
+  private snapshotHand(): Map<number, { x: number; y: number; w: number; h: number; html: string }> {
+    const m = new Map<number, { x: number; y: number; w: number; h: number; html: string }>();
+    const s = this.root.getBoundingClientRect();
+    const k = s.width / this.root.offsetWidth || 1;
+    this.el.querySelectorAll<HTMLElement>('.hand .card[data-uid]').forEach((el) => {
+      const r = el.getBoundingClientRect();
+      m.set(Number(el.dataset.uid), { x: (r.left - s.left) / k, y: (r.top - s.top) / k, w: r.width / k, h: r.height / k, html: el.outerHTML });
+    });
+    return m;
+  }
+
+  private pileCenter(sel: string): { x: number; y: number } | null {
+    const el = this.el.querySelector<HTMLElement>(sel);
+    if (!el) return null;
+    const s = this.root.getBoundingClientRect();
+    const k = s.width / this.root.offsetWidth || 1;
+    const r = el.getBoundingClientRect();
+    return { x: (r.left - s.left + r.width / 2) / k, y: (r.top - s.top + r.height / 2) / k };
+  }
+
+  private animateHand(prev: Map<number, { x: number; y: number; w: number; h: number; html: string }>): void {
+    if (typeof Element.prototype.animate !== 'function') return;
+    const c = this.combat;
+    const s = this.root.getBoundingClientRect();
+    const k = s.width / this.root.offsetWidth || 1;
+    const drawPile = this.pileCenter('.pile.draw');
+    const discard = this.pileCenter('.pile.discard');
+    // Nouvelles cartes : elles sortent de la pioche et glissent jusqu'à leur place dans la main
+    let n = 0;
+    this.el.querySelectorAll<HTMLElement>('.hand .card[data-uid]').forEach((el) => {
+      const uid = Number(el.dataset.uid);
+      if (prev.has(uid) || !drawPile) return;
+      const r = el.getBoundingClientRect();
+      const cx = (r.left - s.left + r.width / 2) / k, cy = (r.top - s.top + r.height / 2) / k;
+      el.animate([
+        { translate: `${drawPile.x - cx}px ${drawPile.y - cy}px`, scale: '0.25', opacity: 0.4 },
+        { translate: '0 0', scale: '1', opacity: 1 },
+      ], { duration: 380, delay: n++ * 90, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'backwards' });
+    });
+    // Cartes parties : un fantôme vole vers la défausse (ou s'évapore si la carte est épuisée)
+    const still = new Set(c.hand.map((x) => x.uid));
+    let m = 0;
+    for (const [uid, o] of prev) {
+      if (still.has(uid)) continue;
+      const start = this.dropRect?.uid === uid ? this.dropRect : o;
+      const exhausted = c.exhaustPile.some((x) => x.uid === uid);
+      const toDraw = c.drawPile.some((x) => x.uid === uid);
+      const dest = exhausted ? { x: start.x + start.w / 2, y: start.y - 120 } : toDraw ? drawPile : discard;
+      if (!dest) continue;
+      const g = document.createElement('div');
+      g.innerHTML = o.html;
+      const card = g.firstElementChild as HTMLElement;
+      card.classList.remove('selected', 'dragging', 'unplayable');
+      card.classList.add('flying');
+      card.style.left = `${start.x}px`;
+      card.style.top = `${start.y}px`;
+      this.fx.appendChild(card);
+      const dx = dest.x - (start.x + start.w / 2), dy = dest.y - (start.y + start.h / 2);
+      const anim = card.animate(exhausted ? [
+        { translate: '0 0', scale: '1', opacity: 1, filter: 'brightness(1)' },
+        { translate: `0 ${dy}px`, scale: '0.9', opacity: 0, filter: 'brightness(2.5)' },
+      ] : [
+        { translate: '0 0', scale: '1', opacity: 1 },
+        { translate: `${dx * 0.4}px ${dy * 0.4 - 40}px`, scale: '0.7', opacity: 1, offset: 0.4 },
+        { translate: `${dx}px ${dy}px`, scale: '0.18', opacity: 0.5 },
+      ], { duration: exhausted ? 450 : 480, delay: m++ * 70, easing: 'ease-in', fill: 'both' });
+      anim.onfinish = () => card.remove();
+    }
+    this.dropRect = null;
+  }
+
   /** Victoire : pas d'écran « Victoire ! », le butin s'affiche directement par-dessus la scène. */
   private ended = false;
   private finish(): void {
@@ -128,6 +203,7 @@ export class CombatView {
       c.weather ? `<div class="field-chip ${c.weatherActive() ? '' : 'off'}" data-tip="<b>${WEATHER[c.weather.id].name}</b><br>${WEATHER[c.weather.id].text}${c.weatherActive() ? '' : '<br><i>Annulée par Air Lock.</i>'}">${WEATHER[c.weather.id].icon} ${WEATHER[c.weather.id].name}${c.weather.turns < 50 ? ` · ${c.weather.turns}` : ''}</div>` : '',
       c.terrain ? `<div class="field-chip terrain" data-tip="<b>${TERRAINS[c.terrain.id].name}</b><br>${TERRAINS[c.terrain.id].text}">${TERRAINS[c.terrain.id].icon} ${TERRAINS[c.terrain.id].name} · ${c.terrain.turns}</div>` : '',
     ].join('');
+    const prevHand = this.snapshotHand();
     this.el.innerHTML = `
       ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
       ${fieldChips ? `<div class="field-chips">${fieldChips}</div>` : ''}
@@ -161,6 +237,7 @@ export class CombatView {
       </div>
       ${(c.phase === 'victoire' && !c.fled) ? '' : c.phase === 'victoire' || c.phase === 'defaite' ? this.endOverlay() : ''}
     `;
+    this.animateHand(prevHand);
     this.lastAura = this.combat.player.aura;
     // Carte choisie au toucher (sans glisser) : on montre les dégâts sur chaque ennemi
     if (this.selected !== null && !this.drag) this.showDamageBadges(true);
@@ -756,6 +833,13 @@ export class CombatView {
     const uid = d.uid;
     const over = d.mode === 'aim' ? this.enemyAt(ev) : null;
     const y = this.stagePoint(ev).y;
+    if (d.ghost) {
+      // la carte jouée part de l'endroit où on l'a lâchée
+      const s = this.root.getBoundingClientRect();
+      const k = s.width / this.root.offsetWidth || 1;
+      const r = d.ghost.getBoundingClientRect();
+      this.dropRect = { uid, x: (r.left - s.left) / k, y: (r.top - s.top) / k, w: r.width / k, h: r.height / k };
+    }
     this.cancelDrag(false);
     if (d.mode === 'aim' && over) return this.tryPlay(uid, Number(over.dataset.who));
     if (d.mode === 'carry' && y < PLAY_LINE) return this.tryPlay(uid);
