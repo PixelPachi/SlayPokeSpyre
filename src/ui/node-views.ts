@@ -184,7 +184,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
         </button>
       </div>`;
     root.innerHTML = shell(run, 'Marché Kecleon', shopScene({
-      keeper: looted ? '' : asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`),
+      keeper: looted ? '' : asset(`sprites/pokemon/${shiny ? 'shiny' : 'front'}/352.png`), bg: 'backgrounds/marche-kecleon.jpg',
       bubble: looted ? 'Kecleon a pris la fuite… Les étals sont à toi (clique dessus).' : shiny ? '★ Kecleon chromatique ! Tout est à moitié prix. Clique sur moi !' : 'Bienvenue ! Clique sur moi pour voir mes articles !',
       title: looted ? 'Marché Kecleon… pillé !' : 'Marché Kecleon',
       actions: `${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}<button class="btn primary leave">Quitter le marché</button>`,
@@ -274,9 +274,9 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
 }
 
 /** Place du marché : décor d'échoppe, le marchand à droite (on clique dessus pour ouvrir le tapis d'articles). */
-export function shopScene(o: { keeper: string; keeperCls?: string; bubble: string; title: string; actions: string; carpet: string; theme?: string }): string {
+export function shopScene(o: { keeper: string; keeperCls?: string; bubble: string; title: string; actions: string; carpet: string; theme?: string; bg?: string }): string {
   return `
-    <div class="shop-scene ${o.theme ?? ''}">
+    <div class="shop-scene ${o.theme ?? ''} ${o.bg ? 'has-bg' : ''}" ${o.bg ? `style="background-image:url('${asset(o.bg)}')"` : ''}>
       <svg class="shop-decor" viewBox="0 0 1280 640" preserveAspectRatio="xMidYMax slice">
         <defs>
           <linearGradient id="wood" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--wood1)"/><stop offset="1" stop-color="var(--wood2)"/></linearGradient>

@@ -169,7 +169,7 @@ export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void
           <small class="ench-tag ${ENCHANTS[o.k].rarity ?? 'commun'}">${ENCHANTS[o.k].rarity === 'legendaire' ? '★ Légendaire — ' : ENCHANTS[o.k].rarity === 'rare' ? '◆ Rare — ' : ''}✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
         </div>`).join('')}</div>`;
     root.innerHTML = shell(run, label, shopScene({
-      keeper: asset('sprites/pokemon/front/352.png'), keeperCls: 'purple', theme: 'dark', title: 'Marché noir',
+      keeper: asset('sprites/pokemon/kecleon-violet.png'), theme: 'dark', title: 'Marché noir', bg: 'backgrounds/marche-noir.jpg',
       bubble: 'Psst… Des capacités enchantées, introuvables ailleurs. Clique sur moi…',
       actions: '<button class="btn primary leave">Repartir</button>', carpet: open ? carpet : '',
     }), 'shop-screen shop-place');

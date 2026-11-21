@@ -137,7 +137,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
   /* Fond de la zone (image Gemini) par-dessus un dégradé de secours aux couleurs de la zone */
   background:
     linear-gradient(transparent 62%, rgba(5, 8, 6, 0.75) 100%),
-    var(--bg, none) center / cover no-repeat,
+    var(--bg, none) center bottom 70px / auto 140% no-repeat, /* agrandi et calé en bas : les plateformes du décor arrivent sous les Pokémon */
     radial-gradient(ellipse 160% 62% at 50% 100%, var(--ground, #4a7a2f) 0, color-mix(in srgb, var(--ground, #4a7a2f) 70%, #000) 70%, transparent 71%),
     radial-gradient(ellipse at 50% 15%, var(--sky, #a9dcaa) 0, color-mix(in srgb, var(--sky, #a9dcaa) 55%, var(--shade, #163322)) 30%, var(--shade, #163322) 75%);
   background-color: var(--shade, #24452f);
@@ -1229,3 +1229,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
   text-shadow: 0 2px 0 #1a2550, 0 0 10px #8fa7d9; letter-spacing: 6px; pointer-events: none; animation: zzz 2.4s ease-in-out infinite; }
 .fighter.asleep .sprite { filter: brightness(0.85) saturate(0.8); }
 @keyframes zzz { 0% { transform: translate(0, 10px) rotate(-8deg); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(24px, -36px) rotate(8deg); opacity: 0; } }
+.shop-scene.has-bg { background-color: #2a1a10; background-size: cover; background-position: center; background-repeat: no-repeat; }
+.shop-scene.has-bg .shop-decor { display: none; }
+.shop-scene.has-bg .shop-title .node-title { text-shadow: 0 3px 0 #000, 0 0 18px #000; }
+.shop-scene.has-bg .shop-stall { left: 6%; right: 40%; top: 25%; height: 55%; }
