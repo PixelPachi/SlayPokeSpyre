@@ -1,0 +1,155 @@
+[
+ {
+  "id": "foret-de-jade",
+  "name": "Forêt de Jade",
+  "region": "Kanto",
+  "act": 1,
+  "mood": "insecte",
+  "season": "Été lumineux",
+  "weather": "pollen"
+ },
+ {
+  "id": "bois-aux-chenes",
+  "name": "Bois aux Chênes",
+  "region": "Johto",
+  "act": 1,
+  "mood": "insecte",
+  "season": "Automne au crépuscule",
+  "weather": "feuilles-or"
+ },
+ {
+  "id": "bois-clematis",
+  "name": "Bois Clématis",
+  "region": "Hoenn",
+  "act": 1,
+  "mood": "plante",
+  "season": "Printemps en fleurs",
+  "weather": "petales"
+ },
+ {
+  "id": "foret-de-vestigion",
+  "name": "Forêt de Vestigion",
+  "region": "Sinnoh",
+  "act": 1,
+  "mood": "plante",
+  "season": "Hiver enneigé",
+  "weather": "neige"
+ },
+ {
+  "id": "foret-d-empoigne",
+  "name": "Forêt d'Empoigne",
+  "region": "Unys",
+  "act": 1,
+  "mood": "insecte",
+  "season": "Automne flamboyant",
+  "weather": "feuilles-rouges"
+ },
+ {
+  "id": "tour-lavanville",
+  "name": "Tour Pokémon de Lavanville",
+  "region": "Kanto",
+  "act": 1,
+  "mood": "spectre",
+  "season": "Nuit de brume et de feux follets",
+  "weather": "feux-follets"
+ },
+ {
+  "id": "mont-selenite",
+  "name": "Mont Sélénite",
+  "region": "Kanto",
+  "act": 2,
+  "mood": "fee",
+  "season": "Nuit de pleine lune",
+  "weather": "cristaux"
+ },
+ {
+  "id": "puits-ramoloss",
+  "name": "Puits Ramoloss",
+  "region": "Johto",
+  "act": 2,
+  "mood": "eau",
+  "season": "Saison des pluies",
+  "weather": "gouttes"
+ },
+ {
+  "id": "mont-chimnee",
+  "name": "Mont Chimnée",
+  "region": "Hoenn",
+  "act": 2,
+  "mood": "feu",
+  "season": "Été caniculaire",
+  "weather": "cendres"
+ },
+ {
+  "id": "mont-couronne",
+  "name": "Mont Couronné",
+  "region": "Sinnoh",
+  "act": 2,
+  "mood": "roche",
+  "season": "Brume d'altitude",
+  "weather": "poussiere"
+ },
+ {
+  "id": "grotte-electrolithe",
+  "name": "Grotte Électrolithe",
+  "region": "Unys",
+  "act": 2,
+  "mood": "electrik",
+  "season": "Nuit d'orage",
+  "weather": "etincelles"
+ },
+ {
+  "id": "route-victoire",
+  "name": "Route Victoire",
+  "region": "Kanto",
+  "act": 3,
+  "mood": "combat",
+  "season": "Nuit aux flambeaux",
+  "weather": "braises"
+ },
+ {
+  "id": "mont-argente",
+  "name": "Mont Argenté",
+  "region": "Johto",
+  "act": 3,
+  "mood": "glace",
+  "season": "Hiver éternel",
+  "weather": "blizzard"
+ },
+ {
+  "id": "pilier-celeste",
+  "name": "Pilier Céleste",
+  "region": "Hoenn",
+  "act": 3,
+  "mood": "dragon",
+  "season": "Aube au-dessus des nuages",
+  "weather": "vent"
+ },
+ {
+  "id": "mont-abrupt",
+  "name": "Mont Abrupt",
+  "region": "Sinnoh",
+  "act": 3,
+  "mood": "feu",
+  "season": "Crépuscule de magma",
+  "weather": "cendres"
+ },
+ {
+  "id": "tour-dragospire",
+  "name": "Tour Dragospire",
+  "region": "Unys",
+  "act": 3,
+  "mood": "dragon",
+  "season": "Tempête de neige et d'éclairs",
+  "weather": "orage"
+ },
+ {
+  "id": "sommet-tour-du-temps",
+  "name": "Sommet de la Tour du Temps",
+  "region": "Tour du Temps",
+  "act": 4,
+  "mood": "dragon",
+  "season": "Le temps se désagrège",
+  "weather": "temps"
+ }
+]
