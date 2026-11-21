@@ -59,8 +59,10 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
             <div class="sheet-row"><b>Deck de départ</b><br>${deck}</div>
             ${expBlock(save, current)}
             ${skinBlock(save, current)}
-            <button class="btn primary start">Grimper la Tour du Temps</button>
-            <button class="btn collection">Voir les capacités</button>`}
+            <div class="sheet-actions">
+              <button class="btn primary start">Grimper la Tour du Temps</button>
+              <button class="btn collection">Voir les capacités</button>
+            </div>`}
         </div>
         <div class="select-roster">
           ${ORDER.map((id) => {

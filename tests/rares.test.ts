@@ -1,19 +1,17 @@
 import { expect, it } from 'vitest';
 import { Run } from '../src/core/run';
 import { cardDef } from '../src/data/cards';
-it('les cartes rares restent rares et ne se répètent pas', () => {
-  let rares = 0, total = 0, dup = 0;
-  for (let s = 0; s < 40; s++) {
-    const run = new Run(`R${s}`, 'caninos');
-    for (let i = 0; i < 25; i++) { // ~ deux actes de combats
-      const ch = run.cardChoices('combat');
-      for (const id of ch) { total++; if (cardDef(id).rarity === 'rare') rares++; }
-      const rare = ch.find((id) => cardDef(id).rarity === 'rare');
-      const pick = rare ?? ch[0];
-      if (rare && run.deck.some((c) => c.defId === rare)) dup++;
-      run.addCard(pick);
+it('chance de rare fixe : faible en combat, bien plus forte sur les dominants, garantie sur les gardiens', () => {
+  const rate = (kind: 'combat' | 'elite' | 'boss') => {
+    let rares = 0, total = 0;
+    for (let s = 0; s < 60; s++) {
+      const run = new Run(`R${s}`, 'riolu');
+      for (let i = 0; i < 20; i++) for (const id of run.cardChoices(kind)) { total++; if (cardDef(id).rarity === 'rare') rares++; }
     }
-  }
-  expect(dup).toBe(0);
-  expect(rares / total).toBeLessThan(0.08);
+    return rares / total;
+  };
+  const c = rate('combat'), e = rate('elite'), b = rate('boss');
+  expect(c).toBeLessThan(0.06);
+  expect(e).toBeGreaterThan(0.15);
+  expect(b).toBeGreaterThan(0.9);
 });

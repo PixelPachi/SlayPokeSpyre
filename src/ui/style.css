@@ -1257,3 +1257,23 @@ img.sprite, .roster img { image-rendering: pixelated; }
 
 /* Cartes en vol (pioche → main, main → défausse) */
 .fx-layer .card.flying { position: absolute; margin: 0; transform: none; transition: none; z-index: 70; pointer-events: none; }
+
+/* Fiche de sélection : tient toujours dans l'écran (défile si besoin), boutons toujours visibles en bas */
+.select-sheet { top: 100px; bottom: 14px; max-height: none; display: flex; flex-direction: column; overflow-y: auto; padding: 16px 20px 0; scrollbar-width: thin; scrollbar-color: #8892a6 transparent; }
+.select-sheet .sheet-name { font-size: 34px; }
+.select-sheet .sheet-types { margin-bottom: 8px; }
+.select-sheet .sheet-row { margin: 6px 0; font-size: 14px; }
+.logo { font-size: 46px; top: 24px; }
+.sheet-actions { position: sticky; bottom: 0; margin-top: auto; padding: 10px 0 14px; background: linear-gradient(to top, var(--panel-solid, #141a2a) 75%, transparent); display: flex; flex-direction: column; gap: 8px; }
+.sheet-actions .start, .sheet-actions .collection { margin-top: 0 !important; width: 100%; }
+.skin-list { gap: 8px !important; }
+.skin-btn { width: 82px !important; }
+.skin-btn img { width: 72px !important; height: 72px !important; }
+.select-sheet { top: 92px; }
+.select-sheet .sheet-name { font-size: 30px; line-height: 1.1; }
+.select-sheet .sheet-row { margin: 4px 0; font-size: 13.5px; line-height: 1.3; }
+.select-sheet .sheet-exp .exp-bar { margin-top: 4px; }
+.skin-btn img { width: 62px !important; height: 62px !important; margin: -10px 0 -8px !important; }
+.skin-btn { width: 76px !important; padding-bottom: 6px !important; }
+.sheet-actions { padding-top: 8px; gap: 6px; }
+.sheet-actions .btn { padding-top: 8px; padding-bottom: 8px; }
