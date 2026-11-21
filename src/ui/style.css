@@ -1308,3 +1308,9 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .welcome-scene::after { background: linear-gradient(to top, #0d1222 0%, #0d1222 15%, rgba(13, 18, 34, 0.55) 32%, transparent 50%); }
 .welcome-hero { top: 162px; }
 .welcome-guild { top: 150px; }
+
+/* Les pastilles de statut passent au-dessus du sprite (pour l'infobulle) */
+.statuses { position: relative; z-index: 6; }
+.status { cursor: help; }
+/* Mots-clés de statut dans le texte des cartes */
+.card-text .kw { text-decoration: underline dotted; text-underline-offset: 2px; cursor: help; }

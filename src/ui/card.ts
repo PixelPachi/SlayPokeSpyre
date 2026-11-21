@@ -2,7 +2,7 @@ import { ENCHANTS } from '../data/cards';
 // Rendu HTML d'une carte, partagé par le combat, les récompenses, la boutique et le deck.
 import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
-import { CATEGORY_LABELS, CHARACTER_COLORS, TYPE_COLORS, cardText } from './labels';
+import { CATEGORY_LABELS, CHARACTER_COLORS, STATUS_INFO, TYPE_COLORS, cardText } from './labels';
 import { esc } from './util';
 import { artNoPokemon, artUrl, orbUrl, frameUrl } from './card-assets';
 
@@ -37,7 +37,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
         ${frame ? '<div class="card-tint"></div>' : ''}
         <div class="card-banner"><div class="card-name" style="font-size:${nameSize(d.name)}px">${esc(d.name)}</div></div>
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
-        <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${text}</span></div>
+        <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${withStatusTips(text)}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
       </div>
       <div class="card-cost ${orb ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orb ? `style="--orb:url('${orb}')"` : ''}>${o.cost ?? d.cost}</div>
@@ -74,4 +74,17 @@ function nameSize(name: string): number {
   const size = Math.max(9, Math.min(NAME_MAX, Math.floor((NAME_MAX * NAME_WIDTH / w) * 10) / 10));
   nameCache.set(name, size);
   return size;
+}
+
+/** Infobulle sur les noms de statuts dans le texte d'une carte (Brûlure, Poison, Peur…). */
+const KW = Object.values(STATUS_INFO).map((i) => i.label).sort((a, b) => b.length - a.length);
+const KW_RE = new RegExp(`(^|[^\\p{L}])(${KW.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\p{L}])`, 'gu');
+const KW_TIP = new Map(Object.values(STATUS_INFO).map((i) => [i.label, i]));
+function withStatusTips(html: string): string {
+  // on ne touche qu'au texte, jamais à l'intérieur des balises
+  return html.split(/(<[^>]+>)/).map((part) => part.startsWith('<') ? part : part.replace(KW_RE, (_m, pre: string, w: string) => {
+    const info = KW_TIP.get(w)!;
+    const tip = `<b>${info.label}</b><br>${info.text(1).replace(/"/g, '&quot;')}`;
+    return `${pre}<span class="kw" style="--c:${info.color}" data-tip="${tip}">${w}</span>`;
+  })).join('');
 }

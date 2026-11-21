@@ -161,6 +161,8 @@ export class Combat {
   readonly relics: Set<string>;
   private used = new Set<string>(); // objets « une fois par combat » déjà déclenchés
   private attacksThisTurn = 0;
+  /** Ennemi qui a posé la Vampigraine sur le joueur (c'est lui qui en profite). */
+  private seedSource: number | null = null;
   /** Objets « une fois par tour » : gemmes déjà utilisées, techniques jouées, Spray Gorge, Encens Bizarre. */
   private gemsUsed = new Set<string>();
   private techsThisTurn = 0;
@@ -615,7 +617,10 @@ export class Combat {
           this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
         }
       }
-      if (m.playerStatus && this.phase === 'ennemi') this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
+      if (m.playerStatus && this.phase === 'ennemi') {
+        if (m.playerStatus.status === 'vampigraine') this.seedSource = uid; // c'est lui qui se soignera
+        this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
+      }
       if (m.selfStatus) this.addStatus(e, uid, m.selfStatus.status, m.selfStatus.stacks);
       if (m.addCards && this.phase === 'ennemi') this.addBossCards(m.addCards.id, m.addCards.count, m.addCards.to);
       if (m.discard && this.phase === 'ennemi') this.discardRandom(m.discard);
@@ -1425,6 +1430,11 @@ export class Combat {
       this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0), s);
       if (s === 'vampigraine' && who !== 'player') {
         this.healPlayer(Math.floor(n / 2));
+      }
+      // Vampigraine posée par un ennemi : c'est lui qui récupère la moitié des PV drainés
+      if (s === 'vampigraine' && who === 'player') {
+        const src = this.enemies.find((e) => e.uid === this.seedSource && e.hp > 0) ?? this.aliveEnemies()[0];
+        if (src) this.healEnemy(src, Math.floor(n / 2));
       }
       if (s === 'poison' && who === 'player' && this.bossAlive('venin-tenace')) continue; // Venin Tenace
       if (n - 1 <= 0) delete f.statuses[s];

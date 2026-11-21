@@ -10,3 +10,5 @@ export const RONDOUDOU_CARDS: CardDef[] = [
   c('berceuse', 'Berceuse', 'normal', 'technique', 'depart', 1, 'ennemi', [st('sommeil', 2)], { cost: 0 }, ['epuisee']),
   c('metronome', 'Métronome', 'normal', 'technique', 'depart', 1, 'ennemi', [{ kind: 'metronome' }], { cost: 0 }),
 ];
+// Illustrations dessinées avec Grodoudou (illustrations/rondoudou-<carte>.webp)
+for (const card of RONDOUDOU_CARDS) card.artName = `rondoudou-${card.id.slice(4)}`;
