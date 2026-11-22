@@ -19,6 +19,8 @@ export type StatusId =
   | 'etourdi' // passe son prochain tour
   | 'rage' // Kangourex : gagnée en perdant des PV, renforce les cartes de Rage
   | 'abri' // annule entièrement le prochain coup subi
+  | 'ligote' // perd 6 PV par cumul au début du tour ; chaque cumul disparaît au bout de 3 tours
+  | 'epine' // inflige X dégâts à l'ennemi qui l'attaque (chaque coup), dure tout le combat
   | 'elan'; // Caninos : +1 dégât par point à toutes ses attaques, divisé par deux à la fin du tour
 
 export type Statuses = Partial<Record<StatusId, number>>;
@@ -28,7 +30,7 @@ export type Target = 'ennemi' | 'tous' | 'aleatoire' | 'soi';
 /** Talents (pouvoirs) : effets permanents pour tout le combat. */
 export type PowerId =
   | 'plenitude' | 'lire-esprit' // Riolu
-  | 'champ-herbu' | 'racines' | 'zenith-plante' // Vipélierre
+  | 'champ-herbu' | 'racines' | 'zenith-plante' | 'peau-dure' // Vipélierre
   | 'amour-filial' | 'eveil' | 'rancune' // Kangourex
   | 'zenith' | 'braises' | 'turbo' // Caninos
   | 'souvenir' | 'telekinesie'; // Mew

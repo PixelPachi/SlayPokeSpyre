@@ -28,6 +28,8 @@ export interface Fighter {
   maxHp: number;
   block: number;
   statuses: Statuses;
+  /** Ligoté : tours restants de chaque cumul. */
+  binds?: number[];
 }
 
 export interface PlayerState extends Fighter {
@@ -299,7 +301,7 @@ export class Combat {
   /** Dégâts d'une attaque du joueur, objets compris. */
   private playerDamage(base: number, d: CardDef, t: Fighter) {
     const r = computeDamage(base + this.relicFlat(d), this.player, t, d.pokeType);
-    return { amount: Math.floor(r.amount * this.relicMult(r.effectiveness === 'super') * this.fieldMult(d.pokeType) + 1e-9), effectiveness: r.effectiveness };
+    return { amount: Math.floor(r.amount * this.relicMult(r.effectiveness === 'super') * this.fieldMult(d.pokeType, this.has('lunettes-filtre')) + 1e-9), effectiveness: r.effectiveness };
   }
 
   // ——— Lecture ———
@@ -582,7 +584,7 @@ export class Combat {
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
       const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
-      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal')) : undefined });
+      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
       if (m.meteo) this.setField(m.meteo);
       // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
       if (this.gimmickOf(e) === 'miroir-originel' && m.pokeType && e.types[0] !== m.pokeType) {
@@ -605,13 +607,16 @@ export class Combat {
             continue;
           }
           let { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
-          amount = Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal'));
+          amount = Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre')));
           if (this.resists.has(m.pokeType ?? 'normal')) amount = Math.floor(amount / 2);
           // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
           const hidden = m.pierce ? this.player.block : this.gimmickOf(e) === 'teravolt' ? Math.ceil(this.player.block / 2) : 0;
           this.player.block -= hidden;
           this.dealDamage(this.player, 'player', amount, effectiveness);
           this.player.block += hidden;
+          // Épine : l'attaquant se pique à chaque coup
+          const thorns = this.player.statuses.epine ?? 0;
+          if (thorns > 0 && e.hp > 0) this.dealDamage(e, uid, thorns, 'normal');
         }
         if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
           this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
@@ -748,6 +753,7 @@ export class Combat {
     if (pw.plenitude) this.gainAura(pw.plenitude);
     if (pw['champ-herbu']) this.healPlayer(pw['champ-herbu']);
     if (pw.racines) this.gainBlock(this.player, 'player', pw.racines);
+    if (pw['peau-dure']) this.addStatus(this.player, 'player', 'epine', pw['peau-dure']);
     if (pw.eveil && this.player.familiar) this.player.familiar.power += pw.eveil;
     if (pw.turbo) this.addStatus(this.player, 'player', 'elan', pw.turbo);
     if (pw.braises) for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'brulure', pw.braises);
@@ -892,7 +898,12 @@ export class Combat {
           eff.on === 'soi' ? [[p, 'player']]
           : eff.on === 'tous' ? this.aliveEnemies().map((e) => [e, e.uid] as [Fighter, Who])
           : target ? [[target, target.uid]] : [];
-        for (const [f, who] of list) this.addStatus(f, who, eff.status, eff.stacks);
+        for (const [f, who] of list) {
+          let n = eff.stacks;
+          // Pic Venin (Vipélierre) : chaque statut infligé à un ennemi en inflige 1 de plus
+          if (who !== 'player' && this.has('pic-venin')) n += n > 0 ? 1 : -1;
+          this.addStatus(f, who, eff.status, n);
+        }
         return;
       }
       case 'casse-protection':
@@ -1195,8 +1206,8 @@ export class Combat {
   }
 
   /** Multiplicateur de dégâts dû à la météo et au terrain. */
-  fieldMult(type: PokeType): number {
-    const w = this.weatherActive();
+  fieldMult(type: PokeType, goggles = false): number {
+    const w = goggles ? null : this.weatherActive();
     return (w ? WEATHER[w].mult[type] ?? 1 : 1) * (this.terrain ? TERRAINS[this.terrain.id].mult[type] ?? 1 : 1);
   }
 
@@ -1217,6 +1228,7 @@ export class Combat {
     const fighters: [Fighter, Who][] = [[this.player, 'player'], ...this.aliveEnemies().map((e) => [e, e.uid] as [Fighter, Who])];
     if (chip) for (const [f, who] of fighters) {
       if (f.hp <= 0 || f.types.some((t) => chip.immune.includes(t))) continue;
+      if (who === 'player' && this.has('lunettes-filtre')) continue;
       const n = Math.min(chip.dmg, f.hp);
       this.events.push({ type: 'hp-loss', target: who, amount: n, source: 'carte' });
       this.applyHpLoss(f, who, chip.dmg);
@@ -1414,6 +1426,7 @@ export class Combat {
       this.events.push({ type: 'player-move', name: 'Air Lock bloque la hausse !' });
       return;
     }
+    if (status === 'ligote' && s > 0) (f.binds ??= []).push(...Array(s).fill(3));
     const v = (f.statuses[status] ?? 0) + s;
     if (v === 0) delete f.statuses[status];
     else f.statuses[status] = v;
@@ -1445,6 +1458,15 @@ export class Combat {
       if (n - 1 <= 0) delete f.statuses[s];
       else f.statuses[s] = n - 1;
     }
+    // Ligoté : 6 PV par cumul, chaque cumul tient 3 tours
+    const nb = f.statuses.ligote ?? 0;
+    if (nb <= 0) { f.binds = undefined; return; }
+    const binds = (f.binds ?? []).slice(0, nb);
+    while (binds.length < nb) binds.push(3);
+    if (f.hp > 0) this.loseHp(f, who, 6 * nb, 'ligote');
+    f.binds = binds.map((t) => t - 1).filter((t) => t > 0);
+    if (f.binds.length) f.statuses.ligote = f.binds.length;
+    else { delete f.statuses.ligote; f.binds = undefined; }
   }
 
   // ——— Gardiens ———
@@ -1526,7 +1548,7 @@ function m0(m: EnemyMove): EnemyMove {
 
 function hasAnyStatus(f: Fighter): boolean {
   const s = f.statuses;
-  return ['poison', 'brulure', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil'].some((k) => (s[k as StatusId] ?? 0) > 0);
+  return ['poison', 'brulure', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil', 'ligote'].some((k) => (s[k as StatusId] ?? 0) > 0);
 }
 
 /** Crée les cartes d'un deck de départ. */

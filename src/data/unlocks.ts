@@ -23,7 +23,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['metalaser', 'ultralaser'],
   },
   vipelierre: {
-    1: ['vip-garde-florale', 'vip-cotogarde', 'vip-pico-defense', 'vip-vege-attaque', 'vip-lame-feuille', 'vip-enroulement', 'vip-giga-sangsue', 'vip-suc-digestif', 'vip-fouet-lianes', 'vip-ligotage', 'vip-groz-yeux', 'vip-croissance', 'vip-feuille-magik', 'vip-mega-sangsue', 'vip-souplesse', 'vip-balle-graine', 'vip-aeropique'],
+    1: ['vip-garde-florale', 'vip-cotogarde', 'vip-pico-defense', 'vip-peau-dure', 'vip-vege-attaque', 'vip-lame-feuille', 'vip-enroulement', 'vip-giga-sangsue', 'vip-suc-digestif', 'vip-fouet-lianes', 'vip-ligotage', 'vip-groz-yeux', 'vip-croissance', 'vip-feuille-magik', 'vip-mega-sangsue', 'vip-souplesse', 'vip-balle-graine', 'vip-aeropique'],
     2: ['vip-danse-lames', 'vip-belier', 'vip-damocles', 'vip-mur-lumiere', 'vip-plaquage', 'vip-meteores', 'vip-grimace', 'vip-facade', 'vip-coup-main'],
     3: ['vip-lance-soleil', 'vip-protection', 'vip-repos', 'vip-clonage', 'vip-colere', 'vip-gliss-herbe', 'vip-abattage', 'vip-doux-parfum'],
     4: ['vip-giga-impact', 'vip-tenacite', 'vip-provoc', 'vip-canon-graine', 'vip-draco-choc', 'vip-siffl-herbe', 'vip-poursuite', 'vip-ouragan'],

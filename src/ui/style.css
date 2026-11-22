@@ -619,6 +619,13 @@ img.sprite, .roster img { image-rendering: pixelated; }
 
 /* ——— Objets tenus ——— */
 .tb-relics { display: flex; gap: 2px; align-items: center; }
+.relic-tray {
+  position: absolute; left: 10px; top: 46px; z-index: 6; max-width: 46%;
+  flex-wrap: wrap; gap: 4px; padding: 4px 6px; border-radius: 10px;
+  background: rgba(10, 14, 22, .55); border: 1px solid rgba(255,255,255,.12);
+}
+.relic-tray:empty { display: none; }
+.relic-tray .relic-icon { width: 34px; height: 34px; }
 .relic-icon { width: 30px; height: 30px; image-rendering: pixelated; cursor: help; filter: drop-shadow(0 1px 1px #000); }
 .relic-icon.pulse { animation: relic-pulse 0.6s; }
 @keyframes relic-pulse { 40% { transform: scale(1.6); filter: drop-shadow(0 0 8px #ffe08a); } }

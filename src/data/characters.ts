@@ -17,7 +17,7 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
   vipelierre: {
     id: 'vipelierre', name: 'Vipélierre', dex: [495, 496, 497], types: ['plante'], maxHp: 70,
     evolutions: [{ act: 2, dex: 496, name: 'Lianaja', types: ['plante'], hp: 6 }, { act: 3, dex: 497, name: 'Majaspic', types: ['plante'], hp: 8 }],
-    talent: { name: 'Contestation', text: 'Ses baisses de stats deviennent des hausses, et inversement.' },
+    talent: { name: 'Contestation', text: 'Ses baisses d’Attaque et de Défense deviennent des hausses, et inversement.' },
     starterRelic: 'grain-miracle',
     starterDeck: ['charge', 'charge', 'charge', 'charge', 'abri', 'abri', 'abri', 'abri', 'vampigraine', 'tempete-verte'],
   },

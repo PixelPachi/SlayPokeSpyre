@@ -35,7 +35,7 @@ export interface BerryDef {
   character?: CharacterId;
 }
 
-const BAD: StatusId[] = ['brulure', 'poison', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil', 'gel', 'etourdi'];
+const BAD: StatusId[] = ['brulure', 'poison', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil', 'gel', 'etourdi', 'ligote'];
 const SNAME: Partial<Record<StatusId, string>> = {
   brulure: 'Brûlure', poison: 'Poison', paralysie: 'Paralysie', peur: 'Peur', confusion: 'Confusion',
   sommeil: 'Sommeil', gel: 'Gel', etourdi: 'Étourdi', attaque: 'Attaque', defense: 'Défense', vampigraine: 'Vampigraine',

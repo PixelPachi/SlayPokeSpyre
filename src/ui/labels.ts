@@ -31,6 +31,8 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   etourdi: { label: 'Étourdi', color: '#c9c9c9', text: () => 'Passe son prochain tour.' },
   abri: { label: 'Abri', color: '#9fe7a8', text: () => 'Le prochain coup subi est entièrement annulé.' },
   rage: { label: 'Rage', color: '#e5484d', text: (n) => `${n} Rage. Kangourex en gagne 1 chaque fois qu’il perd des PV ; les cartes de Rage s’en servent.` },
+  ligote: { label: 'Ligoté', color: '#c49a6c', text: (n) => `Perd ${6 * n} PV au début du tour (6 par cumul). Chaque cumul disparaît au bout de 3 tours.` },
+  epine: { label: 'Épine', color: '#7fbf5a', text: (n) => `Chaque coup reçu d’un ennemi lui inflige ${n} dégât${n > 1 ? 's' : ''}. Dure tout le combat.` },
   elan: { label: 'Élan', color: '#ffb84d', text: (n) => `Tes attaques infligent ${n} dégât${n > 1 ? 's' : ''} de plus. L’Élan est divisé par deux à la fin de ton tour.` },
 };
 
@@ -39,6 +41,7 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   'lire-esprit': { label: 'Lire-Esprit', text: () => 'Si ton tour commence avec 30 Aura ou plus, consomme 15 Aura : tes cartes coûtent 0 PA pendant ce tour.' },
   'champ-herbu': { label: 'Champ Herbu', text: (n) => `Au début de chaque tour, récupère ${n} PV.` },
   racines: { label: 'Racines', text: (n) => `Au début de chaque tour, gagne ${n} Protection.` },
+  'peau-dure': { label: 'Peau Dure', text: (n) => `Au début de chaque tour, gagne ${n} Épine.` },
   'zenith-plante': { label: 'Zénith', text: (n) => `Tes attaques Plante infligent ${n} dégâts de plus.` },
   'amour-filial': { label: 'Amour Filial', text: (n) => `Le Bébé attaque ${n} fois de plus à la fin de chaque tour.` },
   eveil: { label: 'Éveil', text: (n) => `Au début de chaque tour, le Bébé gagne ${n} Puissance.` },
