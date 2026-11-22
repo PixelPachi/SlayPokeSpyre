@@ -15,6 +15,15 @@ const FILE_TRACKS: Record<string, string> = {
   'bois-aux-chenes': 'music/bois-aux-chenes.mp3', // Ilex Forest
   'bois-clematis': 'music/bois-clematis.mp3', // Bois Clémenti (Hoenn)
   'foret-de-vestigion': 'music/foret-de-vestigion.mp3', // Eterna Forest
+  'mont-selenite': 'music/mont-selenite.mp3', // Mt. Moon
+  'mont-chimnee': 'music/mont-chimnee.mp3', // Mt. Chimney
+  'mont-couronne': 'music/mont-couronne.mp3', // Mt. Coronet
+  'grotte-electrolithe': 'music/grotte-electrolithe.mp3', // Chargestone Cave
+  'route-victoire': 'music/route-victoire.mp3', // Victory Road
+  'mont-argente': 'music/mont-argente.mp3', // Silver Cave
+  'pilier-celeste': 'music/pilier-celeste.mp3', // Sky Pillar
+  'mont-abrupt': 'music/mont-abrupt.mp3', // Stark Mountain
+  'tour-dragospire': 'music/tour-dragospire.mp3', // Dragonspiral Tower
 };
 /** Vrai si une musique enregistrée existe pour cet identifiant. */
 export function hasTrack(id: string): boolean { return !!FILE_TRACKS[id]; }
