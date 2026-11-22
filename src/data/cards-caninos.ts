@@ -37,7 +37,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('echo', 'Écho', 'normal', 'attaque', 'commune', 0, 'ennemi', [dmg(2, { parStatut: 'brulure' })], { effects: [dmg(4, { parStatut: 'brulure' })] }, ['conservee']),
   c('eclate-roc', 'Éclate-Roc', 'combat', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('defense', -1)], { effects: [dmg(7), st('defense', -2)] }),
   c('rune-protect', 'Rune Protect', 'normal', 'technique', 'commune', 1, 'soi', [prot(7)], { effects: [prot(10)] }),
-  c('aboiement', 'Aboiement', 'tenebres', 'attaque', 'commune', 1, 'tous', [dmg(3), st('attaque', -1, 'tous')], { effects: [dmg(5), st('attaque', -1, 'tous')] }),
+  c('aboiement', 'Aboiement', 'tenebres', 'attaque', 'commune', 1, 'tous', [dmg(3), st('attaque', -1, 'tous')], { effects: [dmg(5), st('attaque', -1, 'tous')] }, ['epuisee']),
   c('calinerie', 'Câlinerie', 'fee', 'attaque', 'commune', 2, 'ennemi', [dmg(11), st('attaque', -1)], { effects: [dmg(15), st('attaque', -1)] }),
   c('attraction', 'Attraction', 'normal', 'technique', 'commune', 1, 'ennemi', [st('confusion', 2)], { effects: [st('confusion', 3)] }),
 

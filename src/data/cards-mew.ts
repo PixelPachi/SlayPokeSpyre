@@ -66,7 +66,7 @@ export const MEW_CARDS: CardDef[] = [
   c('eboulement', 'Éboulement', 'roche', 'attaque', 'peu-commune', 2, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(11), st('peur', 1, 'tous')] }),
   c('lame-de-roc', 'Lame de Roc', 'roche', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(16)], { effects: [dmg(21)] }),
   c('tunnel', 'Tunnel', 'sol', 'attaque', 'peu-commune', 2, 'ennemi', [prot(6), dmg(10)], { effects: [prot(8), dmg(13)] }),
-  c('aboiement', 'Aboiement', 'tenebres', 'attaque', 'peu-commune', 1, 'tous', [dmg(3), st('attaque', -1, 'tous')], { effects: [dmg(5), st('attaque', -1, 'tous')] }),
+  c('aboiement', 'Aboiement', 'tenebres', 'attaque', 'peu-commune', 1, 'tous', [dmg(3), st('attaque', -1, 'tous')], { effects: [dmg(5), st('attaque', -1, 'tous')] }, ['epuisee']),
   c('echange', 'Échange', 'psy', 'technique', 'peu-commune', 1, 'soi', [addCards(2)], { cost: 0 }, ['epuisee']),
   c('degommage', 'Dégommage', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(14)], { effects: [dmg(19)] }, ['epuisee']),
   c('ultimawashi', 'Ultimawashi', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(18), hpLoss(2)], { effects: [dmg(24), hpLoss(2)] }),
