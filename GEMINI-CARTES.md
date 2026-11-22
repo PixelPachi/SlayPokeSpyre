@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (323 images)
+## 2. Les illustrations des capacités (326 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -36,8 +36,8 @@ Prompt commun :
 
 Puis, selon la colonne « Pokémon dans l'image » :
 
-- **Capacité exclusive (176 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
-- **Capacité partagée (147 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
+- **Capacité exclusive (180 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
+- **Capacité partagée (146 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
 
@@ -87,7 +87,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `brouhaha.png` | Brouhaha | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `bulles-d-o.png` | Bulles d'O | Eau · Attaque | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
 | `cage-eclair.png` | Cage-Éclair | Électrik · Technique | Neutre | Aucun (capacité seule) | éclairs jaunes, étincelles, arcs électriques | ☐ |
-| `calinerie.png` | Câlinerie | Fée · Attaque | Caninos | **Caninos** lance la capacité | lumière rose et blanche, étoiles, paillettes | ☐ |
+| `calinerie.png` | Câlinerie | Fée · Attaque | Kangourex, Caninos | Aucun (capacité seule) | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `canicule.png` | Canicule | Feu · Attaque | Caninos, Mew | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `canon-graine.png` | Canon Graine | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `cascade.png` | Cascade | Eau · Attaque | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
@@ -123,7 +123,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `coupe.png` | Coupe | Normal · Attaque | Vipélierre, Kangourex | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `crocs-eclair.png` | Crocs Éclair | Électrik · Attaque | Caninos | **Caninos** lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
 | `crocs-feu.png` | Crocs Feu | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
-| `croissance.png` | Croissance | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `croissance.png` | Croissance | Normal · Technique | Vipélierre, Kangourex | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `cru-ailes.png` | Cru-Ailes | Vol · Attaque | Neutre | Aucun (capacité seule) | bourrasques, plumes, courants d’air | ☐ |
 | `damocles.png` | Damoclès | Normal · Attaque | Vipélierre, Kangourex, Caninos, Mew | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `danse-draco.png` | Danse Draco | Dragon · Technique | Neutre | Aucun (capacité seule) | énergie draconique bleue et violette, écailles | ☐ |
@@ -132,7 +132,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `danse-pluie.png` | Danse Pluie | Eau · Technique | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
 | `dard-venimeux.png` | Dard Venimeux | Poison · Statut | Neutre | Aucun (capacité seule) | liquide et fumée violets, bulles toxiques | ☐ |
 | `dard-nuee.png` | Dard-Nuée | Insecte · Attaque | Neutre | Aucun (capacité seule) | élytres, fils de soie, nuée verte | ☐ |
-| `deflagration.png` | Déflagration | Feu · Attaque | Kangourex, Caninos, Mew | Aucun (capacité seule) | flammes orange et rouges, braises, chaleur | ☐ |
+| `deflagration.png` | Déflagration | Feu · Attaque | Caninos, Mew | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `degommage.png` | Dégommage | Ténèbres · Attaque | Kangourex, Mew | **Kangourex** (avec son Bébé dans la poche) lance la capacité | ténèbres, griffes d’ombre, lueurs rouges | ☐ |
 | `demi-tour.png` | Demi-Tour | Insecte · Attaque | Neutre | Aucun (capacité seule) | élytres, fils de soie, nuée verte | ☐ |
 | `dernier-recours.png` | Dernier Recours | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
@@ -143,6 +143,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `direct-toxik.png` | Direct Toxik | Poison · Attaque | Riolu, Mew | **Riolu** lance la capacité | liquide et fumée violets, bulles toxiques | ☐ |
 | `distorsion.png` | Distorsion | Psy · Technique | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `don-naturel.png` | Don Naturel | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `double-baffe.png` | Double Baffe | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `double-pied.png` | Double Pied | Combat · Attaque | Caninos | **Caninos** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `doux-parfum.png` | Doux Parfum | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `draco-choc.png` | Draco-Choc | Dragon · Attaque | Riolu, Vipélierre, Caninos, Mew | Aucun (capacité seule) | énergie draconique bleue et violette, écailles | ☐ |
@@ -180,7 +181,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `feuille-magik.png` | Feuille Magik | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `flair.png` | Flair | Normal · Technique | Caninos | **Caninos** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `flammeche.png` | Flammèche | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
-| `force.png` | Force | Normal · Attaque | Riolu, Vipélierre, Kangourex | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `force.png` | Force | Normal · Attaque | Riolu, Vipélierre | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `force-ajoutee.png` | Force Ajoutée | Psy · Attaque | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `force-cachee.png` | Force Cachée | Normal · Attaque | Caninos | **Caninos** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `forte-paume.png` | Forte-Paume | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
@@ -189,6 +190,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `frappe-atlas.png` | Frappe Atlas | Combat · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `frenesie.png` | Frénésie | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `frustration.png` | Frustration | Normal · Attaque | Vipélierre, Caninos | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `furie.png` | Furie | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `garde-aura.png` | Garde Aura | Combat · Technique | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `garde-florale.png` | Garde Florale | Fée · Technique | Vipélierre | **Vipélierre** lance la capacité | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `garde-large.png` | Garde Large | Normal · Technique | Riolu, Kangourex, Caninos | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
@@ -232,7 +234,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `marto-poing.png` | Marto-Poing | Combat · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `mega-evolution.png` | Méga-Évolution | Normal · Talent | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `mega-sangsue.png` | Méga-Sangsue | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
-| `megaphone.png` | Mégaphone | Normal · Attaque | Kangourex, Caninos | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `megaphone.png` | Mégaphone | Normal · Attaque | Caninos | **Caninos** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `megapoing.png` | Mégapoing | Normal · Attaque | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `metalaser.png` | Métalaser | Acier · Attaque | Riolu | **Riolu** lance la capacité | métal brillant, reflets argentés, étincelles | ☐ |
 | `meteores.png` | Météores | Normal · Attaque | Riolu, Vipélierre, Caninos, Mew | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
@@ -248,7 +250,6 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `nitrocharge.png` | Nitrocharge | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `n-ud-herbe.png` | Nœud Herbe | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `ombre-portee.png` | Ombre Portée | Spectre · Attaque | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
-| `onde-de-choc.png` | Onde de Choc | Électrik · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
 | `onde-folie.png` | Onde Folie | Spectre · Technique | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `onde-vide.png` | Onde Vide | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `ouragan.png` | Ouragan | Dragon · Attaque | Vipélierre | **Vipélierre** lance la capacité | énergie draconique bleue et violette, écailles | ☐ |
@@ -269,7 +270,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `poing-comete.png` | Poing Comète | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `poing-de-feu.png` | Poing de Feu | Feu · Attaque | Kangourex, Mew | **Kangourex** (avec son Bébé dans la poche) lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `poing-eclair.png` | Poing Éclair | Électrik · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | éclairs jaunes, étincelles, arcs électriques | ☐ |
-| `poing-glace.png` | Poing Glace | Glace · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | cristaux de glace, givre, brume froide bleutée | ☐ |
+| `poing-glace.png` | Poing Glace | Glace · Attaque | Riolu, Mew | **Riolu** lance la capacité | cristaux de glace, givre, brume froide bleutée | ☐ |
 | `poing-meteore.png` | Poing Météore | Acier · Attaque | Riolu | **Riolu** lance la capacité | métal brillant, reflets argentés, étincelles | ☐ |
 | `poing-karate.png` | Poing-Karaté | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `poisse.png` | Poisse | Ténèbres · Statut | Neutre | Aucun (capacité seule) | ténèbres, griffes d’ombre, lueurs rouges | ☐ |
@@ -312,12 +313,14 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `sable-ardent.png` | Sable Ardent | Sol · Attaque | Caninos | **Caninos** lance la capacité | terre, sable, roches qui jaillissent du sol | ☐ |
 | `sabotage.png` | Sabotage | Ténèbres · Attaque | Neutre | Aucun (capacité seule) | ténèbres, griffes d’ombre, lueurs rouges | ☐ |
 | `sacrifice.png` | Sacrifice | Combat · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
+| `second-souffle.png` | Second Souffle | Normal · Technique | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `seduction.png` | Séduction | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `seisme.png` | Séisme | Sol · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | terre, sable, roches qui jaillissent du sol | ☐ |
 | `siffl-herbe.png` | Siffl'Herbe | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `soin.png` | Soin | Normal · Technique | Neutre | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `soucigraine.png` | Soucigraine | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `souplesse.png` | Souplesse | Normal · Attaque | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `souvenir.png` | Souvenir | Spectre · Technique | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | ombres violettes, flammes fantomatiques | ☐ |
 | `strido-son.png` | Strido-Son | Acier · Technique | Riolu | **Riolu** lance la capacité | métal brillant, reflets argentés, étincelles | ☐ |
 | `suc-digestif.png` | Suc Digestif | Poison · Technique | Vipélierre | **Vipélierre** lance la capacité | liquide et fumée violets, bulles toxiques | ☐ |
 | `surchauffe.png` | Surchauffe | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
@@ -345,7 +348,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `turbo.png` | Turbo | Feu · Talent | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `ultimapoing.png` | Ultimapoing | Normal · Attaque | Kangourex, Mew | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `ultimawashi.png` | Ultimawashi | Normal · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
-| `ultralaser.png` | Ultralaser | Normal · Attaque | Riolu, Vipélierre, Kangourex, Caninos, Mew | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `ultralaser.png` | Ultralaser | Normal · Attaque | Riolu, Vipélierre, Caninos, Mew | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `uppercut.png` | Uppercut | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `vampi-poing.png` | Vampi-Poing | Combat · Attaque | Riolu, Kangourex, Mew | Aucun (capacité seule) | poings et coups, aura bleue, impact martial | ☐ |
 | `vampigraine.png` | Vampigraine | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |

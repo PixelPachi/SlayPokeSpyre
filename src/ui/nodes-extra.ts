@@ -22,7 +22,7 @@ const refreshBar = (root: HTMLElement, run: Run, label: string) => {
 export function renderChest(root: HTMLElement, run: Run, done: Done): void {
   const big = run.rng.next() < 0.25;
   root.innerHTML = shell(run, 'Coffre mystère', `
-    <div class="chest">${chestSvg()}</div>
+    <div class="chest chest-illus"><img class="event-illus" src="${asset('illustrations/evenements/evt-coffre-ferme.webp')}" alt=""></div>
     <h1 class="node-title">Un coffre mystère</h1>
     <p class="node-sub">Il a l’air ancien. Quelque chose tinte à l’intérieur…</p>
     <div class="choice-row">
@@ -31,7 +31,17 @@ export function renderChest(root: HTMLElement, run: Run, done: Done): void {
     </div>`, 'reward');
   bindDeck(root, run);
   root.querySelector('.leave-chest')!.addEventListener('click', done);
+  // le coffre s'ouvre à l'écran, puis le butin apparaît
+  const openImg = new Image(); openImg.src = asset('illustrations/evenements/evt-coffre-ouvert.webp');
   root.querySelector('.open')!.addEventListener('click', () => {
+    const chest = root.querySelector('.chest')!;
+    chest.classList.add('open');
+    chest.querySelector('img')!.src = openImg.src;
+    root.querySelectorAll<HTMLButtonElement>('.choice').forEach((b) => (b.disabled = true));
+    sfx('victoire');
+    window.setTimeout(() => openChest(), 1100);
+  });
+  const openChest = () => {
     const money = run.rng.int(big ? 60 : 25, big ? 110 : 55);
     const withRelic = big || run.rng.next() < 0.5;
     const cog = run.cogsUnlocked && !run.relics.includes('rouage-temps');
@@ -40,18 +50,9 @@ export function renderChest(root: HTMLElement, run: Run, done: Done): void {
       money, cards: [], relic: cog ? 'rouage-temps' : withRelic ? run.rollRelics(1)[0] : undefined, berry: withRelic || cog ? undefined : run.rollBerry(),
       title: big ? 'Un gros trésor !' : 'Le coffre s’ouvre…', label: 'Coffre mystère',
     }, done);
-    sfx('victoire');
-  });
-}
-
-function chestSvg(open = false): string {
-  return `<svg viewBox="0 0 120 100">
-    <rect x="14" y="44" width="92" height="48" rx="6" fill="#8a5426" stroke="#2d1806" stroke-width="5"/>
-    <rect x="14" y="50" width="92" height="8" fill="#f5c84c" stroke="#2d1806" stroke-width="3"/>
-    <rect x="52" y="52" width="16" height="20" rx="3" fill="#f5c84c" stroke="#2d1806" stroke-width="3"/>
-    <g class="lid" ${open ? 'transform="rotate(-28 14 46)"' : ''}><path d="M14 48c0-26 20-36 46-36s46 10 46 36z" fill="#b06c30" stroke="#2d1806" stroke-width="5"/>
-    <rect x="14" y="42" width="92" height="7" fill="#f5c84c" stroke="#2d1806" stroke-width="3"/></g>
-  </svg>`;
+    // le coffre ouvert reste visible au-dessus du butin
+    root.querySelector('h1')?.insertAdjacentHTML('beforebegin', `<img class="event-illus reward-illus" src="${openImg.src}" alt="">`);
+  };
 }
 
 /** Pension Pokémon : choisis deux cartes, elles fusionnent en une seule (effets cumulés, coût réduit d'1). */
@@ -62,7 +63,7 @@ export function renderPension(root: HTMLElement, run: Run, done: Done): void {
     return run.deck.some((o) => o.uid !== c.uid && canFuse(d, cardDef(o.defId, o.upgraded)));
   });
   root.innerHTML = shell(run, label, `
-    <img class="pension-egg" src="${asset('sprites/items/lucky-egg.png')}" alt="">
+    <img class="event-illus" src="${asset('illustrations/evenements/evt-pension.webp')}" alt="">
     <h1 class="node-title">Pension Pokémon</h1>
     <p class="node-sub">« On s’occupe de tes capacités ! Confie-m’en deux, elles n’en feront plus qu’une. »<br>
       <small>La carte fusionnée a les effets des deux cartes et coûte la somme des deux moins 1 (au moins le coût de la plus chère).

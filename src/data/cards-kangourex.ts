@@ -1,26 +1,27 @@
 // Cartes de Kangourex : capacités de Kangourex et de Méga-Kangourex (niveau, CT, reproduction, tuteurs).
-// Identité : le Bébé Kangourex (familier qui attaque à la fin de chaque tour), poings et coups puissants,
+// Identité : le Bébé Kangourex (familier qui attaque à la fin de chaque tour et encaisse les coups à sa place),
+// l'Invocation (le Bébé grandit ou revient), poings et coups puissants,
 // et la Rage : Kangourex gagne 1 Rage à chaque perte de PV (Sacrifice, Clonage, Damoclès l'alimentent),
 // que Frénésie, Colère, Avalanche, Trépignement, Mâchouille, Dégommage et Rancune exploitent.
 import type { CardDef } from '../core/model';
 import {
-  bebeAtk, bebeHeal, bebeMax, bebePow, bebeProt, breakBlock, cardMaker, dmg, draw, heal, hpLoss, multi, pa, power, prot, st,
+  bebeAtk, bebeHeal, bebeMax, invoc, bebePow, bebeProt, breakBlock, cardMaker, dmg, draw, heal, hpLoss, multi, pa, power, prot, st,
 } from './card-kit';
 
 const c = cardMaker('kangourex', 'kan');
 
 export const KANGOUREX_CARDS: CardDef[] = [
   // ——— Départ ———
-  c('coup-main', "Coup d'Main", 'normal', 'technique', 'depart', 1, 'soi', [bebePow(1), bebeProt(4)], { effects: [bebePow(2), bebeProt(5)] }),
+  c('coup-main', "Coup d'Main", 'normal', 'technique', 'depart', 1, 'soi', [invoc(3), bebePow(1)], { effects: [invoc(5), bebePow(1)] }),
   c('coup-double', 'Coup Double', 'normal', 'attaque', 'depart', 1, 'ennemi', [multi(4, 2)], { effects: [multi(6, 2)] }),
 
   // ——— Communes (28) ———
-  c('garde-large', 'Garde Large', 'normal', 'technique', 'commune', 1, 'soi', [prot(6), bebeProt(6)], { effects: [prot(8), bebeProt(8)] }),
+  c('garde-large', 'Garde Large', 'normal', 'technique', 'commune', 1, 'soi', [prot(5), invoc(4)], { effects: [prot(7), invoc(6)] }),
   c('boul-armure', "Boul'Armure", 'normal', 'technique', 'commune', 0, 'soi', [prot(4), st('rage', 1, 'soi')], { effects: [prot(6), st('rage', 1, 'soi')] }),
-  c('protection', 'Protection', 'normal', 'technique', 'peu-commune', 1, 'soi', [prot(8), { kind: 'bebe-garde' }], { effects: [prot(11), { kind: 'bebe-garde' }] }),
+  c('protection', 'Protection', 'normal', 'technique', 'peu-commune', 1, 'soi', [prot(8), invoc(3)], { effects: [prot(11), invoc(4)] }),
   c('mur-de-fer', 'Mur de Fer', 'acier', 'technique', 'peu-commune', 2, 'soi', [prot(12), st('defense', 1, 'soi')], { effects: [prot(16), st('defense', 1, 'soi')] }),
   c('mimi-queue', 'Mimi-Queue', 'normal', 'technique', 'commune', 0, 'tous', [st('defense', -1, 'tous'), bebeAtk()], { effects: [st('defense', -2, 'tous'), bebeAtk()] }),
-  c('rugissement', 'Rugissement', 'normal', 'technique', 'commune', 1, 'tous', [st('attaque', -1, 'tous'), bebeProt(4)], { effects: [st('attaque', -1, 'tous'), bebeProt(7)] }),
+  c('rugissement', 'Rugissement', 'normal', 'technique', 'commune', 1, 'tous', [st('attaque', -1, 'tous'), invoc(3)], { effects: [st('attaque', -1, 'tous'), invoc(5)] }),
   c('bluff', 'Bluff', 'normal', 'attaque', 'commune', 0, 'ennemi', [dmg(3), st('peur', 2)], { effects: [dmg(5), st('peur', 3)] }, ['epuisee', 'innee']),
   c('morsure', 'Morsure', 'tenebres', 'attaque', 'commune', 1, 'ennemi', [dmg(5, { siBebe: 3 }), st('peur', 1)], { effects: [dmg(7, { siBebe: 4 }), st('peur', 1)] }),
   c('ecrasement', 'Écrasement', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(4, { parBebe: 1 }), st('paralysie', 1)], { effects: [dmg(6, { parBebe: 1 }), st('paralysie', 1)] }),
@@ -31,7 +32,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('coupe', 'Coupe', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5, { siBebe: 4 })], { effects: [dmg(7, { siBebe: 5 })] }),
   c('eclate-roc', 'Éclate-Roc', 'combat', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('defense', -1)], { effects: [dmg(7), st('defense', -2)] }),
   c('pietisol', 'Piétisol', 'sol', 'attaque', 'commune', 1, 'tous', [dmg(5)], { effects: [dmg(7)] }),
-  c('onde-de-choc', 'Onde de Choc', 'electrik', 'attaque', 'commune', 1, 'ennemi', [dmg(7)], { effects: [dmg(10)] }, ['conservee']),
+  c('calinerie', 'Câlinerie', 'fee', 'attaque', 'commune', 1, 'ennemi', [dmg(4), invoc(3)], { effects: [dmg(6), invoc(4)] }),
   c('vibraqua', 'Vibraqua', 'eau', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('confusion', 1)], { effects: [dmg(9), st('confusion', 1)] }),
   c('griffe-ombre', 'Griffe Ombre', 'spectre', 'attaque', 'commune', 1, 'ennemi', [dmg(6), draw(1)], { effects: [dmg(9), draw(1)] }),
   c('poing-comete', 'Poing Comète', 'normal', 'attaque', 'commune', 1, 'ennemi', [multi(2, 2, 4), bebeAtk()], { effects: [multi(3, 2, 4), bebeAtk()] }),
@@ -40,18 +41,18 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('plaquage', 'Plaquage', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5), { kind: 'bebe-attaque', times: 1, status: 'paralysie', stacks: 1 }], { effects: [dmg(7), { kind: 'bebe-attaque', times: 1, status: 'paralysie', stacks: 2 }] }),
   c('balayage', 'Balayage', 'combat', 'attaque', 'commune', 1, 'ennemi', [dmg(9)], { effects: [dmg(12)] }),
   c('poing-eclair', 'Poing Éclair', 'electrik', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('paralysie', 1)], { effects: [dmg(9), st('paralysie', 1)] }),
-  c('poing-glace', 'Poing Glace', 'glace', 'attaque', 'commune', 1, 'ennemi', [dmg(8)], { effects: [dmg(11)] }),
+  c('furie', 'Furie', 'normal', 'attaque', 'commune', 1, 'ennemi', [{ kind: 'bebe-furie', bonus: 0 }], { effects: [{ kind: 'bebe-furie', bonus: 1 }] }),
   c('vengeance', 'Vengeance', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5, { revanche: true, siBebe: 3 })], { effects: [dmg(7, { revanche: true, siBebe: 4 })] }),
   c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)] }),
-  c('clairvoyance', 'Clairvoyance', 'normal', 'technique', 'commune', 1, 'soi', [draw(2), bebeProt(3)], { effects: [draw(3), bebeProt(3)] }),
+  c('clairvoyance', 'Clairvoyance', 'normal', 'technique', 'commune', 1, 'soi', [draw(2), invoc(2)], { effects: [draw(3), invoc(3)] }),
   c('chant-canon', 'Chant Canon', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(3), bebeAtk()], { effects: [dmg(5), bebeAtk()] }),
-  c('retour', 'Retour', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6), bebeHeal(3)], { effects: [dmg(8), bebeHeal(5)] }),
-  c('rune-protect', 'Rune Protect', 'normal', 'technique', 'commune', 1, 'soi', [{ kind: 'protection-par-bebe', mult: 2 }, bebeProt(3)], { effects: [{ kind: 'protection-par-bebe', mult: 3 }, bebeProt(4)] }),
+  c('retour', 'Retour', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6), invoc(3)], { effects: [dmg(8), invoc(5)] }),
+  c('rune-protect', 'Rune Protect', 'normal', 'technique', 'commune', 1, 'soi', [{ kind: 'protection-pv-bebe', mult: 1 }], { effects: [invoc(3), { kind: 'protection-pv-bebe', mult: 1 }] }),
 
   // ——— Peu communes (34) ———
   c('puissance', 'Puissance', 'normal', 'technique', 'peu-commune', 1, 'soi', [bebePow(2)], { effects: [bebePow(3)] }),
   c('machouille', 'Mâchouille', 'tenebres', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { parSoi: 'rage', parSoiX: 1 }), st('defense', -1)], { effects: [dmg(13, { parSoi: 'rage', parSoiX: 1 }), st('defense', -1)] }),
-  c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'bebe-garde' }, bebeProt(10), bebeHeal(4)], { effects: [{ kind: 'bebe-garde' }, bebeProt(14), bebeHeal(6)] }),
+  c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [invoc(8), bebeProt(4)], { effects: [invoc(11), bebeProt(6)] }),
   c('contre', 'Contre', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [{ kind: 'degats-pv-perdus', amount: 4, per: 3 }], { effects: [{ kind: 'degats-pv-perdus', amount: 4, per: 2 }] }),
   c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [st('rage', 2, 'soi'), multi(4, 3)], { effects: [st('rage', 3, 'soi'), multi(5, 3)] }),
   c('hurlement', 'Hurlement', 'normal', 'technique', 'peu-commune', 1, 'tous', [st('peur', 2, 'tous')], { effects: [st('peur', 3, 'tous')] }, ['epuisee']),
@@ -60,14 +61,14 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('ball-ombre', "Ball'Ombre", 'spectre', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(13), st('defense', -1)], { effects: [dmg(17), st('defense', -1)] }),
   c('casse-brique', 'Casse-Brique', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [breakBlock, dmg(8)], { effects: [breakBlock, dmg(11)] }),
   c('lance-flammes', 'Lance-Flammes', 'feu', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(12), st('brulure', 2)], { effects: [dmg(15), st('brulure', 3)] }),
-  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }, bebeHeal(10)], { cost: 1 }, ['epuisee']),
+  c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }, invoc(6)], { cost: 1 }, ['epuisee']),
   c('larcin', 'Larcin', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6), draw(1), pa(1)], { effects: [dmg(9), draw(1), pa(1)] }, ['epuisee']),
   c('degommage', 'Dégommage', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6, { parSoi: 'rage', parSoiX: 4 }), { kind: 'perd-statut', status: 'rage' }], { effects: [dmg(9, { parSoi: 'rage', parSoiX: 4 }), { kind: 'perd-statut', status: 'rage' }] }),
-  c('vampi-poing', 'Vampi-Poing', 'combat', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { drain: true }), bebeHeal(4)], { effects: [dmg(14, { drain: true }), bebeHeal(6)] }),
+  c('vampi-poing', 'Vampi-Poing', 'combat', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { drain: true }), invoc(3)], { effects: [dmg(14, { drain: true }), invoc(4)] }),
   c('avalanche', 'Avalanche', 'glace', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(8, { revanche: true, parSoi: 'rage', parSoiX: 1 })], { effects: [dmg(11, { revanche: true, parSoi: 'rage', parSoiX: 1 })] }),
   c('eboulement', 'Éboulement', 'roche', 'attaque', 'peu-commune', 2, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(11), st('peur', 1, 'tous')] }),
-  c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(4), bebeMax(4), bebeHeal(4)], { effects: [hpLoss(3), bebeMax(5), bebeHeal(5)] }),
-  c('force', 'Force', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(15)], { effects: [dmg(20)] }),
+  c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(4), invoc(7)], { effects: [hpLoss(3), invoc(9)] }),
+  c('souvenir', 'Souvenir', 'spectre', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'souvenir' }], { cost: 0 }),
   c('escalade', 'Escalade', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10), bebePow(1)], { effects: [dmg(13), bebePow(1)] }),
   c('projection', 'Projection', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(4, { parBebe: 1 }), st('peur', 1)], { effects: [dmg(6, { parBebe: 2 }), st('peur', 1)] }),
   c('riposte', 'Riposte', 'combat', 'technique', 'peu-commune', 1, 'soi', [bebeProt(6), { kind: 'bebe-vers-joueur' }, bebeAtk()], { effects: [bebeProt(9), { kind: 'bebe-vers-joueur' }, bebeAtk()] }),
@@ -80,7 +81,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('ultimapoing', 'Ultimapoing', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10), bebeAtk(2)], { effects: [dmg(14), bebeAtk(2)] }),
   c('frappe-atlas', 'Frappe Atlas', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(5, { parBebe: 1 })], { effects: [dmg(7, { parBebe: 1 }), draw(1)] }),
   c('sacrifice', 'Sacrifice', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(12), hpLoss(4), bebePow(1)], { effects: [dmg(16), hpLoss(4), bebePow(1)] }),
-  c('megaphone', 'Mégaphone', 'normal', 'attaque', 'peu-commune', 2, 'tous', [dmg(9)], { effects: [dmg(12)] }),
+  c('double-baffe', 'Double Baffe', 'normal', 'attaque', 'peu-commune', 1, 'ennemi', [bebeAtk(2), invoc(2)], { effects: [bebeAtk(2), invoc(4)] }),
   c('trepignement', 'Trépignement', 'sol', 'attaque', 'peu-commune', 2, 'ennemi', [{ kind: 'protection-par-soi', status: 'rage', mult: 2 }, dmg(8)], { effects: [{ kind: 'protection-par-soi', status: 'rage', mult: 3 }, dmg(10)] }),
   c('lance-soleil', 'Lance-Soleil', 'plante', 'attaque', 'peu-commune', 3, 'tous', [dmg(16)], { effects: [dmg(21)] }),
 
@@ -89,10 +90,10 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('dynamo-poing', 'Dynamo-Poing', 'combat', 'attaque', 'rare', 3, 'ennemi', [dmg(22), st('confusion', 3)], { effects: [dmg(28), st('confusion', 3)] }),
   c('dernier-recours', 'Dernier Recours', 'normal', 'attaque', 'rare', 2, 'ennemi', [dmg(14, { parBebe: 3 })], { effects: [dmg(20, { parBebe: 3 })] }, ['epuisee']),
   c('giga-impact', 'Rancune', 'spectre', 'talent', 'rare', 1, 'soi', [power('rancune', 1)], { effects: [power('rancune', 1), st('rage', 3, 'soi')] }),
-  c('ultralaser', 'Ultralaser', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(34)], { effects: [dmg(44)] }, ['ephemere']),
+  c('second-souffle', 'Second Souffle', 'normal', 'technique', 'rare', 1, 'soi', [invoc(15)], { effects: [invoc(20)] }, ['epuisee']),
   c('exploforce', 'Exploforce', 'combat', 'attaque', 'rare', 2, 'ennemi', [dmg(20), st('defense', -1)], { effects: [dmg(26), st('defense', -1)] }),
   c('mitra-poing', 'Mitra-Poing', 'combat', 'attaque', 'rare', 3, 'ennemi', [dmg(32)], { effects: [dmg(42)] }, ['epuisee']),
-  c('deflagration', 'Déflagration', 'feu', 'attaque', 'rare', 3, 'ennemi', [dmg(22), st('brulure', 3)], { effects: [dmg(28), st('brulure', 4)] }),
+  c('croissance', 'Croissance', 'plante', 'talent', 'rare', 2, 'soi', [power('croissance', 3)], { effects: [power('croissance', 4)] }),
   c('seisme', 'Séisme', 'sol', 'attaque', 'rare', 2, 'tous', [dmg(13)], { effects: [dmg(17)] }),
   c('effort', 'Effort', 'normal', 'attaque', 'rare', 1, 'ennemi', [{ kind: 'degats-pv-perdus', amount: 2, per: 2 }], { effects: [{ kind: 'degats-pv-perdus', amount: 6, per: 2 }] }),
   c('rengorgement', 'Rengorgement', 'normal', 'talent', 'rare', 1, 'soi', [power('eveil', 1)], { effects: [power('eveil', 1), bebePow(1)] }),

@@ -18,6 +18,7 @@ export const bebeAtk = (times = 1): Effect => ({ kind: 'bebe-attaque', times });
 export const bebePow = (amount: number): Effect => ({ kind: 'bebe-puissance', amount });
 export const bebeHeal = (amount: number): Effect => ({ kind: 'bebe-soin', amount });
 export const bebeMax = (amount: number): Effect => ({ kind: 'bebe-pvmax', amount });
+export const invoc = (amount: number): Effect => ({ kind: 'invocation', amount });
 export const bebeProt = (amount: number): Effect => ({ kind: 'bebe-protection', amount });
 
 export type CardMaker = (

@@ -201,7 +201,7 @@ export class Combat {
     // Méga-Évolution : la Méga-Gemme tenue (et le bon stade) transforme le Pokémon pour tout le combat
     const mega = ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
     if (ch.id === 'kangourex') {
-      const hp = 6 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
+      const hp = 8 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
       this.player.familiar = { hp, maxHp: hp, power: 3 + (this.relics.has('grelot-zen') ? 2 : 0), block: 0, mega: !!opts.mega || !!mega };
     }
     if (mega) {
@@ -438,6 +438,10 @@ export class Combat {
 
   /** Le Bébé attire toutes les attaques ennemies ce tour-ci (Garde Maternelle…). */
   babyTaunt = false;
+  /** Attaques du Bébé faites ce tour (Furie). */
+  babyHits = 0;
+  /** Le Bébé n'enrage sa mère qu'une fois par combat. */
+  private babyEnraged = false;
 
   /** Façade : un statut néfaste ou une baisse de stat. */
   private hasBadStatus(): boolean {
@@ -599,11 +603,14 @@ export class Combat {
       if (m.damage !== undefined) {
         // Le Bébé Kangourex peut être visé (3 chances sur 10)
         const fam = this.player.familiar;
-        const atBaby = !!fam && fam.hp > 0 && (this.babyTaunt || this.rng.next() < 0.3);
         for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
-          if (atBaby && fam!.hp > 0) {
-            const { amount, effectiveness } = computeDamage(m.damage, e, BABY_FIGHTER, m.pokeType ?? 'normal');
-            this.hitFamiliar(Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal')), effectiveness);
+          // Le Bébé fait bouclier : tant qu'il est debout, il encaisse les coups ; le surplus touche Kangourex
+          if (fam && fam.hp > 0) {
+            const { amount, effectiveness } = computeDamage(m.damage + extra, e, BABY_FIGHTER, m.pokeType ?? 'normal');
+            const left = this.hitFamiliar(Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))), effectiveness);
+            if (left > 0) this.dealDamage(this.player, 'player', left, effectiveness);
+            const thornsB = this.player.statuses.epine ?? 0;
+            if (thornsB > 0 && e.hp > 0) this.dealDamage(e, uid, thornsB, 'normal');
             continue;
           }
           let { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
@@ -711,6 +718,7 @@ export class Combat {
     this.oddUsed = false;
     this.gemsUsed.clear();
     if (this.player.familiar) this.player.familiar.block = 0;
+    this.babyHits = 0;
     // Lumargile : la Protection n'est que divisée par deux au lieu de disparaître
     this.player.block = this.has('lumargile') ? Math.floor(this.player.block / 2) : 0;
     // Évoluroc : tant que le Pokémon n'a pas évolué, 3 Protection à chaque tour
@@ -755,6 +763,7 @@ export class Combat {
     if (pw.racines) this.gainBlock(this.player, 'player', pw.racines);
     if (pw['peau-dure']) this.addStatus(this.player, 'player', 'epine', pw['peau-dure']);
     if (pw.eveil && this.player.familiar) this.player.familiar.power += pw.eveil;
+    if (pw.croissance) this.invoke(pw.croissance);
     if (pw.turbo) this.addStatus(this.player, 'player', 'elan', pw.turbo);
     if (pw.braises) for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'brulure', pw.braises);
     if (pw.souvenir) this.resolve({ kind: 'ajoute-carte', from: 'tous', count: pw.souvenir }, cardDef('abri'), undefined);
@@ -1026,6 +1035,29 @@ export class Combat {
       case 'bebe-attaque':
         this.familiarAttack(eff.times, target, eff.status, eff.stacks);
         return;
+      case 'invocation':
+        this.invoke(eff.amount);
+        return;
+      case 'bebe-furie':
+        this.familiarAttack(1 + eff.bonus + this.babyHits, target);
+        return;
+      case 'protection-pv-bebe': {
+        const f = p.familiar;
+        if (f && f.hp > 0) this.gainBlock(p, 'player', f.hp * eff.mult);
+        return;
+      }
+      case 'souvenir': {
+        const f = p.familiar;
+        if (!f || f.hp <= 0) return;
+        const n = f.hp;
+        f.hp = 0;
+        this.events.push({ type: 'player-move', name: 'Souvenir ! Le Bébé se sacrifie !' });
+        this.events.push({ type: 'ko', target: 'bebe' });
+        for (const t of this.aliveEnemies()) this.dealDamage(t, t.uid, n, 'normal');
+        this.gainBlock(p, 'player', n);
+        this.checkEnd();
+        return;
+      }
       case 'bebe-puissance':
         if (p.familiar) {
           p.familiar.power += eff.amount;
@@ -1154,24 +1186,42 @@ export class Combat {
       const baby = { ...BABY_FIGHTER, statuses: { attaque: this.player.statuses.attaque ?? 0 } };
       const { amount, effectiveness } = computeDamage(f.power, baby, t, 'normal');
       this.events.push({ type: 'player-move', name: 'Le Bébé attaque !' });
+      this.babyHits++;
       this.dealDamage(t, t.uid, amount, effectiveness);
       if (status && stacks && t.hp > 0) this.addStatus(t, t.uid, status, stacks);
       this.checkEnd();
     }
   }
 
-  private hitFamiliar(amount: number, effectiveness: Effectiveness): void {
+  /** Le Bébé encaisse un coup ; renvoie les dégâts qu'il n'a pas pu absorber. */
+  private hitFamiliar(amount: number, effectiveness: Effectiveness): number {
     const f = this.player.familiar!;
     const blocked = Math.min(f.block, amount);
     f.block -= blocked;
     const rest = Math.min(f.hp, amount - blocked);
     f.hp -= rest;
     this.events.push({ type: 'damage', target: 'bebe', amount: rest, blocked, effectiveness });
+    // Instinct maternel : voir son Bébé blessé donne aussi de la Rage
+    if (rest > 0 && this.player.character === 'kangourex') this.addStatus(this.player, 'player', 'rage', 1 + (this.player.powers.rancune ?? 0));
     if (f.hp <= 0) {
       this.events.push({ type: 'ko', target: 'bebe' });
-      // Kangourex enrage : Attaque +2 pour le combat
-      this.addStatus(this.player, 'player', 'attaque', 2);
+      // Kangourex enrage (une fois par combat) : Attaque +2 pour le combat
+      if (!this.babyEnraged) { this.babyEnraged = true; this.addStatus(this.player, 'player', 'attaque', 2); }
     }
+    return amount - blocked - rest;
+  }
+
+  /** Invocation : le Bébé gagne X PV max et X PV ; s'il est K.O., il revient avec X PV. */
+  private invoke(n: number): void {
+    const f = this.player.familiar;
+    if (!f || n <= 0) return;
+    if (f.hp <= 0) {
+      f.maxHp = n; f.hp = n; f.block = 0;
+      this.events.push({ type: 'player-move', name: `Invocation ${n} : le Bébé revient !` });
+    } else {
+      f.maxHp += n; f.hp += n;
+    }
+    this.events.push({ type: 'heal', target: 'bebe', amount: n });
   }
 
   /** Gardien à deux phases : sous le seuil de PV, il change d'ordre d'actions et se renforce. */

@@ -77,9 +77,11 @@ function nameSize(name: string): number {
 }
 
 /** Infobulle sur les noms de statuts dans le texte d'une carte (Brûlure, Poison, Peur…). */
-const KW = Object.values(STATUS_INFO).map((i) => i.label).sort((a, b) => b.length - a.length);
+const EXTRA_KW = [{ label: 'Invocation', color: '#e8b04a', text: () => 'Le Bébé gagne autant de PV max et de PV. S’il est K.O., il revient avec autant de PV.' }];
+const KW_INFOS = [...Object.values(STATUS_INFO), ...EXTRA_KW];
+const KW = KW_INFOS.map((i) => i.label).sort((a, b) => b.length - a.length);
 const KW_RE = new RegExp(`(^|[^\\p{L}])(${KW.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\p{L}])`, 'gu');
-const KW_TIP = new Map(Object.values(STATUS_INFO).map((i) => [i.label, i]));
+const KW_TIP = new Map(KW_INFOS.map((i) => [i.label, i]));
 function withStatusTips(html: string): string {
   // on ne touche qu'au texte, jamais à l'intérieur des balises
   return html.split(/(<[^>]+>)/).map((part) => part.startsWith('<') ? part : part.replace(KW_RE, (_m, pre: string, w: string) => {

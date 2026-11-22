@@ -409,6 +409,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
       ? `<img class="tarot-card ${reversed ? 'reversed' : ''}" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
       : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
     : ev.images ? `<div class="event-duo">${ev.images.map((im) => `<img class="event-img poke" src="${asset(im)}" alt="">`).join('')}</div>`
+    : ev.image.includes('illustrations/') ? `<img class="event-illus" src="${asset(ev.image)}" alt="">`
     : `<img class="event-img ${ev.image.includes('sprites/pokemon') ? 'poke' : ''}" src="${asset(ev.image)}" alt="">`;
   // Accueil de Grodoudou : la scène se passe dans le décor de la zone, ton Pokémon à gauche, la Guilde à droite
   if (ev.images && ev.id === 'accueil') {

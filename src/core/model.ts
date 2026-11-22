@@ -31,7 +31,7 @@ export type Target = 'ennemi' | 'tous' | 'aleatoire' | 'soi';
 export type PowerId =
   | 'plenitude' | 'lire-esprit' // Riolu
   | 'champ-herbu' | 'racines' | 'zenith-plante' | 'peau-dure' // Vipélierre
-  | 'amour-filial' | 'eveil' | 'rancune' // Kangourex
+  | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
   | 'zenith' | 'braises' | 'turbo' // Caninos
   | 'souvenir' | 'telekinesie'; // Mew
 
@@ -96,6 +96,10 @@ export type Effect =
   | { kind: 'bebe-soin'; amount: number } // soigne le Bébé (le ramène s'il est K.O.)
   | { kind: 'bebe-pvmax'; amount: number }
   | { kind: 'bebe-protection'; amount: number }
+  | { kind: 'invocation'; amount: number } // le Bébé gagne X PV max et X PV ; s'il est K.O., il revient avec X PV
+  | { kind: 'bebe-furie'; bonus: number } // le Bébé attaque 1 fois + 1 fois par attaque du Bébé déjà faite ce tour (+ bonus)
+  | { kind: 'souvenir' } // le Bébé tombe K.O. : ses PV sont infligés à tous les ennemis et donnés en Protection
+  | { kind: 'protection-pv-bebe'; mult: number } // Protection = PV actuels du Bébé × mult
   | { kind: 'protection-cible' } // gagne autant de Protection que la cible en a
   | { kind: 'soin-cible'; amount: number } // soigne aussi la cible
   | { kind: 'double-jeu'; amount: number } // les N prochaines cartes jouées le sont 2 fois

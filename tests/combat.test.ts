@@ -452,9 +452,9 @@ describe('Bébé Kangourex', () => {
     return c;
   };
 
-  it('apparaît avec 10 PV grâce au Lait Meumeu et attaque à la fin du tour', () => {
+  it('apparaît avec 12 PV grâce au Lait Meumeu et attaque à la fin du tour', () => {
     const c = mk();
-    expect(c.player.familiar).toMatchObject({ hp: 10, maxHp: 10, power: 3 });
+    expect(c.player.familiar).toMatchObject({ hp: 12, maxHp: 12, power: 3 });
     const before = c.enemies[0].hp;
     c.endPlayerTurn();
     expect(c.enemies[0].hp).toBeLessThan(before);
@@ -557,7 +557,8 @@ describe('sommet et Dialga Primal', async () => {
     expect(run.zone.id).toBe('sommet-tour-du-temps');
     expect(SUMMIT_STEPS[SUMMIT_STEPS.length - 1]).toBe('boss');
     expect(run.encounter('boss')).toEqual(['dialga-primal']);
-    expect(run.encounter('elite')).toEqual(['noctunoir']);
+    const a = run.encounter('elite'), b = run.encounter('elite');
+    expect([a[0], b[0]].sort()).toEqual(['mammochon', 'noctunoir']);
   });
 
   it('Dialga annonce Hurle-Temps puis se recharge, et passe en phase 2 sous 50 % de PV', () => {
@@ -1110,13 +1111,13 @@ describe('nouvelles mécaniques Caninos et Kangourex', () => {
     expect(e.statuses.brulure ?? 0).toBe(0);
     expect(before - e.hp).toBeGreaterThan(15);
   });
-  it('Ténacité : le Bébé attire les attaques ; Rune Protect donne la Puissance du Bébé en Protection', () => {
+  it('Ténacité : Invocation 8 ; Rune Protect donne les PV du Bébé en Protection', () => {
     const c = setup('kangourex', ['kan-tenacite', 'kan-rune-protect']);
+    const hp0 = c.player.familiar!.hp;
     c.play(900);
-    expect(c.babyTaunt).toBe(true);
-    const pow = c.player.familiar!.power;
+    expect(c.player.familiar!.hp).toBe(hp0 + 8);
     c.play(901);
-    expect(c.player.block).toBe(pow * 2);
+    expect(c.player.block).toBe(c.player.familiar!.hp);
   });
 });
 

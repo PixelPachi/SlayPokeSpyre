@@ -1349,3 +1349,13 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .relic-choice-row { display: flex; gap: 18px; justify-content: center; }
 .relic-pick { background: none; border: none; padding: 0; cursor: pointer; transition: transform 0.15s; width: 240px; }
 .relic-pick:hover { transform: translateY(-6px) scale(1.04); }
+
+/* ——— Illustrations d'événements (Gemini) ——— */
+.event-illus { display: block; width: 440px; max-width: 80%; aspect-ratio: 16 / 9; object-fit: cover; margin: 0 auto 4px;
+  border-radius: 14px; border: 3px solid #0009; box-shadow: 0 8px 24px #000a; }
+.chest.chest-illus { width: auto; animation: none; filter: none; }
+.chest.chest-illus .event-illus { transition: filter 0.3s; }
+.chest.chest-illus:not(.open) .event-illus { animation: chestWiggle 2.6s ease-in-out infinite; }
+.chest.chest-illus.open .event-illus { filter: drop-shadow(0 0 22px #ffd76a); animation: chestPop 0.5s ease-out; }
+@keyframes chestPop { 0% { transform: scale(0.96); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.event-illus.reward-illus { width: 320px; margin-bottom: 8px; filter: drop-shadow(0 0 18px #ffd76a88); }

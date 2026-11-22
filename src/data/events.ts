@@ -38,7 +38,7 @@ export const EVENTS: GameEvent[] = [
   {
     id: 'baies',
     title: 'Le buisson de Baies Oran',
-    image: 'sprites/items/oran-berry.png',
+    image: 'illustrations/evenements/evt-baies.webp',
     text: 'Au détour d’un sentier, un buisson ploie sous les Baies Oran. Elles brillent étrangement, comme si le temps s’était arrêté autour d’elles.',
     choices: [
       {

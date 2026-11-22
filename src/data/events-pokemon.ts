@@ -92,7 +92,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     ],
   },
   {
-    id: 'autel-ancien', title: 'L’autel oublié', image: item('griseous-orb'),
+    id: 'autel-ancien', title: 'L’autel oublié', image: 'illustrations/evenements/evt-autel.webp',
     text: 'Un autel couvert de runes pulse d’une lumière violette. On y devine une offrande, et une inscription : « Le sang contre la force ».',
     choices: [
       { label: 'Offrir ta vitalité', detail: '−8 PV max, gagne un objet tenu', available: (r) => r.maxHp > 20, apply: (r) => { loseMax(r, 8); return `L’autel accepte. Tu reçois : ${giveRelic(r)}.`; } },
@@ -128,7 +128,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     ],
   },
   {
-    id: 'tempete-temporelle', title: 'La tempête temporelle', image: item('adamant-orb'),
+    id: 'tempete-temporelle', title: 'La tempête temporelle', image: 'illustrations/evenements/evt-tempete.webp',
     text: 'Les engrenages de la tour s’emballent. Une tempête de sable doré, où passé et futur se mélangent, souffle devant toi.',
     choices: [
       { label: 'Traverser la tempête', detail: '−12 PV, gagne 130 ₽', available: (r) => r.hp > 12, apply: (r) => { hurt(r, 12); r.money += 130; return 'Tu ressors couvert de sable… et de pièces anciennes. +130 ₽.'; } },
@@ -145,7 +145,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     ],
   },
   {
-    id: 'feu-de-camp', title: 'Le feu de camp', image: item('charcoal'),
+    id: 'feu-de-camp', title: 'Le feu de camp', image: 'illustrations/evenements/evt-feu-de-camp.webp',
     text: 'Des braises encore chaudes, des couvertures, une marmite : des Dresseurs ont campé ici il y a peu.',
     choices: [
       { label: 'Se reposer', detail: 'Récupère 20 PV', apply: (r) => `Tu te réchauffes. +${r.heal(20)} PV.` },
@@ -197,7 +197,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     ],
   },
   {
-    id: 'oeuf-mysterieux', title: 'L’œuf mystérieux', image: item('lucky-egg'),
+    id: 'oeuf-mysterieux', title: 'L’œuf mystérieux', image: 'illustrations/evenements/evt-oeuf.webp',
     text: 'Un œuf tacheté repose dans un nid de plumes, tout chaud. Il bouge légèrement.',
     choices: [
       { label: 'Le couver', detail: '+6 PV max', apply: (r) => { gainMax(r, 6); return 'L’œuf éclot : un petit Pokémon te fait un câlin avant de filer. +6 PV max.'; } },
@@ -222,7 +222,7 @@ export const POKEMON_EVENTS: GameEvent[] = [
     ],
   },
   {
-    id: 'miroir-zarbi', title: 'Le miroir déformant', image: item('scope-lens'),
+    id: 'miroir-zarbi', title: 'Le miroir déformant', image: 'illustrations/evenements/evt-miroir.webp',
     text: 'Un grand miroir reflète une version de toi aux capacités étranges. Ton reflet tend la main à travers la vitre.',
     choices: [
       { label: 'Toucher le reflet', detail: 'Transforme 2 cartes de ton deck', apply: () => ({ pick: 'transformer', text: 'Le reflet échange une de tes capacités. Laquelle ?', count: 2 }) },

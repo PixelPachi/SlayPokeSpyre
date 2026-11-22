@@ -126,6 +126,8 @@ export class Run {
   qShop = 0.03;
   /** Ennemis du dernier combat (pour l'historique). */
   lastEnemies: string[] = [];
+  /** Dominants déjà affrontés : on évite de retomber sur le même. */
+  elitesMet: string[] = [];
   eventsSeen = 0;
   shiniesMet = 0;
   /** Objets tenus (le premier est l'objet de départ). */
@@ -376,7 +378,15 @@ export class Run {
 
   encounter(type: 'combat' | 'elite' | 'boss'): string[] {
     if (type === 'boss') return [this.zone.boss];
-    if (type === 'elite') return [...this.rng.pick(this.zone.elites)];
+    if (type === 'elite') {
+      const met = this.elitesMet ?? (this.elitesMet = []);
+      const fresh = this.zone.elites.filter((g) => !met.includes(g.join('+')));
+      const last = met[met.length - 1];
+      const pool = fresh.length ? fresh : this.zone.elites.filter((g) => g.join('+') !== last);
+      const pick = this.rng.pick(pool.length ? pool : this.zone.elites);
+      met.push(pick.join('+'));
+      return [...pick];
+    }
     return [...this.rng.pick(this.zone.encounters)];
   }
 

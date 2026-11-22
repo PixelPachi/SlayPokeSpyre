@@ -41,6 +41,7 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   'lire-esprit': { label: 'Lire-Esprit', text: () => 'Si ton tour commence avec 30 Aura ou plus, consomme 15 Aura : tes cartes coûtent 0 PA pendant ce tour.' },
   'champ-herbu': { label: 'Champ Herbu', text: (n) => `Au début de chaque tour, récupère ${n} PV.` },
   racines: { label: 'Racines', text: (n) => `Au début de chaque tour, gagne ${n} Protection.` },
+  croissance: { label: 'Croissance', text: (n) => `Au début de chaque tour, Invocation ${n}.` },
   'peau-dure': { label: 'Peau Dure', text: (n) => `Au début de chaque tour, gagne ${n} Épine.` },
   'zenith-plante': { label: 'Zénith', text: (n) => `Tes attaques Plante infligent ${n} dégâts de plus.` },
   'amour-filial': { label: 'Amour Filial', text: (n) => `Le Bébé attaque ${n} fois de plus à la fin de chaque tour.` },
@@ -135,6 +136,10 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
       case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;
       case 'bebe-protection': parts.push(`Le Bébé gagne <b>${e.amount}</b> Protection.`); break;
+      case 'invocation': parts.push(`Invocation <b>${e.amount}</b>.`); break;
+      case 'bebe-furie': parts.push(`Le Bébé attaque ${e.bonus > 0 ? `${1 + e.bonus} fois` : 'une fois'}, plus 1 fois par attaque du Bébé déjà faite ce tour.`); break;
+      case 'souvenir': parts.push('Le Bébé tombe K.O. : inflige ses PV en dégâts à tous les ennemis et gagne autant de Protection.'); break;
+      case 'protection-pv-bebe': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}les PV du Bébé en Protection.`); break;
       case 'protection': parts.push(`Gagne <b>${e.amount}</b> Protection.`); break;
       case 'statut': {
         const s = STATUS_INFO[e.status].label;
