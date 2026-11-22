@@ -1,4 +1,5 @@
 import { ENCHANTS } from '../data/cards';
+import { TERRAINS, WEATHER } from '../core/weather';
 // Rendu HTML d'une carte, partagé par le combat, les récompenses, la boutique et le deck.
 import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
@@ -77,7 +78,20 @@ function nameSize(name: string): number {
 }
 
 /** Infobulle sur les noms de statuts dans le texte d'une carte (Brûlure, Poison, Peur…). */
-const EXTRA_KW = [{ label: 'Invocation', color: '#e8b04a', text: () => 'Le Bébé gagne autant de PV max et de PV. S’il est K.O., il revient avec autant de PV.' }];
+const kw = (label: string, color: string, text: string) => ({ label, color, text: () => text });
+const EXTRA_KW = [
+  kw('Invocation', '#e8b04a', 'Le Bébé gagne autant de PV max et de PV. S’il est K.O., il revient avec autant de PV.'),
+  kw('Aura', '#4aa8ff', 'Chaque point d’Aura ajoute 1 dégât à ta prochaine attaque, puis l’Aura retombe à 0. Chaque PV perdu donne 1 Aura.'),
+  // météos et terrains
+  ...Object.values(WEATHER).map((w) => kw(w.name, '#7cc6ff', `Météo : ${w.text}`)),
+  ...Object.values(TERRAINS).map((t) => kw(t.name, '#8fd16a', `Terrain : ${t.text}`)),
+  // mots-clés des cartes
+  kw('Épuisée', '#c9a0ff', 'Une fois jouée, la carte est retirée pour le reste du combat.'),
+  kw('Conservée', '#c9a0ff', 'La carte reste dans ta main à la fin du tour au lieu d’être défaussée.'),
+  kw('Éphémère', '#c9a0ff', 'Si la carte est encore dans ta main à la fin du tour, elle est épuisée.'),
+  kw('Innée', '#c9a0ff', 'La carte est toujours dans ta main au début du combat.'),
+  kw('Injouable', '#c9a0ff', 'Cette carte ne peut pas être jouée.'),
+];
 const KW_INFOS = [...Object.values(STATUS_INFO), ...EXTRA_KW];
 const KW = KW_INFOS.map((i) => i.label).sort((a, b) => b.length - a.length);
 const KW_RE = new RegExp(`(^|[^\\p{L}])(${KW.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\p{L}])`, 'gu');
