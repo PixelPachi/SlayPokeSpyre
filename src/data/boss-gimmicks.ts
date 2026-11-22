@@ -78,7 +78,7 @@ const SPECS: Record<string, Spec> = {
     moves: [{ id: 'foudre-fusion', name: 'Foudre Fusion', weight: 25, intent: 'attaque', pokeType: 'electrik', damage: 22, pierce: true, signature: true }],
   },
   'dialga-primal': {
-    gimmick: { id: 'distorsion', name: 'Distorsion du Temps', text: 'Au 3e tour, le temps se fige : tu as 1 PA de moins (une seule fois).' },
+    gimmick: { id: 'distorsion', name: 'Distorsion du Temps', text: 'À partir du 3e tour, le temps se fige : tu as 1 PA de moins jusqu’à la fin du combat. Après Hurle-Temps, tu as 2 PA de moins au tour suivant.' },
     moves: [],
   },
 };

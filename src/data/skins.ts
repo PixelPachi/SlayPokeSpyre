@@ -52,8 +52,8 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
       { act: 3, dex: 9059, name: 'Arcanâme', types: ['feu', 'spectre'], hp: 8 },
     ],
   }],
-  mew: [SHINY_GOAL],
-  quelorior: [SHINY_GOAL, {
+  mew: [SHINY_GOAL, primordial('Mew', [151])],
+  quelorior: [SHINY_GOAL, primordial('Quelorior', [235]), {
     id: 'flambeur', name: 'Flambeur', stat: 'bosses', goal: 1, bosses: ['arceus'], dex: [235],
     goalText: 'Vaincre Arceus en jouant Quelorior',
   }],

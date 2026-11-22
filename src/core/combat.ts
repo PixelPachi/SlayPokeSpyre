@@ -445,6 +445,8 @@ export class Combat {
   babyTaunt = false;
   /** Attaques du Bébé faites ce tour (Furie). */
   babyHits = 0;
+  /** Dialga a lancé Hurle-Temps : 2 PA de moins au prochain tour du joueur. */
+  timeRoar = false;
   /** Le Bébé n'enrage sa mère qu'une fois par combat. */
   private babyEnraged = false;
 
@@ -593,6 +595,7 @@ export class Combat {
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
       const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
+      if (m.id === 'hurle-temps') this.timeRoar = true;
       this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
       if (m.meteo) this.setField(m.meteo);
       // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
@@ -753,9 +756,10 @@ export class Combat {
         if (this.phase !== 'joueur') return;
       }
     }
-    if (this.bossAlive('distorsion') && this.turn === 3) {
-      this.changeEnergy(-1, 'Distorsion du Temps');
-    }
+    // Distorsion du Temps (Dialga) : à partir du 3e tour, 1 PA de moins jusqu'à la fin du combat
+    if (this.bossAlive('distorsion') && this.turn >= 3) this.changeEnergy(-1, 'Distorsion du Temps');
+    // Hurle-Temps : le tour suivant, 2 PA de moins
+    if (this.timeRoar) { this.timeRoar = false; this.changeEnergy(-2, 'Hurle-Temps'); }
     if (this.player.statuses.etourdi) {
       delete this.player.statuses.etourdi;
       this.skipTurn = true;
