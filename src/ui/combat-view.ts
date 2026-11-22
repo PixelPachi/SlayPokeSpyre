@@ -176,6 +176,8 @@ export class CombatView {
   private finish(): void {
     if (this.ended) return;
     this.ended = true;
+    // Gribouille : les capacités copiées restent dans le deck jusqu'à la fin de la run
+    for (const id of this.combat.copiedCards) this.run.addCard(id);
     this.onEnd({
       victory: this.combat.phase === 'victoire',
       hp: this.combat.player.hp,

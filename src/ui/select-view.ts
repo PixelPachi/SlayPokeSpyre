@@ -18,13 +18,14 @@ import { asset, esc } from './util';
 const ICON_FILES = import.meta.glob<string>('../assets/ui/icones/*.png', { eager: true, query: '?url', import: 'default' });
 const ICONS: Partial<Record<string, string>> = Object.fromEntries(Object.entries(ICON_FILES).map(([p, u]) => [p.split('/').pop()!.replace('.png', ''), u]));
 
-const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
+const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'];
 const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
   riolu: 'illustrations/riolu.webp',
   vipelierre: 'illustrations/vipelierre.webp',
   kangourex: 'illustrations/kangourex.webp',
   caninos: 'illustrations/caninos.webp',
   mew: 'illustrations/mew.webp',
+  quelorior: 'illustrations/quelorior.webp',
 };
 const UNLOCK_TEXT: Record<CharacterId, string> = {
   riolu: '',
@@ -32,6 +33,7 @@ const UNLOCK_TEXT: Record<CharacterId, string> = {
   kangourex: "Battre le gardien de l'acte 2",
   caninos: 'Atteindre le sommet de la tour',
   mew: '???',
+  quelorior: '???',
 };
 
 export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: CharacterId) => void, onBack?: () => void): void {
@@ -50,7 +52,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
         <h1 class="logo">SlayPoke<span>Spyre</span></h1>
         ${onBack ? '<button class="btn back-title">← Écran titre</button>' : ''}
         <div class="select-sheet">
-          <div class="sheet-name">${locked && current === 'mew' ? '???' : esc(ch.name)}</div>
+          <div class="sheet-name">${locked && (current === 'mew' || current === 'quelorior') ? '???' : esc(ch.name)}</div>
           <div class="sheet-types">${ch.types.map((t) => `<span class="type-badge" style="background:${TYPE_COLORS[t]}">${TYPE_LABELS[t]}</span>`).join('')}</div>
           ${locked ? `<p class="sheet-locked">Verrouillé<br><small>${esc(UNLOCK_TEXT[current])}</small></p>` : `
             <div class="sheet-row"><b>PV</b> ${ch.maxHp}</div>

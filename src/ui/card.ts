@@ -22,7 +22,7 @@ export interface CardRenderOptions {
 export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const base = d.effects.find((e) => e.kind === 'degats');
   const text = o.text ?? cardText(d, null, null);
-  const enemy = d.id.startsWith('ennemi-');
+  const enemy = d.id.startsWith('ennemi-') || d.id.includes('copie:');
   const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character);
   const art = enemy ? artNoPokemon(d.name) : artUrl(d.artName ?? d.name, d.character);
   const orb = orbUrl(d.character);

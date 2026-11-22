@@ -53,6 +53,10 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     ],
   }],
   mew: [SHINY_GOAL],
+  quelorior: [SHINY_GOAL, {
+    id: 'flambeur', name: 'Flambeur', stat: 'bosses', goal: 1, bosses: ['arceus'], dex: [235],
+    goalText: 'Vaincre Arceus en jouant Quelorior',
+  }],
 } as Record<CharacterId, SkinDef[]>;
 
 /** Chemin du sprite de combat selon le skin. */

@@ -40,4 +40,9 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     talent: { name: 'Gène ancestral', text: 'A accès aux cartes de tous les personnages.' },
     starterDeck: ['mew-ecras-face', 'mew-ecras-face', 'mew-ecras-face', 'mew-ecras-face', 'abri', 'abri', 'abri', 'abri', 'mew-morphing', 'mew-choc-mental'],
   },
+  quelorior: {
+    id: 'quelorior', name: 'Quelorior', dex: [235], types: ['normal'], maxHp: 72,
+    talent: { name: 'Technicien', text: 'Les attaques copiées avec Gribouille infligent 25 % de dégâts en plus.' },
+    starterDeck: ['ruse', 'ruse', 'ruse', 'ruse', 'abri', 'abri', 'abri', 'abri', 'quel-gribouille', 'quel-gribouille'],
+  },
 };

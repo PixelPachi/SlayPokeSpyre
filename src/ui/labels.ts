@@ -12,7 +12,7 @@ export const TYPE_COLORS: Record<PokeType, string> = {
 
 /** Code couleur des cartes de chaque personnage (les cartes communes restent grises). */
 export const CHARACTER_COLORS: Record<string, string> = {
-  riolu: '#3a7bd5', vipelierre: '#3f9f45', kangourex: '#8b6343', caninos: '#d6402b', mew: '#e57bb8', normal: '#8f8f8f',
+  riolu: '#3a7bd5', vipelierre: '#3f9f45', kangourex: '#8b6343', caninos: '#d6402b', mew: '#e57bb8', quelorior: '#d9c08a', normal: '#8f8f8f',
 };
 
 export const STATUS_INFO: Record<StatusId, { label: string; color: string; text: (n: number) => string }> = {
@@ -136,6 +136,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
       case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;
       case 'bebe-protection': parts.push(`Le Bébé gagne <b>${e.amount}</b> Protection.`); break;
+      case 'gribouille': parts.push(`Copie la capacité que prépare l'ennemi${e.enchant ? ', <b>enchantée</b>' : ''} : elle rejoint ton deck pour la run.`); break;
       case 'invocation': parts.push(`Invocation <b>${e.amount}</b>.`); break;
       case 'bebe-furie': parts.push(`Le Bébé attaque ${e.bonus > 0 ? `${1 + e.bonus} fois` : 'une fois'}, plus 1 fois par attaque du Bébé déjà faite ce tour.`); break;
       case 'souvenir': parts.push('Le Bébé tombe K.O. : inflige ses PV en dégâts à tous les ennemis et gagne autant de Protection.'); break;

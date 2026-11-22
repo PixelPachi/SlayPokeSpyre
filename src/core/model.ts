@@ -1,7 +1,7 @@
 // Modèle de données du jeu (section 10 du GDD).
 import type { PokeType } from './types';
 
-export type CharacterId = 'riolu' | 'vipelierre' | 'kangourex' | 'caninos' | 'mew';
+export type CharacterId = 'riolu' | 'vipelierre' | 'kangourex' | 'caninos' | 'mew' | 'quelorior';
 
 export type StatusId =
   | 'brulure' // perd X PV en début de tour, inflige 25 % de dégâts en moins, -1 par tour
@@ -96,6 +96,7 @@ export type Effect =
   | { kind: 'bebe-soin'; amount: number } // soigne le Bébé (le ramène s'il est K.O.)
   | { kind: 'bebe-pvmax'; amount: number }
   | { kind: 'bebe-protection'; amount: number }
+  | { kind: 'gribouille'; enchant: boolean } // copie la capacité de l'ennemi ciblé : elle rejoint le deck (enchantée si amélioré)
   | { kind: 'invocation'; amount: number } // le Bébé gagne X PV max et X PV ; s'il est K.O., il revient avec X PV
   | { kind: 'bebe-furie'; bonus: number } // le Bébé attaque 1 fois + 1 fois par attaque du Bébé déjà faite ce tour (+ bonus)
   | { kind: 'souvenir' } // le Bébé tombe K.O. : ses PV sont infligés à tous les ennemis et donnés en Protection
@@ -120,6 +121,8 @@ export interface CardDef {
   character: CharacterId | 'normal';
   pokeType: PokeType;
   category: CardCategory;
+  /** Carte copiée par Gribouille : nom du Pokémon d'origine. */
+  copiedFrom?: string;
   rarity: Rarity;
   cost: number;
   target: Target;

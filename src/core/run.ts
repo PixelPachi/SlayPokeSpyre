@@ -355,7 +355,7 @@ export class Run {
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
-      const pool = this.character === 'mew' ? [...own, ...neutralPool()] : this.rng.next() < neutralChance ? neutralPool() : own;
+      const pool = this.character === 'mew' ? [...own, ...neutralPool()] : !own.length || this.rng.next() < neutralChance ? neutralPool() : own;
       const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
       const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare'));
       if (pick) out.push(pick.id);

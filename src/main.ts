@@ -208,7 +208,7 @@ function startRun(character: CharacterId): void {
   run.applySkin(equippedSkin(save, character), skinDef(character, equippedSkin(save, character)));
   activeRun = run;
   // Rouages du Temps et de l'Espace : seulement après avoir apaisé Dialga Primal avec au moins 3 Pokémon différents
-  const dialgaWins = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as CharacterId[]).filter((c) => beatenBosses(save, c).includes('dialga-primal')).length;
+  const dialgaWins = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as CharacterId[]).filter((c) => beatenBosses(save, c).includes('dialga-primal')).length;
   run.cogsUnlocked = dialgaWins >= 3 || params.has('rouages');
   // Pour tester : ?acte=2 commence directement à l'acte 2 (?acte=5 : la Salle Originelle)
   const startAct = Math.min(SECRET_ACT, Number(params.get('acte') ?? 1));
@@ -455,7 +455,7 @@ function endRun(run: Run, victory: boolean): void {
     shinies: run.shiniesMet, elites: run.elitesDefeated, bosses: run.bossesDefeated, combats: run.combatsWon, wins: victory ? 1 : 0,
   }, run.bossIds);
   for (const k of newSkins) setTimeout(() => toast(`Skin débloqué : ${CHARACTERS[run.character].name} ${k.name.toLowerCase()} ! Choisis-le sur l'écran de sélection.`), 1200);
-  const fresh = unlockCharacters(save, run.bossesDefeated, victory);
+  const fresh = unlockCharacters(save, run.bossesDefeated, victory, run.bossIds.includes('arceus'));
   if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
   renderRunEnd(screen, run, victory, { exp, lines, ...result, total: save.exp[run.character] ?? 0 }, title, () => startRun(run.character));
 }

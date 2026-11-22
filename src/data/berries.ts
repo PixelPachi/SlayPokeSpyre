@@ -63,7 +63,7 @@ const b = (id: string, name: string, rarity: BerryRarity, fx: BerryFx): BerryDef
   return { id, name: `Baie ${name}`, sprite: `${id}-berry`, rarity, fx, combatOnly,
     text: describe(fx) + (combatOnly ? ' (en combat)' : '') };
 };
-const CHAR_NAMES: Partial<Record<CharacterId, string>> = { riolu: 'Riolu', vipelierre: 'Vipélierre', kangourex: 'Kangourex', caninos: 'Caninos', mew: 'Mew' };
+const CHAR_NAMES: Partial<Record<CharacterId, string>> = { riolu: 'Riolu', vipelierre: 'Vipélierre', kangourex: 'Kangourex', caninos: 'Caninos', mew: 'Mew', quelorior: 'Quelorior' };
 const x = (id: string, name: string, character: CharacterId, say: string, effects: Effect[]): BerryDef => ({
   id, name: `Baie ${name}`, sprite: `${id}-berry`, rarity: 'peu-commune', fx: { effects, say }, combatOnly: true, character,
   text: `${say} (en combat) ★ Exclusive à ${CHAR_NAMES[character]}.`,

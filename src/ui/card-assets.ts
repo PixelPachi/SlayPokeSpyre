@@ -32,7 +32,7 @@ export function artSlug(name: string): string {
 
 /** Fichier du cadre : un par personnage, « neutre » pour les cartes que tout le monde peut apprendre. */
 export function frameFile(character: string): string {
-  return character === 'normal' ? 'neutre' : character;
+  return character === 'normal' || character === 'quelorior' ? 'neutre' : character;
 }
 
 export function frameUrl(character: string): string | undefined {

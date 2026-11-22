@@ -1,11 +1,12 @@
 // Moteur de combat (section 4 du GDD). Aucune dépendance à l'affichage : l'interface lit l'état
 // et les événements produits, et appelle les actions (jouer une carte, finir le tour…).
 import type { Card, CardDef, CharacterId, EnemyMove, Effect, PowerId, StatusId, Statuses, Form } from './model';
+import { copyId, isCopy } from '../data/copies';
 import { Rng } from './rng';
 import {
   type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier,
 } from './types';
-import { CARD_DEFS, cardDef } from '../data/cards';
+import { CARD_DEFS, cardDef, enchantId, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { primordialTypes, skinDef } from '../data/skins';
 import { ENEMY_DEFS } from '../data/enemies';
@@ -158,6 +159,8 @@ export class Combat {
   private nextTempUid = 100000;
   /** Objets tenus consommés pendant ce combat (à retirer de la run). */
   consumedRelics: string[] = [];
+  /** Cartes copiées par Gribouille : elles rejoignent le deck de la run. */
+  copiedCards: string[] = [];
   private enemyPower?: number;
   private lastPlayed: CardDef | null = null;
   readonly relics: Set<string>;
@@ -301,7 +304,9 @@ export class Combat {
   /** Dégâts d'une attaque du joueur, objets compris. */
   private playerDamage(base: number, d: CardDef, t: Fighter) {
     const r = computeDamage(base + this.relicFlat(d), this.player, t, d.pokeType);
-    return { amount: Math.floor(r.amount * this.relicMult(r.effectiveness === 'super') * this.fieldMult(d.pokeType, this.has('lunettes-filtre')) + 1e-9), effectiveness: r.effectiveness };
+    // Technicien (Quelorior) : les attaques copiées frappent 25 % plus fort
+    const tech = this.player.character === 'quelorior' && isCopy(d.id) ? 1.25 : 1;
+    return { amount: Math.floor(r.amount * tech * this.relicMult(r.effectiveness === 'super') * this.fieldMult(d.pokeType, this.has('lunettes-filtre')) + 1e-9), effectiveness: r.effectiveness };
   }
 
   // ——— Lecture ———
@@ -1038,6 +1043,19 @@ export class Combat {
       case 'invocation':
         this.invoke(eff.amount);
         return;
+      case 'gribouille': {
+        if (!target) return;
+        const def = ENEMY_DEFS[target.defId];
+        if (!def) return;
+        // la capacité qu'il prépare, sinon une de ses capacités au hasard
+        const move = def.moves.find((m) => m.id === target.intent?.id) ?? this.rng.pick(def.moves);
+        let id = copyId(target.defId, move.id);
+        if (eff.enchant) { const k = rollEnchant(cardDef(id), () => this.rng.next()); if (k) id = enchantId(k, id); }
+        this.copiedCards.push(id);
+        this.discardPile.push({ uid: this.nextTempUid++, defId: id, upgraded: false });
+        this.events.push({ type: 'player-move', name: `Gribouille copie ${cardDef(id).name} !` });
+        return;
+      }
       case 'bebe-furie':
         this.familiarAttack(1 + eff.bonus + this.babyHits, target);
         return;

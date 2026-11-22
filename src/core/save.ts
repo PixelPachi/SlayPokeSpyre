@@ -157,18 +157,19 @@ export const saveHooks: { encounter?: (list: { dex: number; shiny: boolean }[]) 
 /** Personnages jouables. `?tous` dans l'adresse les débloque tous (pour tester). */
 export function playableCharacters(s: SaveData): CharacterId[] {
   if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('tous')) {
-    return ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
+    return ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'];
   }
   return ['riolu', ...(s.characters ?? []).filter((c) => c !== 'riolu')];
 }
 
 /** Débloque les personnages : gardien de l'acte 1 → Vipélierre, acte 2 → Kangourex, sommet atteint → Caninos, Dialga Primal apaisé → Mew. */
-export function unlockCharacters(s: SaveData, bosses: number, victory: boolean): CharacterId[] {
+export function unlockCharacters(s: SaveData, bosses: number, victory: boolean, arceus = false): CharacterId[] {
   const want: CharacterId[] = [];
   if (bosses >= 1) want.push('vipelierre');
   if (bosses >= 2) want.push('kangourex');
   if (bosses >= 3) want.push('caninos'); // atteindre le sommet
   if (victory) want.push('mew'); // apaiser Dialga Primal
+  if (arceus) want.push('quelorior'); // vaincre Arceus dans la Salle Originelle
   const have = new Set(s.characters ?? []);
   const fresh = want.filter((c) => !have.has(c));
   if (fresh.length) {
@@ -203,7 +204,7 @@ export function characterLevel(s: SaveData, c: CharacterId): number {
 export function characterUnlocks(s: SaveData, c: CharacterId): string[] {
   if (c !== 'mew') return unlockedCards(c, characterLevel(s, c));
   // Gène ancestral : Mew a ses cartes et celles que chaque personnage a débloquées
-  const all: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
+  const all: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'];
   return all.flatMap((ch) => unlockedCards(ch, characterLevel(s, ch)));
 }
 

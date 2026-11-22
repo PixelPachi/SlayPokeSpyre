@@ -1,6 +1,8 @@
 // Toutes les cartes du jeu. Ajouter une carte = ajouter une entrée ici (aucun code à écrire).
 // Règle du GDD : la plupart des cartes portent le nom d'une capacité que le Pokémon peut apprendre dans les jeux.
 import type { CardDef } from '../core/model';
+import { QUELORIOR_CARDS } from './cards-quelorior';
+import { copyDef, isCopy } from './copies';
 import { VIPELIERRE_CARDS } from './cards-vipelierre';
 import { KANGOUREX_CARDS } from './cards-kangourex';
 import { CANINOS_CARDS } from './cards-caninos';
@@ -106,7 +108,7 @@ CARDS.push(
   bossCard('g-electrocution', 'Électrocution', 'electrik', [{ kind: 'perte-pv', amount: 4 }]),
   bossCard('g-felure-temporelle', 'Fêlure Temporelle', 'dragon', [{ kind: 'pa', amount: -1 }]),
 );
-CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS, ...RONDOUDOU_CARDS);
+CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS, ...RONDOUDOU_CARDS, ...QUELORIOR_CARDS);
 // Ronflement et Blabla Dodo ne se jouent qu'endormi
 for (const d of CARDS) if (/-(ronflement|blabla-dodo)$/.test(d.id) || ['n-devoreve', 'n-cauchemar', 'n-baillement'].includes(d.id)) d.requires = { ...d.requires, asleep: true };
 
@@ -121,7 +123,7 @@ export function fusionId(a: string, upA: boolean, b: string, upB: boolean): stri
 /** Deux cartes peuvent-elles fusionner ? (pas de talent, de malédiction, ni de cibles incompatibles) */
 export function canFuse(a: CardDef, b: CardDef): boolean {
   const ok = (d: CardDef) => (d.category === 'attaque' || d.category === 'technique') && !d.keywords?.includes('injouable')
-    && !d.onDraw && !d.fusion && !d.requires && !d.enchant;
+    && !d.onDraw && !d.fusion && !d.requires && !d.enchant && !isCopy(d.id);
   if (!ok(a) || !ok(b)) return false;
   const t = new Set([a.target, b.target]);
   return !(t.has('ennemi') && t.has('tous'));
@@ -216,6 +218,7 @@ export function cardDef(defId: string, upgraded = false): CardDef {
     return e ? { ...e.apply(inner), id: defId, name: inner.name, artName: inner.artName ?? inner.name.replace(/\+$/, ''), enchant: k } : inner;
   }
   if (defId.startsWith('fusion:')) return fusionDef(defId, upgraded);
+  if (isCopy(defId)) { const cp = copyDef(defId, upgraded); if (cp) return cp; }
   const base = CARD_DEFS[defId];
   if (!base) throw new Error(`Carte inconnue : ${defId}`);
   if (!upgraded) return base;
