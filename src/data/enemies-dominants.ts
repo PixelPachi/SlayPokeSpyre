@@ -154,12 +154,14 @@ export const DOMINANT_ENEMIES: EnemyDef[] = [
 
   // ——— Sommet et Salle Originelle ———
   {
-    id: 'mammochon', name: 'Mammochon', dex: 473, types: ['glace', 'sol'], hp: [112, 118],
+    // Massko : l'explorateur venu du futur, qui veut lui aussi atteindre le sommet de la Tour du Temps
+    id: 'massko', name: 'Massko', dex: 253, types: ['plante'], hp: [106, 112],
     moves: [
-      { id: 'seisme', name: 'Séisme', weight: 30, intent: 'attaque', pokeType: 'sol', damage: 16 },
-      { id: 'chute-glace', name: 'Chute Glace', weight: 25, intent: 'attaque', pokeType: 'glace', damage: 14, playerStatus: { status: 'gel', stacks: 1 } },
-      { id: 'eclats-glace', name: 'Éclats Glace', weight: 25, intent: 'attaque', pokeType: 'glace', damage: 4, hits: 4 },
-      { id: 'boul-armure', name: "Boul'Armure", weight: 20, intent: 'boost', selfStatus: { status: 'defense', stacks: 2 }, block: 18 },
+      { id: 'lame-feuille', name: 'Lame-Feuille', weight: 30, intent: 'attaque', pokeType: 'plante', damage: 15 },
+      { id: 'vive-attaque', name: 'Vive-Attaque', weight: 25, intent: 'attaque', pokeType: 'normal', damage: 5, hits: 3 },
+      { id: 'tranche-nuit', name: 'Tranche-Nuit', weight: 20, intent: 'attaque', pokeType: 'tenebres', damage: 12, playerStatus: { status: 'peur', stacks: 1 } },
+      { id: 'tempete-verte', name: 'Tempête Verte', weight: 10, intent: 'attaque', pokeType: 'plante', damage: 24, selfStatus: { status: 'attaque', stacks: -2 } },
+      { id: 'detection', name: 'Détection', weight: 15, intent: 'boost', selfStatus: { status: 'attaque', stacks: 2 }, block: 16 },
     ],
   },
   {

@@ -558,7 +558,7 @@ describe('sommet et Dialga Primal', async () => {
     expect(SUMMIT_STEPS[SUMMIT_STEPS.length - 1]).toBe('boss');
     expect(run.encounter('boss')).toEqual(['dialga-primal']);
     const a = run.encounter('elite'), b = run.encounter('elite');
-    expect([a[0], b[0]].sort()).toEqual(['mammochon', 'noctunoir']);
+    expect([a[0], b[0]].sort()).toEqual(['massko', 'noctunoir']);
   });
 
   it('Dialga annonce Hurle-Temps puis se recharge, et passe en phase 2 sous 50 % de PV', () => {

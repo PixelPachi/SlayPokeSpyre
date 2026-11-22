@@ -145,7 +145,7 @@ export const ZONES: ZoneDef[] = [
   // ——— Sommet : le combat final ———
   {
     id: 'sommet-tour-du-temps', name: 'Sommet de la Tour du Temps', region: 'Tour du Temps', act: 4,
-    encounters: [['noctunoir']], elites: [['noctunoir'], ['mammochon']], boss: 'dialga-primal',
+    encounters: [['noctunoir']], elites: [['noctunoir'], ['massko']], boss: 'dialga-primal',
     background: 'backgrounds/sommet-tour-du-temps.jpg', palette: ['#4a3a8a', '#4a4560', '#0a0618'], mood: 'dragon',
     season: 'Le temps se désagrège', weather: 'temps',
   },
