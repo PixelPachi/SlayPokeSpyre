@@ -52,7 +52,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('protection', 'Protection', 'normal', 'technique', 'peu-commune', 2, 'soi', [prot(13)], { effects: [prot(17)] }),
   c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }], { cost: 1 }, ['epuisee']),
   c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(5), prot(15)], { effects: [hpLoss(4), prot(18)] }),
-  c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [multi(5, 3)], { effects: [multi(5, 4)] }),
+  c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [multi(7, 3), st('confusion', 2, 'soi')], { effects: [multi(7, 4), st('confusion', 2, 'soi')] }),
   c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [prot(8), st('defense', -1, 'soi')], { effects: [prot(11), st('defense', -1, 'soi')] }, ['epuisee']),
   c('provoc', 'Provoc', 'tenebres', 'technique', 'peu-commune', 1, 'ennemi', [st('attaque', -1), draw(1)], { effects: [st('attaque', -2), draw(1)] }),
   c('canon-graine', 'Canon Graine', 'plante', 'attaque', 'peu-commune', 1, 'ennemi', [multi(3, 2, 5)], { effects: [multi(4, 2, 5)] }),

@@ -54,7 +54,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('machouille', 'Mâchouille', 'tenebres', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { parSoi: 'rage', parSoiX: 1 }), st('defense', -1)], { effects: [dmg(13, { parSoi: 'rage', parSoiX: 1 }), st('defense', -1)] }),
   c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [invoc(8), bebeProt(4)], { effects: [invoc(11), bebeProt(6)] }),
   c('contre', 'Contre', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [{ kind: 'degats-pv-perdus', amount: 4, per: 3 }], { effects: [{ kind: 'degats-pv-perdus', amount: 4, per: 2 }] }),
-  c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [st('rage', 2, 'soi'), multi(4, 3)], { effects: [st('rage', 3, 'soi'), multi(5, 3)] }),
+  c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [st('rage', 2, 'soi'), multi(6, 3), st('confusion', 2, 'soi')], { effects: [st('rage', 3, 'soi'), multi(7, 3), st('confusion', 2, 'soi')] }),
   c('hurlement', 'Hurlement', 'normal', 'technique', 'peu-commune', 1, 'tous', [st('peur', 2, 'tous')], { effects: [st('peur', 3, 'tous')] }, ['epuisee']),
   c('queue-de-fer', 'Queue de Fer', 'acier', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(12), st('defense', -1)], { effects: [dmg(16), st('defense', -2)] }),
   c('tunnel', 'Tunnel', 'sol', 'attaque', 'peu-commune', 2, 'ennemi', [prot(6), dmg(10)], { effects: [prot(8), dmg(13)] }),

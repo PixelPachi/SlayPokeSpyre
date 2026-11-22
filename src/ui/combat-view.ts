@@ -498,7 +498,8 @@ export class CombatView {
   /** Carte de l'attaque ennemie, affichée au milieu de l'écran. */
   private showEnemyCard(uid: number, m: EnemyMove, dmg: number): void {
     const e = this.combat.enemy(uid);
-    const effects: Effect[] = m.damage !== undefined ? [{ kind: 'degats', amount: dmg, hits: m.hits }] : [];
+    const effects: Effect[] = m.damage !== undefined ? [{ kind: 'degats', amount: dmg, hits: m.hits, drain: m.drain }] : [];
+    if (m.recoil) effects.push({ kind: 'perte-pv', amount: m.recoil });
     if (m.playerStatus) effects.push({ kind: 'statut', status: m.playerStatus.status, stacks: m.playerStatus.stacks, on: 'cible' });
     if (m.selfStatus) effects.push({ kind: 'statut', status: m.selfStatus.status, stacks: m.selfStatus.stacks, on: 'soi' });
     if (m.block) effects.push({ kind: 'protection', amount: m.block });

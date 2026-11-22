@@ -19,7 +19,8 @@ export function copyDef(defId: string, upgraded: boolean): CardDef | undefined {
   if (!m) return undefined;
   const up = (n: number) => (upgraded ? Math.ceil(n * 1.3) : n);
   const effects: Effect[] = [];
-  if (m.damage !== undefined) effects.push({ kind: 'degats', amount: up(m.damage), hits: m.hits });
+  if (m.damage !== undefined) effects.push({ kind: 'degats', amount: up(m.damage), hits: m.hits, drain: m.drain });
+  if (m.recoil) effects.push({ kind: 'perte-pv', amount: m.recoil });
   if (m.playerStatus) effects.push({ kind: 'statut', status: m.playerStatus.status, stacks: m.playerStatus.stacks + (upgraded && m.playerStatus.stacks > 0 ? 1 : 0), on: 'cible' });
   if (m.selfStatus) effects.push({ kind: 'statut', status: m.selfStatus.status, stacks: m.selfStatus.stacks + (upgraded && m.selfStatus.stacks > 0 ? 1 : 0), on: 'soi' });
   if (m.block) effects.push({ kind: 'protection', amount: up(m.block) });

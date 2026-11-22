@@ -11,6 +11,7 @@ import { CHARACTERS } from '../data/characters';
 import { primordialTypes, skinDef } from '../data/skins';
 import { ENEMY_DEFS } from '../data/enemies';
 import '../data/boss-gimmicks';
+import '../data/enemy-fixes';
 import '../data/balance';
 import '../data/weather-moves';
 import { TERRAINS, WEATHER, isWeather, type TerrainId, type WeatherId } from './weather';
@@ -611,11 +612,13 @@ export class Combat {
       if (m.damage !== undefined) {
         // Le Bébé Kangourex peut être visé (3 chances sur 10)
         const fam = this.player.familiar;
+        let dealt = 0;
         for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
           // Le Bébé fait bouclier : tant qu'il est debout, il encaisse les coups ; le surplus touche Kangourex
           if (fam && fam.hp > 0) {
             const { amount, effectiveness } = computeDamage(m.damage + extra, e, BABY_FIGHTER, m.pokeType ?? 'normal');
             const left = this.hitFamiliar(Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))), effectiveness);
+            dealt += amount;
             if (left > 0) this.dealDamage(this.player, 'player', left, effectiveness);
             const thornsB = this.player.statuses.epine ?? 0;
             if (thornsB > 0 && e.hp > 0) this.dealDamage(e, uid, thornsB, 'normal');
@@ -629,10 +632,14 @@ export class Combat {
           this.player.block -= hidden;
           this.dealDamage(this.player, 'player', amount, effectiveness);
           this.player.block += hidden;
+          dealt += amount;
           // Épine : l'attaquant se pique à chaque coup
           const thorns = this.player.statuses.epine ?? 0;
           if (thorns > 0 && e.hp > 0) this.dealDamage(e, uid, thorns, 'normal');
         }
+        // Drain : récupère la moitié des dégâts ; Contrecoup : se blesse
+        if (m.drain && e.hp > 0 && dealt > 0) this.healEnemy(e, Math.floor(dealt / 2));
+        if (m.recoil && e.hp > 0) this.dealDamage(e, uid, m.recoil, 'normal');
         if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
           this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
         }

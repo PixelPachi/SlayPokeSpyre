@@ -54,7 +54,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('repos', 'Repos', 'psy', 'technique', 'peu-commune', 2, 'soi', [{ kind: 'repos', turns: 3 }], { cost: 1 }, ['epuisee']),
   c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(5), prot(15)], { effects: [hpLoss(4), prot(18)] }),
   c('larcin', 'Larcin', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6), draw(1), pa(1)], { effects: [dmg(9), draw(1), pa(1)] }, ['epuisee']),
-  c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [multi(5, 3)], { effects: [multi(5, 4)] }),
+  c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [multi(7, 3), st('confusion', 2, 'soi')], { effects: [multi(7, 4), st('confusion', 2, 'soi')] }),
   c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'ennemi', [prot(4), { kind: 'protection-par-statut', status: 'brulure', mult: 2 }], { effects: [prot(6), { kind: 'protection-par-statut', status: 'brulure', mult: 3 }] }, ['conservee']),
   c('canicule', 'Canicule', 'feu', 'attaque', 'peu-commune', 2, 'tous', [dmg(7), st('brulure', 2, 'tous')], { effects: [dmg(9), st('brulure', 3, 'tous')] }),
   c('feu-follet', 'Feu Follet', 'feu', 'technique', 'peu-commune', 1, 'ennemi', [st('brulure', 3), { kind: 'propage-statut', status: 'brulure' }], { effects: [st('brulure', 5), { kind: 'propage-statut', status: 'brulure' }] }),

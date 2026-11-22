@@ -199,6 +199,10 @@ export interface EnemyMove {
   discard?: number;
   /** Se soigne. */
   heal?: number;
+  /** Draine : récupère la moitié des dégâts infligés (Méga-Sangsue, Vampirisme…). */
+  drain?: boolean;
+  /** Contrecoup : perd ces PV après l'attaque (Bélier, Fracass'Tête…). */
+  recoil?: number;
   /** Dégâts en plus à chaque nouvelle utilisation pendant le combat. */
   escalate?: number;
 }

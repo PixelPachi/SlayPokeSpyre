@@ -149,7 +149,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         else if (e.on === 'soi' && (e.status === 'attaque' || e.status === 'defense')) {
           // Valeur brute affichée (Contestation inverse l'effet en combat pour Vipélierre)
           parts.push(`${s} ${signed(e.stacks)}.`);
-        } else if (e.on === 'soi') parts.push(`Gagne ${e.stacks} ${s}.`);
+        } else if (e.on === 'soi') parts.push(['confusion', 'peur', 'paralysie', 'poison', 'brulure', 'sommeil', 'ligote'].includes(e.status) ? `Tu subis ${e.stacks} ${s}.` : `Gagne ${e.stacks} ${s}.`);
         else parts.push(`Applique <b>${e.stacks}</b> ${s}${e.on === 'tous' ? ' à tous les ennemis' : ''}.`);
         break;
       }
