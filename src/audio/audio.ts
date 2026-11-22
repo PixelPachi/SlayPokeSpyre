@@ -31,7 +31,7 @@ let fileAudio: HTMLAudioElement | null = null;
 let fileTrack: string | null = null;
 /** Volume propre à certaines musiques (l'écran titre reste discret). */
 const TRACK_VOLUME: Record<string, number> = { titre: 0.18 };
-const fileVolume = () => (mode === 'tout' ? TRACK_VOLUME[fileTrack ?? ''] ?? 0.5 : 0);
+const fileVolume = () => (mode === 'tout' ? (TRACK_VOLUME[fileTrack ?? ''] ?? 0.5) * levels.musique : 0);
 function stopFile(): void {
   if (fileAudio) { fileAudio.pause(); fileAudio = null; }
   fileTrack = null;
@@ -102,6 +102,23 @@ type Mode = 'tout' | 'effets' | 'muet';
 const KEY = 'slaypokespyre-son';
 let mode: Mode = (() => { try { return (localStorage.getItem(KEY) as Mode) || 'tout'; } catch { return 'tout'; } })();
 
+// Volumes réglables (0 à 1) : musique et effets
+const VKEY = 'slaypokespyre-volumes';
+const levels: { musique: number; effets: number } = (() => {
+  try { return { musique: 1, effets: 1, ...JSON.parse(localStorage.getItem(VKEY) ?? '{}') }; } catch { return { musique: 1, effets: 1 }; }
+})();
+export function volumes(): { musique: number; effets: number } { return { ...levels }; }
+export function setVolume(kind: 'musique' | 'effets', v: number): void {
+  levels[kind] = Math.max(0, Math.min(1, v));
+  try { localStorage.setItem(VKEY, JSON.stringify(levels)); } catch { /* ignore */ }
+  applyVolumes();
+}
+export function setSoundMode(m: Mode): void {
+  mode = m;
+  try { localStorage.setItem(KEY, mode); } catch { /* ignore */ }
+  applyVolumes();
+}
+
 export function soundMode(): Mode { return mode; }
 export function cycleSound(): Mode {
   mode = mode === 'tout' ? 'effets' : mode === 'effets' ? 'muet' : 'tout';
@@ -110,7 +127,8 @@ export function cycleSound(): Mode {
   return mode;
 }
 export function soundIcon(): string {
-  return mode === 'tout' ? '🔊' : mode === 'effets' ? '🔉' : '🔇';
+  if (mode === 'muet' || (levels.musique === 0 && levels.effets === 0)) return '🔇';
+  return mode === 'tout' ? '🔊' : '🔉';
 }
 export function soundLabel(): string {
   return mode === 'tout' ? 'Son : musique + effets' : mode === 'effets' ? 'Son : effets seulement' : 'Son coupé';
@@ -149,8 +167,8 @@ function ensure(): AudioContext | null {
 function applyVolumes(): void {
   if (fileAudio) fileAudio.volume = fileVolume();
   if (!ctx) return;
-  musicBus.gain.setTargetAtTime(mode === 'tout' ? 0.16 * fade : 0, ctx.currentTime, 0.05);
-  sfxBus.gain.setTargetAtTime(mode === 'muet' ? 0 : 0.42, ctx.currentTime, 0.05);
+  musicBus.gain.setTargetAtTime(mode === 'tout' ? 0.16 * fade * levels.musique : 0, ctx.currentTime, 0.05);
+  sfxBus.gain.setTargetAtTime(mode === 'muet' ? 0 : 0.42 * levels.effets, ctx.currentTime, 0.05);
 }
 
 /** Les navigateurs exigent un geste : on démarre l'audio au premier clic / touche. */

@@ -1359,3 +1359,14 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .chest.chest-illus.open .event-illus { filter: drop-shadow(0 0 22px #ffd76a); animation: chestPop 0.5s ease-out; }
 @keyframes chestPop { 0% { transform: scale(0.96); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
 .event-illus.reward-illus { width: 320px; margin-bottom: 8px; filter: drop-shadow(0 0 18px #ffd76a88); }
+
+/* ——— Panneau de réglage du son ——— */
+.sound-panel { position: absolute; z-index: 60; width: 250px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(14, 18, 30, .95); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 30px #000a; color: #fff; font-size: 14px; }
+.sound-panel .sp-title { font-weight: 800; margin-bottom: 8px; letter-spacing: .5px; }
+.sound-panel label { display: grid; grid-template-columns: 82px 1fr 44px; align-items: center; gap: 6px; margin: 6px 0; }
+.sound-panel input[type=range] { width: 100%; accent-color: #ffcb3d; }
+.sound-panel label span { text-align: right; opacity: .8; font-size: 12px; }
+.sound-panel .sp-mute { width: 100%; margin-top: 8px; padding: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.08); color: #fff; cursor: pointer; }
+.sound-panel .sp-mute:hover { background: rgba(255,255,255,.16); }

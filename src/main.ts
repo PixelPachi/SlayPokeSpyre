@@ -1,7 +1,7 @@
 import { skinDef } from './data/skins';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
-import { cycleSound, hasTrack, installAudioUnlock, playTheme, sfx, soundIcon, soundLabel } from './audio/audio';
+import { hasTrack, installAudioUnlock, playTheme, setSoundMode, setVolume, sfx, soundIcon, soundMode, volumes } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
@@ -28,12 +28,42 @@ installTooltips(stage);
 installAudioUnlock();
 
 // Bouton son (barre du haut, écran titre) : musique + effets → effets seuls → muet
+// Réglages du son : un petit panneau avec le volume de la musique et des effets
+const refreshSoundButtons = () => document.querySelectorAll<HTMLElement>('.tb-sound').forEach((el) => { el.textContent = soundIcon(); });
 stage.addEventListener('click', (ev) => {
-  const b = (ev.target as HTMLElement).closest('.tb-sound');
+  const target = ev.target as HTMLElement;
+  const open = stage.querySelector('.sound-panel');
+  if (open && !target.closest('.sound-panel') && !target.closest('.tb-sound')) { open.remove(); return; }
+  const b = target.closest('.tb-sound');
   if (!b) return;
   ev.stopPropagation();
-  cycleSound();
-  document.querySelectorAll<HTMLElement>('.tb-sound').forEach((el) => { el.textContent = soundIcon(); el.dataset.tip = `${soundLabel()} (cliquer pour changer)`; });
+  if (open) { open.remove(); return; }
+  const v = volumes();
+  const muted = soundMode() === 'muet';
+  const panel = document.createElement('div');
+  panel.className = 'sound-panel';
+  panel.innerHTML = `
+    <div class="sp-title">Son</div>
+    <label>🎵 Musique <input type="range" min="0" max="100" step="5" data-k="musique" value="${Math.round(v.musique * 100)}"><span>${Math.round(v.musique * 100)} %</span></label>
+    <label>💥 Effets <input type="range" min="0" max="100" step="5" data-k="effets" value="${Math.round(v.effets * 100)}"><span>${Math.round(v.effets * 100)} %</span></label>
+    <button class="sp-mute">${muted ? '🔊 Remettre le son' : '🔇 Couper le son'}</button>`;
+  const r = b.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+  const scale = sr.width / stage.offsetWidth || 1;
+  panel.style.top = `${(r.bottom - sr.top) / scale + 6}px`;
+  panel.style.right = `${Math.max(8, (sr.right - r.right) / scale)}px`;
+  stage.appendChild(panel);
+  panel.querySelectorAll<HTMLInputElement>('input[type=range]').forEach((inp) => inp.addEventListener('input', () => {
+    if (soundMode() !== 'tout') setSoundMode('tout');
+    setVolume(inp.dataset.k as 'musique' | 'effets', Number(inp.value) / 100);
+    inp.nextElementSibling!.textContent = `${inp.value} %`;
+    panel.querySelector('.sp-mute')!.textContent = '🔇 Couper le son';
+    refreshSoundButtons();
+  }));
+  panel.querySelector('.sp-mute')!.addEventListener('click', () => {
+    setSoundMode(soundMode() === 'muet' ? 'tout' : 'muet');
+    panel.querySelector('.sp-mute')!.textContent = soundMode() === 'muet' ? '🔊 Remettre le son' : '🔇 Couper le son';
+    refreshSoundButtons();
+  });
 }, true);
 
 let view: CombatView | null = null;

@@ -20,6 +20,7 @@ export function topbar(run: Run, label: string, hp = run.hp): string {
       <span class="tb-floor" data-tip="Étage de la Tour du Temps">Étage ${run.floor}</span>
       <button class="tb-deck" data-tip="Voir ton deck">Deck ${run.deck.length}</button>
       <span class="tb-berries">${berrySlots(run)}</span>
+      <button class="tb-sound" data-tip="Régler le son">${soundIcon()}</button>
       <button class="tb-menu" data-tip="Menu : sauvegarder et quitter">☰</button>
     </div>
     <div class="tb-relics relic-tray">${run.relics.map((id) => relicIcon(id)).join('')}</div>`;
