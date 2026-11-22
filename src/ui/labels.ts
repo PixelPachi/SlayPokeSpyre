@@ -138,8 +138,8 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         if (e.status === 'tenace') parts.push('<b>Tenace</b> : pas de K.O. avant ton prochain tour.');
         else if (e.status === 'etourdi') parts.push('<b>Étourdi</b> : tu passes ton prochain tour.');
         else if (e.on === 'soi' && (e.status === 'attaque' || e.status === 'defense')) {
-          // Contestation : les baisses de stats de Vipélierre deviennent des hausses
-          parts.push(d.character === 'vipelierre' && e.stacks < 0 ? `${s} ${signed(-e.stacks)} <i>(Contestation)</i>.` : `${s} ${signed(e.stacks)}.`);
+          // Valeur brute affichée (Contestation inverse l'effet en combat pour Vipélierre)
+          parts.push(`${s} ${signed(e.stacks)}.`);
         } else if (e.on === 'soi') parts.push(`Gagne ${e.stacks} ${s}.`);
         else parts.push(`Applique <b>${e.stacks}</b> ${s}${e.on === 'tous' ? ' à tous les ennemis' : ''}.`);
         break;
