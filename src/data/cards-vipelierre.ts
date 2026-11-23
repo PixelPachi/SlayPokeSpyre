@@ -18,7 +18,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('feuille-magik', 'Feuille Magik', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }, ['conservee']),
   c('mega-sangsue', 'Méga-Sangsue', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(6, { drain: true })], { effects: [dmg(9, { drain: true })] }),
   c('souplesse', 'Souplesse', 'normal', 'attaque', 'commune', 2, 'ennemi', [dmg(13)], { effects: [dmg(17)] }),
-  c('balle-graine', 'Balle Graine', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(8)], { effects: [dmg(11)] }),
+  c('balle-graine', 'Balle Graine', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(2, { hits: 2, hitsMax: 5 })], { effects: [dmg(3, { hits: 2, hitsMax: 5 })] }),
   c('aeropique', 'Aéropique', 'vol', 'attaque', 'commune', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }, ['conservee']),
   c('plaquage', 'Plaquage', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('paralysie', 1)], { effects: [dmg(8), st('paralysie', 2)] }),
   c('meteores', 'Météores', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(4)], { effects: [dmg(6)] }),

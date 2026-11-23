@@ -32,7 +32,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-window">
-          <div class="card-art">${art ? `<img src="${art}" alt="" draggable="false">` : CATEGORY_ART[d.category]}</div>
+          <div class="card-art">${art ? `<img src="${art}" alt="" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src=this.src.split('?')[0]+'?r='+Date.now()}">` : CATEGORY_ART[d.category]}</div>
           <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
         </div>
         ${frame ? '<div class="card-tint"></div>' : ''}
