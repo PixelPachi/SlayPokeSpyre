@@ -27,7 +27,7 @@ const ART_URLS = new Map(Object.entries(ARTS).map(([path, url]) => [path.split('
 
 /** Nom de fichier d'une capacité : « Écras'Face » → ecras-face. */
 export function artSlug(name: string): string {
-  return name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return name.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 /** Fichier du cadre : un par personnage, « neutre » pour les cartes que tout le monde peut apprendre. */

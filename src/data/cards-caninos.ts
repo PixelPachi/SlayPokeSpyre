@@ -38,8 +38,8 @@ export const CANINOS_CARDS: CardDef[] = [
   c('eclate-roc', 'Éclate-Roc', 'combat', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('defense', -1)], { effects: [dmg(7), st('defense', -2)] }),
   c('rune-protect', 'Rune Protect', 'normal', 'technique', 'commune', 1, 'soi', [prot(7)], { effects: [prot(10)] }),
   // Chien de la Lanterne : attaque de départ spectrale et Âmes de la Lanterne Bleue
-  { ...c('lechouille-ame', 'Léchouille des Âmes', 'spectre', 'attaque', 'depart', 1, 'ennemi', [dmg(2), draw(1)], { effects: [dmg(4), draw(1)] }), artName: 'Léchouille' },
-  { ...c('ame', 'Âme', 'spectre', 'technique', 'depart', 0, 'soi', [draw(2)], { effects: [draw(3)] }, ['epuisee']), artName: 'Ombre Portée' },
+  c('lechouille-ame', 'Léchouille des Âmes', 'spectre', 'attaque', 'depart', 1, 'ennemi', [dmg(2), draw(1)], { effects: [dmg(4), draw(1)] }),
+  c('ame', 'Âme', 'spectre', 'technique', 'depart', 0, 'soi', [draw(2)], { effects: [draw(3)] }, ['epuisee']),
   c('aboiement', 'Aboiement', 'tenebres', 'attaque', 'commune', 1, 'tous', [dmg(3), st('attaque', -1, 'tous')], { effects: [dmg(5), st('attaque', -1, 'tous')] }, ['epuisee']),
   c('calinerie', 'Câlinerie', 'fee', 'attaque', 'commune', 2, 'ennemi', [dmg(11), st('attaque', -1)], { effects: [dmg(15), st('attaque', -1)] }),
   c('attraction', 'Attraction', 'normal', 'technique', 'commune', 1, 'ennemi', [st('confusion', 2)], { effects: [st('confusion', 3)] }),
@@ -87,7 +87,7 @@ export const CANINOS_CARDS: CardDef[] = [
   c('deflagration', 'Déflagration', 'feu', 'attaque', 'rare', 3, 'tous', [dmg(10), { kind: 'detonation', status: 'brulure', per: 3 }], { effects: [dmg(14), { kind: 'detonation', status: 'brulure', per: 4 }] }),
   c('zenith', 'Zénith', 'feu', 'talent', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'zenith', turns: 5 }, power('zenith', 2)], { effects: [{ kind: 'meteo', id: 'zenith', turns: 5 }, power('zenith', 3)] }),
   // Soleil Intense : l'Eau s'évapore, le Feu ×1,5 pendant 5 tours
-  { ...c('soleil-intense', 'Soleil Intense', 'feu', 'technique', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'soleil-intense', turns: 5 }], { cost: 1 }), artName: 'Flammèche' },
+  c('soleil-intense', 'Soleil Intense', 'feu', 'technique', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'soleil-intense', turns: 5 }], { cost: 1 }),
   c('danse-flammes', 'Danse Flammes', 'feu', 'talent', 'rare', 2, 'soi', [power('braises', 2)], { effects: [power('braises', 3)] }),
   c('giga-impact', 'Giga Impact', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(30), st('defense', -2, 'soi')], { effects: [dmg(38), st('defense', -2, 'soi')] }),
   c('ultralaser', 'Ultralaser', 'normal', 'attaque', 'rare', 3, 'ennemi', [dmg(34)], { effects: [dmg(44)] }, ['ephemere']),

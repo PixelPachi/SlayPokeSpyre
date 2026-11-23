@@ -42,7 +42,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('balayage', 'Balayage', 'combat', 'attaque', 'commune', 1, 'ennemi', [dmg(9)], { effects: [dmg(12)] }),
   c('poing-eclair', 'Poing Éclair', 'electrik', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('paralysie', 1)], { effects: [dmg(9), st('paralysie', 1)] }),
   // Gardien Océanique : attaque de départ
-  { ...c('ecume', 'Écume', 'eau', 'attaque', 'depart', 1, 'tous', [dmg(4)], { effects: [dmg(6)] }), artName: "Bulles d'O" },
+  c('ecume', 'Écume', 'eau', 'attaque', 'depart', 1, 'tous', [dmg(4)], { effects: [dmg(6)] }),
   c('furie', 'Furie', 'normal', 'attaque', 'commune', 1, 'ennemi', [{ kind: 'bebe-furie', bonus: 0 }], { effects: [{ kind: 'bebe-furie', bonus: 1 }] }),
   c('vengeance', 'Vengeance', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5, { revanche: true, siBebe: 3 })], { effects: [dmg(7, { revanche: true, siBebe: 4 })] }),
   c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)] }),

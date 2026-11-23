@@ -259,14 +259,14 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `mur-lumiere.png` | Mur Lumière | Psy · Talent | Vipélierre, Mew | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `neige.png` | Neige | Glace · Technique | Neutre | Aucun (capacité seule) | cristaux de glace, givre, brume froide bleutée | ☐ |
 | `nitrocharge.png` | Nitrocharge | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
-| `n-ud-herbe.png` | Nœud Herbe | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
+| `noeud-herbe.png` | Nœud Herbe | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `ombre-portee.png` | Ombre Portée | Spectre · Attaque | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `onde-folie.png` | Onde Folie | Spectre · Technique | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `onde-vide.png` | Onde Vide | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
 | `ouragan.png` | Ouragan | Dragon · Attaque | Vipélierre | **Vipélierre** lance la capacité | énergie draconique bleue et violette, écailles | ☐ |
 | `paresse.png` | Paresse | Normal · Technique | Neutre | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `peau-dure.png` | Peau Dure | Plante · Talent | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
-| `permuc-ur.png` | Permucœur | Psy · Technique | Vipélierre | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
+| `permucoeur.png` | Permucœur | Psy · Technique | Vipélierre | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `photocopie.png` | Photocopie | Normal · Technique | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `phytomixeur.png` | Phytomixeur | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `pico-defense.png` | Pico-Défense | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
@@ -378,7 +378,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `vibrobscur.png` | Vibrobscur | Ténèbres · Attaque | Riolu, Mew | **Riolu** lance la capacité | ténèbres, griffes d’ombre, lueurs rouges | ☐ |
 | `vitesse-extreme.png` | Vitesse Extrême | Normal · Attaque | Riolu, Caninos | Aucun (capacité seule) | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `vive-attaque.png` | Vive-Attaque | Normal · Attaque | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
-| `v-u-brise.png` | Vœu Brisé | Spectre · Statut | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
+| `voeu-brise.png` | Vœu Brisé | Spectre · Statut | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `voile-miroir.png` | Voile Miroir | Psy · Attaque | Vipélierre | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `voix-enjoleuse.png` | Voix Enjôleuse | Fée · Attaque | Neutre | Aucun (capacité seule) | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `vol.png` | Vol | Vol · Attaque | Mew | **Mew** lance la capacité | bourrasques, plumes, courants d’air | ☐ |
