@@ -129,6 +129,8 @@ export class Run {
   lastEnemies: string[] = [];
   /** Dominants déjà affrontés : on évite de retomber sur le même. */
   elitesMet: string[] = [];
+  /** Cartes débloquées par tous les Pokémon (skins qui ouvrent des cartes d'autres types). */
+  extraUnlocked?: string[];
   /** Pokémon mis K.O. par type pendant la run (objectifs de skins). */
   typeKills: Partial<Record<PokeType, number>> = {};
   eventsSeen = 0;
@@ -362,14 +364,19 @@ export class Run {
   /** 3 cartes différentes à choisir. Chaque emplacement a 12 % de chances d'être une carte neutre. */
   cardChoices(kind: 'combat' | 'elite' | 'boss' | 'boutique', count = 3, neutralChance = kind === 'boutique' ? 0 : 0.12): string[] {
     let own = this.character === 'mew' ? mewPool(this.unlocked) : rewardPool(this.character, this.unlocked);
-    // Chien de la Lanterne : toutes les cartes Spectre du jeu s'ajoutent à ses récompenses
-    if (this.character === 'caninos' && this.skin === 'lanterne') {
+    // Skins qui ouvrent des cartes d'autres types : Chien de la Lanterne (toutes les cartes Spectre),
+    // Tisserand de Soie Astrale (les cartes Psy et Ténèbres débloquées)
+    const sk = skinDef(this.character, this.skin);
+    if (sk?.typeCards?.length) {
       // (sans les cartes qui dépendent d'une mécanique d'un autre Pokémon : Bébé, Rage, Aura)
-      const foreign = (c: CardDef) => c.effects.some((e) => e.kind.startsWith('bebe') || ['souvenir', 'invocation', 'aura', 'aura-mult', 'degats-aura'].includes(e.kind)
-        || (e.kind === 'pouvoir' && e.power === 'rancune') || (e.kind === 'statut' && (e as { status?: string }).status === 'rage'));
+      const foreign = (c: CardDef) => c.effects.some((e) => e.kind.startsWith('bebe') || ['souvenir', 'invocation', 'aura', 'aura-mult', 'degats-aura', 'aura-protection', 'consomme-aura'].includes(e.kind)
+        || ['protection-par-soi', 'perd-statut', 'pioche-par-soi', 'protection-aura'].includes(e.kind)
+        || (e.kind === 'degats' && !!e.parSoi) || (e.kind === 'pouvoir' && ['rancune', 'turbo'].includes(e.power))
+        || (e.kind === 'statut' && ['rage', 'elan'].includes((e as { status?: string }).status ?? '')));
       const names = new Set(own.map((c) => c.name));
       for (const c of allCards()) {
-        if (c.pokeType !== 'spectre' || c.rarity === 'depart' || c.character === 'caninos' || foreign(c) || names.has(c.name)) continue;
+        if (!sk.typeCards.includes(c.pokeType) || c.rarity === 'depart' || c.character === this.character || foreign(c) || names.has(c.name)) continue;
+        if (sk.typeCardsUnlocked && c.character !== 'normal' && !(this.extraUnlocked ?? []).includes(c.id)) continue;
         names.add(c.name); own = [...own, c];
       }
     }

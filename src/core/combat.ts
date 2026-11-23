@@ -1581,7 +1581,7 @@ export class Combat {
   private addStatus(f: Fighter, who: Who, status: StatusId, stacks: number): void {
     let s = stacks;
     // Contestation (Vipélierre) : ses baisses de stats deviennent des hausses, et inversement
-    if (who === 'player' && this.player.character === 'vipelierre' && (status === 'attaque' || status === 'defense')) s = -s;
+    if (who === 'player' && this.player.character === 'vipelierre' && !this.weaver && (status === 'attaque' || status === 'defense')) s = -s;
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
     if (s > 0 && this.terrain?.id === 'champ-brumeux' && BAD_STATUSES.includes(status)) return;
     if (who === 'player' && s > 0 && this.has('carapace-mue') && (status === 'peur' || status === 'paralysie')) return void this.relicFired('carapace-mue');

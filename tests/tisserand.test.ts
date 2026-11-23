@@ -68,3 +68,25 @@ describe('Contestation', () => {
     expect(c.player.statuses.attaque).toBe(2);
   });
 });
+
+describe('Tisserand : sans Contestation, cartes Psy et Ténèbres', () => {
+  it('les baisses de stats restent des baisses', () => {
+    const r = skinRun();
+    const c = new Combat({ character: 'vipelierre', deck: r.deck, enemies: ['onix'], seed: 'NC', relics: [], skin: 'tisserand', form: r.form });
+    c.drainEvents(); c.player.energy = 9;
+    c.hand = [{ uid: 1, defId: 'vip-enroulement', upgraded: false }];
+    c.play(1);
+    expect(c.player.statuses.attaque).toBe(-1);
+  });
+  it('peut obtenir les cartes Psy/Ténèbres débloquées des autres Pokémon', () => {
+    const r = skinRun();
+    r.extraUnlocked = ['psycho-croc', 'mew-choc-mental', 'griffe-ombre', 'larcin', 'machination', 'feinte'].flatMap((x) => [x, `kan-${x}`, `can-${x}`, `riolu-${x}`]);
+    const seen = new Set<string>();
+    for (let i = 0; i < 300; i++) for (const id of r.cardChoices('elite')) seen.add(id);
+    const foreign = [...seen].filter((id) => cardDef(id).character !== 'vipelierre' && cardDef(id).character !== 'normal');
+    for (const id of foreign) {
+      expect(['psy', 'tenebres']).toContain(cardDef(id).pokeType);
+      expect(r.extraUnlocked).toContain(id);
+    }
+  });
+});

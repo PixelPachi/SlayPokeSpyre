@@ -273,6 +273,8 @@ function startRun(character: CharacterId): void {
   // Pour tester : ?zone=tour-lavanville choisit la zone de l'acte en cours
   if (params.get('skin')) run.applySkin(params.get('skin')!, skinDef(character, params.get('skin')!)); // test : ?skin=primordial
   syncSkinLabels(run);
+  // Skins qui ouvrent les cartes d'autres types : on connaît les cartes débloquées par chaque Pokémon
+  if (skinDef(character, run.skin)?.typeCardsUnlocked) run.extraUnlocked = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as CharacterId[]).flatMap((c) => characterUnlocks(save, c));
   if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
   // Pour tester : ?cartes=vip-aromatherapie,vip-don-naturel ajoute des cartes au deck
   for (const id of (params.get('cartes') ?? '').split(',').filter(Boolean)) run.addCard(id);

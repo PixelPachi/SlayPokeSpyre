@@ -28,8 +28,12 @@ export interface SkinDef {
   kills?: { type: PokeType; goal: number };
   /** Types du Pokémon avec ce skin (remplacent les siens). */
   types?: PokeType[];
-  /** Peut obtenir toutes les cartes de type Spectre du jeu. */
-  spectreCards?: boolean;
+  /** Peut obtenir les cartes de ces types, de tous les Pokémon. */
+  typeCards?: PokeType[];
+  /** … seulement celles débloquées (par l'EXP de leur Pokémon). */
+  typeCardsUnlocked?: boolean;
+  /** Le Pokémon perd son talent (ex. Contestation). */
+  noTalent?: boolean;
   /** Cartes ajoutées au deck de départ. */
   extraCards?: string[];
   /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
@@ -58,14 +62,14 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     kills: { type: 'poison', goal: 25 }, extraCards: ['vip-catalyse'], relic: 'plaque-toxik',
   }, {
     id: 'tisserand', name: 'Tisserand de Soie Astrale', stat: 'bosses', goal: 1, bosses: [], kills: { type: 'psy', goal: 25 }, dex: [495, 496, 497],
-    goalText: 'Mettre K.O. 25 Pokémon de type Psy en jouant Vipélierre. Il devient Psy/Ténèbres, ses cartes peuvent porter plusieurs enchantements, il commence avec Permucœur (enchante une carte de ta main pour la run) et le Nœud Destin à la place du Grain Miracle (tisse une carte au Centre Pokémon).',
-    types: ['psy', 'tenebres'], extraCards: ['vip-permucoeur'], relic: 'noeud-destin',
+    goalText: 'Mettre K.O. 25 Pokémon de type Psy en jouant Vipélierre. Il devient Psy/Ténèbres et perd Contestation, il peut apprendre toutes les cartes Psy et Ténèbres débloquées, ses cartes peuvent porter plusieurs enchantements, il commence avec Permucœur (enchante une carte de ta main pour la run) et le Nœud Destin à la place du Grain Miracle (tisse une carte au Centre Pokémon).',
+    types: ['psy', 'tenebres'], extraCards: ['vip-permucoeur'], relic: 'noeud-destin', noTalent: true, typeCards: ['psy', 'tenebres'], typeCardsUnlocked: true,
   }],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
     goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 12 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',
-    relic: 'lanterne-bleue', deck: ['can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'abri', 'abri', 'abri', 'abri', 'flammeche', 'morsure'], spectreCards: true,
+    relic: 'lanterne-bleue', deck: ['can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'abri', 'abri', 'abri', 'abri', 'flammeche', 'morsure'], typeCards: ['spectre'],
     evolutions: [
       { act: 2, dex: 59, name: 'Arcanin', types: ['feu'], hp: 12 },
       { act: 3, dex: 9059, name: 'Arcanâme', types: ['feu', 'spectre'], hp: 8 },
