@@ -727,7 +727,7 @@ export function renderSummit(root: HTMLElement, run: Run, onNext: Done): void {
         ${steps.map((s, i) => {
           const info = SUMMIT_INFO[s];
           const state = i < run.summitStep ? 'done' : i === run.summitStep ? 'next' : 'later';
-          const img = s === 'boss' ? `<img class="summit-boss primal" src="${asset('sprites/pokemon/front/483.png')}" alt="">`
+          const img = s === 'boss' ? `<img class="summit-boss primal" src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">`
             : s === 'elite' ? `<img src="${asset('sprites/pokemon/front/477.png')}" alt="">`
             : s === 'boutique' ? `<img src="${asset('sprites/pokemon/front/352.png')}" alt="">`
             : '<span class="summit-cross">✚</span>';

@@ -744,10 +744,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .weather-temps i { width: calc(8px * var(--s)); height: calc(8px * var(--s)); background: linear-gradient(135deg, #8fe3ff, #b48cff); transform: rotate(45deg);
   box-shadow: 0 0 10px #8fd0ff; top: auto; bottom: -20px; animation-name: rise; opacity: .8; }
 .enemy .sprite.front.primal, .summit-boss.primal {
-  filter: brightness(0.55) saturate(1.6) hue-rotate(-12deg) drop-shadow(0 0 10px #ff3d2e) drop-shadow(0 0 24px #7a2cff);
+  filter: drop-shadow(0 0 8px #ff3d2e) drop-shadow(0 0 20px #7a2cff); image-rendering: auto; object-fit: contain;
 }
-.enemy .sprite.front.primal { width: 300px; height: 300px; margin: -40px 0 -40px; animation: primal-pulse 3s ease-in-out infinite; }
-@keyframes primal-pulse { 50% { filter: brightness(0.62) saturate(1.8) hue-rotate(-12deg) drop-shadow(0 0 16px #ff3d2e) drop-shadow(0 0 34px #7a2cff); } }
+.enemy .sprite.front.primal { width: 290px; height: 290px; margin: 0 0 -48px; object-position: bottom; animation: primal-pulse 3s ease-in-out infinite; }
+@keyframes primal-pulse { 50% { filter: drop-shadow(0 0 14px #ff3d2e) drop-shadow(0 0 32px #7a2cff); } }
 .intent-recharge span { display: none; }
 .summit { position: absolute; inset: 0; overflow: hidden; color: #fff;
   background: radial-gradient(ellipse at 50% 10%, var(--sky), var(--shade) 80%); }
@@ -798,7 +798,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Pas de plateforme sous les combattants : ils se tiennent directement sur le décor */
 .fighter .platform { display: none; }
 .enemy.hovered .sprite.front { filter: drop-shadow(0 0 10px rgba(255, 215, 94, 0.95)); }
-.enemy.hovered .sprite.front.primal { filter: brightness(0.6) saturate(1.6) hue-rotate(-12deg) drop-shadow(0 0 12px #ffd75e); }
+.enemy.hovered .sprite.front.primal { filter: drop-shadow(0 0 12px #ffd75e) drop-shadow(0 0 22px #ffd75e); }
 
 /* ——— Événements : arcanes majeurs (carte à gauche, choix à droite) ——— */
 .event-side { display: flex; flex-direction: column; align-items: center; gap: 14px; }

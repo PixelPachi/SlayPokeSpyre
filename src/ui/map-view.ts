@@ -77,7 +77,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
   });
   const bossAvail = avail === 'boss';
   nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
-      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien : ${boss.name}</b><br>Le boss de la zone ${zone.name}.">${nodeIcon('boss', boss.dex)}</button>`);
+      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien : ${boss.name}</b><br>Le boss de la zone ${zone.name}.">${boss.look === 'primal' ? `<img src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">` : nodeIcon('boss', boss.dex)}</button>`);
 
   root.innerHTML = `
     <div class="map-screen">
