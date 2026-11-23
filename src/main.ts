@@ -107,6 +107,14 @@ stage.addEventListener('click', (ev) => {
   });
   menu.querySelector('.eat')!.addEventListener('click', (e) => {
     e.stopPropagation();
+    const eaten = () => {
+      run.berries.splice(i, 1);
+      menu.remove();
+      document.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
+      persist(run, run.inNode);
+    };
+    // Baie à un seul ennemi : on choisit la cible
+    if (inCombat && b.single) { menu.remove(); view!.aimBerry(b.name, b.fx, eaten); return; }
     if (inCombat) {
       if (!view!.eatBerry(b.name, b.fx)) return;
     } else {

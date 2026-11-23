@@ -1392,7 +1392,7 @@ export class Combat {
   resists = new Set<string>();
 
   /** Manger une baie pendant ton tour. */
-  useBerry(name: string, fx: BerryFx): boolean {
+  useBerry(name: string, fx: BerryFx, targetUid?: number): boolean {
     if (this.phase !== 'joueur') return false;
     const p = this.player;
     this.events.push({ type: 'player-move', name: `${name} !` });
@@ -1407,7 +1407,7 @@ export class Combat {
     if (fx.resist) this.resists.add(fx.resist);
     if (fx.effects) {
       const card = { id: 'baie', name, character: p.character, pokeType: 'normal', category: 'technique', rarity: 'commune', cost: 0, target: 'ennemi', effects: fx.effects, upgrade: {} } as CardDef;
-      const t = this.aliveEnemies()[0];
+      const t = this.aliveEnemies().find((x) => x.uid === targetUid) ?? this.aliveEnemies()[0];
       for (const e of fx.effects) if (this.phase === 'joueur') this.resolve(e, card, t);
       this.checkEnd();
     }

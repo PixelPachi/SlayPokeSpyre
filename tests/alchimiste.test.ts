@@ -72,3 +72,17 @@ describe('Alchimiste : Plaque Toxik et condition de déblocage', () => {
     expect(skinProgress(done, 'vipelierre', k)).toEqual([26, 26]);
   });
 });
+
+describe('baies empoisonnées monocibles', () => {
+  it('n’empoisonnent que l’ennemi choisi', () => {
+    const c = new Combat({ character: 'vipelierre', deck: makeDeck(CHARACTERS.vipelierre.starterDeck), enemies: ['rattata', 'rattata'], seed: 'BP', relics: [] });
+    c.drainEvents();
+    const [a, b] = c.aliveEnemies();
+    const berry = BERRY_DEFS['empoisonnee-rare'];
+    expect(berry.single).toBe(true);
+    c.useBerry(berry.name, berry.fx, b.uid);
+    expect(a.statuses.poison ?? 0).toBe(0);
+    expect(b.statuses.poison).toBe(10);
+    expect(b.statuses.confusion).toBe(2);
+  });
+});

@@ -616,8 +616,35 @@ export class CombatView {
   }
 
   /** Manger une baie depuis la barre du haut (pendant ton tour). */
-  eatBerry(name: string, fx: BerryFx): boolean {
-    if (this.busy || !this.combat.useBerry(name, fx)) return false;
+  /** Baie à lancer sur un ennemi : on choisit la cible en cliquant dessus (Échap ou clic ailleurs pour annuler). */
+  aimBerry(name: string, fx: BerryFx, onEaten: () => void): void {
+    if (this.busy) return;
+    const alive = this.combat.aliveEnemies();
+    if (alive.length === 1) { if (this.eatBerry(name, fx, alive[0].uid)) onEaten(); return; }
+    const foes = [...this.el.querySelectorAll<HTMLElement>('.enemy:not(.dead)')];
+    foes.forEach((f) => f.classList.add('targetable', 'berry-aim'));
+    const hint = document.createElement('div');
+    hint.className = 'berry-aim-hint';
+    hint.textContent = `Choisis la cible de ${name}`;
+    this.el.appendChild(hint);
+    const stop = () => {
+      foes.forEach((f) => f.classList.remove('targetable', 'berry-aim'));
+      hint.remove();
+      this.el.removeEventListener('click', onClick, true);
+      window.removeEventListener('keydown', onKey);
+    };
+    const onClick = (ev: MouseEvent) => {
+      const foe = (ev.target as HTMLElement).closest<HTMLElement>('.enemy[data-who]');
+      ev.stopPropagation(); ev.preventDefault();
+      stop();
+      if (foe && this.eatBerry(name, fx, Number(foe.dataset.who))) onEaten();
+    };
+    const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') stop(); };
+    setTimeout(() => { this.el.addEventListener('click', onClick, true); window.addEventListener('keydown', onKey); });
+  }
+
+  eatBerry(name: string, fx: BerryFx, targetUid?: number): boolean {
+    if (this.busy || !this.combat.useBerry(name, fx, targetUid)) return false;
     sfx('baie');
     if (fx.maxHp) this.run.maxHp += fx.maxHp;
     this.refresh();

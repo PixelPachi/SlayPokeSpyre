@@ -35,6 +35,8 @@ export interface BerryDef {
   character?: CharacterId;
   /** Ne se trouve jamais en butin (baies empoisonnées de la Plaque Toxik). */
   noDrop?: boolean;
+  /** Se lance sur un seul ennemi, à choisir. */
+  single?: boolean;
 }
 
 const BAD: StatusId[] = ['brulure', 'poison', 'vampigraine', 'paralysie', 'peur', 'confusion', 'sommeil', 'gel', 'etourdi', 'ligote'];
@@ -73,9 +75,9 @@ const x = (id: string, name: string, character: CharacterId, say: string, effect
 const conf = (heal: number, extra: BerryFx): BerryFx => ({ heal, ...extra, self: [...(extra.self ?? []), { status: 'confusion', stacks: 1 }] });
 const res = (t: PokeType): BerryFx => ({ resist: t });
 
-const st = (status: StatusId, stacks: number): Effect => ({ kind: 'statut', status, stacks, on: 'tous' });
+const st = (status: StatusId, stacks: number): Effect => ({ kind: 'statut', status, stacks, on: 'cible' });
 const poisoned = (id: string, name: string, rarity: BerryRarity, say: string, effects: Effect[]): BerryDef => ({
-  id, name, sprite: 'kebia-berry', rarity, fx: { effects, say }, combatOnly: true, noDrop: true,
+  id, name, sprite: 'kebia-berry', rarity, fx: { effects, say }, combatOnly: true, noDrop: true, single: true,
   text: `${say} (en combat) ☠ Baie transformée par la Plaque Toxik.`,
 });
 /** Baie empoisonnée correspondant à une baie (selon sa rareté). */
@@ -138,9 +140,9 @@ export const BERRIES: BerryDef[] = [
   x('custap', 'Chérim', 'mew', 'Lance deux Métronomes.', [{ kind: 'metronome' }, { kind: 'metronome' }]),
   x('rowap', 'Pommo', 'mew', 'Ajoute 2 cartes au hasard dans ta main.', [{ kind: 'ajoute-carte', from: 'tous', count: 2 }]),
   // Baies empoisonnées : la Plaque Toxik (Vipélierre Alchimiste) transforme une baie en l'une d'elles, selon sa rareté
-  poisoned('empoisonnee', 'Baie Empoisonnée', 'commune', 'Inflige 5 Poison à tous les ennemis.', [st('poison', 5)]),
-  poisoned('empoisonnee-forte', 'Baie Empoisonnée+', 'peu-commune', 'Inflige 7 Poison et Attaque −1 à tous les ennemis.', [st('poison', 7), st('attaque', -1)]),
-  poisoned('empoisonnee-rare', 'Baie Empoisonnée★', 'rare', 'Inflige 10 Poison, Attaque −1, Défense −1 et 2 Confusion à tous les ennemis.', [st('poison', 10), st('attaque', -1), st('defense', -1), st('confusion', 2)]),
+  poisoned('empoisonnee', 'Baie Empoisonnée', 'commune', 'Inflige 5 Poison à un ennemi.', [st('poison', 5)]),
+  poisoned('empoisonnee-forte', 'Baie Empoisonnée+', 'peu-commune', 'Inflige 7 Poison et Attaque −1 à un ennemi.', [st('poison', 7), st('attaque', -1)]),
+  poisoned('empoisonnee-rare', 'Baie Empoisonnée★', 'rare', 'Inflige 10 Poison, Attaque −1, Défense −1 et 2 Confusion à un ennemi.', [st('poison', 10), st('attaque', -1), st('defense', -1), st('confusion', 2)]),
 ];
 
 export { BAD as BAD_STATUSES };
