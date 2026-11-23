@@ -594,6 +594,9 @@ export class CombatView {
     }
     const events = this.combat.drainEvents();
     this.render();
+    // Jackpot : le compteur de Pokédollars suit les gains en direct
+    const money = this.el.querySelector('.tb-money');
+    if (money) money.textContent = `${this.run.money + this.combat.moneyGained} ₽`;
     this.showEvents(events);
     if (this.combat.pendingChoice) this.showChoice();
   }

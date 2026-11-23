@@ -214,8 +214,8 @@ export class Run {
   /** Une carte d'un autre Pokémon ou neutre (Le Monde). Les cartes de Vipélierre restent possibles : sans sa
    *  Contestation, leurs baisses de stats te pénalisent (c'est le risque). Seules celles du Bébé sont exclues. */
   foreignCard(): string {
-    const pool = allCards().filter((c) => c.rarity !== 'depart' && c.character !== this.character
-      && !c.effects.some((e) => e.kind.startsWith('bebe-') && this.character !== 'kangourex'));
+    const pool = this.offerable(allCards().filter((c) => c.rarity !== 'depart' && c.character !== this.character
+      && !c.effects.some((e) => e.kind.startsWith('bebe-') && this.character !== 'kangourex')));
     return this.rng.pick(pool).id;
   }
 
@@ -390,7 +390,7 @@ export class Run {
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
-      const pool = this.character === 'mew' || this.character === 'quelorior' ? [...own, ...neutralPool()] : !own.length || this.rng.next() < neutralChance ? neutralPool() : own;
+      const pool = this.offerable(this.character === 'mew' || this.character === 'quelorior' ? [...own, ...neutralPool()] : !own.length || this.rng.next() < neutralChance ? neutralPool() : own);
       const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
       const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare'));
       if (pick) out.push(pick.id);
@@ -399,8 +399,13 @@ export class Run {
   }
 
   /** Cartes neutres vendues au Marché Kecleon. */
+  /** Quelorior n'apprend aucune attaque : ses attaques viennent de Gribouille (et de Jackpot pour le Flambeur). */
+  offerable<T extends { category: string }>(pool: T[]): T[] {
+    return this.character === 'quelorior' ? pool.filter((c) => c.category !== 'attaque') : pool;
+  }
+
   neutralChoices(count: number): string[] {
-    const pool = neutralPool();
+    const pool = this.offerable(neutralPool());
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity('boutique');
