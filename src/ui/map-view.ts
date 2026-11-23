@@ -43,7 +43,9 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
   HEIGHT = BOTTOM + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
   BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (ROWS - 1) * ROW_H - BOSS_GAP };
   const zone = run.zone;
-  const boss = ENEMY_DEFS[zone.boss];
+  const bossIds = run.bossId.split('+');
+  const boss = ENEMY_DEFS[bossIds[0]];
+  const bossName = bossIds.map((id) => ENEMY_DEFS[id].name).join(' & ');
   const avail = run.available();
   const isAvail = (n: MapNode) => avail !== 'boss' && avail.some((a) => a.row === n.row && a.col === n.col);
   const visited = (r: number, c: number) => run.visited.includes(`${r}-${c}`);
@@ -77,14 +79,14 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
   });
   const bossAvail = avail === 'boss';
   nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
-      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien : ${boss.name}</b><br>Le boss de la zone ${zone.name}.">${boss.look === 'primal' ? `<img src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">` : nodeIcon('boss', boss.dex)}</button>`);
+      data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien${bossIds.length > 1 ? "s" : ""} : ${bossName}</b><br>Le boss de la zone ${zone.name}.">${boss.look === 'primal' ? `<img src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">` : bossIds.length > 1 ? `<span class="duo-boss">${bossIds.map((id) => `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[id].dex}.png`)}" alt="">`).join('')}</span>` : nodeIcon('boss', boss.dex)}</button>`);
 
   root.innerHTML = `
     <div class="map-screen">
       ${topbar(run, `${zone.name} · ${run.act > 4 ? "acte secret" : `acte ${run.act}`}`)}
       <div class="map-scroll">
         <div class="map-canvas" style="height:${HEIGHT}px;background-image:linear-gradient(#0a0e1899, #0a0e18b3), url('${asset(`illustrations/cartes/${zone.id}.webp`)}')">
-          <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien : ${boss.name}</div>
+          <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien${bossIds.length > 1 ? "s" : ""} : ${bossName}</div>
           <svg class="map-lines" width="1280" height="${HEIGHT}">${lines.join('')}</svg>
           ${nodes.join('')}
         </div>

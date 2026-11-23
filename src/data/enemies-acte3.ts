@@ -267,4 +267,15 @@ export const ACT3_ENEMIES: EnemyDef[] = [
       { id: 'cage-eclair', name: 'Cage-Éclair', weight: 15, intent: 'handicap', playerStatus: { status: 'paralysie', stacks: 3 } },
     ],
   },
+  // Gardien possible de la Tour Dragospire, à la place de Zekrom
+  {
+    id: 'reshiram', name: 'Reshiram', dex: 643, types: ['dragon', 'feu'], hp: [238, 238],
+    moves: [
+      { id: 'flamme-croix', name: 'Flamme Croix', weight: 25, intent: 'attaque', pokeType: 'feu', damage: 18, playerStatus: { status: 'brulure', stacks: 2 } },
+      { id: 'flamme-bleue', name: 'Flamme Bleue', weight: 15, intent: 'attaque', pokeType: 'feu', damage: 26, playerStatus: { status: 'brulure', stacks: 3 } },
+      { id: 'draco-charge', name: 'Draco-Charge', weight: 20, intent: 'attaque', pokeType: 'dragon', damage: 14, playerStatus: { status: 'peur', stacks: 1 } },
+      { id: 'danse-draco', name: 'Danse Draco', weight: 20, intent: 'boost', selfStatus: { status: 'attaque', stacks: 3 }, block: 16 },
+      { id: 'feu-sacre', name: 'Feu Sacré', weight: 15, intent: 'attaque', pokeType: 'feu', damage: 12, hits: 2 },
+    ],
+  },
 ];

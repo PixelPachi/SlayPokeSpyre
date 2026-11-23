@@ -10,6 +10,8 @@ export interface ZoneDef {
   encounters: string[][];
   elites: string[][];
   boss: string;
+  /** Autres gardiens possibles (tirés au hasard pour chaque run) ; « a+b » = gardiens en duo. */
+  altBosses?: string[];
   /** Fond de combat (public/backgrounds) ; tant que l'image n'existe pas, le dégradé de secours s'affiche. */
   background: string;
   /** Couleurs du fond de secours : ciel, sol, ombres. */
@@ -42,7 +44,7 @@ export const ZONES: ZoneDef[] = [
   {
     id: 'bois-clematis', name: 'Bois Clématis', region: 'Hoenn', act: 1,
     encounters: [['zigzaton'], ['chenipotte', 'balignon'], ['zigzaton', 'chenipotte'], ['balignon', 'balignon'], ['chenipotte', 'chenipotte', 'zigzaton'], ['tarinor'], ['medhyena'], ['tarsal'], ['makuhita'], ['gobou'], ['tarinor', 'tarsal'], ['medhyena', 'makuhita']],
-    elites: [['chapignon'], ['pifeuil']], boss: 'charmillon',
+    elites: [['chapignon'], ['pifeuil']], boss: 'charmillon', altBosses: ['muciole+lumivole'],
     background: 'backgrounds/bois-clematis.jpg', palette: ['#ffd6e8', '#6fa63c', '#2c4a22'], mood: 'plante',
     season: 'Printemps en fleurs', weather: 'petales',
   },
@@ -137,7 +139,7 @@ export const ZONES: ZoneDef[] = [
   {
     id: 'tour-dragospire', name: 'Tour Dragospire', region: 'Unys', act: 3,
     encounters: [['gringolem'], ['drakkarmin'], ['incisache', 'polarhume'], ['polarhume', 'polarhume'], ['gringolem', 'incisache'], ['zeblitz'], ['shaofouine'], ['mastouffe'], ['lakmecygne'], ['zeblitz', 'mastouffe'], ['shaofouine', 'lakmecygne']],
-    elites: [['tranchodon'], ['trioxhydre']], boss: 'zekrom',
+    elites: [['tranchodon'], ['trioxhydre']], boss: 'zekrom', altBosses: ['reshiram'],
     background: 'backgrounds/tour-dragospire.jpg', palette: ['#5a6a8a', '#7d8494', '#141a28'], mood: 'dragon',
     season: "Tempête de neige et d'éclairs", weather: 'orage',
   },

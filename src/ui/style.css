@@ -1540,3 +1540,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .pile.draw, .pile.discard, .pile.exhaust { cursor: pointer; }
 .pile.draw:hover, .pile.discard:hover, .pile.exhaust:hover { filter: brightness(1.2); }
 .pile.exhaust { right: 116px; bottom: 90px; border-color: #c9a0ff66; color: #e6d6ff; }
+/* Chiffres lisibles (le 5 et le 2 se confondaient en police pixel) : dégâts annoncés des ennemis et prix des boutiques */
+.intent, .price, .shop-tile .price, .shop-relic .price, .shop-item .price, .carpet-money {
+  font-family: 'Nunito', system-ui, sans-serif !important; font-weight: 900; letter-spacing: 0;
+}
+.intent { font-size: 25px; }
+.duo-boss { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
+.duo-boss img { width: 58% !important; height: auto !important; margin: 0 -8%; }

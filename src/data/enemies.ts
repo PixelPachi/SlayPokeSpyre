@@ -184,6 +184,26 @@ const ENEMIES: EnemyDef[] = [
     ],
   },
 
+  // Gardiens en duo du Bois Clématis : Lumivole soutient, Muciole attaque
+  {
+    id: 'muciole', name: 'Muciole', dex: 313, types: ['insecte'], hp: [58, 58],
+    moves: [
+      { id: 'rayon-signal', name: 'Rayon Signal', weight: 35, intent: 'attaque', pokeType: 'insecte', damage: 9, playerStatus: { status: 'confusion', stacks: 1 } },
+      { id: 'vive-attaque', name: 'Vive-Attaque', weight: 30, intent: 'attaque', pokeType: 'normal', damage: 5, hits: 2 },
+      { id: 'bourdon', name: 'Bourdon', weight: 25, intent: 'attaque', pokeType: 'insecte', damage: 13 },
+      { id: 'lumiqueue', name: 'Lumiqueue', weight: 10, intent: 'boost', selfStatus: { status: 'attaque', stacks: 2 } },
+    ],
+  },
+  {
+    id: 'lumivole', name: 'Lumivole', dex: 314, types: ['insecte'], hp: [52, 52],
+    moves: [
+      { id: 'coup-d-main', name: "Coup d'Main", weight: 30, intent: 'boost', ally: true, selfStatus: { status: 'attaque', stacks: 2 } },
+      { id: 'mur-lumiere', name: 'Mur Lumière', weight: 30, intent: 'defense', ally: true, block: 12 },
+      { id: 'aromatherapie', name: 'Aromathérapie', weight: 20, intent: 'defense', ally: true, heal: 10 },
+      { id: 'charme', name: 'Charme', weight: 20, intent: 'handicap', playerStatus: { status: 'attaque', stacks: -1 } },
+    ],
+  },
+
   // ——— Forêt de Vestigion (Sinnoh) ———
   {
     id: 'cheniti', name: 'Cheniti', dex: 412, types: ['insecte'], hp: [12, 16],

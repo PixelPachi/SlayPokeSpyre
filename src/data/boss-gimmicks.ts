@@ -77,6 +77,10 @@ const SPECS: Record<string, Spec> = {
     gimmick: { id: 'teravolt', name: 'Téra-Voltage', text: 'Ses attaques ignorent la moitié de ta Protection.' },
     moves: [{ id: 'foudre-fusion', name: 'Foudre Fusion', weight: 25, intent: 'attaque', pokeType: 'electrik', damage: 22, pierce: true, signature: true }],
   },
+  reshiram: {
+    gimmick: { id: 'turbobrasier', name: 'Turbo Brasier', text: 'Ses attaques ignorent la moitié de ta Protection.' },
+    moves: [{ id: 'flamme-fusion', name: 'Flamme Fusion', weight: 25, intent: 'attaque', pokeType: 'feu', damage: 22, pierce: true, signature: true, playerStatus: { status: 'brulure', stacks: 2 } }],
+  },
   'dialga-primal': {
     gimmick: { id: 'distorsion', name: 'Distorsion du Temps', text: 'À partir du 3e tour, le temps se fige : tu as 1 PA de moins jusqu’à la fin du combat. Après Hurle-Temps, tu as 2 PA de moins au tour suivant.' },
     moves: [],

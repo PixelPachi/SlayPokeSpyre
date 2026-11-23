@@ -392,7 +392,6 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (!r.victory) return endRun(run, false);
       if (run.zenFights > 0 && --run.zenFights === 0) run.relics = run.relics.filter((id) => id !== 'encens-zen'); // l'Encens Zen s'est consumé
       if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
-      if (run.relics.includes('grelot-coque')) run.heal(6);
       run.shiniesMet += r.shinies;
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'combat') run.combatsWon++;

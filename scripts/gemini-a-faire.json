@@ -2,6 +2,22 @@
   "_note": "Illustrations à générer avec Gemini. « pokemon » : avec le Pokémon du personnage (gabarit spsTplP) ; « sans » : sans Pokémon (gabarit spsTpl). Fichiers : <perso>-<slug> → illustrations/<perso>/<slug>.webp, carte-<slug> → illustrations/<slug>.webp (arts.py). Retirer l'artName de la carte une fois l'image installée.",
   "cartes_sans_illustration": [],
   "cartes_qui_empruntent": [],
-  "attaques_ennemies": [],
+  "attaques_ennemies": [
+    [
+      "carte-flamme-fusion",
+      "sans",
+      "Flamme Fusion : énorme sphère de feu blanc et bleu qui tombe du ciel"
+    ],
+    [
+      "carte-lumiqueue",
+      "sans",
+      "Lumiqueue : traînée de lumière jaune de luciole"
+    ],
+    [
+      "carte-aromatherapie",
+      "sans",
+      "Aromathérapie : nuage parfumé de pétales pastel"
+    ]
+  ],
   "optionnel": []
 }

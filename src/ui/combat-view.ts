@@ -346,8 +346,8 @@ export class CombatView {
       tip += ` : attaque ${m.pokeType ? TYPE_LABELS[m.pokeType] : ''} de ${label} dégâts`;
       if (m.playerStatus) tip += ` et ${m.playerStatus.stacks} ${STATUS_INFO[m.playerStatus.status].label}`;
     } else if (m.intent === 'defense') {
-      label = `${m.block}`;
-      tip += ` : gagne ${m.block} Protection`;
+      label = m.block ? `${m.block}` : m.heal ? `+${m.heal}` : '';
+      tip += m.block ? ` : gagne ${m.block} Protection` : m.heal ? ` : récupère ${m.heal} PV` : '';
     } else if (m.intent === 'handicap' && m.playerStatus) {
       tip += ` : t'applique ${m.playerStatus.stacks} ${STATUS_INFO[m.playerStatus.status].label}`;
     } else if (m.intent === 'boost') {
@@ -356,6 +356,9 @@ export class CombatView {
     } else if (m.intent === 'recharge') {
       tip += ' : ne peut pas agir ce tour-ci. Profites-en !';
     }
+    // Soutien (Lumivole) : l'effet va à un allié
+    const mate = m.ally ? this.combat.aliveEnemies().find((x) => x.uid !== e.uid) : undefined;
+    if (mate) { tip = tip.replace('gagne', `donne à ${mate.name}`).replace('récupère', `soigne ${mate.name} de`).replace('se renforce', `renforce ${mate.name}`); label = `${label} → ${mate.name}`; }
     const color = m.pokeType ? TYPE_COLORS[m.pokeType] : '#888';
     return `
       <div class="intent intent-${m.intent}" data-tip="${tip}" style="--tc:${color}">
@@ -567,7 +570,7 @@ export class CombatView {
     f.innerHTML = `${text}${reason ? `<small>${reason}</small>` : ''}`;
     const k = s.width / this.root.offsetWidth || 1;
     f.style.left = `${(r.left - s.left + r.width / 2) / k}px`;
-    f.style.top = `${(r.top - s.top) / k - 6 - this.fx.querySelectorAll('.energy-float').length * 26}px`;
+    f.style.top = `${(r.top - s.top) / k - 6 - this.fx.querySelectorAll('.energy-float').length * 48}px`;
     this.fx.appendChild(f);
     setTimeout(() => f.remove(), 1500);
   }

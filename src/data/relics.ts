@@ -182,7 +182,7 @@ const RELICS: RelicDef[] = [
   { id: 'bandeau-muscle', name: 'Bandeau Muscle', sprite: 'muscle-band', rarity: 'commun', owner: 'commun',
     text: 'Commence chaque combat avec Attaque +1.' },
   { id: 'grelot-coque', name: 'Grelot Coque', sprite: 'shell-bell', rarity: 'commun', owner: 'commun',
-    text: 'À la fin de chaque combat, récupère 6 PV.' },
+    text: 'Chaque fois que tu joues une carte Attaque, récupère 1 PV.' },
   { id: 'piece-rune', name: 'Pièce Rune', sprite: 'amulet-coin', rarity: 'commun', owner: 'commun',
     text: 'Tu gagnes 50 % de Pokédollars en plus après les combats.' },
   { id: 'casque-brut', name: 'Casque Brut', sprite: 'rocky-helmet', rarity: 'peu-commun', owner: 'commun',

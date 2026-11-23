@@ -170,6 +170,16 @@ export class Run {
     this.map = generateMap(this.rng);
   }
 
+  /** Gardien de la zone pour cette run : le gardien habituel ou un autre possible (Reshiram à la Tour Dragospire…). */
+  get bossId(): string {
+    const z = this.zone;
+    const all = [z.boss, ...(z.altBosses ?? [])];
+    if (all.length === 1) return z.boss;
+    let h = 0;
+    for (const ch of `${this.seed}:${z.id}`) h = (h * 31 + ch.charCodeAt(0)) | 0;
+    return all[Math.abs(h) % all.length];
+  }
+
   /** Étage de la tour, compté depuis la base (16 étages par acte, gardien compris). */
   get floor(): number {
     if (this.act === LAST_ACT) return (this.act - 1) * (MAP_ROWS + 1) + this.summitStep;
@@ -417,7 +427,7 @@ export class Run {
   }
 
   encounter(type: 'combat' | 'elite' | 'boss'): string[] {
-    if (type === 'boss') return [this.zone.boss];
+    if (type === 'boss') return this.bossId.split('+');
     if (type === 'elite') {
       const met = this.elitesMet ?? (this.elitesMet = []);
       const fresh = this.zone.elites.filter((g) => !met.includes(g.join('+')));

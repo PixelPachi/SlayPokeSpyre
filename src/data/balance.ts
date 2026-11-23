@@ -20,7 +20,7 @@ const TUNE: Record<string, { hp?: number; dmg?: number; st?: number }> = {
   rhinocorne: { dmg: 0.9 },
   mackogneur: { dmg: 0.9 }, tranchodon: { dmg: 0.9 }, maganon: { hp: 0.85, dmg: 0.85 }, drattak: { hp: 0.85, dmg: 0.85 },
   dracolosse: { hp: 0.9, dmg: 0.85 }, tyranocif: { hp: 0.7, dmg: 0.76 },
-  rayquaza: { hp: 0.8, dmg: 0.75 }, heatran: { hp: 0.6, dmg: 0.62, st: 0.5 }, zekrom: { hp: 0.75, dmg: 0.75 },
+  rayquaza: { hp: 0.8, dmg: 0.75 }, heatran: { hp: 0.6, dmg: 0.62, st: 0.5 }, zekrom: { hp: 0.75, dmg: 0.75 }, reshiram: { hp: 0.75, dmg: 0.75 },
 };
 
 for (const [id, t] of Object.entries(TUNE)) {

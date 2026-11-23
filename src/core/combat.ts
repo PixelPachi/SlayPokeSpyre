@@ -564,6 +564,8 @@ export class Combat {
       if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
+    // Grelot Coque : chaque carte Attaque jouée soigne 1 PV
+    if (d.category === 'attaque' && this.has('grelot-coque') && this.phase === 'joueur') this.healPlayer(1);
     this.cardsThisTurn++;
     if (this.phase === 'joueur' && this.cardsThisTurn >= 5 && this.bossAlive('decharge')) {
       this.events.push({ type: 'player-move', name: 'Décharge !' });
@@ -663,8 +665,12 @@ export class Combat {
         e.form = m.pokeType;
         this.events.push({ type: 'enemy-move', uid, name: `Arceus devient de type ${TYPE_NAMES[m.pokeType] ?? m.pokeType} !` });
       }
-      if (m.block) this.gainBlock(e, uid, m.block);
-      if (m.heal) this.healEnemy(e, m.heal);
+      // Soutien (Lumivole) : la Protection, le soin et le bonus vont à un allié encore debout
+      const mate = m.ally ? this.aliveEnemies().find((x) => x.uid !== uid) : undefined;
+      const sup = mate ?? e, supUid = mate ? mate.uid : uid;
+      if (mate) this.events.push({ type: 'enemy-move', uid: mate.uid, name: `Soutenu par ${e.name} !` });
+      if (m.block) this.gainBlock(sup, supUid, m.block);
+      if (m.heal) this.healEnemy(sup, m.heal);
       const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
       if (m.escalate) e.flags[m.id] = (e.flags[m.id] ?? 0) + 1;
       if (m.damage !== undefined) {
@@ -686,7 +692,7 @@ export class Combat {
           amount = Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre')));
           if (this.resists.has(m.pokeType ?? 'normal')) amount = Math.floor(amount / 2);
           // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
-          const hidden = m.pierce ? this.player.block : this.gimmickOf(e) === 'teravolt' ? Math.ceil(this.player.block / 2) : 0;
+          const hidden = m.pierce ? this.player.block : (this.gimmickOf(e) === 'teravolt' || this.gimmickOf(e) === 'turbobrasier') ? Math.ceil(this.player.block / 2) : 0;
           this.player.block -= hidden;
           this.dealDamage(this.player, 'player', amount, effectiveness);
           this.player.block += hidden;
@@ -710,7 +716,7 @@ export class Combat {
         if (m.playerStatus.status === 'vampigraine') this.seedSource = uid; // c'est lui qui se soignera
         this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
       }
-      if (m.selfStatus) this.addStatus(e, uid, m.selfStatus.status, m.selfStatus.stacks);
+      if (m.selfStatus) this.addStatus(sup, supUid, m.selfStatus.status, m.selfStatus.stacks);
       if (m.addCards && this.phase === 'ennemi') this.addBossCards(m.addCards.id, m.addCards.count, m.addCards.to);
       if (m.discard && this.phase === 'ennemi') this.discardRandom(m.discard);
       if (m.summon) this.summon(m.summon.id, m.summon.max);

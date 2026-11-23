@@ -205,6 +205,8 @@ export interface EnemyMove {
   addCards?: { id: string; count: number; to: 'pioche' | 'defausse' | 'main' };
   /** Ignore la Protection du joueur. */
   pierce?: boolean;
+  /** Protection, soin et statut sur soi vont à un allié encore debout (Lumivole soutient Muciole). */
+  ally?: boolean;
   /** Appelle un allié (id d'ennemi), au plus `max` en même temps. */
   summon?: { id: string; max: number };
   /** Défausse des cartes au hasard de la main du joueur. */
@@ -221,7 +223,7 @@ export interface EnemyMove {
 
 export type GimmickId =
   | 'venin-tenace' | 'cuirasse' | 'ailes' | 'reine' | 'boule-de-neige' | 'clair-de-lune' | 'regard-royal' | 'sol-brulant'
-  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'distorsion' | 'fantome-inconnu' | 'miroir-originel';
+  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'turbobrasier' | 'distorsion' | 'fantome-inconnu' | 'miroir-originel';
 
 export interface EnemyDef {
   id: string;
