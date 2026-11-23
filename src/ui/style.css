@@ -1406,3 +1406,41 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .carpet-bottom { align-items: center; }
 .carpet-bottom .choice.remove { max-width: 230px; }
 .bag-full { font-style: normal; font-size: 12px; color: #fff; background: #c0392b; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+
+/* ——— Tapis du Marché Kecleon : tapis tissé (motifs, bordure dorée, franges) ——— */
+.shop-scene:not(.dark) .carpet {
+  position: relative; overflow: visible; border-radius: 6px; border: 0; outline: 0;
+  padding: 26px 40px 26px;
+  background:
+    radial-gradient(circle at 50% 50%, #0000 0 34%, #0000 34%),
+    repeating-linear-gradient(45deg, #ffffff07 0 2px, #0000 2px 14px),
+    repeating-linear-gradient(-45deg, #00000012 0 2px, #0000 2px 14px),
+    radial-gradient(ellipse at 50% 50%, #a32a36 0%, #7c1c28 62%, #5a1019 100%);
+  box-shadow:
+    inset 0 0 0 6px #5a1019, inset 0 0 0 10px #e3b85c, inset 0 0 0 13px #5a1019,
+    inset 0 0 0 22px #1f5a63, inset 0 0 0 25px #e3b85c, inset 0 0 0 28px #5a1019,
+    0 22px 44px #000b;
+}
+/* frise de losanges dans la bordure */
+.shop-scene:not(.dark) .carpet::before {
+  content: ''; position: absolute; inset: 13px; pointer-events: none; border-radius: 3px;
+  background:
+    linear-gradient(#0000 0 0) padding-box,
+    repeating-linear-gradient(90deg, #f3d27a 0 4px, #0000 4px 16px) top / 100% 3px no-repeat,
+    repeating-linear-gradient(90deg, #f3d27a 0 4px, #0000 4px 16px) bottom / 100% 3px no-repeat;
+  -webkit-mask: linear-gradient(#000 0 0);
+  opacity: .7;
+}
+/* franges de laine à gauche et à droite */
+.shop-scene:not(.dark) .carpet::after {
+  content: ''; position: absolute; top: 18px; bottom: 18px; left: -16px; right: -16px; z-index: -1; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, #f1dfb1 0 3px, #c9ad72 3px 5px, #0000 5px 8px) left / 18px 100% no-repeat,
+    repeating-linear-gradient(0deg, #f1dfb1 0 3px, #c9ad72 3px 5px, #0000 5px 8px) right / 18px 100% no-repeat;
+}
+.shop-scene:not(.dark) .carpet-head h2 { color: #ffe2a0; letter-spacing: .5px; }
+.shop-scene:not(.dark) .carpet-head { position: relative; padding-bottom: 8px; margin-bottom: 10px; }
+.shop-scene:not(.dark) .carpet-head::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: 0; height: 2px;
+  background: linear-gradient(90deg, #0000, #e3b85c, #0000); }
+.shop-scene:not(.dark) .shop-tile { background: #3a0c13aa; border-color: #e3b85c55; }
+.shop-scene:not(.dark) .carpet-bottom .choice.remove { background: #3a0c13cc; border-color: #e3b85c77; }
