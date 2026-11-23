@@ -26,6 +26,8 @@ export interface SkinDef {
   firstCard?: string;
   /** Condition en plus : mettre K.O. N Pokémon d'un type (toutes runs confondues). */
   kills?: { type: PokeType; goal: number };
+  /** Types du Pokémon avec ce skin (remplacent les siens). */
+  types?: PokeType[];
   /** Peut obtenir toutes les cartes de type Spectre du jeu. */
   spectreCards?: boolean;
   /** Cartes ajoutées au deck de départ. */
@@ -54,6 +56,10 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
     goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 25 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',
     kills: { type: 'poison', goal: 25 }, extraCards: ['vip-catalyse'], relic: 'plaque-toxik',
+  }, {
+    id: 'tisserand', name: 'Tisserand de Soie Astrale', stat: 'bosses', goal: 1, bosses: [], kills: { type: 'psy', goal: 25 }, dex: [495, 496, 497],
+    goalText: 'Mettre K.O. 25 Pokémon de type Psy en jouant Vipélierre. Il devient Psy/Ténèbres, ses cartes peuvent porter plusieurs enchantements, il commence avec Permucœur (enchante une carte de ta main pour la run) et le Nœud Destin à la place du Grain Miracle (tisse une carte au Centre Pokémon).',
+    types: ['psy', 'tenebres'], extraCards: ['vip-permucoeur'], relic: 'noeud-destin',
   }],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {

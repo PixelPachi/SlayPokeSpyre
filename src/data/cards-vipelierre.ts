@@ -86,6 +86,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('tempete-florale', 'Tempête Florale', 'plante', 'attaque', 'rare', 2, 'tous', [dmg(10), st('defense', -1, 'soi')], { effects: [dmg(14), st('defense', -1, 'soi')] }),
   c('synthese', 'Synthèse', 'plante', 'technique', 'rare', 1, 'soi', [heal(10)], { effects: [heal(15)] }, ['epuisee']),
   c('essorage', 'Essorage', 'normal', 'technique', 'rare', 2, 'ennemi', [st('ligote', 1), st('vampigraine', 3)], { cost: 1 }),
+  c('permucoeur', 'Permucœur', 'psy', 'technique', 'depart', 1, 'soi', [{ kind: 'permucoeur' }], { cost: 0 }, ['epuisee']),
   c('catalyse', 'Catalyse', 'poison', 'technique', 'depart', 1, 'ennemi', [{ kind: 'multiplie-statut', status: 'poison', mult: 2 }], { cost: 0 }, ['epuisee']),
   c('peau-dure', 'Peau Dure', 'plante', 'talent', 'peu-commune', 1, 'soi', [power('peau-dure', 2)], { effects: [power('peau-dure', 3)] }),
   c('plenitude', 'Plénitude', 'psy', 'technique', 'rare', 1, 'soi', [st('attaque', -2, 'soi'), st('defense', -2, 'soi')], { cost: 0 }, ['epuisee']),

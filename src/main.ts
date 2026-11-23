@@ -298,6 +298,7 @@ function startRun(character: CharacterId): void {
   if (params.get('noeud') === 'pension') { clear(); return renderPension(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'marche-noir') { clear(); return renderBlackMarket(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'ct') { clear(); return renderTmShop(screen, run, () => showMap(run)); }
+  if (params.get('noeud') === 'centre') { clear(); return renderCentre(screen, run, () => showMap(run)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
   // Début de run : Grodoudou et Pijako accueillent le joueur et lui proposent leur aide
   if (run.act === 1 && !params.get('combat') && !params.get('boutique') && !params.has('noeud') && !params.get('fin')) {

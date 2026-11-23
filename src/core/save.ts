@@ -67,7 +67,7 @@ export function skinProgress(s: SaveData, c: CharacterId, skin: SkinDef): [numbe
 /** Détail lisible de la progression d'un skin (gardiens et K.O. par type). */
 export function skinDetail(s: SaveData, c: CharacterId, skin: SkinDef): string {
   const parts: string[] = [];
-  if (skin.bosses) parts.push(`gardiens ${skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length}/${skin.bosses.length}`);
+  if (skin.bosses?.length) parts.push(`gardiens ${skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length}/${skin.bosses.length}`);
   if (skin.kills) parts.push(`K.O. ${Math.min(skin.kills.goal, statOf(s, c, `ko-${skin.kills.type}`))}/${skin.kills.goal}`);
   if (!parts.length) { const [n, g] = skinProgress(s, c, skin); return `${n}/${g}`; }
   return parts.join(', ');

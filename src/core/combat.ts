@@ -6,7 +6,7 @@ import { Rng } from './rng';
 import {
   type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier,
 } from './types';
-import { CARD_DEFS, cardDef, enchantId, rollEnchant } from '../data/cards';
+import { CARD_DEFS, cardDef, ENCHANTS, enchantId, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { primordialTypes, skinDef } from '../data/skins';
 import { ENEMY_DEFS } from '../data/enemies';
@@ -239,6 +239,7 @@ export class Combat {
     // Talents de départ
     if (ch.id === 'riolu') this.gainAura(3);
     this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
+    this.weaver = ch.id === 'vipelierre' && opts.skin === 'tisserand';
     // Intimidation (Caninos) ; le Chien de la Lanterne a Feu des Âmes à la place
     if (ch.id === 'caninos' && !this.soulDog) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
@@ -469,6 +470,10 @@ export class Combat {
   alchemist = false;
   /** Skin Chien de la Lanterne (Caninos) : chaque pioche pendant son tour inflige 12 dégâts à tous les ennemis. */
   soulDog = false;
+  /** Skin Tisserand de Soie Astrale (Vipélierre) : une carte peut porter plusieurs enchantements. */
+  weaver = false;
+  /** Enchantements faits en combat (Permucœur), à reporter dans le deck de la run. */
+  enchantedCards: { uid: number; defId: string }[] = [];
   /** Pioche de la main du tour en cours (ne déclenche pas Feu des Âmes). */
   private handDraw = false;
   /** Le Bébé n'enrage sa mère qu'une fois par combat. */
@@ -1108,6 +1113,24 @@ export class Combat {
       case 'invocation':
         this.invoke(eff.amount);
         return;
+      case 'permucoeur': {
+        // une autre carte de la main, enchantable (déjà enchantée seulement pour le Tisserand)
+        const options = this.hand.filter((c) => {
+          const cd = this.def(c);
+          if (c.defId === d.id || cd.category === 'statut' || cd.keywords?.includes('injouable')) return false;
+          if (cd.enchant && !this.weaver) return false;
+          return !!rollEnchant(cd, () => 0.5, cd.enchants ?? []);
+        });
+        if (!options.length) return;
+        const card = this.rng.pick(options);
+        const cd = this.def(card);
+        const k = rollEnchant(cd, () => this.rng.next(), cd.enchants ?? []);
+        if (!k) return;
+        card.defId = enchantId(k, card.defId);
+        this.enchantedCards.push({ uid: card.uid, defId: card.defId });
+        this.events.push({ type: 'player-move', name: `Permucœur : ${cd.name} devient ${ENCHANTS[k].name} !` });
+        return;
+      }
       case 'multiplie-statut': {
         const t = target;
         const n = t?.statuses[eff.status] ?? 0;

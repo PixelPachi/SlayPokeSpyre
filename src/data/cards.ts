@@ -1,6 +1,7 @@
 // Toutes les cartes du jeu. Ajouter une carte = ajouter une entrée ici (aucun code à écrire).
 // Règle du GDD : la plupart des cartes portent le nom d'une capacité que le Pokémon peut apprendre dans les jeux.
 import type { CardDef } from '../core/model';
+import { weaveDef } from './tissage';
 import { QUELORIOR_CARDS } from './cards-quelorior';
 import { copyDef, isCopy } from './copies';
 import { VIPELIERRE_CARDS } from './cards-vipelierre';
@@ -193,8 +194,8 @@ export const ENCHANTS: Record<string, { name: string; text: string; rarity?: Enc
 export const ENCHANT_ODDS: Record<EnchantRarity, number> = { commun: 0.85, rare: 0.13, legendaire: 0.02 };
 
 /** Tire un enchantement qui convient à la carte : les rares et légendaires sont bien plus rares. */
-export function rollEnchant(d: CardDef, rand: () => number): string | null {
-  const ok = Object.keys(ENCHANTS).filter((k) => ENCHANTS[k].ok(d));
+export function rollEnchant(d: CardDef, rand: () => number, exclude: string[] = []): string | null {
+  const ok = Object.keys(ENCHANTS).filter((k) => ENCHANTS[k].ok(d) && !exclude.includes(k));
   if (!ok.length) return null;
   const x = rand();
   const want: EnchantRarity = x < ENCHANT_ODDS.legendaire ? 'legendaire' : x < ENCHANT_ODDS.legendaire + ENCHANT_ODDS.rare ? 'rare' : 'commun';
@@ -215,9 +216,11 @@ export function cardDef(defId: string, upgraded = false): CardDef {
     const [, k, ...rest] = defId.split(':');
     const inner = cardDef(rest.join(':'), upgraded);
     const e = ENCHANTS[k];
-    return e ? { ...e.apply(inner), id: defId, name: inner.name, artName: inner.artName ?? inner.name.replace(/\+$/, ''), enchant: k } : inner;
+    const list = [...(inner.enchants ?? (inner.enchant ? [inner.enchant] : [])), k];
+    return e ? { ...e.apply(inner), id: defId, name: inner.name, artName: inner.artName ?? inner.name.replace(/\+$/, ''), enchant: k, enchants: list } : inner;
   }
   if (defId.startsWith('fusion:')) return fusionDef(defId, upgraded);
+  if (defId.startsWith('tissage:')) { const w = weaveDef(defId, upgraded); if (w) return w; }
   if (isCopy(defId)) { const cp = copyDef(defId, upgraded); if (cp) return cp; }
   const base = CARD_DEFS[defId];
   if (!base) throw new Error(`Carte inconnue : ${defId}`);

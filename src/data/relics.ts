@@ -65,6 +65,8 @@ const RELICS: RelicDef[] = [
     text: 'Tes attaques de type Plante infligent 2 dégâts de plus.' },
   { id: 'herbe-blanche', name: 'Herbe Blanche', sprite: 'white-herb', rarity: 'peu-commun', owner: 'vipelierre', free: true,
     text: 'Commence chaque combat avec Attaque −1 et Défense −1… que Contestation transforme en +1 et +1.' },
+  { id: 'noeud-destin', name: 'Nœud Destin', sprite: 'destiny-knot', rarity: 'quete', owner: 'vipelierre', free: true,
+    text: 'Tisserand : au Centre Pokémon, tu peux tisser une nouvelle carte en choisissant deux effets (trois propositions pour chacun).' },
   { id: 'lanterne-bleue', name: 'Lanterne Bleue', sprite: 'lanterne-bleue', rarity: 'quete', owner: 'caninos', free: true,
     text: 'Chien de la Lanterne : 3 cartes Âme (0 PA, pioche 2, Épuisée) rejoignent ta pioche au début de chaque combat.' },
   { id: 'plaque-toxik', name: 'Plaque Toxik', sprite: 'toxic-plate', rarity: 'quete', owner: 'vipelierre', free: true,

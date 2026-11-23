@@ -177,11 +177,16 @@ export class Run {
   }
 
   /** Stade d'évolution actuel (le Pokémon évolue au début de certains actes). */
+  /** Tisserand de Soie Astrale : plusieurs enchantements par carte. */
+  get weaver(): boolean { return this.character === 'vipelierre' && this.skin === 'tisserand'; }
+
   get form(): Form {
     const ch = CHARACTERS[this.character];
     const evo = this.evolutions.filter((e) => e.act <= this.act).pop();
     const f = evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
-    return skinDef(this.character, this.skin)?.addDragon ? { ...f, types: primordialTypes(f.types) } : f;
+    const sk = skinDef(this.character, this.skin);
+    if (sk?.types) return { ...f, types: [...sk.types] };
+    return sk?.addDragon ? { ...f, types: primordialTypes(f.types) } : f;
   }
 
   /** Évolution qui vient d'avoir lieu en entrant dans cet acte. */
@@ -314,9 +319,9 @@ export class Run {
   /** Enchante une carte du deck (enchantement au hasard parmi ceux qui lui conviennent). Renvoie l'enchantement. */
   enchantCard(uid: number): string | null {
     const c = this.deck.find((x) => x.uid === uid);
-    if (!c || c.defId.startsWith('ench:')) return null;
+    if (!c || (c.defId.startsWith('ench:') && !this.weaver)) return null;
     const d = cardDef(c.defId, c.upgraded);
-    const k = rollEnchant(d, () => this.rng.next());
+    const k = rollEnchant(d, () => this.rng.next(), d.enchants ?? []);
     if (!k) return null;
     c.defId = enchantId(k, c.defId);
     return k;

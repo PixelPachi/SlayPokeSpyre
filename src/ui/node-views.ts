@@ -1,4 +1,5 @@
 import { welcomeEvent } from '../data/events-accueil';
+import { WEAVE_FX, weaveChoices, weaveId } from '../data/tissage';
 import { ZONE_BG } from '../data/zone-bg';
 import { babySprite, skinSprite } from '../data/skins';
 import { sfx } from '../audio/audio';
@@ -12,6 +13,7 @@ import { CHARACTERS } from '../data/characters';
 import { EVENTS, type EventFight, type EventPick, type GameEvent } from '../data/events';
 import { TAROT_EVENTS } from '../data/events-tarot';
 import { renderCard } from './card';
+import { cardText } from './labels';
 import { ENCHANTS } from '../data/cards';
 import { MAX_BERRIES, berryPrice } from '../data/berries';
 import { TYPE_LABELS } from '../core/types';
@@ -140,7 +142,33 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
     <div class="choice-row">
       <button class="choice heal" ${run.relics.includes('cendre-sacree') ? 'disabled' : ''}><b>Se soigner</b><span>${run.relics.includes('cendre-sacree') ? 'Impossible : la Cendre Sacrée t’en empêche' : `Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)`}</span></button>
       <button class="choice upgrade" ${upgradable.length ? '' : 'disabled'}><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
+      ${run.relics.includes('noeud-destin') ? '<button class="choice weave"><b>Tisser une carte</b><span>Nœud Destin : crée une carte en choisissant deux effets</span></button>' : ''}
     </div>`, 'centre');
+  // Nœud Destin : premier effet parmi 3, second parmi 3 autres, puis la carte rejoint le deck
+  root.querySelector('.weave')?.addEventListener('click', () => {
+    const first = weaveChoices(() => run.rng.next());
+    const pickStep = (title: string, keys: string[], onPick: (k: string) => void) => {
+      root.querySelector('.weave-layer')?.remove();
+      const layer = document.createElement('div');
+      layer.className = 'weave-layer';
+      layer.innerHTML = `<div class="weave-box"><h2>${title}</h2><div class="choice-row">${keys.map((k) => {
+        const e = WEAVE_FX[k];
+        const txt = cardText({ ...cardDef(weaveId(k, k)), effects: [e.make(false)] }, null, null);
+        return `<button class="choice" data-k="${k}"><b>${e.name}</b><span>${txt}</span></button>`;
+      }).join('')}</div></div>`;
+      root.querySelector('.node-screen')!.appendChild(layer);
+      layer.querySelectorAll<HTMLElement>('[data-k]').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.k!)));
+    };
+    pickStep('Premier fil : choisis un effet', first, (a) => {
+      pickStep('Second fil : choisis un autre effet', weaveChoices(() => run.rng.next(), [a]), (b) => {
+        const id = weaveId(a, b);
+        run.addCard(id);
+        const layer = root.querySelector('.weave-layer')!;
+        layer.innerHTML = `<div class="weave-box"><h2>Le Nœud Destin tisse une nouvelle carte !</h2><div class="weave-result">${renderCard(cardDef(id))}</div><button class="btn primary weave-ok">Ajouter au deck</button></div>`;
+        layer.querySelector('.weave-ok')!.addEventListener('click', done);
+      });
+    });
+  });
   bindDeck(root, run);
   root.querySelector('.heal')!.addEventListener('click', () => {
     run.heal(heal);
@@ -442,7 +470,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   const results: string[] = [];
   const doPick = (p: EventPick, left: number) => {
     const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise')
-      : p.pick === 'enchanter' ? run.deck.filter((c) => { const d = cardDef(c.defId, c.upgraded); return !d.enchant && d.category !== 'statut' && !d.keywords?.includes('injouable'); })
+      : p.pick === 'enchanter' ? run.deck.filter((c) => { const d = cardDef(c.defId, c.upgraded); return (!d.enchant || run.weaver) && d.category !== 'statut' && !d.keywords?.includes('injouable'); })
       : run.deck;
     if (!cards.length) return showResult([...results, 'Aucune carte ne convient.'].join(' '));
     openDeckOverlay(root, {

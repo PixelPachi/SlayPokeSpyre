@@ -140,6 +140,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
       case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;
       case 'bebe-protection': parts.push(`Le Bébé gagne <b>${e.amount}</b> Protection.`); break;
+      case 'permucoeur': parts.push('Enchante au hasard une autre carte de ta main, pour le reste de la run.'); break;
       case 'multiplie-statut': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} le ${STATUS_INFO[e.status].label} de la cible.`); break;
       case 'recharge': parts.push(`Au prochain tour, tu as <b>${e.amount}</b> PA de moins.`); break;
       case 'gribouille': parts.push(`Copie la capacité que prépare l'ennemi${e.enchant ? ', <b>enchantée</b>' : ''} : elle rejoint ton deck pour la run.`); break;
