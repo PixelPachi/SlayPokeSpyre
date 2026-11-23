@@ -206,10 +206,12 @@ export class Combat {
     this.relics = new Set(opts.relics ?? []);
     this.boss = !!opts.boss;
     // Méga-Évolution : la Méga-Gemme tenue (et le bon stade) transforme le Pokémon pour tout le combat
-    const mega = ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
+    // Kangourex ne méga-évolue pas avec un skin (sauf chromatique)
+    const megaLocked = ch.id === 'kangourex' && !!opts.skin && opts.skin !== 'shiny';
+    const mega = !megaLocked && ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
     if (ch.id === 'kangourex') {
       const hp = 8 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
-      this.player.familiar = { hp, maxHp: hp, power: 3 + (this.relics.has('grelot-zen') ? 2 : 0), block: 0, mega: !!opts.mega || !!mega };
+      this.player.familiar = { hp, maxHp: hp, power: 3 + (this.relics.has('grelot-zen') ? 2 : 0), block: 0, mega: (!!opts.mega && !megaLocked) || !!mega };
     }
     if (mega) {
       this.player.name = mega.name;

@@ -67,7 +67,7 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   }],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true }), {
     id: 'oceanique', name: 'Gardien Océanique', stat: 'bosses', goal: 1, bosses: ['roigada'], dex: [115], baby: true,
-    goalText: 'Vaincre le gardien du Puits Ramoloss (Roigada) en jouant Kangourex. Il devient de type Eau, le Corail remplace le Lait Meumeu (le Bébé gagne 3 Protection chaque tour), ses attaques de départ deviennent des Écumes (4 dégâts à tous les ennemis) et il peut obtenir toutes les cartes Eau du jeu.',
+    goalText: 'Vaincre le gardien du Puits Ramoloss (Roigada) en jouant Kangourex. Il devient de type Eau, le Corail remplace le Lait Meumeu (le Bébé gagne 3 Protection chaque tour), ses attaques de départ deviennent des Écumes (4 dégâts à tous les ennemis) et il peut obtenir toutes les cartes Eau du jeu. Pas de Méga-Évolution avec ce skin.',
     types: ['eau'], relic: 'corail', typeCards: ['eau'],
     deck: ['kan-ecume', 'kan-ecume', 'kan-ecume', 'kan-ecume', 'abri', 'abri', 'abri', 'abri', 'kan-coup-main', 'kan-coup-double'],
   }],

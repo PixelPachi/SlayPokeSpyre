@@ -31,3 +31,17 @@ describe('Gardien Océanique', () => {
     expect([...seen].some((id) => cardDef(id).pokeType === 'eau' && cardDef(id).character !== 'kangourex')).toBe(true);
   });
 });
+
+describe('Kangourex skinné : pas de Méga-Évolution (sauf chromatique)', () => {
+  const mk = (skin?: string) => new Combat({ character: 'kangourex', deck: [], enemies: ['onix'], seed: 'MEGA', relics: ['kangourexite'], skin, act: 2 });
+  it('Méga avec le skin normal ou chromatique, pas avec les autres', () => {
+    expect(mk().player.isMega).toBe(true);
+    expect(mk('shiny').player.isMega).toBe(true);
+    expect(mk('oceanique').player.isMega).toBeFalsy();
+    expect(mk('primordial').player.isMega).toBeFalsy();
+  });
+  it('la Kangourexite n’est pas proposée avec un skin', () => {
+    const r = skinRun();
+    expect(r.relicPool()).not.toContain('kangourexite');
+  });
+});

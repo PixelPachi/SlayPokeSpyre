@@ -427,6 +427,7 @@ export class Run {
   /** Objets qu'on peut encore obtenir : communs + ceux du Pokémon débloqués, sans ceux déjà tenus. */
   relicPool(): string[] {
     return allRelics()
+      .filter((r) => !(r.id === 'kangourexite' && this.character === 'kangourex' && this.skin && this.skin !== 'shiny'))
       .filter((r) => r.rarity !== 'depart' && r.rarity !== 'gardien' && r.rarity !== 'quete' && (r.owner === 'commun' || (r.owner === this.character && (r.free || this.unlockedRelics.includes(r.id)))))
       .filter((r) => !this.relics.includes(r.id))
       .map((r) => r.id);
