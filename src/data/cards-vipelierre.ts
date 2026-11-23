@@ -13,7 +13,7 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('pico-defense', 'Pico-Défense', 'plante', 'technique', 'peu-commune', 2, 'soi', [prot(10), st('epine', 3, 'soi')], { effects: [prot(14), st('epine', 5, 'soi')] }),
   c('fouet-lianes', 'Fouet Lianes', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(7)], { effects: [dmg(10)] }),
   c('ligotage', 'Ligotage', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(4), st('ligote', 1)], { effects: [dmg(7), st('ligote', 1)] }),
-  c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)] }),
+  c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)], keywords: [] }, ['epuisee']),
   c('croissance', 'Croissance', 'normal', 'technique', 'commune', 1, 'soi', [st('attaque', -1, 'soi'), prot(3)], { effects: [st('attaque', -1, 'soi'), prot(6)] }),
   c('feuille-magik', 'Feuille Magik', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }, ['conservee']),
   c('mega-sangsue', 'Méga-Sangsue', 'plante', 'attaque', 'commune', 1, 'ennemi', [dmg(6, { drain: true })], { effects: [dmg(9, { drain: true })] }),

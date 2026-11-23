@@ -258,7 +258,7 @@ export class Combat {
     if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
     if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);
     if (this.has('orbe-flamme')) this.addStatus(this.player, 'player', 'brulure', 2);
-    if (this.has('lunettes-sages')) this.relicFired('lunettes-sages', () => this.gainAura(5));
+    if (this.has('lunettes-sages')) this.relicFired('lunettes-sages', () => this.gainAura(5, true));
     if (this.has('herbe-blanche')) this.relicFired('herbe-blanche', () => {
       this.addStatus(this.player, 'player', 'attaque', -1);
       this.addStatus(this.player, 'player', 'defense', -1);
@@ -555,7 +555,7 @@ export class Combat {
     if (d.category === 'technique') for (const e of this.aliveEnemies()) if (this.gimmickOf(e) === 'regard-royal') this.gainBlock(e, e.uid, 3);
     if (d.category === 'technique') {
       this.techsThisTurn++;
-      if (this.has('encens-pur') && this.phase === 'joueur') this.relicFired('encens-pur', () => this.gainAura(2));
+      if (this.has('encens-pur') && this.phase === 'joueur') this.relicFired('encens-pur', () => this.gainAura(2, true));
       if (this.techsThisTurn >= 3 && this.has('spray-gorge') && !this.sprayUsed && this.phase === 'joueur') {
         this.sprayUsed = true;
         this.relicFired('spray-gorge', () => this.changeEnergy(1, 'Spray Gorge'));
@@ -1022,7 +1022,7 @@ export class Combat {
         this.loseHp(p, 'player', eff.amount, 'carte');
         return;
       case 'aura':
-        this.gainAura(eff.amount);
+        this.gainAura(eff.amount, true);
         return;
       case 'meteo':
         this.setField(eff.id, eff.turns);
@@ -1036,7 +1036,7 @@ export class Combat {
         return;
       }
       case 'aura-mult':
-        this.gainAura(p.aura * (eff.amount - 1));
+        this.gainAura(p.aura * (eff.amount - 1), true);
         return;
       case 'soin':
         this.healPlayer(eff.amount);
@@ -1528,8 +1528,9 @@ export class Combat {
     });
   }
 
-  private gainAura(n: number): void {
-    if (this.player.character !== 'riolu' && this.player.character !== 'mew') return;
+  /** `fromCard` : une carte (ou un objet) qui donne de l'Aura en donne à tous les Pokémon, pas seulement à Riolu et Mew. */
+  private gainAura(n: number, fromCard = false): void {
+    if (!fromCard && this.player.character !== 'riolu' && this.player.character !== 'mew') return;
     this.player.aura += n;
     if (this.has('ceinture-noire') && n > 0 && this.ceintureBonus) {
       this.player.aura += 1;

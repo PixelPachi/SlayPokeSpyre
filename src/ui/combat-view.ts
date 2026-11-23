@@ -59,6 +59,8 @@ export class CombatView {
     for (const id of (new URLSearchParams(location.search).get('meteo') ?? '').split(',').filter(Boolean)) this.combat.setField(id as never);
     this.combat.drainEvents();
     saveHooks.encounter?.(this.combat.enemies.map((e) => ({ dex: e.dex, shiny: e.shiny })));
+    // Un chromatique apparaît : son de scintillement, comme dans les jeux
+    if (this.combat.enemies.some((e) => e.shiny)) setTimeout(() => sfx('shiny'), 700);
     // Le décor (fond + particules) reste en place pendant tout le combat : les animations ne redémarrent pas
     const z = run.zone;
     root.style.setProperty('--ground', z.palette[1]);
@@ -289,7 +291,7 @@ export class CombatView {
     // L'Aura de Riolu et Mew est affichée dans son compteur, à côté de l'énergie
     if (isPlayer && this.combat.player.aura > 0 && this.combat.player.character !== 'riolu' && this.combat.player.character !== 'mew') {
       const a = this.combat.player.aura;
-      items.push(`<span class="status aura" data-tip="${this.combat.crimson ? `Aura (Cramoisi) : ta prochaine attaque inflige ${a} Brûlure à sa cible, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.` : `Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.`}">${iconImg('aura')}Aura ${a}</span>`);
+      items.push(`<span class="status aura" data-tip="${this.combat.crimson ? `Aura (Cramoisi) : ta prochaine attaque inflige ${a} Brûlure à sa cible, puis l'Aura retombe à 0.` : `Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0.`}">${iconImg('aura')}Aura ${a}</span>`);
     }
     if (isPlayer) {
       for (const [k, v] of Object.entries(this.combat.player.powers) as [PowerId, number][]) {

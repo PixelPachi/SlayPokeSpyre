@@ -502,7 +502,7 @@ export function sfxType(type: PokeType, power = 1): void {
 }
 
 /** Petits bruitages d'interface et de combat. */
-export function sfx(name: 'coup' | 'protection' | 'soin' | 'ko' | 'statut' | 'baie' | 'clic' | 'victoire' | 'defaite' | 'carte'): void {
+export function sfx(name: 'coup' | 'protection' | 'soin' | 'ko' | 'statut' | 'baie' | 'clic' | 'victoire' | 'defaite' | 'carte' | 'shiny'): void {
   const c = sfxReady();
   if (!c) return;
   const t = c.currentTime + 0.01;
@@ -516,6 +516,12 @@ export function sfx(name: 'coup' | 'protection' | 'soin' | 'ko' | 'statut' | 'ba
     case 'baie': tone(o, t, 600, 0.06, 'square', 0.2); tone(o, t + 0.07, 900, 0.1, 'square', 0.2); break;
     case 'clic': tone(o, t, 900, 0.03, 'square', 0.1); break;
     case 'carte': noise(o, t, 0.06, 0.15, 'bandpass', 3500, { q: 1.5 }); break;
+    // Scintillement d'un Pokémon chromatique : deux éclats aigus puis une pluie d'étincelles
+    case 'shiny':
+      [[2093, 0], [3136, 0.07], [2637, 0.22], [3951, 0.29]].forEach(([f, d]) => { tone(o, t + d, f, 0.16, 'sine', 0.22); tone(o, t + d, f * 2, 0.08, 'triangle', 0.06); });
+      [4186, 3520, 4699, 3951, 5274, 4435].forEach((f, i) => tone(o, t + 0.42 + i * 0.045, f, 0.12, 'sine', 0.09 - i * 0.01));
+      noise(o, t + 0.4, 0.35, 0.05, 'highpass', 6000);
+      break;
     case 'victoire': [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(o, t + i * 0.11, f, i === 5 ? 0.6 : 0.14, 'square', 0.2)); break;
     case 'defaite': [392, 349, 311, 262].forEach((f, i) => tone(o, t + i * 0.22, f, 0.3, 'triangle', 0.3)); break;
   }

@@ -45,7 +45,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('ecume', 'Écume', 'eau', 'attaque', 'depart', 1, 'tous', [dmg(4)], { effects: [dmg(6)] }),
   c('furie', 'Furie', 'normal', 'attaque', 'commune', 1, 'ennemi', [{ kind: 'bebe-furie', bonus: 0 }], { effects: [{ kind: 'bebe-furie', bonus: 1 }] }),
   c('vengeance', 'Vengeance', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(5, { revanche: true, siBebe: 3 })], { effects: [dmg(7, { revanche: true, siBebe: 4 })] }),
-  c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)] }),
+  c('groz-yeux', "Groz'Yeux", 'normal', 'technique', 'commune', 0, 'ennemi', [st('defense', -1), draw(1)], { effects: [st('defense', -2), draw(1)], keywords: [] }, ['epuisee']),
   c('clairvoyance', 'Clairvoyance', 'normal', 'technique', 'commune', 1, 'soi', [draw(2), invoc(2)], { effects: [draw(3), invoc(3)] }),
   c('chant-canon', 'Chant Canon', 'normal', 'attaque', 'commune', 1, 'tous', [dmg(3), bebeAtk()], { effects: [dmg(5), bebeAtk()] }),
   c('retour', 'Retour', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6), invoc(3)], { effects: [dmg(8), invoc(5)] }),
