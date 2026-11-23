@@ -264,7 +264,11 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
       actions: `${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}<button class="btn primary leave">Quitter le marché</button>`,
       carpet: carpetOpen ? carpet : '',
     }), `shop-screen shop-place ${carpetShown ? 'carpet-stay' : ''}`);
-    if (carpetOpen) { const c = root.querySelector<HTMLElement>('.carpet'); if (c) c.scrollTop = carpetScroll; carpetShown = true; } else carpetShown = false;
+    if (carpetOpen) {
+      const c = root.querySelector<HTMLElement>('.carpet');
+      if (c) { c.scrollTop = carpetScroll; if (!c.closest('.dark')) c.style.borderImageSource = `url("${asset('illustrations/tapis-kecleon.webp')}")`; }
+      carpetShown = true;
+    } else carpetShown = false;
     root.querySelector<HTMLElement>('.carpet')?.addEventListener('scroll', (ev) => { carpetScroll = (ev.target as HTMLElement).scrollTop; });
     root.querySelector('.shop-keeper')?.addEventListener('click', () => { carpetOpen = true; draw(); });
     root.querySelector('.shop-stall')?.addEventListener('click', () => { carpetOpen = true; draw(); });

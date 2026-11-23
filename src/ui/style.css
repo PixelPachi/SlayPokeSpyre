@@ -1492,3 +1492,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .field-chip .turns { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #ffffff22; font-size: 13px; }
 /* Fiche de sélection : ce que le skin équipé change */
 .select-sheet .sheet-row.skin-changed { border-left: 3px solid #ffd76a; padding-left: 8px; }
+/* Tapis peint (Gemini) : il remplace le tapis dessiné en CSS */
+.shop-scene:not(.dark) .carpet {
+  background: #6e1822; box-shadow: 0 22px 44px #000b; border-radius: 0;
+  border: 36px solid #6e1822; border-image-slice: 128 fill; border-image-width: 36px; border-image-repeat: stretch;
+  padding: 14px 26px 10px;
+}
+.shop-scene:not(.dark) .carpet::before { display: none; }
