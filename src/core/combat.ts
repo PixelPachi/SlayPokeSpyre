@@ -216,6 +216,7 @@ export class Combat {
     }
     // Skin primordial : gagne le type Dragon (remplace Acier)
     if (skinDef(ch.id, opts.skin)?.addDragon) this.player.types = primordialTypes(this.player.types);
+    this.crimson = ch.id === 'riolu' && opts.skin === 'magma';
     this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
     // Encens Zen (offert par Grodoudou) : les ennemis n'ont qu'1 PV
@@ -373,16 +374,16 @@ export class Combat {
           if (e.facade && this.hasBadStatus()) base *= 2;
           if (e.revanche && p.hpLostEnemyTurn > 0) base *= 2;
           if (e.parSoi) base += (p.statuses[e.parSoi] ?? 0) * (e.parSoiX ?? 1);
-          return base + (e.noAura ? 0 : p.aura * (mult ? mult.amount : 1));
+          return base + (e.noAura || (this.crimson && !mult) ? 0 : p.aura * (mult ? mult.amount : 1));
         }
         case 'degats-aura':
           return p.aura * e.mult;
         case 'degats-pv-perdus':
-          return e.amount + Math.floor((p.maxHp - p.hp) / e.per) + p.aura;
+          return e.amount + Math.floor((p.maxHp - p.hp) / e.per) + (this.crimson ? 0 : p.aura);
         case 'tout-ou-rien':
           return p.hp - 1;
         case 'concentration':
-          return e.amount + p.aura;
+          return e.amount + (this.crimson ? 0 : p.aura);
       }
     }
     return null;
@@ -450,6 +451,8 @@ export class Combat {
   timeRoar = false;
   /** Recharge (Hurle-Temps du joueur) : PA en moins au prochain tour. */
   rechargePa = 0;
+  /** Skin Cramoisi (Riolu) : l'Aura brûle la cible au lieu d'ajouter des dégâts (sauf cartes d'Aura comme Aurasphère). */
+  crimson = false;
   /** Le Bébé n'enrage sa mère qu'une fois par combat. */
   private babyEnraged = false;
 
@@ -820,6 +823,19 @@ export class Combat {
     return this.def(card).keywords?.includes(kw) ?? false;
   }
 
+  /** Cartes dont les dégâts dépendent de l'Aura (Aurasphère, Vibrobscur, cartes qui multiplient l'Aura). */
+  private auraScaling(d: CardDef): boolean {
+    return d.effects.some((e) => e.kind === 'degats-aura' || e.kind === 'aura-mult');
+  }
+
+  /** Bonus d'Aura d'une carte. Skin Cramoisi : l'Aura est consommée et inflige autant de Brûlure aux cibles. */
+  private auraFor(d: CardDef, targets: EnemyState[]): number {
+    if (!this.crimson || this.auraScaling(d)) return this.takeAura();
+    const a = this.takeAura();
+    if (a > 0) for (const t of targets) if (t.hp > 0) this.addStatus(t, t.uid, 'brulure', a);
+    return 0;
+  }
+
   /** L'Aura s'ajoute au premier coup d'une carte, puis retombe à 0 (une seule fois par carte). */
   private takeAura(): number {
     if (this.cardAuraUsed) return 0;
@@ -876,7 +892,7 @@ export class Combat {
           if (!targets.length) break;
           let bonus = 0;
           if (eff.noAura) this.cardAuraUsed = true;
-          else bonus = this.takeAura();
+          else bonus = this.auraFor(d, targets);
           for (const t of targets) {
             let b = eff.contreStatut && hasAnyStatus(t) ? base * 2 : base;
             if (eff.parStatut) b += (t.statuses[eff.parStatut] ?? 0) * (eff.parStatutX ?? 1);
@@ -900,7 +916,7 @@ export class Combat {
       }
       case 'degats-pv-perdus': {
         const t = this.targetsFor(d, target)[0];
-        const base = eff.amount + Math.floor((p.maxHp - p.hp) / eff.per) + this.takeAura();
+        const base = eff.amount + Math.floor((p.maxHp - p.hp) / eff.per) + (t ? this.auraFor(d, [t]) : this.takeAura());
         if (t) this.strike(t, base, d);
         return;
       }
@@ -1150,7 +1166,7 @@ export class Combat {
       case 'concentration': {
         const t = target ?? this.aliveEnemies()[0];
         if (!t) return;
-        const bonus = this.takeAura();
+        const bonus = this.auraFor(d, [t]);
         this.focus = { d, uid: t.uid };
         this.player.statuses.concentration = eff.amount + bonus;
         this.events.push({ type: 'status', target: 'player', status: 'concentration', stacks: eff.amount + bonus });

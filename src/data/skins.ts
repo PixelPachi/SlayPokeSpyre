@@ -41,8 +41,8 @@ const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): 
 
 export const SKINS: Record<CharacterId, SkinDef[]> = {
   riolu: [SHINY_GOAL, {
-    id: 'magma', name: 'Magma', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
-    goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu',
+    id: 'magma', name: 'Cramoisi', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
+    goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).',
   }, primordial('Riolu', [447, 448, 10059])],
   vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497])],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],

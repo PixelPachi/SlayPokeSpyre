@@ -225,7 +225,7 @@ export class CombatView {
         <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : ${p.energy} sur ${p.maxEnergy}. Chaque carte coûte des PA ; ils se rechargent à chaque tour.">
           <span class="energy-num">${p.energy}</span>
         </div>
-        ${p.character === 'riolu' || p.character === 'mew' ? `<div class="aura-counter ${p.aura >= 25 ? 'high' : ''} ${p.aura !== this.lastAura ? 'bump' : ''}" data-tip="<b>Aura : ${p.aura}</b><br>Chaque point d'Aura ajoute 1 dégât à ta prochaine attaque (l'Aura est alors consommée). Tu en gagnes en jouant certaines cartes et en perdant des PV.">
+        ${p.character === 'riolu' || p.character === 'mew' ? `<div class="aura-counter ${p.aura >= 25 ? 'high' : ''} ${p.aura !== this.lastAura ? 'bump' : ''}" data-tip="<b>Aura : ${p.aura}</b><br>${this.combat.crimson ? 'Cramoisi : ta prochaine attaque inflige autant de Brûlure que d’Aura à sa cible (l’Aura est alors consommée). Seules Aurasphère et les cartes d’Aura s’en servent pour les dégâts.' : 'Chaque point d’Aura ajoute 1 dégât à ta prochaine attaque (l’Aura est alors consommée).'} Tu en gagnes en jouant certaines cartes et en perdant des PV.">
           ${iconImg('aura', 'aura-ico')}<span class="aura-num">${p.aura}</span><small>Aura</small>
         </div>` : ''}
         <div class="pile draw ${backUrl(p.character) ? 'has-back' : ''}" ${backUrl(p.character) ? `style="--back:url('${backUrl(p.character)}')"` : ''} data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
@@ -281,7 +281,7 @@ export class CombatView {
     // L'Aura de Riolu et Mew est affichée dans son compteur, à côté de l'énergie
     if (isPlayer && this.combat.player.aura > 0 && this.combat.player.character !== 'riolu' && this.combat.player.character !== 'mew') {
       const a = this.combat.player.aura;
-      items.push(`<span class="status aura" data-tip="Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.">${iconImg('aura')}Aura ${a}</span>`);
+      items.push(`<span class="status aura" data-tip="${this.combat.crimson ? `Aura (Cramoisi) : ta prochaine attaque inflige ${a} Brûlure à sa cible, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.` : `Aura : ta prochaine attaque inflige +${a} dégâts, puis l'Aura retombe à 0. Chaque PV perdu donne 1 Aura.`}">${iconImg('aura')}Aura ${a}</span>`);
     }
     if (isPlayer) {
       for (const [k, v] of Object.entries(this.combat.player.powers) as [PowerId, number][]) {
