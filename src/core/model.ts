@@ -21,6 +21,7 @@ export type StatusId =
   | 'abri' // annule entièrement le prochain coup subi
   | 'ligote' // perd 6 PV par cumul au début du tour ; chaque cumul disparaît au bout de 3 tours
   | 'epine' // inflige X dégâts à l'ennemi qui l'attaque (chaque coup), dure tout le combat
+  | 'clone' // Clonage : Protection persistante, ne disparaît que si elle est cassée
   | 'elan'; // Caninos : +1 dégât par point à toutes ses attaques, divisé par deux à la fin du tour
 
 export type Statuses = Partial<Record<StatusId, number>>;
@@ -47,6 +48,7 @@ export type Effect =
       parStatutX?: number;
       noAura?: boolean; // l'Aura ne s'ajoute pas (et n'est pas consommée)
       parProtection?: boolean; // + la Protection actuelle du lanceur
+      champ?: string; // dégâts doublés si ce champ est actif
       cumul?: number; // chaque utilisation donne +cumul dégâts à toutes les cartes du même nom (pour le combat)
       peurChance?: number; // chance d'appliquer 1 Peur à chaque cible touchée
       recul?: number; // le lanceur perd ce nombre de PV si la cible avait de la Protection
@@ -101,6 +103,9 @@ export type Effect =
   | { kind: 'permucoeur' } // enchante au hasard une carte de la main, pour le reste de la run
   | { kind: 'multiplie-statut'; status: StatusId; mult: number } // multiplie le statut de la cible (Catalyse)
   | { kind: 'recharge'; amount: number } // au prochain tour, X PA de moins
+  | { kind: 'clone'; amount: number } // Protection persistante (ne se dissipe pas en début de tour)
+  | { kind: 'lance-soleil'; amount: number } // X dégâts à tous les ennemis au début du prochain tour (tout de suite au soleil)
+  | { kind: 'affaiblit'; amount: number } // la cible a X Attaque de moins pour ce tour
   | { kind: 'gribouille'; enchant: boolean } // copie la capacité de l'ennemi ciblé : elle rejoint le deck (enchantée si amélioré)
   | { kind: 'invocation'; amount: number } // le Bébé gagne X PV max et X PV ; s'il est K.O., il revient avec X PV
   | { kind: 'bebe-furie'; bonus: number } // le Bébé attaque 1 fois + 1 fois par attaque du Bébé déjà faite ce tour (+ bonus)

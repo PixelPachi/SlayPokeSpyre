@@ -26,6 +26,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   attaque: { label: 'Attaque', color: '#ff9b4a', text: (n) => `${n > 0 ? '+' : ''}${n} dégâts par coup.` },
   defense: { label: 'Défense', color: '#5aa5ff', text: (n) => `${n > 0 ? '+' : ''}${n} Protection par carte.` },
   tenace: { label: 'Tenace', color: '#ffd166', text: () => 'Ne peut pas tomber K.O. avant son prochain tour.' },
+  clone: { label: 'Clone', color: '#c9b8ff', text: (n) => `${n} Protection persistante : elle ne disparaît pas en début de tour, seulement quand elle est cassée.` },
   gel: { label: 'Gel', color: '#9fe3ff', text: (n) => `${n}/3. À 3 Gel, passe son tour (un gardien n'inflige que la moitié de ses dégâts).` },
   concentration: { label: 'Concentration', color: '#ff8a5c', text: (n) => `Au début du prochain tour, inflige ${n} dégâts… si aucun dégât n'est subi d'ici là.` },
   etourdi: { label: 'Étourdi', color: '#c9c9c9', text: () => 'Passe son prochain tour.' },
@@ -87,12 +88,15 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
         if (e.recul) parts.push(`Perd <b class="down">${e.recul}</b> PV si la cible avait de la Protection.`);
         if (e.facade) parts.push('Double si tu as un statut ou une baisse de stat.');
         if (e.revanche) parts.push('Double si tu as perdu des PV au dernier tour ennemi.');
+        if (e.champ) parts.push(`Double si le <b>${e.champ === 'champ-herbu' ? 'Champ Herbu' : e.champ}</b> est actif.`);
         if (e.drain) parts.push('Récupère la moitié des dégâts infligés.');
         if (e.contreStatut) parts.push('Double si la cible a un statut.');
         if (e.parStatut) parts.push(`+${e.parStatutX ?? 1} par ${STATUS_INFO[e.parStatut].label} sur la cible.`);
-        if (e.siBebe) parts.push(`+${e.siBebe} si le Bébé est debout.`);
+        // En combat, le nombre affiché compte déjà le bonus du Bébé
+        if (e.siBebe && dmg === null) parts.push(`+${e.siBebe} si le Bébé est debout.`);
         if (e.parSoi) parts.push(`+${e.parSoiX ?? 1} par ${STATUS_INFO[e.parSoi].label}.`);
-        if (e.parBebe) parts.push(`+${e.parBebe === 1 ? '' : `${e.parBebe} × `}la Puissance du Bébé.`);
+        if (e.parBebe && dmg === null) parts.push(`+${e.parBebe === 1 ? '' : `${e.parBebe} × `}la Puissance du Bébé.`);
+        if ((e.parBebe || e.siBebe) && dmg !== null) parts.push('<i>(Bébé compris)</i>');
         break;
       }
       case 'degats-aura':
@@ -145,6 +149,9 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'permucoeur': parts.push('Enchante au hasard une autre carte de ta main, pour le reste de la run.'); break;
       case 'multiplie-statut': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} le ${STATUS_INFO[e.status].label} de la cible.`); break;
       case 'recharge': parts.push(`Au prochain tour, tu as <b>${e.amount}</b> PA de moins.`); break;
+      case 'clone': parts.push(`Gagne <b>${e.amount}</b> Clone (Protection persistante).`); break;
+      case 'lance-soleil': parts.push(`Au début de ton prochain tour, inflige <b>${e.amount}</b> dégâts à tous les ennemis. Au soleil, frappe tout de suite.`); break;
+      case 'affaiblit': parts.push(`La cible a <b>${e.amount}</b> Attaque de moins ce tour.`); break;
       case 'gribouille': parts.push(`Copie la capacité que prépare l'ennemi${e.enchant ? ', <b>enchantée</b>' : ''} : elle rejoint ton deck pour la run.`); break;
       case 'invocation': parts.push(`Invocation <b>${e.amount}</b>.`); break;
       case 'bebe-furie': parts.push(`Le Bébé attaque ${e.bonus > 0 ? `${1 + e.bonus} fois` : 'une fois'}, plus 1 fois par attaque du Bébé déjà faite ce tour.`); break;

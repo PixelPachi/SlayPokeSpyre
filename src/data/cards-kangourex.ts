@@ -54,7 +54,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   // ——— Peu communes (34) ———
   c('puissance', 'Puissance', 'normal', 'technique', 'peu-commune', 1, 'soi', [bebePow(2)], { effects: [bebePow(3)] }),
   c('machouille', 'Mâchouille', 'tenebres', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { parSoi: 'rage', parSoiX: 1 }), st('defense', -1)], { effects: [dmg(13, { parSoi: 'rage', parSoiX: 1 }), st('defense', -1)] }),
-  c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [invoc(8), bebeProt(4)], { effects: [invoc(11), bebeProt(6)] }),
+  c('tenacite', 'Ténacité', 'normal', 'technique', 'peu-commune', 1, 'soi', [invoc(8), bebeProt(4), st('tenace', 1, 'soi')], { effects: [invoc(11), bebeProt(6), st('tenace', 1, 'soi')] }),
   c('contre', 'Contre', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [{ kind: 'degats-pv-perdus', amount: 4, per: 3 }], { effects: [{ kind: 'degats-pv-perdus', amount: 4, per: 2 }] }),
   c('colere', 'Colère', 'dragon', 'attaque', 'peu-commune', 2, 'aleatoire', [st('rage', 2, 'soi'), multi(6, 3), st('confusion', 2, 'soi')], { effects: [st('rage', 3, 'soi'), multi(7, 3), st('confusion', 2, 'soi')] }),
   c('hurlement', 'Hurlement', 'normal', 'technique', 'peu-commune', 1, 'tous', [st('peur', 2, 'tous')], { effects: [st('peur', 3, 'tous')] }, ['epuisee']),
@@ -69,7 +69,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('vampi-poing', 'Vampi-Poing', 'combat', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { drain: true }), invoc(3)], { effects: [dmg(14, { drain: true }), invoc(4)] }),
   c('avalanche', 'Avalanche', 'glace', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(8, { revanche: true, parSoi: 'rage', parSoiX: 1 }), st('gel', 1)], { effects: [dmg(11, { revanche: true, parSoi: 'rage', parSoiX: 1 }), st('gel', 1)] }),
   c('eboulement', 'Éboulement', 'roche', 'attaque', 'peu-commune', 2, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(11), st('peur', 1, 'tous')] }),
-  c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(4), invoc(7)], { effects: [hpLoss(3), invoc(9)] }),
+  c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(4), { kind: 'clone', amount: 15 }], { effects: [hpLoss(3), { kind: 'clone', amount: 18 }] }),
   c('souvenir', 'Souvenir', 'spectre', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'souvenir' }], { cost: 0 }),
   c('escalade', 'Escalade', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10), bebePow(1)], { effects: [dmg(13), bebePow(1)] }),
   c('projection', 'Projection', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(4, { parBebe: 1 }), st('peur', 1)], { effects: [dmg(6, { parBebe: 2 }), st('peur', 1)] }),
@@ -85,7 +85,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('sacrifice', 'Sacrifice', 'combat', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(12), hpLoss(4), bebePow(1)], { effects: [dmg(16), hpLoss(4), bebePow(1)] }),
   c('double-baffe', 'Double Baffe', 'normal', 'attaque', 'peu-commune', 1, 'ennemi', [bebeAtk(2), invoc(2)], { effects: [bebeAtk(2), invoc(4)] }),
   c('trepignement', 'Trépignement', 'sol', 'attaque', 'peu-commune', 2, 'ennemi', [{ kind: 'protection-par-soi', status: 'rage', mult: 2 }, dmg(8)], { effects: [{ kind: 'protection-par-soi', status: 'rage', mult: 3 }, dmg(10)] }),
-  c('lance-soleil', 'Lance-Soleil', 'plante', 'attaque', 'peu-commune', 3, 'tous', [dmg(16)], { effects: [dmg(21)] }),
+  c('lance-soleil', 'Lance-Soleil', 'plante', 'attaque', 'peu-commune', 2, 'tous', [{ kind: 'lance-soleil', amount: 23 }], { effects: [{ kind: 'lance-soleil', amount: 30 }] }),
 
   // ——— Rares (13) ———
   c('mega-evolution', 'Méga-Évolution', 'normal', 'talent', 'rare', 3, 'soi', [power('amour-filial', 1), bebePow(2)], { cost: 2 }),

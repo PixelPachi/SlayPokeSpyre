@@ -259,9 +259,14 @@ export class CombatView {
   private babyHtml(f: import('../core/combat').Familiar): string {
     if (f.hp <= 0) return '<div class="fighter bebe dead" data-who="bebe"><span class="bebe-ko">Bébé K.O.</span></div>';
     const pct = (f.hp / f.maxHp) * 100;
+    const plan = this.combat.babyPlan();
     return `
-      <div class="fighter bebe" data-who="bebe" data-tip="<b>Bébé Kangourex</b><br>Attaque à la fin de ton tour (Puissance ${f.power}). Les ennemis peuvent le viser. S'il est K.O., Kangourex gagne Attaque +2.">
-        <div class="bebe-power">Puissance ${f.power}</div>
+      <div class="fighter bebe" data-who="bebe" data-tip="<b>Bébé Kangourex</b><br>• <b>Fin de ton tour</b> : attaque un ennemi au hasard (${plan ? `${plan.dmg} dégâts${plan.times > 1 ? ` × ${plan.times}` : ''}` : '—'}).<br>• <b>Puissance ${f.power}</b> : ses dégâts, et le bonus des cartes « Bébé ».<br>• <b>Bouclier</b> : il encaisse les attaques ennemies à ta place tant qu'il a des PV.<br>• S'il est K.O., Kangourex gagne Attaque +2.">
+        <div class="bebe-tags">
+          <span class="bebe-tag atk" title="">⚔ ${plan ? `${plan.dmg}${plan.times > 1 ? `×${plan.times}` : ''}` : 0}<small>fin du tour</small></span>
+          <span class="bebe-tag pow">✦ ${f.power}<small>Puissance</small></span>
+          <span class="bebe-tag shield">🛡<small>te protège</small></span>
+        </div>
         <img class="sprite bebe-sprite" src="${asset(babySprite(this.run.skin))}" alt="Bébé">
         <div class="hpbar small">
           ${f.block > 0 ? `<div class="block-badge ${iconUrl('protection') ? 'has-ico' : ''}" ${iconUrl('protection') ? `style="--ico:url('${iconUrl('protection')}')"` : ''}>${f.block}</div>` : ''}

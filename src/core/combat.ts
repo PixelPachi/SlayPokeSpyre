@@ -393,7 +393,8 @@ export class Combat {
       switch (e.kind) {
         case 'degats': {
           const mult = d.effects.find((x): x is Extract<Effect, { kind: 'aura-mult' }> => x.kind === 'aura-mult');
-          let base = e.amount + (e.parProtection ? p.block : 0) + (e.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
+          let base = e.amount + (e.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (e.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
+          if (e.champ && this.terrain?.id === e.champ) base *= 2;
           if (e.facade && this.hasBadStatus()) base *= 2;
           if (e.revanche && p.hpLostEnemyTurn > 0) base *= 2;
           if (e.parSoi) base += (p.statuses[e.parSoi] ?? 0) * (e.parSoiX ?? 1);
@@ -405,6 +406,8 @@ export class Combat {
           return e.amount + Math.floor((p.maxHp - p.hp) / e.per) + (this.crimson ? 0 : p.aura);
         case 'tout-ou-rien':
           return p.hp - 1;
+        case 'lance-soleil':
+          return e.amount;
         case 'concentration':
           return e.amount + (this.crimson ? 0 : p.aura);
       }
@@ -472,6 +475,10 @@ export class Combat {
   babyHits = 0;
   /** Dialga a lancé Hurle-Temps : 2 PA de moins au prochain tour du joueur. */
   timeRoar = false;
+  /** Lance-Soleil chargés : ils frappent au début du prochain tour du joueur. */
+  pendingSolar: { amount: number; d: CardDef }[] = [];
+  /** Abattage : baisses d'Attaque qui ne durent que ce tour. */
+  weakened: { uid: number; amount: number }[] = [];
   /** Recharge (Hurle-Temps du joueur) : PA en moins au prochain tour. */
   rechargePa = 0;
   /** Skin Cramoisi (Riolu) : l'Aura brûle la cible au lieu d'ajouter des dégâts (sauf cartes d'Aura comme Aurasphère). */
@@ -706,6 +713,8 @@ export class Combat {
   endEnemyTurn(): void {
     if (this.phase !== 'ennemi') return;
     this.babyTaunt = false;
+    // Abattage : la baisse d'Attaque ne durait que ce tour
+    for (const w of this.weakened.splice(0)) { const e = this.enemy(w.uid); if (e && e.hp > 0) this.addStatus(e, e.uid, 'attaque', w.amount); }
     this.tickField();
     if ((this.phase as string) !== 'ennemi') return;
     this.startPlayerTurn();
@@ -815,6 +824,13 @@ export class Combat {
     // Hurle-Temps : le tour suivant, 2 PA de moins
     if (this.timeRoar) { this.timeRoar = false; this.changeEnergy(-2, 'Hurle-Temps'); }
     if (this.rechargePa) { const n = this.rechargePa; this.rechargePa = 0; this.changeEnergy(-n, 'Recharge'); }
+    // Lance-Soleil chargé au tour précédent : le rayon frappe tous les ennemis
+    for (const sol of this.pendingSolar.splice(0)) {
+      this.events.push({ type: 'player-move', name: 'Lance-Soleil !' });
+      for (const e of this.aliveEnemies()) this.strike(e, sol.amount, sol.d);
+      this.checkEnd();
+      if (this.phase !== 'joueur') return;
+    }
     // Gel : à 3, le joueur aussi passe son tour (le Gel retombe à 0)
     if ((this.player.statuses.gel ?? 0) >= 3) {
       delete this.player.statuses.gel;
@@ -942,7 +958,8 @@ export class Combat {
     switch (eff.kind) {
       case 'degats': {
         const hits = eff.hitsMax ? this.rng.int(eff.hits ?? 1, eff.hitsMax) : (eff.hits ?? 1);
-        let base = eff.amount + (eff.parProtection ? p.block : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
+        let base = eff.amount + (eff.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
+        if (eff.champ && this.terrain?.id === eff.champ) base *= 2;
         if (eff.facade && this.hasBadStatus()) base *= 2;
         if (eff.revanche && p.hpLostEnemyTurn > 0) base *= 2;
         if (eff.parSoi) base += (p.statuses[eff.parSoi] ?? 0) * (eff.parSoiX ?? 1);
@@ -1185,6 +1202,22 @@ export class Combat {
       case 'recharge':
         this.rechargePa += eff.amount;
         return;
+      case 'clone':
+        this.addStatus(p, 'player', 'clone', eff.amount);
+        return;
+      case 'lance-soleil': {
+        // Au soleil (Zénith, Soleil Intense), le rayon part tout de suite ; sinon il se charge jusqu'au prochain tour
+        const w = this.weather?.id;
+        if (w === 'zenith' || w === 'soleil-intense') return this.resolve({ kind: 'degats', amount: eff.amount }, d, target);
+        this.pendingSolar.push({ amount: eff.amount, d });
+        this.events.push({ type: 'player-move', name: 'Lance-Soleil se charge…' });
+        return;
+      }
+      case 'affaiblit':
+        if (!target) return;
+        this.addStatus(target, target.uid, 'attaque', -eff.amount);
+        this.weakened.push({ uid: target.uid, amount: eff.amount });
+        return;
       case 'gribouille': {
         if (!target) return;
         const def = ENEMY_DEFS[target.defId];
@@ -1333,6 +1366,13 @@ export class Combat {
         return;
       }
     }
+  }
+
+  /** Ce que fera le Bébé à la fin du tour : dégâts par coup et nombre de coups (pour l'affichage). */
+  babyPlan(): { dmg: number; times: number } | null {
+    const f = this.player.familiar;
+    if (!f || f.hp <= 0) return null;
+    return { dmg: Math.max(0, f.power + (this.player.statuses.attaque ?? 0)), times: (f.mega ? 2 : 1) + (this.player.powers['amour-filial'] ?? 0) };
   }
 
   /** Le Bébé Kangourex attaque (Puissance + Attaque de sa mère, type Normal). */
@@ -1561,8 +1601,11 @@ export class Combat {
       this.events.push(who === 'player' ? { type: 'player-move', name: 'Abri !' } : { type: 'enemy-move', uid: who as number, name: 'Abri !' });
       return;
     }
-    const blocked = Math.min(f.block, amount);
+    let blocked = Math.min(f.block, amount);
     f.block -= blocked;
+    // Clonage : la Protection persistante encaisse ce qui reste
+    const clone = Math.min(f.statuses.clone ?? 0, amount - blocked);
+    if (clone > 0) { f.statuses.clone! -= clone; if (!f.statuses.clone) delete f.statuses.clone; blocked += clone; }
     const rest = amount - blocked;
     this.events.push({ type: 'damage', target: who, amount: rest, blocked, effectiveness });
     if (rest > 0 && who === 'player' && this.player.statuses.concentration) {
