@@ -9,6 +9,8 @@ export interface RelicDef {
   name: string;
   /** Nom du sprite dans sprites/items de PokeAPI. */
   sprite: string;
+  /** Objet de départ d'un skin : une fois le skin débloqué, tous les Pokémon peuvent le trouver. */
+  shared?: boolean;
   rarity: RelicRarity;
   /** Pokémon qui peut l'obtenir ; 'commun' = tous ; 'evenement' = seulement par un événement. */
   owner: CharacterId | 'commun' | 'evenement';
@@ -65,14 +67,16 @@ const RELICS: RelicDef[] = [
     text: 'Tes attaques de type Plante infligent 2 dégâts de plus.' },
   { id: 'herbe-blanche', name: 'Herbe Blanche', sprite: 'white-herb', rarity: 'peu-commun', owner: 'vipelierre', free: true,
     text: 'Commence chaque combat avec Attaque −1 et Défense −1… que Contestation transforme en +1 et +1.' },
+  { id: 'roulette', name: 'Roulette', sprite: 'roulette', rarity: 'quete', owner: 'quelorior', free: true, shared: true,
+    text: 'Tes attaques infligent 2 dégâts de plus par tranche de 100 Pokédollars que tu possèdes.' },
   { id: 'corail', name: 'Corail', sprite: 'corail', rarity: 'quete', owner: 'kangourex', free: true,
     text: 'Gardien Océanique : le Bébé Kangourex gagne 3 Protection au début de chaque tour.' },
   { id: 'noeud-destin', name: 'Nœud Destin', sprite: 'destiny-knot', rarity: 'quete', owner: 'vipelierre', free: true,
-    text: 'Tisserand : au Centre Pokémon, tu peux tisser une nouvelle carte en choisissant deux effets (trois propositions pour chacun).' },
+    text: 'Au Centre Pokémon, tu peux tisser une nouvelle carte en choisissant deux effets (trois propositions pour chacun).', shared: true },
   { id: 'lanterne-bleue', name: 'Lanterne Bleue', sprite: 'lanterne-bleue', rarity: 'quete', owner: 'caninos', free: true,
-    text: 'Chien de la Lanterne : 3 cartes Âme (0 PA, pioche 2, Épuisée) rejoignent ta pioche au début de chaque combat.' },
+    text: '3 cartes Âme (0 PA, pioche 2, Épuisée) rejoignent ta pioche au début de chaque combat.', shared: true },
   { id: 'plaque-toxik', name: 'Plaque Toxik', sprite: 'toxic-plate', rarity: 'quete', owner: 'vipelierre', free: true,
-    text: 'Vipélierre Alchimiste : tu peux transformer une baie en baie empoisonnée (clique sur la baie). Plus la baie est rare, plus le poison est fort et plus il inflige d’effets.' },
+    text: 'Tu peux transformer une baie en baie empoisonnée (clique sur la baie). Plus la baie est rare, plus le poison est fort et plus il inflige d’effets.', shared: true },
   { id: 'pic-venin', name: 'Pic Venin', sprite: 'poison-barb', rarity: 'rare', owner: 'vipelierre', free: true,
     text: 'Chaque statut que tu infliges à un ennemi en inflige 1 de plus.' },
   // Plaques d'Arceus : +3 dégâts aux attaques de leur type
@@ -218,5 +222,5 @@ export function relicDef(id: string): RelicDef {
 /** Prix au Marché Kecleon. */
 export function relicPrice(id: string): number {
   const r = RELIC_DEFS[id].rarity;
-  return r === 'rare' ? 300 : r === 'peu-commun' ? 250 : 150;
+  return r === 'rare' || r === 'quete' ? 300 : r === 'peu-commun' ? 250 : 150;
 }

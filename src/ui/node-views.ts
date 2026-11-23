@@ -203,7 +203,8 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
     return;
   }
   const shiny = run.rng.next() < SHINY_CHANCE;
-  const price = (p: number) => (shiny ? Math.floor(p / 2) : p);
+  // Kecleon chromatique : moitié prix ; Flambeur : encore -50 %
+  const price = (p: number) => Math.floor(p * (shiny ? 0.5 : 1) * (run.gambler ? 0.5 : 1));
   const offers = [...run.cardChoices('boutique', 5), ...run.neutralChoices(2)].map((id) => ({ id, price: price(cardPrice(id)), sold: false }));
   const items = run.rollRelics(2).map((id) => ({ id, price: price(relicPrice(id)), sold: false }));
   const berries = Array.from({ length: 3 }, () => run.rollBerry()).map((id) => ({ id, price: price(berryPrice(id)), sold: false }));
@@ -220,7 +221,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
     const removeCost = looted ? 0 : price(75 + 25 * run.removals);
     const carpet = `
       <div class="carpet-head">
-        <h2>${looted ? 'Sers-toi : tout est gratuit !' : shiny ? '★ Tout est à moitié prix !' : 'Les articles de Kecleon'}</h2>
+        <h2>${looted ? 'Sers-toi : tout est gratuit !' : shiny ? '★ Tout est à moitié prix !' : run.gambler ? '🎰 Rabais du Flambeur : −50 % !' : 'Les articles de Kecleon'}</h2>
         <button class="btn close-carpet">← Retour à l’échoppe</button>
       </div>
       <div class="card-row shop">

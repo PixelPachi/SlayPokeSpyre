@@ -115,6 +115,8 @@ export interface CombatOptions {
   act?: number;
   /** Combat contre un gardien (Hurlement ne fait pas fuir, le Gel ne fait pas passer le tour). */
   boss?: boolean;
+  /** Pokédollars au début du combat (Roulette du Flambeur). */
+  money?: number;
   /** Skin équipé (le skin primordial ajoute le type Dragon). */
   skin?: string;
   /** Encens Zen : les ennemis commencent à 1 PV. */
@@ -245,6 +247,7 @@ export class Combat {
     if (ch.id === 'riolu') this.gainAura(3);
     this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
     this.weaver = ch.id === 'vipelierre' && opts.skin === 'tisserand';
+    this.moneyStart = opts.money ?? 0;
     // Intimidation (Caninos) ; le Chien de la Lanterne a Feu des Âmes à la place
     if (ch.id === 'caninos' && !this.soulDog) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
@@ -304,6 +307,8 @@ export class Combat {
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
     if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
     if (this.has('metronome')) b += this.attacksThisTurn;
+    // Roulette : +2 dégâts par tranche de 100 Pokédollars
+    if (this.has('roulette')) b += 2 * Math.floor((this.moneyStart + this.moneyGained) / 100);
     b += this.player.statuses.elan ?? 0; // Élan (Caninos)
     if (this.has('loupe') && d.target === 'tous') b += 2;
     const gem = GEMS[d.pokeType];
@@ -477,6 +482,9 @@ export class Combat {
   soulDog = false;
   /** Skin Tisserand de Soie Astrale (Vipélierre) : une carte peut porter plusieurs enchantements. */
   weaver = false;
+  /** Pokédollars gagnés pendant le combat (Jackpot). */
+  moneyGained = 0;
+  private moneyStart = 0;
   /** Enchantements faits en combat (Permucœur), à reporter dans le deck de la run. */
   enchantedCards: { uid: number; defId: string }[] = [];
   /** Pioche de la main du tour en cours (ne déclenche pas Feu des Âmes). */
@@ -1119,6 +1127,30 @@ export class Combat {
         return;
       case 'invocation':
         this.invoke(eff.amount);
+        return;
+      case 'joue-pioche': {
+        for (let i = 0; i < eff.count && this.phase === 'joueur'; i++) {
+          if (!this.drawPile.length) {
+            if (!this.discardPile.length) break;
+            this.drawPile = this.rng.shuffle(this.discardPile); this.discardPile = [];
+          }
+          const card = this.drawPile.pop()!;
+          const cd = this.def(card);
+          const playable = cd.category !== 'statut' && !cd.keywords?.includes('injouable') && !cd.effects.some((e) => e.kind === 'joue-pioche');
+          this.events.push({ type: 'player-move', name: playable ? `Atout : ${cd.name} !` : `Atout : ${cd.name} ne peut pas être jouée` });
+          if (playable) {
+            this.cardAuraUsed = false;
+            const t = cd.target === 'ennemi' && this.aliveEnemies().length ? this.rng.pick(this.aliveEnemies()) : undefined;
+            for (const e of cd.effects) if (this.phase === 'joueur') this.resolve(e, cd, t);
+          }
+          (cd.category === 'talent' || cd.keywords?.includes('epuisee') ? this.exhaustPile : this.discardPile).push(card);
+        }
+        this.checkEnd();
+        return;
+      }
+      case 'argent':
+        this.moneyGained += eff.amount;
+        this.events.push({ type: 'player-move', name: `+${eff.amount} ₽ !` });
         return;
       case 'permucoeur': {
         // une autre carte de la main, enchantable (déjà enchantée seulement pour le Tisserand)

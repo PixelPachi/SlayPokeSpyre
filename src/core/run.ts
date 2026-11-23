@@ -129,6 +129,10 @@ export class Run {
   lastEnemies: string[] = [];
   /** Dominants déjà affrontés : on évite de retomber sur le même. */
   elitesMet: string[] = [];
+  /** Objets de départ des skins débloqués, trouvables par tous les Pokémon. */
+  sharedRelics?: string[];
+  /** Plus grosse réserve de Pokédollars de la run (objectif du skin Flambeur). */
+  maxMoney = 0;
   /** Cartes débloquées par tous les Pokémon (skins qui ouvrent des cartes d'autres types). */
   extraUnlocked?: string[];
   /** Pokémon mis K.O. par type pendant la run (objectifs de skins). */
@@ -180,6 +184,9 @@ export class Run {
 
   /** Stade d'évolution actuel (le Pokémon évolue au début de certains actes). */
   /** Tisserand de Soie Astrale : plusieurs enchantements par carte. */
+  /** Flambeur (Quelorior) : -50 % au Marché Kecleon. */
+  get gambler(): boolean { return this.character === 'quelorior' && this.skin === 'flambeur'; }
+
   get weaver(): boolean { return this.character === 'vipelierre' && this.skin === 'tisserand'; }
 
   get form(): Form {
@@ -383,7 +390,7 @@ export class Run {
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
-      const pool = this.character === 'mew' ? [...own, ...neutralPool()] : !own.length || this.rng.next() < neutralChance ? neutralPool() : own;
+      const pool = this.character === 'mew' || this.character === 'quelorior' ? [...own, ...neutralPool()] : !own.length || this.rng.next() < neutralChance ? neutralPool() : own;
       const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
       const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare'));
       if (pick) out.push(pick.id);
@@ -428,7 +435,7 @@ export class Run {
   relicPool(): string[] {
     return allRelics()
       .filter((r) => !(r.id === 'kangourexite' && this.character === 'kangourex' && this.skin && this.skin !== 'shiny'))
-      .filter((r) => r.rarity !== 'depart' && r.rarity !== 'gardien' && r.rarity !== 'quete' && (r.owner === 'commun' || (r.owner === this.character && (r.free || this.unlockedRelics.includes(r.id)))))
+      .filter((r) => (r.shared && (this.sharedRelics ?? []).includes(r.id)) || r.rarity !== 'depart' && r.rarity !== 'gardien' && r.rarity !== 'quete' && (r.owner === 'commun' || (r.owner === this.character && (r.free || this.unlockedRelics.includes(r.id)))))
       .filter((r) => !this.relics.includes(r.id))
       .map((r) => r.id);
   }

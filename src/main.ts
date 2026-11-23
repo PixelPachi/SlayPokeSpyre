@@ -1,4 +1,5 @@
-import { skinDef } from './data/skins';
+import { SKINS, skinDef } from './data/skins';
+import { RELIC_DEFS } from './data/relics';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
 import { hasTrack, installAudioUnlock, playTheme, setSoundMode, setVolume, sfx, soundIcon, soundMode, volumes } from './audio/audio';
@@ -13,7 +14,7 @@ import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, 
 import { renderSelect } from './ui/select-view';
 import { fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
-import { addHistory, beatenBosses, equippedSkin, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
+import { addHistory, beatenBosses, equippedSkin, skinUnlocked, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
 import { expBreakdown } from './data/unlocks';
 import { ENEMY_DEFS } from './data/enemies';
@@ -150,6 +151,7 @@ saveHooks.encounter = (list) => recordEncounter(save, list);
 /** Sauvegarde automatique : à chaque étape de la run (inNode = le nœud est commencé mais pas fini). */
 function persist(run: Run, inNode: boolean): void {
   run.inNode = inNode;
+  run.maxMoney = Math.max(run.maxMoney ?? 0, run.money);
   saveRun(run.toJSON());
 }
 
@@ -273,6 +275,8 @@ function startRun(character: CharacterId): void {
   // Pour tester : ?zone=tour-lavanville choisit la zone de l'acte en cours
   if (params.get('skin')) run.applySkin(params.get('skin')!, skinDef(character, params.get('skin')!)); // test : ?skin=primordial
   syncSkinLabels(run);
+  // Objets de départ des skins débloqués : tous les Pokémon peuvent les trouver (sauf ceux liés à une mécanique, comme le Corail)
+  run.sharedRelics = (Object.keys(SKINS) as CharacterId[]).flatMap((c) => SKINS[c].filter((k) => k.relic && RELIC_DEFS[k.relic]?.shared && skinUnlocked(save, c, k)).map((k) => k.relic!));
   // Skins qui ouvrent les cartes d'autres types : on connaît les cartes débloquées par chaque Pokémon
   if (skinDef(character, run.skin)?.typeCardsUnlocked) run.extraUnlocked = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as CharacterId[]).flatMap((c) => characterUnlocks(save, c));
   if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
@@ -514,6 +518,7 @@ function endRun(run: Run, victory: boolean): void {
   const newSkins = recordRunStats(save, run.character, {
     shinies: run.shiniesMet, elites: run.elitesDefeated, bosses: run.bossesDefeated, combats: run.combatsWon, wins: victory ? 1 : 0,
     ...Object.fromEntries(Object.entries(run.typeKills ?? {}).map(([t, n]) => [`ko-${t}`, n])),
+    maxMoney: Math.max(run.maxMoney ?? 0, run.money),
   }, run.bossIds);
   for (const k of newSkins) setTimeout(() => toast(`Skin débloqué : ${CHARACTERS[run.character].name} ${k.name.toLowerCase()} ! Choisis-le sur l'écran de sélection.`), 1200);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory, run.bossIds.includes('arceus'));

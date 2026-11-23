@@ -67,6 +67,7 @@ export function skinProgress(s: SaveData, c: CharacterId, skin: SkinDef): [numbe
 /** Détail lisible de la progression d'un skin (gardiens et K.O. par type). */
 export function skinDetail(s: SaveData, c: CharacterId, skin: SkinDef): string {
   const parts: string[] = [];
+  if (skin.maxMoney) parts.push(`record ${Math.min(skin.maxMoney, statOf(s, c, 'maxMoney'))}/${skin.maxMoney} ₽`);
   if (skin.bosses?.length) parts.push(`gardiens ${skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length}/${skin.bosses.length}`);
   if (skin.kills) parts.push(`K.O. ${Math.min(skin.kills.goal, statOf(s, c, `ko-${skin.kills.type}`))}/${skin.kills.goal}`);
   if (!parts.length) { const [n, g] = skinProgress(s, c, skin); return `${n}/${g}`; }
@@ -94,7 +95,7 @@ export function equipSkin(s: SaveData, c: CharacterId, id: string | undefined): 
 export function recordRunStats(s: SaveData, c: CharacterId, add: Partial<Record<SkinStat, number>>, bossIds: string[] = []): SkinDef[] {
   const before = (SKINS[c] ?? []).filter((k) => skinUnlocked(s, c, k)).map((k) => k.id);
   const cur = { ...s.stats?.[c] };
-  for (const [k, v] of Object.entries(add)) cur[k as SkinStat] = (cur[k as SkinStat] ?? 0) + (v ?? 0);
+  for (const [k, v] of Object.entries(add)) cur[k as SkinStat] = k === 'maxMoney' ? Math.max(cur.maxMoney ?? 0, v ?? 0) : (cur[k as SkinStat] ?? 0) + (v ?? 0);
   s.stats = { ...s.stats, [c]: cur };
   s.beaten = { ...s.beaten, [c]: [...new Set([...beatenBosses(s, c), ...bossIds])] };
   writeSave(s);

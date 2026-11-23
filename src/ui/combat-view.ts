@@ -53,7 +53,7 @@ export class CombatView {
     this.combat = new Combat({
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
-      form: run.form, act: run.act, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin, oneHp: opts.oneHp,
+      form: run.form, act: run.act, money: run.money, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin, oneHp: opts.oneHp,
     });
     this.combat.drainEvents();
     saveHooks.encounter?.(this.combat.enemies.map((e) => ({ dex: e.dex, shiny: e.shiny })));
@@ -178,6 +178,8 @@ export class CombatView {
     this.ended = true;
     // Gribouille : les capacités copiées restent dans le deck jusqu'à la fin de la run
     for (const id of this.combat.copiedCards) this.run.addCard(id);
+    // Jackpot : les Pokédollars gagnés en combat
+    if (this.combat.moneyGained) this.run.money += this.combat.moneyGained;
     // Permucœur : l'enchantement reste sur la carte pour la run
     for (const ch of this.combat.enchantedCards) { const c = this.run.deck.find((x) => x.uid === ch.uid); if (c) c.defId = ch.defId; }
     // K.O. par type (objectifs de skins)

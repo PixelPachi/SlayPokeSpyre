@@ -56,6 +56,6 @@ describe('Quelorior', () => {
     const run = new Run('QUELRUN', 'quelorior');
     const ids = run.cardChoices('combat');
     expect(ids).toHaveLength(3);
-    for (const id of ids) expect(cardDef(id).character).toBe('normal');
+    for (const id of ids) expect(['normal', 'quelorior']).toContain(cardDef(id).character);
   });
 });

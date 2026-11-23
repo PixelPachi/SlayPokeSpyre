@@ -2,7 +2,7 @@
 import type { CharacterId } from '../core/model';
 import type { PokeType } from '../core/types';
 
-export type SkinStat = 'shinies' | 'elites' | 'bosses' | 'combats' | 'wins' | `ko-${PokeType}`;
+export type SkinStat = 'shinies' | 'elites' | 'bosses' | 'combats' | 'wins' | 'maxMoney' | `ko-${PokeType}`;
 
 export interface SkinDef {
   id: string;
@@ -28,6 +28,8 @@ export interface SkinDef {
   kills?: { type: PokeType; goal: number };
   /** Types du Pokémon avec ce skin (remplacent les siens). */
   types?: PokeType[];
+  /** Objectif : avoir eu au moins N Pokédollars en réserve pendant une run. */
+  maxMoney?: number;
   /** Peut obtenir les cartes de ces types, de tous les Pokémon. */
   typeCards?: PokeType[];
   /** … seulement celles débloquées (par l'EXP de leur Pokémon). */
@@ -82,8 +84,9 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   }],
   mew: [SHINY_GOAL, primordial('Mew', [151])],
   quelorior: [SHINY_GOAL, primordial('Quelorior', [235]), {
-    id: 'flambeur', name: 'Flambeur', stat: 'bosses', goal: 1, bosses: ['arceus'], dex: [235],
-    goalText: 'Vaincre Arceus en jouant Quelorior',
+    id: 'flambeur', name: 'Flambeur', stat: 'maxMoney', goal: 500, maxMoney: 500, dex: [235],
+    goalText: 'Avoir 500 Pokédollars en réserve pendant une run avec Quelorior. Son deck de départ devient 4 Jackpot (3 dégâts, +5 ₽), 4 Abri, ses Gribouilles et Atout, la Roulette remplace son objet de départ (+2 dégâts par tranche de 100 ₽) et il a −50 % au Marché Kecleon.',
+    relic: 'roulette', deck: ['quel-jackpot', 'quel-jackpot', 'quel-jackpot', 'quel-jackpot', 'abri', 'abri', 'abri', 'abri', 'quel-gribouille', 'quel-gribouille', 'quel-atout'],
   }],
 } as Record<CharacterId, SkinDef[]>;
 
