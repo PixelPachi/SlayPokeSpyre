@@ -28,3 +28,17 @@ describe('Ballon et Bulbe', () => {
     expect(c.player.statuses.defense).toBe(1);
   });
 });
+
+import { relicDef } from '../src/data/relics';
+describe('Plaques d’Arceus', () => {
+  it('+3 dégâts au type de la plaque', () => {
+    expect(relicDef('plaque-fantome').name).toBe('Plaque Fantôme');
+    const mk = (relics: string[]) => {
+      const c = new Combat({ character: 'caninos', deck: makeDeck(CHARACTERS.caninos.starterDeck), enemies: ['onix'], seed: 'PL', relics });
+      c.drainEvents(); c.player.energy = 9; c.hand = [{ uid: 1, defId: 'n-ombre-portee', upgraded: false }];
+      const e = c.aliveEnemies()[0]; e.statuses = {}; const h = e.hp + e.block;
+      c.play(1, e.uid); return h - (e.hp + e.block);
+    };
+    expect(mk(['plaque-fantome'])).toBeGreaterThan(mk([]));
+  });
+});

@@ -144,6 +144,9 @@ export function computeDamage(base: number, attacker: Fighter, defender: Fighter
   };
 }
 
+/** Plaques d'Arceus ajoutées comme objets communs : +3 dégâts à leur type. */
+const PLATES: [string, PokeType][] = [['plaque-hydro', 'eau'], ['plaque-volt', 'electrik'], ['plaque-glace', 'glace'], ['plaque-terre', 'sol'], ['plaque-ciel', 'vol'], ['plaque-insecte', 'insecte'], ['plaque-roc', 'roche'], ['plaque-fantome', 'spectre'], ['plaque-draco', 'dragon'], ['plaque-ombre', 'tenebres'], ['plaque-pixie', 'fee']];
+
 export class Combat {
   readonly rng: Rng;
   player: PlayerState;
@@ -290,6 +293,8 @@ export class Combat {
     if (this.has('mouchoir-soie') && d.pokeType === 'normal') b += 2;
     if (this.has('plaque-flamme') && d.pokeType === 'feu') b += 2;
     if (this.has('plaque-esprit') && d.pokeType === 'psy') b += 2;
+    // Plaques d'Arceus (objets communs) : +3 au type de la plaque
+    for (const [id, t] of PLATES) if (t === d.pokeType && this.has(id)) b += 3;
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
     if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
     if (this.has('metronome')) b += this.attacksThisTurn;
