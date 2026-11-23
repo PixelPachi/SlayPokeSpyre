@@ -52,7 +52,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     3: ['can-boutefeu', 'can-tunnel', 'can-repos', 'can-clonage', 'can-larcin', 'can-double-pied', 'can-vengeance', 'can-retour'],
     4: ['can-surchauffe', 'can-colere', 'can-tenacite', 'can-canicule', 'can-feu-follet', 'can-frustration', 'can-reflet', 'can-ronflement'],
     5: ['can-deflagration', 'can-megaphone', 'can-draco-choc', 'can-eclair-fou', 'can-tacle-feu', 'can-force-cachee', 'can-chant-canon', 'can-echo'],
-    6: ['can-zenith', 'can-psycho-croc', 'can-sable-ardent', 'can-tera-explosion', 'can-indignition', 'can-eclate-roc', 'can-rune-protect', 'can-aboiement'],
+    6: ['can-zenith', 'can-soleil-intense', 'can-psycho-croc', 'can-sable-ardent', 'can-tera-explosion', 'can-indignition', 'can-eclate-roc', 'can-rune-protect', 'can-aboiement'],
     7: ['can-danse-flammes', 'can-giga-impact', 'can-mania', 'can-aurore', 'can-implore', 'can-calinerie', 'can-attraction'],
     8: ['can-ultralaser', 'can-close-combat', 'can-queue-de-fer', 'can-puissance-cachee', 'can-vantardise', 'can-force', 'can-eboulement'],
     9: ['can-fracass-tete', 'can-grand-courroux', 'can-lame-de-roc', 'can-blabla-dodo'],

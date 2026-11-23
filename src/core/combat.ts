@@ -14,7 +14,7 @@ import '../data/boss-gimmicks';
 import '../data/enemy-fixes';
 import '../data/balance';
 import '../data/weather-moves';
-import { TERRAINS, WEATHER, isWeather, type TerrainId, type WeatherId } from './weather';
+import { FIELD_TURNS, TERRAINS, WEATHER, isWeather, type TerrainId, type WeatherId } from './weather';
 import { BAD_STATUSES, type BerryFx } from '../data/berries';
 
 export const HAND_SIZE = 5;
@@ -272,7 +272,7 @@ export class Combat {
     });
 
     for (const e of this.enemies) if (this.gimmickOf(e) === 'mur-roc') this.gainBlock(e, e.uid, 12);
-    if (this.enemies.some((e) => this.gimmickOf(e) === 'tempete-sable')) this.setField('tempete-sable', 99);
+    if (this.enemies.some((e) => this.gimmickOf(e) === 'tempete-sable')) this.setField('tempete-sable');
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
@@ -1415,7 +1415,9 @@ export class Combat {
     return (w ? WEATHER[w].mult[type] ?? 1 : 1) * (this.terrain ? TERRAINS[this.terrain.id].mult[type] ?? 1 : 1);
   }
 
-  setField(id: WeatherId | TerrainId, turns = 5): void {
+  setField(id: WeatherId | TerrainId, _turns?: number): void {
+    // Toutes les météos et tous les champs durent 5 tours (relancer remet le compteur à 5)
+    const turns = FIELD_TURNS;
     if (isWeather(id)) {
       this.weather = { id, turns };
       this.events.push({ type: 'meteo', id, name: `${WEATHER[id].icon} ${WEATHER[id].name} !` });
@@ -1439,6 +1441,8 @@ export class Combat {
     }
     this.checkEnd();
     if (this.phase === 'victoire' || this.phase === 'defaite') return;
+    const guard = w ? WEATHER[w].guard : undefined;
+    if (guard) for (const [f, who] of fighters) if (f.hp > 0 && f.types.some((t) => guard.types.includes(t))) this.gainBlock(f, who, guard.block);
     if (this.terrain?.id === 'champ-herbu') {
       this.healPlayer(3);
       for (const e of this.aliveEnemies()) this.healEnemy(e, 3);
@@ -1626,6 +1630,7 @@ export class Combat {
     if (who === 'player' && s > 0 && this.has('carapace-mue') && (status === 'peur' || status === 'paralysie')) return void this.relicFired('carapace-mue');
     if (who === 'player' && s > 0 && this.has('grosses-bottes') && status === 'brulure') return void this.relicFired('grosses-bottes');
     if (s > 0 && this.terrain?.id === 'champ-electrifie' && status === 'sommeil') return;
+    if (s > 0 && this.terrain?.id === 'champ-psychique' && status === 'confusion') return;
     if (who === 'player' && s > 0 && (status === 'attaque' || status === 'defense') && this.bossAlive('air-lock')) {
       this.events.push({ type: 'player-move', name: 'Air Lock bloque la hausse !' });
       return;

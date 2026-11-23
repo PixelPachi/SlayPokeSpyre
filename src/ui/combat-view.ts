@@ -2,7 +2,7 @@ import { ZONE_BG } from '../data/zone-bg';
 import { playShield, playTalent, playVfx } from './vfx';
 import { babySprite, skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
-import { TERRAINS, WEATHER } from '../core/weather';
+import { FIELD_TYPE, TERRAINS, WEATHER } from '../core/weather';
 import { sfx, sfxType } from '../audio/audio';
 import type { BerryFx } from '../data/berries';
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
@@ -55,6 +55,8 @@ export class CombatView {
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
       form: run.form, act: run.act, money: run.money, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin, oneHp: opts.oneHp,
     });
+    // Test : ?meteo=neige,champ-herbu installe une météo / un champ dès le début
+    for (const id of (new URLSearchParams(location.search).get('meteo') ?? '').split(',').filter(Boolean)) this.combat.setField(id as never);
     this.combat.drainEvents();
     saveHooks.encounter?.(this.combat.enemies.map((e) => ({ dex: e.dex, shiny: e.shiny })));
     // Le décor (fond + particules) reste en place pendant tout le combat : les animations ne redémarrent pas
@@ -208,8 +210,8 @@ export class CombatView {
     if (scene) scene.className = scene.className.replace(/ ?field-[wt]-[a-z-]+/g, '') +
       (c.weatherActive() ? ` field-w-${c.weatherActive()}` : '') + (c.terrain ? ` field-t-${c.terrain.id}` : '');
     const fieldChips = [
-      c.weather ? `<div class="field-chip ${c.weatherActive() ? '' : 'off'}" data-tip="<b>${WEATHER[c.weather.id].name}</b><br>${WEATHER[c.weather.id].text}${c.weatherActive() ? '' : '<br><i>Annulée par Air Lock.</i>'}">${WEATHER[c.weather.id].icon} ${WEATHER[c.weather.id].name}${c.weather.turns < 50 ? ` · ${c.weather.turns}` : ''}</div>` : '',
-      c.terrain ? `<div class="field-chip terrain" data-tip="<b>${TERRAINS[c.terrain.id].name}</b><br>${TERRAINS[c.terrain.id].text}">${TERRAINS[c.terrain.id].icon} ${TERRAINS[c.terrain.id].name} · ${c.terrain.turns}</div>` : '',
+      c.weather ? `<div class="field-chip ${c.weatherActive() ? '' : 'off'}" data-tip="<b>${WEATHER[c.weather.id].name}</b><br>${WEATHER[c.weather.id].text}${c.weatherActive() ? '' : '<br><i>Annulée par Air Lock.</i>'}">${WEATHER[c.weather.id].icon} ${WEATHER[c.weather.id].name}<span class="turns">⏳ ${c.weather.turns}</span></div>` : '',
+      c.terrain ? `<div class="field-chip terrain" data-tip="<b>${TERRAINS[c.terrain.id].name}</b><br>${TERRAINS[c.terrain.id].text}">${TERRAINS[c.terrain.id].icon} ${TERRAINS[c.terrain.id].name}<span class="turns">⏳ ${c.terrain.turns}</span></div>` : '',
     ].join('');
     const prevHand = this.snapshotHand();
     this.el.innerHTML = `
@@ -477,7 +479,7 @@ export class CombatView {
           break;
         case 'meteo':
           this.banner(ev.name, ev.ended);
-          if (!ev.ended) sfxType(({ zenith: 'feu', pluie: 'eau', 'tempete-sable': 'roche', grele: 'glace', 'champ-herbu': 'plante', 'champ-electrifie': 'electrik', 'champ-psychique': 'psy', 'champ-brumeux': 'fee' } as Record<string, PokeType>)[ev.id] ?? 'normal');
+          if (!ev.ended) sfxType((FIELD_TYPE as Record<string, PokeType>)[ev.id] ?? 'normal');
           break;
         case 'break':
           this.float(ev.target, 'Protection brisée !', 'eff weak', at(ev.target));

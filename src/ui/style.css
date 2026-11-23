@@ -1447,3 +1447,46 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Résultat d'événement : le bouton Continuer à côté des cartes gagnées, pour rester dans l'écran */
 .event-after { display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; }
 .event-after .event-gained { margin: 0; }
+
+/* ——— Nouvelles météos ——— */
+.scene.field-w-neige::after { opacity: 1; background:
+  radial-gradient(circle at 20% 30%, #fff 2.5px, transparent 3px) 0 0 / 97px 83px,
+  radial-gradient(circle at 70% 60%, #ffffffdd 2px, transparent 2.5px) 0 0 / 71px 109px,
+  radial-gradient(circle at 40% 80%, #ffffffaa 1.5px, transparent 2px) 0 0 / 53px 61px, #dff2ff3a; animation: snowFall 6s linear infinite; }
+@keyframes snowFall { to { background-position: 40px 249px, -30px 327px, 20px 183px, 0 0; } }
+.scene.field-w-brouillard::after { opacity: 1; background:
+  radial-gradient(ellipse 60% 30% at 20% 60%, #e8eef533, transparent 70%),
+  radial-gradient(ellipse 50% 25% at 80% 45%, #e8eef544, transparent 70%),
+  linear-gradient(#c9d3df55, #c9d3df88); animation: fogDrift 9s ease-in-out infinite alternate; }
+@keyframes fogDrift { to { background-position: 120px 0, -120px 0, 0 0; } }
+.scene.field-w-soleil-intense::after { opacity: 1; background:
+  radial-gradient(circle at 75% -5%, #fff6c8cc, #ffb14766 25%, transparent 60%), #ff7a1a33; animation: heatPulse 2.2s ease-in-out infinite alternate; }
+@keyframes heatPulse { to { filter: brightness(1.15) saturate(1.2); } }
+.scene.field-w-deluge::after { opacity: 1; background:
+  repeating-linear-gradient(100deg, #b7dcff55 0 1.5px, transparent 1.5px 17px), #0b1d3a4d; animation: delugeFall 0.3s linear infinite; }
+@keyframes delugeFall { to { background-position: -14px 70px, 0 0; } }
+.scene.field-w-turbulence::after { opacity: 1; background:
+  repeating-linear-gradient(-8deg, #d9f7ff44 0 2px, transparent 2px 40px),
+  repeating-linear-gradient(4deg, #9fe3d533 0 1px, transparent 1px 63px), #3aa89a22; animation: windBlow 0.6s linear infinite; }
+@keyframes windBlow { to { background-position: 160px 0, 220px 0, 0 0; } }
+
+/* ——— Champs : bande de sol animée et teintée, bien visible ——— */
+.scene::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 46%; pointer-events: none; opacity: 0; transition: opacity .8s; }
+.scene[class*="field-t-"]::before { opacity: 1; }
+.scene.field-t-champ-herbu::before { background:
+  radial-gradient(circle, #b8ff9caa 2px, transparent 3px) 0 0 / 60px 60px,
+  linear-gradient(transparent, #2fae4a66 55%, #1f8a3a99); animation: fieldRise 4s linear infinite; }
+.scene.field-t-champ-electrifie::before { background:
+  repeating-linear-gradient(115deg, transparent 0 34px, #fff38a99 34px 36px, transparent 36px 70px),
+  linear-gradient(transparent, #ffd84a55 55%, #ffc40088); animation: zap .35s steps(2) infinite; }
+.scene.field-t-champ-psychique::before { background:
+  repeating-radial-gradient(ellipse at 50% 120%, #ff8ae055 0 6px, transparent 6px 26px),
+  linear-gradient(transparent, #d24fd055 55%, #a02fb588); animation: psyWave 2.5s linear infinite; }
+.scene.field-t-champ-brumeux::before { background:
+  radial-gradient(circle, #ffffffaa 2px, transparent 3px) 10px 0 / 44px 44px,
+  linear-gradient(transparent, #ffc8f066 50%, #ffb3eaaa); animation: fieldRise 6s linear infinite; }
+@keyframes fieldRise { to { background-position: 0 -120px, 0 0; } }
+@keyframes zap { 50% { opacity: .55; } }
+@keyframes psyWave { to { background-size: 140% 140%, 100% 100%; } }
+.field-chip { font-size: 15px; box-shadow: 0 3px 10px #0008; }
+.field-chip .turns { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #ffffff22; font-size: 13px; }

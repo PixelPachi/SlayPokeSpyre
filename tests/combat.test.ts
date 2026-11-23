@@ -360,16 +360,16 @@ describe('cartes neutres', async () => {
   const { CHARACTERS } = await import('../src/data/characters');
   const { Run } = await import('../src/core/run');
 
-  it('62 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
+  it('66 cartes neutres, avec des types qu’aucun personnage n’a et sans doublon de nom', () => {
     const neutral = neutralPool();
-    expect(neutral).toHaveLength(62);
+    expect(neutral).toHaveLength(66);
     const charTypes = new Set(Object.values(CHARACTERS).flatMap((c) => c.types));
     const otherNames = new Set(Object.values(CARD_DEFS).filter((c) => c.character !== 'normal').map((c) => c.name));
     for (const c of neutral) {
       if (c.id !== 'n-paresse' && !c.requires?.asleep) expect(charTypes.has(c.pokeType), c.name).toBe(false); // les cartes de sommeil gardent leur vrai type
       expect(otherNames.has(c.name), c.name).toBe(false);
     }
-    expect(new Set(neutral.map((c) => c.name)).size).toBe(62);
+    expect(new Set(neutral.map((c) => c.name)).size).toBe(66);
   });
 
   it('des cartes neutres apparaissent parfois dans les récompenses', () => {
@@ -403,7 +403,7 @@ describe('cartes de tous les personnages', async () => {
   const chars = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as const;
 
   it('toutes les cartes de récompense sont débloquables, sans doublon de nom (75 + cartes de Protection ajoutées)', () => {
-    const extra: Record<string, number> = { riolu: 4, vipelierre: 4, kangourex: 4, caninos: 3, mew: 0 };
+    const extra: Record<string, number> = { riolu: 4, vipelierre: 4, kangourex: 4, caninos: 4, mew: 0 };
     for (const ch of chars) {
       const n = 75 + extra[ch];
       const pool = rewardPool(ch);

@@ -33,6 +33,10 @@ export const NEUTRAL_CARDS: CardDef[] = [
   n('tempete-sable', 'Tempête de Sable', 'roche', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'tempete-sable', turns: 5 }], { effects: [{ kind: 'meteo', id: 'tempete-sable', turns: 5 }, prot(6)] }),
   n('grele', 'Grêle', 'glace', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'grele', turns: 5 }], { effects: [{ kind: 'meteo', id: 'grele', turns: 5 }, prot(6)] }),
   n('champ-electrifie', 'Champ Électrifié', 'electrik', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'champ-electrifie', turns: 5 }], { effects: [{ kind: 'meteo', id: 'champ-electrifie', turns: 5 }, draw(1)] }),
+  { ...n('neige', 'Neige', 'glace', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'neige', turns: 5 }], { effects: [{ kind: 'meteo', id: 'neige', turns: 5 }, prot(6)] }), artName: 'Blizzard' },
+  n('brouillard', 'Brouillard', 'spectre', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'brouillard', turns: 5 }], { effects: [{ kind: 'meteo', id: 'brouillard', turns: 5 }, draw(1)] }),
+  { ...n('deluge', 'Déluge', 'eau', 'technique', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'deluge', turns: 5 }], { cost: 1 }), artName: 'Hydrocanon' },
+  { ...n('turbulence', 'Turbulence', 'vol', 'technique', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'turbulence', turns: 5 }], { cost: 1 }), artName: 'Ouragan' },
   n('champ-brumeux', 'Champ Brumeux', 'fee', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'meteo', id: 'champ-brumeux', turns: 5 }], { effects: [{ kind: 'meteo', id: 'champ-brumeux', turns: 5 }, prot(6)] }),
 
   // ——— Eau ———
