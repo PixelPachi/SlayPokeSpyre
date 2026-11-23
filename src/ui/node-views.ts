@@ -420,7 +420,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     for (const c of changed) { const k = `${c.defId}|${c.upgraded}`; const g = groups.get(k); if (g) g.n++; else groups.set(k, { id: c.defId, up: c.upgraded, n: 1 }); }
     const shown = [...groups.values()].slice(0, 6);
     const cardsHtml = shown.length ? `<div class="event-gained"><small>${changed.length > 1 ? 'Nouvelles cartes' : 'Nouvelle carte'}</small><div class="event-gained-row">${shown.map((g) => `<div class="gained">${renderCard(cardDef(g.id, g.up))}${g.n > 1 ? `<span class="gained-n">×${g.n}</span>` : ''}</div>`).join('')}</div></div>` : '';
-    root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p>${cardsHtml}<button class="btn primary leave">Continuer</button>`;
+    root.querySelector('.event-choices')!.innerHTML = `<p class="event-result">${esc(text)}</p><div class="event-after">${cardsHtml}<button class="btn primary leave">Continuer</button></div>`;
     root.querySelector('.leave')!.addEventListener('click', done);
     refreshBar();
     if (run.pendingBerries.length) {

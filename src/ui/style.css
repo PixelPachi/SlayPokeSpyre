@@ -1444,3 +1444,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
   background: linear-gradient(90deg, #0000, #e3b85c, #0000); }
 .shop-scene:not(.dark) .shop-tile { background: #3a0c13aa; border-color: #e3b85c55; }
 .shop-scene:not(.dark) .carpet-bottom .choice.remove { background: #3a0c13cc; border-color: #e3b85c77; }
+/* Résultat d'événement : le bouton Continuer à côté des cartes gagnées, pour rester dans l'écran */
+.event-after { display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; }
+.event-after .event-gained { margin: 0; }
