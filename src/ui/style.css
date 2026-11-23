@@ -443,7 +443,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 }
 .map-canvas { position: relative; width: 1280px; }
 .map-lines { position: absolute; left: 0; top: 0; }
-.map-lines .path { stroke: rgba(233, 228, 214, 0.28); stroke-width: 3; stroke-dasharray: 2 9; stroke-linecap: round; }
+.map-lines .path { stroke: rgba(245, 238, 220, 0.6); stroke-width: 3; stroke-dasharray: 2 9; stroke-linecap: round; }
 .map-lines .path.open { stroke: rgba(245, 200, 76, 0.8); }
 .map-lines .path.walked { stroke: #f5c84c; stroke-dasharray: none; stroke-width: 4; }
 .map-title {
@@ -1511,3 +1511,18 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Fond peint de la zone derrière la carte (défile avec elle) */
 .map-canvas { background-size: cover; background-position: center top; background-repeat: no-repeat; }
 .map-node img.node-art, .legend-icon img.node-art { width: 78%; height: 78%; object-fit: contain; image-rendering: auto; }
+
+/* ——— Bulles de lieu opaques sur la carte : les icônes ressortent sur les fonds peints ——— */
+.map-node {
+  opacity: 1; width: 60px; height: 60px; margin: -30px 0 0 -30px; padding: 6px;
+  background: radial-gradient(circle at 35% 30%, #fffaf0, #efe2c2 60%, #d4c29a);
+  border: 3px solid #4a3b22;
+  box-shadow: 0 4px 8px #000b, inset 0 -3px 0 #0000001f, inset 0 2px 0 #ffffffb0;
+}
+.map-node:not(.available):not(.visited):not(.node-boss) img.node-art { filter: saturate(0.75) brightness(0.92); }
+.map-node.visited { opacity: 1; background: radial-gradient(circle at 35% 30%, #fff3c4, #e9c96a 65%, #b89236); border-color: #6b4e12; }
+.map-node.visited img.node-art { filter: saturate(0.6); opacity: .8; }
+.map-node.available { background: radial-gradient(circle at 35% 30%, #ffffff, #fff0c2 60%, #f2cf6a); border-color: #ffd34d; box-shadow: 0 0 0 3px #3b2a05, 0 4px 14px #000c, 0 0 18px #ffd75e99; }
+.map-node.node-elite { border-color: #8f1d1d; background: radial-gradient(circle at 35% 30%, #fff1ee, #f3c6bd 60%, #d9877a); }
+.map-node.node-elite.available { border-color: #ff5b4a; }
+.map-node.node-boss { opacity: 1; }
