@@ -1534,3 +1534,9 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .bebe-tag.atk { border-color: #ff8a6b; }
 .bebe-tag.shield { border-color: #7ec8ff; font-size: 13px; }
 .fighter.bebe { width: 170px; left: 290px; }
+.played-card .card-cost { display: grid !important; }
+.played-card.failed .card { filter: grayscale(0.8) brightness(0.7); }
+/* Piles cliquables : pioche, défausse et cartes épuisées */
+.pile.draw, .pile.discard, .pile.exhaust { cursor: pointer; }
+.pile.draw:hover, .pile.discard:hover, .pile.exhaust:hover { filter: brightness(1.2); }
+.pile.exhaust { right: 116px; bottom: 90px; border-color: #c9a0ff66; color: #e6d6ff; }

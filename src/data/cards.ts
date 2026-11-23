@@ -95,7 +95,18 @@ CARDS.push({
   id: 'poisse', name: 'Poisse', character: 'normal', pokeType: 'tenebres', category: 'statut', rarity: 'depart',
   cost: 0, target: 'soi', effects: [], keywords: ['injouable'], onDraw: [{ kind: 'statut', status: 'confusion', stacks: 1, on: 'soi' }], upgrade: {},
 });
-export const CURSES = ['voeu-brise', 'cauchemar', 'poisse'];
+// Nouvelles malédictions : injouables, elles agissent quand on les pioche
+const curse = (id: string, name: string, pokeType: CardDef['pokeType'], onDraw: CardDef['onDraw']): CardDef => ({
+  id, name, character: 'normal', pokeType, category: 'statut', rarity: 'depart', cost: 0, target: 'soi', effects: [], keywords: ['injouable'], onDraw, upgrade: {},
+});
+CARDS.push(
+  curse('mauvais-oeil', 'Mauvais Œil', 'tenebres', [{ kind: 'statut', status: 'peur', stacks: 1, on: 'soi' }]),
+  curse('entrave', 'Entrave', 'normal', [{ kind: 'statut', status: 'attaque', stacks: -1, on: 'soi' }]),
+  curse('regard-noir', 'Regard Noir', 'spectre', [{ kind: 'perte-pv', amount: 4 }]),
+  curse('torpeur', 'Torpeur', 'psy', [{ kind: 'statut', status: 'defense', stacks: -1, on: 'soi' }]),
+  curse('gelure', 'Gelure', 'glace', [{ kind: 'statut', status: 'gel', stacks: 1, on: 'soi' }]),
+);
+export const CURSES = ['voeu-brise', 'cauchemar', 'poisse', 'mauvais-oeil', 'entrave', 'regard-noir', 'torpeur', 'gelure'];
 // Cartes de gardien : glissées dans ton deck pendant un combat de gardien, injouables, elles agissent quand on les pioche
 const bossCard = (id: string, name: string, pokeType: CardDef['pokeType'], onDraw: CardDef['onDraw']): CardDef => ({
   id, name, character: 'normal', pokeType, category: 'statut', rarity: 'depart', cost: 0, target: 'soi', effects: [],
@@ -179,7 +190,7 @@ export const ENCHANTS: Record<string, { name: string; text: string; rarity?: Enc
   },
   fortifiant: { name: 'Fortifiant', rarity: 'rare', text: '+1 Attaque', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'attaque', stacks: 1, on: 'soi' }] }) },
   // ——— Légendaires ———
-  echo: { name: 'Écho', rarity: 'legendaire', text: 'ses effets s’appliquent deux fois', ok: (d) => !d.effects.some((e) => e.kind === 'decouverte'), apply: (d) => ({ ...d, effects: [...d.effects, ...d.effects] }) },
+  echo: { name: 'Écho', rarity: 'legendaire', text: 'se joue deux fois à sa première utilisation de chaque combat', ok: (d) => !d.effects.some((e) => e.kind === 'decouverte') && !d.keywords?.includes('echo'), apply: (d) => ({ ...d, keywords: [...(d.keywords ?? []), 'echo'] }) },
   gratuit: { name: 'Divin', rarity: 'legendaire', text: 'coûte 0 PA', ok: (d) => d.cost > 1, apply: (d) => ({ ...d, cost: 0 }) },
   titan: {
     name: 'Titanesque', rarity: 'legendaire', text: '+8 dégâts et +8 Protection', ok: (d) => d.effects.some((e) => e.kind === 'degats'),

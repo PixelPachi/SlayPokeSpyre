@@ -238,11 +238,14 @@ export class CombatView {
         ${p.character === 'riolu' || p.character === 'mew' ? `<div class="aura-counter ${p.aura >= 25 ? 'high' : ''} ${p.aura !== this.lastAura ? 'bump' : ''}" data-tip="<b>Aura : ${p.aura}</b><br>${this.combat.crimson ? 'Cramoisi : ta prochaine attaque inflige autant de Brûlure que d’Aura à sa cible (l’Aura est alors consommée). Seules Aurasphère et les cartes d’Aura s’en servent pour les dégâts.' : 'Chaque point d’Aura ajoute 1 dégât à ta prochaine attaque (l’Aura est alors consommée).'} Tu en gagnes en jouant certaines cartes et en perdant des PV.">
           ${iconImg('aura', 'aura-ico')}<span class="aura-num">${p.aura}</span><small>Aura</small>
         </div>` : ''}
-        <div class="pile draw ${backUrl(p.character) ? 'has-back' : ''}" ${backUrl(p.character) ? `style="--back:url('${backUrl(p.character)}')"` : ''} data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée.">
+        <div class="pile draw ${backUrl(p.character) ? 'has-back' : ''}" ${backUrl(p.character) ? `style="--back:url('${backUrl(p.character)}')"` : ''} data-tip="Pioche : ${c.drawPile.length} carte(s). Quand elle est vide, la défausse est mélangée. Clique pour voir ce qu'elle contient (dans le désordre).">
           <span>${c.drawPile.length}</span><small>Pioche</small>
         </div>
         <div class="hand">${c.hand.map((card, i) => this.cardHtml(card, i, c.hand.length)).join('')}</div>
-        <div class="pile discard" data-tip="Défausse : ${c.discardPile.length} carte(s).">
+        <div class="pile exhaust" data-tip="Cartes épuisées : ${c.exhaustPile.length}. Retirées jusqu'à la fin du combat. Clique pour les voir.">
+          <span>${c.exhaustPile.length}</span><small>Épuisées</small>
+        </div>
+        <div class="pile discard" data-tip="Défausse : ${c.discardPile.length} carte(s). Clique pour les voir.">
           <span>${c.discardPile.length}</span><small>Défausse</small>
         </div>
         <button class="end-turn" ${c.phase !== 'joueur' || this.busy ? 'disabled' : ''}>${c.phase === 'ennemi' ? 'Tour ennemi…' : 'Fin du tour <kbd>E</kbd>'}</button>
@@ -481,6 +484,9 @@ export class CombatView {
         case 'player-move':
           this.float('player', ev.name, 'move', 0);
           break;
+        case 'show-card':
+          this.showPlayedCard(ev.def, ev.label, ev.failed);
+          break;
         case 'energy':
           this.floatEnergy(`${ev.delta > 0 ? '+' : '−'}${Math.abs(ev.delta)} PA`, ev.reason, ev.delta > 0);
           break;
@@ -539,6 +545,16 @@ export class CombatView {
   }
 
   private lastEnemyCard = 0;
+
+  /** Carte activée par une autre carte (Atout, Photocopie, Métronome) : affichée au centre un instant. */
+  private showPlayedCard(def: CardDef, label: string, failed = false): void {
+    this.fx.querySelector('.enemy-card')?.remove();
+    const box = document.createElement('div');
+    box.className = `enemy-card played-card ${failed ? 'failed' : ''}`;
+    box.innerHTML = `<div class="enemy-card-who">${esc(label)}</div>${renderCard(def)}`;
+    this.fx.appendChild(box);
+    setTimeout(() => box.remove(), 1500);
+  }
 
   /** Petit texte qui s'envole au-dessus de l'orbe d'énergie (coût payé, PA gagnés ou perdus). */
   private floatEnergy(text: string, reason: string, gain: boolean): void {
@@ -923,6 +939,11 @@ export class CombatView {
       if (t.closest('.end-turn')) return void this.endTurn();
       if (t.closest('.next') && !this.ended) return this.finish();
       if (t.closest('.tb-deck')) return openDeckOverlay(this.root, { title: 'Ton deck' }, this.run);
+      // Piles : la pioche est montrée triée (pas dans l'ordre où elle sera piochée)
+      const c = this.combat;
+      if (t.closest('.pile.draw')) return openDeckOverlay(this.root, { title: `Pioche · ${c.drawPile.length} carte(s), dans le désordre`, cards: c.drawPile }, this.run);
+      if (t.closest('.pile.discard')) return openDeckOverlay(this.root, { title: `Défausse · ${c.discardPile.length} carte(s)`, cards: c.discardPile }, this.run);
+      if (t.closest('.pile.exhaust')) return openDeckOverlay(this.root, { title: `Cartes épuisées · ${c.exhaustPile.length}`, cards: c.exhaustPile }, this.run);
     });
 
     this.el.addEventListener('contextmenu', (ev) => {

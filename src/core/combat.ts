@@ -86,6 +86,8 @@ export type CombatEvent =
   | { type: 'aura'; amount: number }
   | { type: 'enemy-move'; uid: number; name: string; move?: EnemyMove; damage?: number }
   | { type: 'player-move'; name: string }
+  /** Une carte en active une autre (Atout, Photocopie, Métronome) : on montre la carte jouée. */
+  | { type: 'show-card'; def: CardDef; label: string; failed?: boolean }
   | { type: 'meteo'; id: string; name: string; ended?: boolean }
   | { type: 'energy'; delta: number; reason: string }
   | { type: 'break'; target: Who }
@@ -475,6 +477,8 @@ export class Combat {
   babyHits = 0;
   /** Dialga a lancé Hurle-Temps : 2 PA de moins au prochain tour du joueur. */
   timeRoar = false;
+  /** Cartes Écho déjà jouées deux fois ce combat. */
+  private echoed = new Set<number>();
   /** Lance-Soleil chargés : ils frappent au début du prochain tour du joueur. */
   pendingSolar: { amount: number; d: CardDef }[] = [];
   /** Abattage : baisses d'Attaque qui ne durent que ce tour. */
@@ -538,10 +542,16 @@ export class Combat {
     this.hand.splice(idx, 1);
 
     // Photocopie : la prochaine carte est jouée deux fois
-    const reps = this.doubleNext > 0 && !d.effects.some((e) => e.kind === 'double-jeu') ? 2 : 1;
+    let reps = this.doubleNext > 0 && !d.effects.some((e) => e.kind === 'double-jeu') ? 2 : 1;
     if (reps === 2) {
       this.doubleNext--;
       this.events.push({ type: 'player-move', name: `Photocopie : ${d.name} × 2` });
+    }
+    // Écho : la première fois de chaque combat, la carte se joue deux fois
+    if (d.keywords?.includes('echo') && !this.echoed.has(card.uid)) {
+      this.echoed.add(card.uid);
+      reps += 1;
+      this.events.push({ type: 'player-move', name: `Écho : ${d.name} × 2` });
     }
     for (let r = 0; r < reps; r++) {
       this.cardAuraUsed = false;
@@ -1161,6 +1171,7 @@ export class Combat {
           const cd = this.def(card);
           const playable = cd.category !== 'statut' && !cd.keywords?.includes('injouable') && !cd.effects.some((e) => e.kind === 'joue-pioche');
           this.events.push({ type: 'player-move', name: playable ? `Atout : ${cd.name} !` : `Atout : ${cd.name} ne peut pas être jouée` });
+          this.events.push({ type: 'show-card', def: cd, label: playable ? 'Atout joue' : 'Atout ne peut pas jouer', failed: !playable });
           if (playable) {
             this.cardAuraUsed = false;
             const t = cd.target === 'ennemi' && this.aliveEnemies().length ? this.rng.pick(this.aliveEnemies()) : undefined;
@@ -1353,6 +1364,7 @@ export class Combat {
         const last = this.lastPlayed;
         if (!last) return;
         this.events.push({ type: 'player-move', name: `Photocopie : ${last.name}` });
+        this.events.push({ type: 'show-card', def: last, label: 'Photocopie rejoue' });
         for (const e of last.effects) if (this.phase === 'joueur') this.resolve(e, last, target ?? this.aliveEnemies()[0]);
         return;
       }
@@ -1361,6 +1373,7 @@ export class Combat {
           c.character === p.character && c.category !== 'talent' && !c.requires && !c.effects.some((e) => ['metronome', 'copie', 'fuite', 'fin-tour', 'concentration', 'double-jeu'].includes(e.kind)));
         const pick = this.rng.pick(pool);
         this.events.push({ type: 'player-move', name: `Métronome : ${pick.name}` });
+        this.events.push({ type: 'show-card', def: pick, label: 'Métronome tire' });
         const t = this.aliveEnemies().length ? this.rng.pick(this.aliveEnemies()) : undefined;
         for (const e of pick.effects) if (this.phase === 'joueur') this.resolve(e, pick, t);
         return;

@@ -50,3 +50,26 @@ describe('cartes de novembre', () => {
     expect(h - (e.hp + e.block)).toBeGreaterThan(10);
   });
 });
+
+describe('Écho et malédictions', () => {
+  it('Écho : la carte se joue deux fois la première fois seulement', async () => {
+    const { enchantId } = await import('../src/data/cards');
+    const c = mk();
+    const id = enchantId('echo', 'vip-abattage');
+    const e = c.aliveEnemies()[0];
+    c.hand = [{ uid: 1, defId: id, upgraded: false }];
+    const h0 = e.hp + e.block;
+    c.play(1, e.uid);
+    const first = h0 - (e.hp + e.block);
+    c.hand = [{ uid: 1, defId: id, upgraded: false }];
+    const h1 = e.hp + e.block;
+    c.play(1, e.uid);
+    const second = h1 - (e.hp + e.block);
+    expect(first).toBeGreaterThan(second);
+  });
+  it('8 malédictions, toutes injouables', async () => {
+    const { CURSES, cardDef } = await import('../src/data/cards');
+    expect(CURSES).toHaveLength(8);
+    for (const id of CURSES) expect(cardDef(id).keywords).toContain('injouable');
+  });
+});

@@ -1082,7 +1082,7 @@ describe('enchantements rares et légendaires', () => {
     expect(n.legendaire).toBeLessThan(350);
     expect(n.rare).toBeGreaterThan(1000);
     expect(n.rare).toBeLessThan(1700);
-    expect(cardDef(enchantId('echo', 'ruse')).effects.length).toBe(cardDef('ruse').effects.length * 2);
+    expect(cardDef(enchantId('echo', 'ruse')).keywords).toContain('echo');
     expect(cardDef(enchantId('gratuit', 'aurasphere')).cost).toBe(0);
   });
 });

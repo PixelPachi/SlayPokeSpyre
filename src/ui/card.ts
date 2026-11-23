@@ -91,6 +91,7 @@ const EXTRA_KW = [
   kw('Éphémère', '#c9a0ff', 'Si la carte est encore dans ta main à la fin du tour, elle est épuisée.'),
   kw('Innée', '#c9a0ff', 'La carte est toujours dans ta main au début du combat.'),
   kw('Injouable', '#c9a0ff', 'Cette carte ne peut pas être jouée.'),
+  kw('Écho', '#ffd76a', 'La première fois que la carte est jouée dans un combat, elle se joue deux fois.'),
 ];
 const KW_INFOS = [...Object.values(STATUS_INFO), ...EXTRA_KW];
 const KW = KW_INFOS.map((i) => i.label).sort((a, b) => b.length - a.length);

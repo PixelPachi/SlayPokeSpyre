@@ -6,7 +6,7 @@ import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
-import { cardDef } from '../data/cards';
+import { cardDef, CURSES } from '../data/cards';
 import { LEVEL_EXP, MAX_LEVEL, levelFor, type ExpLine, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
@@ -488,7 +488,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   bindDeck(root, run);
   const results: string[] = [];
   const doPick = (p: EventPick, left: number) => {
-    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise')
+    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && !CURSES.includes(c.defId))
       : p.pick === 'enchanter' ? run.deck.filter((c) => { const d = cardDef(c.defId, c.upgraded); return (!d.enchant || run.weaver) && d.category !== 'statut' && !d.keywords?.includes('injouable'); })
       : run.deck;
     if (!cards.length) return showResult([...results, 'Aucune carte ne convient.'].join(' '));

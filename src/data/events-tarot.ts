@@ -1,7 +1,7 @@
 // Les 22 arcanes majeurs du tarot : des événements mystères avec la carte à gauche et les choix à droite.
 // Chaque arcane a son thème (le Diable : pactes contre des PV max, la Roue : le hasard, la Mort : oublier…).
 import type { Run } from '../core/run';
-import { cardDef } from './cards';
+import { cardDef, CURSES } from './cards';
 import { relicDef } from './relics';
 import type { GameEvent } from './events';
 import { CHARACTERS } from './characters';
@@ -19,7 +19,7 @@ const hurt = (r: Run, n: number) => {
 };
 /** Améliore des cartes au hasard ; renvoie leurs noms. */
 const upgradeRandom = (r: Run, n: number): string => {
-  const pool = r.deck.filter((c) => !c.upgraded && c.defId !== 'voeu-brise');
+  const pool = r.deck.filter((c) => !c.upgraded && !CURSES.includes(c.defId));
   const names: string[] = [];
   for (let i = 0; i < n && pool.length; i++) {
     const c = pool.splice(r.rng.int(0, pool.length - 1), 1)[0];
@@ -375,8 +375,9 @@ const transformAll = (r: Run): number => {
   for (const c of r.deck) c.defId = r.cardChoices('combat', 1)[0];
   return n;
 };
+/** Ajoute n malédictions au hasard (Vœu Brisé, Cauchemar, Poisse, Mauvais Œil, Entrave, Regard Noir, Torpeur, Gelure). */
 const addCurses = (r: Run, n: number) => {
-  for (let i = 0; i < n; i++) r.addCard('voeu-brise');
+  for (let i = 0; i < n; i++) r.addCard(r.rng.pick(CURSES));
 };
 
 const REVERSED: Record<string, NonNullable<GameEvent['reversed']>> = {
@@ -410,7 +411,7 @@ const REVERSED: Record<string, NonNullable<GameEvent['reversed']>> = {
       { label: 'Lire le savoir interdit', detail: 'Améliore TOUTES tes cartes, −15 PV max', available: hasUpgradable, apply: (r) => {
         loseMax(r, 15);
         let n = 0;
-        for (const c of r.deck) if (!c.upgraded && c.defId !== 'voeu-brise') { r.upgradeCard(c.uid); n++; }
+        for (const c of r.deck) if (!c.upgraded && !CURSES.includes(c.defId)) { r.upgradeCard(c.uid); n++; }
         return `Ta tête brûle… ${n} cartes améliorées, mais −15 PV max.`;
       } },
       leave('Tu refermes le parchemin sans le lire.'),
@@ -489,7 +490,7 @@ const REVERSED: Record<string, NonNullable<GameEvent['reversed']>> = {
         const lost = r.money;
         r.money = 0;
         const won: string[] = [];
-        for (const c of r.deck) if (!c.upgraded && c.defId !== 'voeu-brise' && r.rng.next() < 0.05) { r.upgradeCard(c.uid); won.push(cardDef(c.defId).name); }
+        for (const c of r.deck) if (!c.upgraded && !CURSES.includes(c.defId) && r.rng.next() < 0.05) { r.upgradeCard(c.uid); won.push(cardDef(c.defId).name); }
         return `−${lost} ₽. ${won.length ? `La roue améliore : ${won.join(', ')} !` : 'La roue ne rend rien…'}`;
       } },
       leave('Tu gardes ta bourse bien fermée.'),

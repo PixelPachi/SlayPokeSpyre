@@ -64,7 +64,7 @@ let STATUS_ALIAS: Partial<Record<StatusId, StatusId>> = {};
 export function setStatusAlias(alias: Partial<Record<StatusId, StatusId>>): void { STATUS_ALIAS = alias; }
 
 const KEYWORD_LABELS: Record<NonNullable<CardDef['keywords']>[number], string> = {
-  epuisee: 'Épuisée', conservee: 'Conservée', ephemere: 'Éphémère', innee: 'Innée', injouable: 'Injouable',
+  epuisee: 'Épuisée', conservee: 'Conservée', ephemere: 'Éphémère', innee: 'Innée', injouable: 'Injouable', echo: 'Écho',
 };
 
 const signed = (n: number) => (n > 0 ? `+${n}` : `−${-n}`);

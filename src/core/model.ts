@@ -120,7 +120,7 @@ export type Effect =
   | { kind: 'auto-degats'; amount: number } // le lanceur subit ces dégâts (la Protection compte)
   | { kind: 'consomme-aura'; amount: number };
 
-export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable';
+export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable' | 'echo';
 
 export type CardCategory = 'attaque' | 'technique' | 'talent' | 'statut';
 export type Rarity = 'depart' | 'commune' | 'peu-commune' | 'rare';
