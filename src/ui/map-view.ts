@@ -33,28 +33,9 @@ const pos = (n: { row: number; col: number; dx?: number; dy?: number }) => ({
 let BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (ROWS - 1) * ROW_H - BOSS_GAP };
 
 export function nodeIcon(type: NodeType, bossDex = 15): string {
-  switch (type) {
-    case 'combat':
-      return '<svg viewBox="0 0 40 40"><path d="M8 34c2-10 2-16 0-24 4 6 6 14 6 24zM16 34c1-12 3-20 8-28-2 9-3 18-2 28zM24 34c2-8 5-14 10-18-4 6-6 12-5 18z" fill="#7ad04e" stroke="#1d3b12" stroke-width="2" stroke-linejoin="round"/></svg>';
-    case 'evenement':
-      return '<svg viewBox="0 0 40 40"><text x="20" y="31" text-anchor="middle" font-size="30" font-weight="900" fill="#f5d36b" stroke="#3b2a05" stroke-width="2" font-family="Nunito, sans-serif">?</text></svg>';
-    case 'centre':
-      return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#fff" stroke="#3a0d0d" stroke-width="2.5"/><path d="M5 20a15 15 0 0 1 30 0z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5"/><path d="M17 11h6v6h6v6h-6v6h-6v-6h-6v-6h6z" fill="#fff" stroke="#3a0d0d" stroke-width="2"/></svg>';
-    case 'boutique':
-      return `<img class="kecleon-icon" src="${asset('sprites/pokemon/front/352.png')}" alt="">`;
-    case 'elite':
-      return '<svg viewBox="0 0 40 40"><path d="M6 10l7 6 7-10 7 10 7-6-3 22H9z" fill="#e8483f" stroke="#3a0d0d" stroke-width="2.5" stroke-linejoin="round"/><circle cx="15" cy="23" r="2.5" fill="#fff"/><circle cx="25" cy="23" r="2.5" fill="#fff"/></svg>';
-    case 'tresor':
-      return `<img src="${asset('sprites/items/poke-ball.png')}" alt="">`;
-    case 'coffre':
-      return '<svg viewBox="0 0 40 40"><rect x="6" y="16" width="28" height="18" rx="2" fill="#a0642c" stroke="#3b2208" stroke-width="2.5"/><path d="M6 18c0-8 6-11 14-11s14 3 14 11z" fill="#c07a36" stroke="#3b2208" stroke-width="2.5"/><rect x="6" y="17" width="28" height="4" fill="#f5c84c" stroke="#3b2208" stroke-width="1.5"/><rect x="17" y="18" width="6" height="8" rx="1" fill="#f5c84c" stroke="#3b2208" stroke-width="1.5"/></svg>';
-    case 'pension':
-      return `<img src="${asset('sprites/items/lucky-egg.png')}" alt="">`;
-    case 'ct':
-      return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#7a8fd8" stroke="#16204a" stroke-width="2.5"/><circle cx="20" cy="20" r="9" fill="#b9c6ff" stroke="#16204a" stroke-width="1.5"/><circle cx="20" cy="20" r="3" fill="#16204a"/><text x="20" y="13" text-anchor="middle" font-size="7" font-weight="900" fill="#16204a" font-family="Nunito, sans-serif">CT</text></svg>';
-    case 'boss':
-      return `<img src="${asset(`sprites/pokemon/front/${bossDex}.png`)}" alt="">`;
-  }
+  // Icônes peintes (Gemini) pour tous les lieux ; le gardien garde son sprite
+  if (type !== 'boss') return `<img class="node-art" src="${asset(`ui/carte/${type}.png`)}" alt="">`;
+  return `<img src="${asset(`sprites/pokemon/front/${bossDex}.png`)}" alt="">`;
 }
 
 export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void): void {
@@ -102,7 +83,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
     <div class="map-screen">
       ${topbar(run, `${zone.name} · ${run.act > 4 ? "acte secret" : `acte ${run.act}`}`)}
       <div class="map-scroll">
-        <div class="map-canvas" style="height:${HEIGHT}px">
+        <div class="map-canvas" style="height:${HEIGHT}px;background-image:linear-gradient(#0a0e1899, #0a0e18b3), url('${asset(`illustrations/cartes/${zone.id}.webp`)}')">
           <div class="map-title" style="top:${BOSS_POS.y - 130}px">Gardien : ${boss.name}</div>
           <svg class="map-lines" width="1280" height="${HEIGHT}">${lines.join('')}</svg>
           ${nodes.join('')}

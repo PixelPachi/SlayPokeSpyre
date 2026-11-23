@@ -1499,3 +1499,15 @@ img.sprite, .roster img { image-rendering: pixelated; }
   padding: 14px 26px 10px;
 }
 .shop-scene:not(.dark) .carpet::before { display: none; }
+/* Tapis peint plein écran : il occupe toute la zone de jeu, les articles sont posés dans sa bordure */
+.carpet-wrap:has(.carpet.painted) { background: #000d; }
+.shop-scene .carpet.painted {
+  width: 100%; height: 100%; max-height: none; border: 0; outline: 0; border-radius: 0; box-shadow: none;
+  background-color: #2a0d14; background-position: center; background-size: 100% 100%; background-repeat: no-repeat;
+  padding: 7.5% 9% 6%; animation: carpetIn 0.3s ease-out;
+}
+.shop-scene.dark .carpet.painted { background-color: #140a1f; }
+.shop-scene .carpet.painted::before, .shop-scene .carpet.painted::after { display: none; }
+/* Fond peint de la zone derrière la carte (défile avec elle) */
+.map-canvas { background-size: cover; background-position: center top; background-repeat: no-repeat; }
+.map-node img.node-art, .legend-icon img.node-art { width: 78%; height: 78%; object-fit: contain; image-rendering: auto; }

@@ -266,7 +266,9 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
     }), `shop-screen shop-place ${carpetShown ? 'carpet-stay' : ''}`);
     if (carpetOpen) {
       const c = root.querySelector<HTMLElement>('.carpet');
-      if (c) { c.scrollTop = carpetScroll; if (!c.closest('.dark')) c.style.borderImageSource = `url("${asset('illustrations/tapis-kecleon.webp')}")`; }
+      if (c) {
+        c.scrollTop = carpetScroll;
+      }
       carpetShown = true;
     } else carpetShown = false;
     root.querySelector<HTMLElement>('.carpet')?.addEventListener('scroll', (ev) => { carpetScroll = (ev.target as HTMLElement).scrollTop; });
@@ -391,7 +393,7 @@ export function shopScene(o: { keeper: string; keeperCls?: string; bubble: strin
       ${o.hero ? `<img class="shop-hero" src="${o.hero}" alt="">` : ''}
       ${o.keeper ? `<button class="shop-keeper ${o.keeperCls ?? ''}"><img src="${o.keeper}" alt=""><span class="shop-bubble">${o.bubble}</span></button>` : `<p class="shop-bubble alone">${o.bubble}</p>`}
       <div class="shop-scene-actions">${o.actions}</div>
-      ${o.carpet ? `<div class="carpet-wrap"><div class="carpet">${o.carpet}</div></div>` : ''}
+      ${o.carpet ? `<div class="carpet-wrap"><div class="carpet painted" style="background-image:url('${asset(o.theme === 'dark' ? 'illustrations/tapis-marche-noir.webp' : 'illustrations/tapis-kecleon.webp')}')">${o.carpet}</div></div>` : ''}
     </div>`;
 }
 

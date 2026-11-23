@@ -24,6 +24,7 @@ const FILE_TRACKS: Record<string, string> = {
   'pilier-celeste': 'music/pilier-celeste.mp3', // Sky Pillar
   'mont-abrupt': 'music/mont-abrupt.mp3', // Stark Mountain
   'tour-dragospire': 'music/tour-dragospire.mp3', // Dragonspiral Tower
+  'foret-d-empoigne': 'music/foret-d-empoigne.mp3', // Pinwheel Forest
 };
 /** Vrai si une musique enregistrée existe pour cet identifiant. */
 export function hasTrack(id: string): boolean { return !!FILE_TRACKS[id]; }
