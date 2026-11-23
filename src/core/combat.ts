@@ -225,6 +225,8 @@ export class Combat {
     if (opts.enemyPower && opts.enemyPower > 1) {
       for (const e of this.enemies) e.statuses.attaque = Math.round((opts.enemyPower - 1) * 4);
     }
+    // Ballon : résistance aux attaques Sol
+    if (this.relics.has('ballon')) this.resists.add('sol');
     // Lanterne Bleue (Caninos des âmes) : 3 Âmes rejoignent la pioche à chaque combat
     const souls = this.relics.has('lanterne-bleue') ? [0, 1, 2].map(() => ({ uid: this.nextTempUid++, defId: 'can-ame', upgraded: false })) : [];
     this.drawPile = this.rng.shuffle([...opts.deck, ...souls]);
@@ -655,6 +657,10 @@ export class Combat {
         }
         // Drain : récupère la moitié des dégâts ; Contrecoup : se blesse
         if (m.drain && e.hp > 0 && dealt > 0) this.healEnemy(e, Math.floor(dealt / 2));
+        // Bulbe : une attaque Eau te renforce
+        if (m.pokeType === 'eau' && m.damage !== undefined && this.has('bulbe') && this.player.hp > 0) {
+          this.relicFired('bulbe', () => { this.addStatus(this.player, 'player', 'attaque', 1); this.addStatus(this.player, 'player', 'defense', 1); });
+        }
         if (m.recoil && e.hp > 0) this.dealDamage(e, uid, m.recoil, 'normal');
         if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
           this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
