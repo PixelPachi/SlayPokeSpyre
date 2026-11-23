@@ -356,7 +356,18 @@ export class Run {
 
   /** 3 cartes différentes à choisir. Chaque emplacement a 12 % de chances d'être une carte neutre. */
   cardChoices(kind: 'combat' | 'elite' | 'boss' | 'boutique', count = 3, neutralChance = kind === 'boutique' ? 0 : 0.12): string[] {
-    const own = this.character === 'mew' ? mewPool(this.unlocked) : rewardPool(this.character, this.unlocked);
+    let own = this.character === 'mew' ? mewPool(this.unlocked) : rewardPool(this.character, this.unlocked);
+    // Chien de la Lanterne : toutes les cartes Spectre du jeu s'ajoutent à ses récompenses
+    if (this.character === 'caninos' && this.skin === 'lanterne') {
+      // (sans les cartes qui dépendent d'une mécanique d'un autre Pokémon : Bébé, Rage, Aura)
+      const foreign = (c: CardDef) => c.effects.some((e) => e.kind.startsWith('bebe') || ['souvenir', 'invocation', 'aura', 'aura-mult', 'degats-aura'].includes(e.kind)
+        || (e.kind === 'pouvoir' && e.power === 'rancune') || (e.kind === 'statut' && (e as { status?: string }).status === 'rage'));
+      const names = new Set(own.map((c) => c.name));
+      for (const c of allCards()) {
+        if (c.pokeType !== 'spectre' || c.rarity === 'depart' || c.character === 'caninos' || foreign(c) || names.has(c.name)) continue;
+        names.add(c.name); own = [...own, c];
+      }
+    }
     const out: string[] = [];
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);

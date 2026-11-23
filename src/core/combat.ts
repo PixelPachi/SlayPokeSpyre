@@ -225,13 +225,17 @@ export class Combat {
     if (opts.enemyPower && opts.enemyPower > 1) {
       for (const e of this.enemies) e.statuses.attaque = Math.round((opts.enemyPower - 1) * 4);
     }
-    this.drawPile = this.rng.shuffle([...opts.deck]);
+    // Lanterne Bleue (Caninos des âmes) : 3 Âmes rejoignent la pioche à chaque combat
+    const souls = this.relics.has('lanterne-bleue') ? [0, 1, 2].map(() => ({ uid: this.nextTempUid++, defId: 'can-ame', upgraded: false })) : [];
+    this.drawPile = this.rng.shuffle([...opts.deck, ...souls]);
     // Cartes Innées en haut de la pioche
     this.drawPile.sort((a, b) => Number(this.hasKw(a, 'innee')) - Number(this.hasKw(b, 'innee')));
 
     // Talents de départ
     if (ch.id === 'riolu') this.gainAura(3);
-    if (ch.id === 'caninos') for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
+    this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
+    // Intimidation (Caninos) ; le Chien de la Lanterne a Feu des Âmes à la place
+    if (ch.id === 'caninos' && !this.soulDog) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
     // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
     const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
@@ -258,7 +262,7 @@ export class Combat {
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
-    if (this.has('vive-griffe')) this.relicFired('vive-griffe', () => this.draw(2));
+    if (this.has('vive-griffe')) { this.handDraw = true; this.relicFired('vive-griffe', () => this.draw(2)); this.handDraw = false; }
     if (this.has('cuillere-tordue')) this.relicFired('cuillere-tordue', () => this.changeEnergy(1, 'Cuillère Tordue'));
   }
 
@@ -456,6 +460,10 @@ export class Combat {
   crimson = false;
   /** Skin Alchimiste (Vipélierre) : ses Vampigraines deviennent du Poison. */
   alchemist = false;
+  /** Skin Chien de la Lanterne (Caninos) : chaque pioche pendant son tour inflige 12 dégâts à tous les ennemis. */
+  soulDog = false;
+  /** Pioche de la main du tour en cours (ne déclenche pas Feu des Âmes). */
+  private handDraw = false;
   /** Le Bébé n'enrage sa mère qu'une fois par combat. */
   private babyEnraged = false;
 
@@ -799,11 +807,24 @@ export class Combat {
       this.events.push({ type: 'aura', amount: this.player.aura });
       this.events.push({ type: 'player-move', name: 'Énergie illimitée !' });
     }
+    this.handDraw = true;
     this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0));
+    this.handDraw = false;
     this.checkLucarite();
   }
 
   draw(n: number): void {
+    const before = this.hand.length;
+    this.drawCards(n);
+    // Feu des Âmes (Chien de la Lanterne) : chaque pioche pendant le tour brûle tous les ennemis
+    if (this.soulDog && !this.handDraw && this.phase === 'joueur' && this.hand.length > before) {
+      this.events.push({ type: 'player-move', name: 'Feu des Âmes !' });
+      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, 12, 'normal');
+      this.checkEnd();
+    }
+  }
+
+  private drawCards(n: number): void {
     for (let i = 0; i < n; i++) {
       if (this.hand.length >= MAX_HAND) return;
       if (this.drawPile.length === 0) {

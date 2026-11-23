@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (329 images)
+## 2. Les illustrations des capacités (331 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -36,7 +36,7 @@ Prompt commun :
 
 Puis, selon la colonne « Pokémon dans l'image » :
 
-- **Capacité exclusive (182 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
+- **Capacité exclusive (184 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
 - **Capacité partagée (147 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
@@ -53,6 +53,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `affilage.png` | Affilage | Normal · Technique | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `aile-d-acier.png` | Aile d'Acier | Acier · Attaque | Neutre | Aucun (capacité seule) | métal brillant, reflets argentés, étincelles | ☐ |
 | `aire-d-herbe.png` | Aire d'Herbe | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
+| `ame.png` | Âme | Spectre · Technique | Caninos | **Caninos** lance la capacité | ombres violettes, flammes fantomatiques | ☐ |
 | `amnesie.png` | Amnésie | Psy · Technique | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `aqua-jet.png` | Aqua-Jet | Eau · Attaque | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
 | `aromate-bleu.png` | Aromate Bleu | Eau · Technique | Vipélierre | **Vipélierre** lance la capacité | jets et vagues d’eau bleue, éclaboussures | ☐ |
@@ -227,6 +228,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `larcin.png` | Larcin | Ténèbres · Attaque | Kangourex, Caninos | Aucun (capacité seule) | ténèbres, griffes d’ombre, lueurs rouges | ☐ |
 | `laser-glace.png` | Laser Glace | Glace · Attaque | Neutre | Aucun (capacité seule) | cristaux de glace, givre, brume froide bleutée | ☐ |
 | `lechouille.png` | Léchouille | Spectre · Attaque | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
+| `lechouille-des-ames.png` | Léchouille des Âmes | Spectre · Attaque | Caninos | **Caninos** lance la capacité | ombres violettes, flammes fantomatiques | ☐ |
 | `ligotage.png` | Ligotage | Normal · Attaque | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `lire-esprit.png` | Lire-Esprit | Normal · Talent | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `luminocanon.png` | Luminocanon | Acier · Attaque | Riolu, Mew | **Riolu** lance la capacité | métal brillant, reflets argentés, étincelles | ☐ |

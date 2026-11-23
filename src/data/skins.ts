@@ -26,6 +26,8 @@ export interface SkinDef {
   firstCard?: string;
   /** Condition en plus : mettre K.O. N Pokémon d'un type (toutes runs confondues). */
   kills?: { type: PokeType; goal: number };
+  /** Peut obtenir toutes les cartes de type Spectre du jeu. */
+  spectreCards?: boolean;
   /** Cartes ajoutées au deck de départ. */
   extraCards?: string[];
   /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
@@ -56,7 +58,8 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
-    goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos',
+    goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 12 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',
+    relic: 'lanterne-bleue', deck: ['can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'abri', 'abri', 'abri', 'abri', 'flammeche', 'morsure'], spectreCards: true,
     evolutions: [
       { act: 2, dex: 59, name: 'Arcanin', types: ['feu'], hp: 12 },
       { act: 3, dex: 9059, name: 'Arcanâme', types: ['feu', 'spectre'], hp: 8 },
