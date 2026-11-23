@@ -17,7 +17,7 @@ import { addHistory, beatenBosses, equippedSkin, recordRunStats, characterRelics
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
 import { expBreakdown } from './data/unlocks';
 import { ENEMY_DEFS } from './data/enemies';
-import { BERRY_DEFS } from './data/berries';
+import { BERRY_DEFS, poisonedBerry } from './data/berries';
 import type { EventFight } from './data/events';
 import { berrySlots } from './ui/run-ui';
 import { setStatusAlias } from './ui/labels';
@@ -93,7 +93,18 @@ stage.addEventListener('click', (ev) => {
   const canEat = inCombat || !b.combatOnly;
   menu.innerHTML = `<b>${b.name}</b><span>${b.text}</span>
     <button class="btn small primary eat" ${canEat ? '' : 'disabled'}>${canEat ? 'Manger' : 'Seulement en combat'}</button>
+    ${run.relics.includes('plaque-toxik') && !b.noDrop ? '<button class="btn small transmute">☠ Transformer en baie empoisonnée</button>' : ''}
     <button class="btn small toss">Jeter la baie</button>`;
+  // Plaque Toxik (Vipélierre Alchimiste) : la baie devient une baie empoisonnée, plus forte si elle était rare
+  menu.querySelector('.transmute')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    run.berries[i] = poisonedBerry(run.berries[i]);
+    sfx('statut');
+    menu.remove();
+    document.querySelectorAll('.tb-berries').forEach((el) => (el.innerHTML = berrySlots(run)));
+    toast(`${b.name} devient une ${BERRY_DEFS[run.berries[i]].name} !`);
+    persist(run, run.inNode);
+  });
   menu.querySelector('.eat')!.addEventListener('click', (e) => {
     e.stopPropagation();
     if (inCombat) {
@@ -491,6 +502,7 @@ function endRun(run: Run, victory: boolean): void {
   const result = grantExp(save, run.character, exp);
   const newSkins = recordRunStats(save, run.character, {
     shinies: run.shiniesMet, elites: run.elitesDefeated, bosses: run.bossesDefeated, combats: run.combatsWon, wins: victory ? 1 : 0,
+    ...Object.fromEntries(Object.entries(run.typeKills ?? {}).map(([t, n]) => [`ko-${t}`, n])),
   }, run.bossIds);
   for (const k of newSkins) setTimeout(() => toast(`Skin débloqué : ${CHARACTERS[run.character].name} ${k.name.toLowerCase()} ! Choisis-le sur l'écran de sélection.`), 1200);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory, run.bossIds.includes('arceus'));

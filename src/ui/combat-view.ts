@@ -178,6 +178,8 @@ export class CombatView {
     this.ended = true;
     // Gribouille : les capacités copiées restent dans le deck jusqu'à la fin de la run
     for (const id of this.combat.copiedCards) this.run.addCard(id);
+    // K.O. par type (objectifs de skins)
+    for (const e of this.combat.enemies) if (e.hp <= 0) for (const t of e.types) this.run.typeKills[t] = (this.run.typeKills[t] ?? 0) + 1;
     this.onEnd({
       victory: this.combat.phase === 'victoire',
       hp: this.combat.player.hp,

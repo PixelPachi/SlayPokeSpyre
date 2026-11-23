@@ -45,3 +45,30 @@ describe('skin Alchimiste', () => {
     expect(cardText(cardDef('vampigraine'), null, null)).toContain('Vampigraine');
   });
 });
+
+import { BERRY_DEFS, poisonedBerry } from '../src/data/berries';
+import { skinProgress } from '../src/core/save';
+
+describe('Alchimiste : Plaque Toxik et condition de déblocage', () => {
+  it('remplace le Grain Miracle par la Plaque Toxik', () => {
+    const run = new Run('ALC2', 'vipelierre');
+    run.applySkin('alchimiste', skinDef('vipelierre', 'alchimiste'));
+    expect(run.relics).toContain('plaque-toxik');
+    expect(run.relics).not.toContain('grain-miracle');
+  });
+  it('les baies empoisonnées dépendent de la rareté et ne tombent jamais en butin', () => {
+    expect(poisonedBerry('oran')).toBe('empoisonnee');
+    const rare = Object.values(BERRY_DEFS).find((b) => b.rarity === 'rare' && !b.noDrop)!;
+    expect(poisonedBerry(rare.id)).toBe('empoisonnee-rare');
+    expect(BERRY_DEFS['empoisonnee-rare'].fx.effects!.length).toBeGreaterThan(BERRY_DEFS.empoisonnee.fx.effects!.length);
+    const run = new Run('DROP', 'vipelierre');
+    for (let i = 0; i < 300; i++) expect(BERRY_DEFS[run.rollBerry()].noDrop).toBeFalsy();
+  });
+  it('déblocage : Brutapode + 25 Pokémon Poison mis K.O.', () => {
+    const k = skinDef('vipelierre', 'alchimiste')!;
+    const save = { beaten: { vipelierre: ['brutapode'] }, stats: { vipelierre: { 'ko-poison': 10 } } } as never;
+    expect(skinProgress(save, 'vipelierre', k)).toEqual([11, 26]);
+    const done = { beaten: { vipelierre: ['brutapode'] }, stats: { vipelierre: { 'ko-poison': 30 } } } as never;
+    expect(skinProgress(done, 'vipelierre', k)).toEqual([26, 26]);
+  });
+});

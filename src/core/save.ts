@@ -58,8 +58,19 @@ export function beatenBosses(s: SaveData, c: CharacterId): string[] {
 
 /** Progression d'un skin : [fait, objectif]. */
 export function skinProgress(s: SaveData, c: CharacterId, skin: SkinDef): [number, number] {
-  if (skin.bosses) return [skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length, skin.bosses.length];
+  const k = skin.kills ? Math.min(skin.kills.goal, statOf(s, c, `ko-${skin.kills.type}`)) : 0;
+  const kg = skin.kills?.goal ?? 0;
+  if (skin.bosses) return [skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length + k, skin.bosses.length + kg];
   return [Math.min(skin.goal, statOf(s, c, skin.stat)), skin.goal];
+}
+
+/** Détail lisible de la progression d'un skin (gardiens et K.O. par type). */
+export function skinDetail(s: SaveData, c: CharacterId, skin: SkinDef): string {
+  const parts: string[] = [];
+  if (skin.bosses) parts.push(`gardiens ${skin.bosses.filter((b) => beatenBosses(s, c).includes(b)).length}/${skin.bosses.length}`);
+  if (skin.kills) parts.push(`K.O. ${Math.min(skin.kills.goal, statOf(s, c, `ko-${skin.kills.type}`))}/${skin.kills.goal}`);
+  if (!parts.length) { const [n, g] = skinProgress(s, c, skin); return `${n}/${g}`; }
+  return parts.join(', ');
 }
 
 export function skinUnlocked(s: SaveData, c: CharacterId, skin: SkinDef): boolean {

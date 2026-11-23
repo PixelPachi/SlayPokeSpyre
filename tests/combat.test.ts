@@ -687,8 +687,8 @@ describe('arcanes inversés, baies, Kecleon', async () => {
     expect(run.deck.filter((c) => c.defId === 'diable-vampirisme')).toHaveLength(4);
     expect(run.deck.filter((c) => c.defId === 'diable-soin')).toHaveLength(4);
   });
-  it('52 baies et 3 emplacements', () => {
-    expect(BERRIES).toHaveLength(52);
+  it('52 baies trouvables (+ 3 empoisonnées) et 3 emplacements', () => {
+    expect(BERRIES.filter((b) => !b.noDrop)).toHaveLength(52);
     const run = new Run('BAIES', 'riolu');
     for (let i = 0; i < 3; i++) expect(run.addBerry(run.rollBerry())).toBe(true);
     expect(run.addBerry('oran')).toBe(false);

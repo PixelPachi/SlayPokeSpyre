@@ -1,3 +1,4 @@
+import type { PokeType } from './types';
 import { primordialTypes, skinDef } from '../data/skins';
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
 import type { Form, Card, CardDef, CharacterId } from './model';
@@ -128,6 +129,8 @@ export class Run {
   lastEnemies: string[] = [];
   /** Dominants déjà affrontés : on évite de retomber sur le même. */
   elitesMet: string[] = [];
+  /** Pokémon mis K.O. par type pendant la run (objectifs de skins). */
+  typeKills: Partial<Record<PokeType, number>> = {};
   eventsSeen = 0;
   shiniesMet = 0;
   /** Objets tenus (le premier est l'objet de départ). */
@@ -234,9 +237,9 @@ export class Run {
   rollBerry(): string {
     const r = this.rng.next();
     const want = r < 0.65 ? 'commune' : r < 0.95 ? 'peu-commune' : 'rare';
-    const mine = BERRIES.filter((x) => x.character === this.character);
+    const mine = BERRIES.filter((x) => x.character === this.character && !x.noDrop);
     if (mine.length && this.rng.next() < 0.2) return this.rng.pick(mine).id;
-    return this.rng.pick(BERRIES.filter((x) => x.rarity === want && !x.character)).id;
+    return this.rng.pick(BERRIES.filter((x) => x.rarity === want && !x.character && !x.noDrop)).id;
   }
 
   /** Événements déjà vus pendant cette run (on ne retombe pas deux fois sur le même arcane). */

@@ -65,6 +65,8 @@ const RELICS: RelicDef[] = [
     text: 'Tes attaques de type Plante infligent 2 dégâts de plus.' },
   { id: 'herbe-blanche', name: 'Herbe Blanche', sprite: 'white-herb', rarity: 'peu-commun', owner: 'vipelierre', free: true,
     text: 'Commence chaque combat avec Attaque −1 et Défense −1… que Contestation transforme en +1 et +1.' },
+  { id: 'plaque-toxik', name: 'Plaque Toxik', sprite: 'toxic-plate', rarity: 'quete', owner: 'vipelierre', free: true,
+    text: 'Vipélierre Alchimiste : tu peux transformer une baie en baie empoisonnée (clique sur la baie). Plus la baie est rare, plus le poison est fort et plus il inflige d’effets.' },
   { id: 'pic-venin', name: 'Pic Venin', sprite: 'poison-barb', rarity: 'rare', owner: 'vipelierre', free: true,
     text: 'Chaque statut que tu infliges à un ennemi en inflige 1 de plus.' },
   { id: 'lunettes-filtre', name: 'Lunettes Filtre', sprite: 'safety-goggles', rarity: 'peu-commun', owner: 'commun',

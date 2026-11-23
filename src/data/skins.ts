@@ -2,7 +2,7 @@
 import type { CharacterId } from '../core/model';
 import type { PokeType } from '../core/types';
 
-export type SkinStat = 'shinies' | 'elites' | 'bosses' | 'combats' | 'wins';
+export type SkinStat = 'shinies' | 'elites' | 'bosses' | 'combats' | 'wins' | `ko-${PokeType}`;
 
 export interface SkinDef {
   id: string;
@@ -24,6 +24,8 @@ export interface SkinDef {
   relic?: string;
   /** Remplace la première carte du deck de départ par celle-ci. */
   firstCard?: string;
+  /** Condition en plus : mettre K.O. N Pokémon d'un type (toutes runs confondues). */
+  kills?: { type: PokeType; goal: number };
   /** Cartes ajoutées au deck de départ. */
   extraCards?: string[];
   /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
@@ -48,8 +50,8 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   }, primordial('Riolu', [447, 448, 10059])],
   vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497]), {
     id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
-    goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) en jouant Vipélierre. Ses Vampigraines deviennent du Poison, et il commence avec Catalyse (double le Poison de la cible).',
-    extraCards: ['vip-catalyse'],
+    goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 25 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',
+    kills: { type: 'poison', goal: 25 }, extraCards: ['vip-catalyse'], relic: 'plaque-toxik',
   }],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
