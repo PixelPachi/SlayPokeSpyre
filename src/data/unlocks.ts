@@ -58,6 +58,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     9: ['can-fracass-tete', 'can-grand-courroux', 'can-lame-de-roc', 'can-blabla-dodo'],
     10: ['can-lance-soleil', 'can-malediction'],
   },
+  quelorior: { 1: ['quel-atout'] },
   mew: {
     1: ['mew-metronome', 'mew-psyko', 'mew-ultimapoing', 'mew-moi-d-abord', 'mew-mur-lumiere', 'mew-copietype', 'mew-relais', 'mew-bouclier', 'mew-amnesie', 'mew-protection', 'mew-meteores', 'mew-choc-psy', 'mew-vibraqua', 'mew-rayon-charge'],
     2: ['mew-hate', 'mew-repos', 'mew-clonage', 'mew-ball-ombre', 'mew-boule-elek', 'mew-feu-ensorcele', 'mew-poing-de-feu', 'mew-poing-eclair', 'mew-poing-glace'],

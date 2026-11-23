@@ -74,7 +74,13 @@ export function skinDetail(s: SaveData, c: CharacterId, skin: SkinDef): string {
   return parts.join(', ');
 }
 
+/** `?tous` dans l'adresse : mode essai, tout est débloqué (personnages, skins, cartes, objets, Rouages). */
+export function testMode(): boolean {
+  return typeof location !== 'undefined' && new URLSearchParams(location.search).has('tous');
+}
+
 export function skinUnlocked(s: SaveData, c: CharacterId, skin: SkinDef): boolean {
+  if (testMode()) return true;
   const [n, goal] = skinProgress(s, c, skin);
   return n >= goal;
 }
@@ -210,6 +216,7 @@ export function writeSave(s: SaveData): void {
 }
 
 export function characterLevel(s: SaveData, c: CharacterId): number {
+  if (testMode()) return 99;
   return levelFor(s.exp[c] ?? 0);
 }
 

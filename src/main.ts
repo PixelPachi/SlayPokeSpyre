@@ -267,7 +267,7 @@ function startRun(character: CharacterId): void {
   activeRun = run;
   // Rouages du Temps et de l'Espace : seulement après avoir apaisé Dialga Primal avec au moins 3 Pokémon différents
   const dialgaWins = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as CharacterId[]).filter((c) => beatenBosses(save, c).includes('dialga-primal')).length;
-  run.cogsUnlocked = dialgaWins >= 3 || params.has('rouages');
+  run.cogsUnlocked = dialgaWins >= 3 || params.has('rouages') || params.has('tous');
   // Pour tester : ?acte=2 commence directement à l'acte 2 (?acte=5 : la Salle Originelle)
   const startAct = Math.min(SECRET_ACT, Number(params.get('acte') ?? 1));
   while (run.act < startAct) run.nextAct();

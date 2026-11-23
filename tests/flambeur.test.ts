@@ -56,3 +56,14 @@ describe('Flambeur', () => {
     expect(r.relicPool()).not.toContain('corail');
   });
 });
+
+import { unlockedCards } from '../src/data/unlocks';
+describe('Atout sans skin', () => {
+  it('est débloqué dès le niveau 1 et proposé en récompense', () => {
+    expect(unlockedCards('quelorior', 1)).toContain('quel-atout');
+    const r = new Run('ATO', 'quelorior', unlockedCards('quelorior', 1));
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) for (const id of r.cardChoices('combat')) seen.add(id);
+    expect(seen.has('quel-atout')).toBe(true);
+  });
+});
