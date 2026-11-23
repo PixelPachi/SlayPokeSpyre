@@ -22,6 +22,8 @@ export interface SkinDef {
   /** Prévu pour plus tard : le skin remplace le deck de départ et/ou l'objet tenu de départ. */
   deck?: string[];
   relic?: string;
+  /** Remplace la première carte du deck de départ par celle-ci. */
+  firstCard?: string;
   /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
   evolutions?: { act: number; dex: number; name: string; types: PokeType[]; hp: number }[];
 }
@@ -34,7 +36,7 @@ const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouan
 // Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.
 const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): SkinDef => ({
   id: 'primordial', name: 'Primordial', stat: 'bosses', goal: 1, bosses: ['dialga-primal'], dex,
-  goalText: `Vaincre Dialga Primal en jouant ${name}. Le Pokémon gagne le type Dragon.`, addDragon: true, ...extra,
+  goalText: `Vaincre Dialga Primal en jouant ${name}. Le Pokémon gagne le type Dragon, et Hurle-Temps remplace une carte de son deck de départ.`, addDragon: true, firstCard: 'n-hurle-temps', ...extra,
 });
 
 export const SKINS: Record<CharacterId, SkinDef[]> = {

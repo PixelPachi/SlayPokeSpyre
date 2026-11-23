@@ -18,6 +18,9 @@ function n(
 }
 
 export const NEUTRAL_CARDS: CardDef[] = [
+  // ——— Skins primordiaux : le cri de Dialga Primal remplace une carte de départ ———
+  n('hurle-temps', 'Hurle-Temps', 'dragon', 'attaque', 'depart', 2, 'ennemi', [dmg(30), { kind: 'recharge', amount: 2 }], { effects: [dmg(40), { kind: 'recharge', amount: 2 }] }),
+
   // ——— Sommeil ———
   n('paresse', 'Paresse', 'normal', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'repos', turns: 3, healPct: 0.5 }, { kind: 'ajoute-sommeil' }], { cost: 0 }, ['epuisee']),
   // Jouables seulement endormi

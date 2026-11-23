@@ -448,6 +448,8 @@ export class Combat {
   babyHits = 0;
   /** Dialga a lancé Hurle-Temps : 2 PA de moins au prochain tour du joueur. */
   timeRoar = false;
+  /** Recharge (Hurle-Temps du joueur) : PA en moins au prochain tour. */
+  rechargePa = 0;
   /** Le Bébé n'enrage sa mère qu'une fois par combat. */
   private babyEnraged = false;
 
@@ -767,6 +769,7 @@ export class Combat {
     if (this.bossAlive('distorsion') && this.turn >= 3) this.changeEnergy(-1, 'Distorsion du Temps');
     // Hurle-Temps : le tour suivant, 2 PA de moins
     if (this.timeRoar) { this.timeRoar = false; this.changeEnergy(-2, 'Hurle-Temps'); }
+    if (this.rechargePa) { const n = this.rechargePa; this.rechargePa = 0; this.changeEnergy(-n, 'Recharge'); }
     if (this.player.statuses.etourdi) {
       delete this.player.statuses.etourdi;
       this.skipTurn = true;
@@ -1053,6 +1056,9 @@ export class Combat {
         return;
       case 'invocation':
         this.invoke(eff.amount);
+        return;
+      case 'recharge':
+        this.rechargePa += eff.amount;
         return;
       case 'gribouille': {
         if (!target) return;

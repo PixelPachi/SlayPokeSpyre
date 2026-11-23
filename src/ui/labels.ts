@@ -136,6 +136,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
       case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;
       case 'bebe-protection': parts.push(`Le Bébé gagne <b>${e.amount}</b> Protection.`); break;
+      case 'recharge': parts.push(`Au prochain tour, tu as <b>${e.amount}</b> PA de moins.`); break;
       case 'gribouille': parts.push(`Copie la capacité que prépare l'ennemi${e.enchant ? ', <b>enchantée</b>' : ''} : elle rejoint ton deck pour la run.`); break;
       case 'invocation': parts.push(`Invocation <b>${e.amount}</b>.`); break;
       case 'bebe-furie': parts.push(`Le Bébé attaque ${e.bonus > 0 ? `${1 + e.bonus} fois` : 'une fois'}, plus 1 fois par attaque du Bébé déjà faite ce tour.`); break;

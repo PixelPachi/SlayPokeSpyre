@@ -21,3 +21,29 @@ describe('Dialga Primal et les PA', () => {
     expect(roars).toBeGreaterThan(0);
   });
 });
+
+import { Run } from '../src/core/run';
+import { skinDef } from '../src/data/skins';
+import { cardDef } from '../src/data/cards';
+
+describe('Skins primordiaux : Hurle-Temps', () => {
+  it('remplace la première carte du deck de départ, pour chaque personnage', () => {
+    for (const ch of ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as const) {
+      const run = new Run('PRIM', ch);
+      const n = run.deck.length;
+      run.applySkin('primordial', skinDef(ch, 'primordial'));
+      expect(run.deck).toHaveLength(n);
+      expect(run.deck.filter((c) => c.defId === 'n-hurle-temps'), ch).toHaveLength(1);
+    }
+  });
+  it('Hurle-Temps frappe fort puis retire 2 PA au tour suivant', () => {
+    const c = new Combat({ character: 'riolu', deck: makeDeck(CHARACTERS.riolu.starterDeck), enemies: ['onix'], seed: 'HT', relics: [] });
+    c.drainEvents(); c.player.energy = 9;
+    c.hand = [{ uid: 1, defId: 'n-hurle-temps', upgraded: false }];
+    const e = c.aliveEnemies()[0], before = e.hp + e.block;
+    c.play(1, e.uid);
+    expect(before - (e.hp + e.block)).toBeGreaterThanOrEqual(cardDef('n-hurle-temps').cost > 0 ? 10 : 0);
+    c.endPlayerTurn(); for (const x of c.aliveEnemies()) c.enemyAct(x.uid); if ((c.phase as string) === 'ennemi') c.endEnemyTurn();
+    expect(c.drainEvents().some((x) => x.type === 'energy' && (x as { reason: string }).reason === 'Recharge')).toBe(true);
+  });
+});
