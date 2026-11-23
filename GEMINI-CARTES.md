@@ -56,12 +56,12 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `ame.png` | Âme | Spectre · Technique | Caninos | **Caninos** lance la capacité | ombres violettes, flammes fantomatiques | ☐ |
 | `amnesie.png` | Amnésie | Psy · Technique | Mew | **Mew** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `aqua-jet.png` | Aqua-Jet | Eau · Attaque | Neutre | Aucun (capacité seule) | jets et vagues d’eau bleue, éclaboussures | ☐ |
-| `aromate-bleu.png` | Aromate Bleu | Eau · Technique | Vipélierre | **Vipélierre** lance la capacité | jets et vagues d’eau bleue, éclaboussures | ☐ |
-| `aromate-dore.png` | Aromate Doré | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
-| `aromate-jaune.png` | Aromate Jaune | Électrik · Technique | Vipélierre | **Vipélierre** lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
-| `aromate-rose.png` | Aromate Rose | Fée · Technique | Vipélierre | **Vipélierre** lance la capacité | lumière rose et blanche, étoiles, paillettes | ☐ |
-| `aromate-rouge.png` | Aromate Rouge | Feu · Attaque | Vipélierre | **Vipélierre** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
-| `aromate-vert.png` | Aromate Vert | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
+| `aromate-assure.png` | Aromate Assuré | Eau · Technique | Vipélierre | **Vipélierre** lance la capacité | jets et vagues d’eau bleue, éclaboussures | ☐ |
+| `aromate-calme.png` | Aromate Calme | Fée · Technique | Vipélierre | **Vipélierre** lance la capacité | lumière rose et blanche, étoiles, paillettes | ☐ |
+| `aromate-jovial.png` | Aromate Jovial | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
+| `aromate-modeste.png` | Aromate Modeste | Glace · Technique | Vipélierre | **Vipélierre** lance la capacité | cristaux de glace, givre, brume froide bleutée | ☐ |
+| `aromate-rigide.png` | Aromate Rigide | Feu · Attaque | Vipélierre | **Vipélierre** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
+| `aromate-serieux.png` | Aromate Sérieux | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `aromatherapie.png` | Aromathérapie | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
 | `atout.png` | Atout | Normal · Technique | Quelorior | **Quelorior** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `atterrissage.png` | Atterrissage | Vol · Technique | Neutre | Aucun (capacité seule) | bourrasques, plumes, courants d’air | ☐ |

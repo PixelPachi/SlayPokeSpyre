@@ -94,10 +94,11 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('blabla-dodo', 'Blabla Dodo', 'normal', 'technique', 'rare', 0, 'soi', [{ kind: 'blabla' }], { effects: [{ kind: 'blabla' }, { kind: 'blabla' }] }),
   c('force', 'Force', 'normal', 'attaque', 'rare', 2, 'ennemi', [dmg(16), st('attaque', -1, 'soi')], { effects: [dmg(21), st('attaque', -1, 'soi')] }),
   // ——— Aromates (créés par Aromathérapie, seulement pour le combat en cours) ———
-  c('arom-rouge', 'Aromate Rouge', 'feu', 'attaque', 'depart', 0, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),
-  c('arom-bleu', 'Aromate Bleu', 'eau', 'technique', 'depart', 0, 'soi', [prot(6)], { effects: [prot(9)] }),
-  c('arom-rose', 'Aromate Rose', 'fee', 'technique', 'depart', 0, 'soi', [heal(4)], { effects: [heal(6)] }),
-  c('arom-vert', 'Aromate Vert', 'plante', 'technique', 'depart', 0, 'ennemi', [st('vampigraine', 3)], { effects: [st('vampigraine', 5)] }),
-  c('arom-jaune', 'Aromate Jaune', 'electrik', 'technique', 'depart', 0, 'soi', [draw(2)], { effects: [draw(3)] }),
-  c('arom-dore', 'Aromate Doré', 'normal', 'technique', 'depart', 0, 'soi', [{ kind: 'pa', amount: 1 }], { effects: [{ kind: 'pa', amount: 1 }, draw(1)] }),
+  // Aromates officiels (menthes de nature) : chacun suit la statistique qu'il renforce dans les jeux
+  c('arom-rouge', 'Aromate Rigide', 'feu', 'attaque', 'depart', 0, 'ennemi', [dmg(6)], { effects: [dmg(9)] }), // Attaque
+  c('arom-bleu', 'Aromate Assuré', 'eau', 'technique', 'depart', 0, 'soi', [prot(6)], { effects: [prot(9)] }), // Défense
+  c('arom-rose', 'Aromate Calme', 'fee', 'technique', 'depart', 0, 'soi', [heal(4)], { effects: [heal(6)] }), // Défense Spéciale
+  c('arom-vert', 'Aromate Jovial', 'plante', 'technique', 'depart', 0, 'soi', [{ kind: 'pa', amount: 1 }], { effects: [{ kind: 'pa', amount: 1 }, draw(1)] }), // Vitesse
+  c('arom-jaune', 'Aromate Sérieux', 'normal', 'technique', 'depart', 0, 'soi', [draw(2)], { effects: [draw(3)] }), // neutre
+  c('arom-dore', 'Aromate Modeste', 'glace', 'technique', 'depart', 0, 'ennemi', [st('vampigraine', 3)], { effects: [st('vampigraine', 5)] }), // Attaque Spéciale
 ];
