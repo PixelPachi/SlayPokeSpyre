@@ -23,6 +23,8 @@ each(byName('Colère', 'Mania'), (m) => { m.selfStatus = { status: 'confusion', 
 // Soins : Appel Soins et Atterrissage soignent au lieu de renforcer
 each(byName('Appel Soins'), (m) => { delete m.selfStatus; m.block = 6; m.heal = 12; m.intent = 'defense'; });
 each(byName('Atterrissage'), (m) => { m.block = 8; m.heal = 16; });
+// Glace : la plupart des attaques Glace infligent 1 Gel (à 3, la cible passe son tour)
+each((id, m) => m.intent === 'attaque' && (m.pokeType ?? ENEMY_DEFS[id].types[0]) === 'glace' && !m.playerStatus, (m) => { m.playerStatus = { status: 'gel', stacks: 1 }; });
 // Hypnose et Berceuse endorment
 each(byName('Hypnose', 'Berceuse'), (m) => { m.playerStatus = { status: 'sommeil', stacks: 1 }; });
 // Grimace effraie (Peur), comme chez la plupart des Pokémon qui l'utilisent

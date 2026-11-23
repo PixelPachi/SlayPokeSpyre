@@ -41,10 +41,10 @@ export const VIPELIERRE_CARDS: CardDef[] = [
   c('reflet', 'Reflet', 'normal', 'technique', 'commune', 1, 'soi', [prot(4), draw(1)], { effects: [prot(6), draw(1)] }),
 
   // ——— Peu communes (34) ———
-  c('lame-feuille', 'Lame Feuille', 'plante', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(14)], { effects: [dmg(19)] }),
+  c('lame-feuille', 'Lame Feuille', 'plante', 'attaque', 'peu-commune', 2, 'tous', [dmg(11)], { effects: [dmg(15)] }),
   c('enroulement', 'Enroulement', 'poison', 'technique', 'peu-commune', 1, 'soi', [st('attaque', -1, 'soi'), st('defense', -1, 'soi')], { cost: 0 }, ['epuisee']),
   c('giga-sangsue', 'Giga-Sangsue', 'plante', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(12, { drain: true })], { effects: [dmg(16, { drain: true })] }),
-  c('suc-digestif', 'Suc Digestif', 'poison', 'technique', 'peu-commune', 1, 'ennemi', [smult('vampigraine', 2)], { cost: 0 }),
+  c('suc-digestif', 'Suc Digestif', 'poison', 'technique', 'peu-commune', 1, 'ennemi', [smult('vampigraine', 2)], { cost: 0, keywords: [] }, ['epuisee']),
   c('danse-lames', 'Danse Lames', 'normal', 'technique', 'peu-commune', 1, 'soi', [st('attaque', -2, 'soi')], { cost: 0 }, ['epuisee']),
   c('belier', 'Bélier', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(17), hpLoss(3)], { effects: [dmg(22), hpLoss(3)] }),
   c('damocles', 'Damoclès', 'normal', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(20), hpLoss(5)], { effects: [dmg(26), hpLoss(5)] }),

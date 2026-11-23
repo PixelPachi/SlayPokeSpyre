@@ -67,7 +67,7 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('larcin', 'Larcin', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6), draw(1), pa(1)], { effects: [dmg(9), draw(1), pa(1)] }, ['epuisee']),
   c('degommage', 'Dégommage', 'tenebres', 'attaque', 'peu-commune', 1, 'ennemi', [dmg(6, { parSoi: 'rage', parSoiX: 4 }), { kind: 'perd-statut', status: 'rage' }], { effects: [dmg(9, { parSoi: 'rage', parSoiX: 4 }), { kind: 'perd-statut', status: 'rage' }] }),
   c('vampi-poing', 'Vampi-Poing', 'combat', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(10, { drain: true }), invoc(3)], { effects: [dmg(14, { drain: true }), invoc(4)] }),
-  c('avalanche', 'Avalanche', 'glace', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(8, { revanche: true, parSoi: 'rage', parSoiX: 1 })], { effects: [dmg(11, { revanche: true, parSoi: 'rage', parSoiX: 1 })] }),
+  c('avalanche', 'Avalanche', 'glace', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(8, { revanche: true, parSoi: 'rage', parSoiX: 1 }), st('gel', 1)], { effects: [dmg(11, { revanche: true, parSoi: 'rage', parSoiX: 1 }), st('gel', 1)] }),
   c('eboulement', 'Éboulement', 'roche', 'attaque', 'peu-commune', 2, 'tous', [dmg(8), st('peur', 1, 'tous')], { effects: [dmg(11), st('peur', 1, 'tous')] }),
   c('clonage', 'Clonage', 'normal', 'technique', 'peu-commune', 1, 'soi', [hpLoss(4), invoc(7)], { effects: [hpLoss(3), invoc(9)] }),
   c('souvenir', 'Souvenir', 'spectre', 'technique', 'peu-commune', 1, 'soi', [{ kind: 'souvenir' }], { cost: 0 }),

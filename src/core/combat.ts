@@ -815,6 +815,12 @@ export class Combat {
     // Hurle-Temps : le tour suivant, 2 PA de moins
     if (this.timeRoar) { this.timeRoar = false; this.changeEnergy(-2, 'Hurle-Temps'); }
     if (this.rechargePa) { const n = this.rechargePa; this.rechargePa = 0; this.changeEnergy(-n, 'Recharge'); }
+    // Gel : à 3, le joueur aussi passe son tour (le Gel retombe à 0)
+    if ((this.player.statuses.gel ?? 0) >= 3) {
+      delete this.player.statuses.gel;
+      this.events.push({ type: 'status', target: 'player', status: 'gel', stacks: -3 });
+      this.skipTurn = true;
+    }
     if (this.player.statuses.etourdi) {
       delete this.player.statuses.etourdi;
       this.skipTurn = true;

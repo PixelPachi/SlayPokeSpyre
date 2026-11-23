@@ -54,10 +54,10 @@ export const NEUTRAL_CARDS: CardDef[] = [
   n('fatal-foudre', 'Fatal-Foudre', 'electrik', 'attaque', 'rare', 3, 'ennemi', [dmg(26), st('paralysie', 2)], { effects: [dmg(33), st('paralysie', 2)] }),
 
   // ——— Glace ———
-  n('poudreuse', 'Poudreuse', 'glace', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('confusion', 1)], { effects: [dmg(7), st('confusion', 2)] }),
-  n('vent-glace', 'Vent Glace', 'glace', 'attaque', 'peu-commune', 1, 'tous', [dmg(4), st('paralysie', 1, 'tous')], { effects: [dmg(6), st('paralysie', 1, 'tous')] }),
-  n('laser-glace', 'Laser Glace', 'glace', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(14), st('confusion', 1)], { effects: [dmg(18), st('confusion', 1)] }),
-  n('blizzard', 'Blizzard', 'glace', 'attaque', 'rare', 3, 'tous', [dmg(14), st('paralysie', 1, 'tous')], { effects: [dmg(18), st('paralysie', 1, 'tous')] }),
+  n('poudreuse', 'Poudreuse', 'glace', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('gel', 1)], { effects: [dmg(7), st('gel', 1), st('confusion', 1)] }),
+  n('vent-glace', 'Vent Glace', 'glace', 'attaque', 'peu-commune', 1, 'tous', [dmg(4), st('gel', 1, 'tous')], { effects: [dmg(6), st('gel', 1, 'tous')] }),
+  n('laser-glace', 'Laser Glace', 'glace', 'attaque', 'peu-commune', 2, 'ennemi', [dmg(14), st('gel', 1)], { effects: [dmg(18), st('gel', 1)] }),
+  n('blizzard', 'Blizzard', 'glace', 'attaque', 'rare', 3, 'tous', [dmg(14), st('gel', 1, 'tous')], { effects: [dmg(18), st('gel', 1, 'tous')] }),
 
   // ——— Poison ———
   n('acide', 'Acide', 'poison', 'attaque', 'commune', 1, 'tous', [dmg(4), st('poison', 1, 'tous')], { effects: [dmg(5), st('poison', 2, 'tous')] }),

@@ -25,7 +25,7 @@ export const MEW_CARDS: CardDef[] = [
   c('feu-ensorcele', 'Feu Ensorcelé', 'feu', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('attaque', -1)], { effects: [dmg(8), st('attaque', -1)] }),
   c('poing-de-feu', 'Poing de Feu', 'feu', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('brulure', 1)], { effects: [dmg(8), st('brulure', 2)] }),
   c('poing-eclair', 'Poing Éclair', 'electrik', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('paralysie', 1)], { effects: [dmg(8), st('paralysie', 2)] }),
-  c('poing-glace', 'Poing Glace', 'glace', 'attaque', 'commune', 1, 'ennemi', [dmg(8)], { effects: [dmg(11)] }),
+  c('poing-glace', 'Poing Glace', 'glace', 'attaque', 'commune', 1, 'ennemi', [dmg(8), st('gel', 1)], { effects: [dmg(11), st('gel', 1)] }),
   c('plaquage', 'Plaquage', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('paralysie', 1)], { effects: [dmg(8), st('paralysie', 2)] }),
   c('facade', 'Façade', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(7, { facade: true })], { effects: [dmg(10, { facade: true })] }),
   c('coup-main', "Coup d'Main", 'normal', 'technique', 'commune', 0, 'soi', [draw(2)], { effects: [draw(3)] }, ['epuisee']),
