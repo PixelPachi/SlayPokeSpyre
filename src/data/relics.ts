@@ -147,9 +147,9 @@ const RELICS: RelicDef[] = [
 
   // ——— Objets de quête (après avoir apaisé Dialga avec 3 Pokémon différents) ———
   { id: 'rouage-temps', name: 'Rouage du Temps', sprite: 'rouage-temps', rarity: 'quete', owner: 'commun',
-    text: 'Un rouage venu du futur. Aucun effet… mais avec le Rouage de l’Espace, un passage s’ouvre après Dialga Primal.' },
+    text: 'Un étrange rouage venu du futur. Il semble attendre quelque chose…' },
   { id: 'rouage-espace', name: 'Rouage de l’Espace', sprite: 'rouage-espace', rarity: 'quete', owner: 'commun',
-    text: 'Un rouage nacré qui déforme l’espace. Aucun effet… mais avec le Rouage du Temps, un passage s’ouvre après Dialga Primal.' },
+    text: 'Un rouage nacré qui déforme l’espace. Il semble attendre quelque chose…' },
 
   { id: 'encens-zen', name: 'Encens Zen', sprite: 'sea-incense', rarity: 'quete', owner: 'commun',
     text: 'Cadeau de Grodoudou : les ennemis de tes 3 prochains combats n’ont qu’1 PV. Disparaît ensuite.' },
