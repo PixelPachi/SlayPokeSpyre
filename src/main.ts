@@ -20,6 +20,7 @@ import { ENEMY_DEFS } from './data/enemies';
 import { BERRY_DEFS } from './data/berries';
 import type { EventFight } from './data/events';
 import { berrySlots } from './ui/run-ui';
+import { setStatusAlias } from './ui/labels';
 
 const stage = document.getElementById('stage')!;
 const screen = document.getElementById('screen')!;
@@ -65,6 +66,11 @@ stage.addEventListener('click', (ev) => {
     refreshSoundButtons();
   });
 }, true);
+
+/** Textes des cartes selon le skin équipé (Alchimiste : la Vampigraine s'affiche comme du Poison). */
+function syncSkinLabels(run: Run): void {
+  setStatusAlias(run.character === 'vipelierre' && run.skin === 'alchimiste' ? { vampigraine: 'poison' } : {});
+}
 
 let view: CombatView | null = null;
 /** Run en cours (pour le menu des baies). */
@@ -221,6 +227,7 @@ function continueRun(): void {
     return title();
   }
   activeRun = run;
+  syncSkinLabels(run);
   if (run.act === LAST_ACT) return run.inNode ? summitStep(run) : showSummit(run);
   if (run.inNode && run.pos) return enterNode(run, run.pos.row, run.pos.col);
   showMap(run);
@@ -246,6 +253,7 @@ function startRun(character: CharacterId): void {
   if (run.act === LAST_ACT) run.summitStep = Math.min(3, Number(params.get('etape') ?? 0)); // ?acte=4&etape=3 : Dialga direct
   // Pour tester : ?zone=tour-lavanville choisit la zone de l'acte en cours
   if (params.get('skin')) run.applySkin(params.get('skin')!, skinDef(character, params.get('skin')!)); // test : ?skin=primordial
+  syncSkinLabels(run);
   if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
   // Pour tester : ?cartes=vip-aromatherapie,vip-don-naturel ajoute des cartes au deck
   for (const id of (params.get('cartes') ?? '').split(',').filter(Boolean)) run.addCard(id);

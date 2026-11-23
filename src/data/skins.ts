@@ -24,6 +24,8 @@ export interface SkinDef {
   relic?: string;
   /** Remplace la première carte du deck de départ par celle-ci. */
   firstCard?: string;
+  /** Cartes ajoutées au deck de départ. */
+  extraCards?: string[];
   /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
   evolutions?: { act: number; dex: number; name: string; types: PokeType[]; hp: number }[];
 }
@@ -44,7 +46,11 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     id: 'magma', name: 'Cramoisi', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
     goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).',
   }, primordial('Riolu', [447, 448, 10059])],
-  vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497])],
+  vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497]), {
+    id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
+    goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) en jouant Vipélierre. Ses Vampigraines deviennent du Poison, et il commence avec Catalyse (double le Poison de la cible).',
+    extraCards: ['vip-catalyse'],
+  }],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],

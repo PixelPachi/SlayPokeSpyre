@@ -217,6 +217,7 @@ export class Combat {
     // Skin primordial : gagne le type Dragon (remplace Acier)
     if (skinDef(ch.id, opts.skin)?.addDragon) this.player.types = primordialTypes(this.player.types);
     this.crimson = ch.id === 'riolu' && opts.skin === 'magma';
+    this.alchemist = ch.id === 'vipelierre' && opts.skin === 'alchimiste';
     this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
     // Encens Zen (offert par Grodoudou) : les ennemis n'ont qu'1 PV
@@ -453,6 +454,8 @@ export class Combat {
   rechargePa = 0;
   /** Skin Cramoisi (Riolu) : l'Aura brûle la cible au lieu d'ajouter des dégâts (sauf cartes d'Aura comme Aurasphère). */
   crimson = false;
+  /** Skin Alchimiste (Vipélierre) : ses Vampigraines deviennent du Poison. */
+  alchemist = false;
   /** Le Bébé n'enrage sa mère qu'une fois par combat. */
   private babyEnraged = false;
 
@@ -1073,6 +1076,12 @@ export class Combat {
       case 'invocation':
         this.invoke(eff.amount);
         return;
+      case 'multiplie-statut': {
+        const t = target;
+        const n = t?.statuses[eff.status] ?? 0;
+        if (t && n > 0) this.addStatus(t, t.uid, eff.status, n * (eff.mult - 1));
+        return;
+      }
       case 'recharge':
         this.rechargePa += eff.amount;
         return;
@@ -1527,6 +1536,8 @@ export class Combat {
       this.events.push({ type: 'player-move', name: 'Air Lock bloque la hausse !' });
       return;
     }
+    // Alchimiste : la Vampigraine qu'il inflige devient du Poison
+    if (this.alchemist && who !== 'player' && status === 'vampigraine') status = 'poison';
     if (status === 'ligote' && s > 0) (f.binds ??= []).push(...Array(s).fill(3));
     const v = (f.statuses[status] ?? 0) + s;
     if (v === 0) delete f.statuses[status];

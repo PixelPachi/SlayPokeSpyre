@@ -58,6 +58,10 @@ export const CATEGORY_LABELS: Record<CardDef['category'], string> = {
   attaque: 'Attaque', technique: 'Technique', talent: 'Talent', statut: 'Statut',
 };
 
+/** Statuts affichés autrement selon le skin (Alchimiste : Vampigraine → Poison). */
+let STATUS_ALIAS: Partial<Record<StatusId, StatusId>> = {};
+export function setStatusAlias(alias: Partial<Record<StatusId, StatusId>>): void { STATUS_ALIAS = alias; }
+
 const KEYWORD_LABELS: Record<NonNullable<CardDef['keywords']>[number], string> = {
   epuisee: 'Épuisée', conservee: 'Conservée', ephemere: 'Éphémère', innee: 'Innée', injouable: 'Injouable',
 };
@@ -136,6 +140,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'bebe-soin': parts.push(`Soigne le Bébé de <b>${e.amount}</b> PV.`); break;
       case 'bebe-pvmax': parts.push(`Le Bébé gagne <b>${e.amount}</b> PV max.`); break;
       case 'bebe-protection': parts.push(`Le Bébé gagne <b>${e.amount}</b> Protection.`); break;
+      case 'multiplie-statut': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} le ${STATUS_INFO[e.status].label} de la cible.`); break;
       case 'recharge': parts.push(`Au prochain tour, tu as <b>${e.amount}</b> PA de moins.`); break;
       case 'gribouille': parts.push(`Copie la capacité que prépare l'ennemi${e.enchant ? ', <b>enchantée</b>' : ''} : elle rejoint ton deck pour la run.`); break;
       case 'invocation': parts.push(`Invocation <b>${e.amount}</b>.`); break;
@@ -144,7 +149,7 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'protection-pv-bebe': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}les PV du Bébé en Protection.`); break;
       case 'protection': parts.push(`Gagne <b>${e.amount}</b> Protection.`); break;
       case 'statut': {
-        const s = STATUS_INFO[e.status].label;
+        const s = STATUS_INFO[STATUS_ALIAS[e.status] ?? e.status].label;
         if (e.status === 'tenace') parts.push('<b>Tenace</b> : pas de K.O. avant ton prochain tour.');
         else if (e.status === 'etourdi') parts.push('<b>Étourdi</b> : tu passes ton prochain tour.');
         else if (e.on === 'soi' && (e.status === 'attaque' || e.status === 'defense')) {

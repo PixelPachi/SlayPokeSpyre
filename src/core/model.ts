@@ -96,6 +96,7 @@ export type Effect =
   | { kind: 'bebe-soin'; amount: number } // soigne le Bébé (le ramène s'il est K.O.)
   | { kind: 'bebe-pvmax'; amount: number }
   | { kind: 'bebe-protection'; amount: number }
+  | { kind: 'multiplie-statut'; status: StatusId; mult: number } // multiplie le statut de la cible (Catalyse)
   | { kind: 'recharge'; amount: number } // au prochain tour, X PA de moins
   | { kind: 'gribouille'; enchant: boolean } // copie la capacité de l'ennemi ciblé : elle rejoint le deck (enchantée si amélioré)
   | { kind: 'invocation'; amount: number } // le Bébé gagne X PV max et X PV ; s'il est K.O., il revient avec X PV
