@@ -59,7 +59,9 @@ export function renderReward(
       case 'berry': {
         const b = BERRY_DEFS[l.berry!];
         const full = run.berries.length >= MAX_BERRIES;
-        return `${berryIcon(l.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${full ? 'Sac plein : jette une baie (clic sur une baie en haut) pour la prendre' : esc(b.text)}</small></span>`;
+        return full
+          ? `${berryIcon(l.berry!, 'loot-icon')}<span><b>${esc(b.name)} <em class="bag-full">🎒 Sac plein</em></b><small>Jette d’abord une baie (clique sur une baie en haut de l’écran) pour pouvoir la ramasser.</small></span>`
+          : `${berryIcon(l.berry!, 'loot-icon')}<span><b>${esc(b.name)}</b><small>${esc(b.text)}</small></span>`;
       }
       case 'cards':
         return `<span class="loot-icon cards">🂠</span><span><b>Apprendre une capacité</b><small>Choisis 1 carte parmi ${o.cards.length}</small></span>`;
@@ -217,34 +219,42 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
   let picked: number | null = null;
 
   let carpetOpen = false;
+  let carpetShown = false;
+  let carpetScroll = 0;
   const draw = () => {
     const removeCost = looted ? 0 : price(75 + 25 * run.removals);
+    const full = run.berries.length >= MAX_BERRIES;
+    const tip = (name: string, text: string) => `data-tip="<b>${esc(name)}</b><br>${esc(text)}"`;
+    const priceTag = (o: { price: number; sold: boolean }, extra = '') => `<div class="price ${!o.sold && run.money < o.price ? 'too-expensive' : ''}">${o.sold ? 'Vendu' : `${o.price} ₽`}${extra}</div>`;
     const carpet = `
       <div class="carpet-head">
         <h2>${looted ? 'Sers-toi : tout est gratuit !' : shiny ? '★ Tout est à moitié prix !' : run.gambler ? '🎰 Rabais du Flambeur : −50 % !' : 'Les articles de Kecleon'}</h2>
+        <span class="carpet-money">${run.money} ₽</span>
         <button class="btn close-carpet">← Retour à l’échoppe</button>
       </div>
       <div class="card-row shop">
         ${offers.map((o, i) => `
-          <div class="shop-item ${o.sold ? 'sold' : ''} ${run.money < o.price ? 'poor' : ''} ${picked === i ? 'picked' : ''}" data-i="${i}">
+          <div class="shop-item ${o.sold ? 'sold' : ''} ${!o.sold && run.money < o.price ? 'poor' : ''} ${picked === i ? 'picked' : ''}" data-i="${i}">
             ${renderCard(cardDef(o.id))}
-            <div class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}${i === sale && !o.sold ? ' <span class="sale">-50 %</span>' : ''}</div>
-            ${picked === i && !o.sold ? `<button class="btn primary buy" ${run.money < o.price ? 'disabled' : ''}>${run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
+            ${priceTag(o, i === sale && !o.sold ? ' <span class="sale">-50 %</span>' : '')}
+            ${picked === i && !o.sold && run.money >= o.price ? '<button class="btn primary buy">Acheter</button>' : ''}
           </div>`).join('')}
       </div>
       <div class="carpet-bottom">
-      ${items.length ? `<div class="shop-relics">${items.map((o, i) => `
-        <div class="shop-relic ${o.sold ? 'sold' : ''} ${pickedItem === i ? 'picked' : ''}" data-i="${i}">
-          ${relicCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
-          ${pickedItem === i && !o.sold ? `<button class="btn primary buy-relic" ${run.money < o.price ? 'disabled' : ''}>${run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
-        </div>`).join('')}</div>` : ''}
-      <div class="shop-berries">${berries.map((o, i) => `
-        <div class="shop-relic shop-berry ${o.sold ? 'sold' : ''} ${pickedBerry === i ? 'picked' : ''}" data-i="${i}">
-          ${berryCard(o.id, `<span class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</span>`)}
-          ${pickedBerry === i && !o.sold ? `<button class="btn primary buy-berry" ${run.money < o.price || run.berries.length >= MAX_BERRIES ? 'disabled' : ''}>${run.berries.length >= MAX_BERRIES ? 'Sac plein' : run.money < o.price ? 'Pas assez de ₽' : 'Acheter'}</button>` : ''}
-        </div>`).join('')}</div>
-        <button class="choice remove" ${removed || run.money < removeCost ? 'disabled' : ''}>
-          <b>Oublier une capacité</b><span>${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
+        ${items.map((o, i) => { const r = relicDef(o.id); return `
+          <div class="shop-tile shop-relic ${o.sold ? 'sold' : ''} ${!o.sold && run.money < o.price ? 'poor' : ''} ${pickedItem === i ? 'picked' : ''}" data-i="${i}" ${tip(r.name, r.text)}>
+            <img src="${asset(`sprites/items/${r.sprite}.png`)}" alt=""><span class="tile-name">${esc(r.name)}</span>
+            ${priceTag(o)}
+            ${pickedItem === i && !o.sold && run.money >= o.price ? '<button class="btn primary buy-relic">Acheter</button>' : ''}
+          </div>`; }).join('')}
+        ${berries.map((o, i) => { const b = BERRY_DEFS[o.id]; const blocked = !o.sold && (run.money < o.price || full); return `
+          <div class="shop-tile shop-berry ${o.sold ? 'sold' : ''} ${blocked ? 'poor' : ''} ${pickedBerry === i ? 'picked' : ''}" data-i="${i}" ${tip(b.name, full && !o.sold ? `${b.text} — Sac plein : jette une baie (clic sur une baie en haut) pour en acheter.` : b.text)}>
+            <img src="${asset(`sprites/items/${b.sprite}.png`)}" alt=""><span class="tile-name">${esc(b.name)}</span>
+            ${full && !o.sold ? '<div class="price too-expensive">Sac plein</div>' : priceTag(o)}
+            ${pickedBerry === i && !blocked ? '<button class="btn primary buy-berry">Acheter</button>' : ''}
+          </div>`; }).join('')}
+        <button class="choice remove ${removed || run.money < removeCost ? 'poor' : ''}" ${removed || run.money < removeCost ? 'disabled' : ''}>
+          <b>Oublier une capacité</b><span class="${!removed && run.money < removeCost ? 'too-expensive' : ''}">${removed ? 'Déjà fait ici' : `${removeCost} ₽ — retire une carte du deck`}</span>
         </button>
       </div>`;
     root.innerHTML = shell(run, 'Marché Kecleon', shopScene({
@@ -253,7 +263,9 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
       title: looted ? 'Marché Kecleon… pillé !' : 'Marché Kecleon',
       actions: `${onAttack && !looted ? '<button class="btn danger attack-kecleon">Attaquer Kecleon</button>' : ''}<button class="btn primary leave">Quitter le marché</button>`,
       carpet: carpetOpen ? carpet : '',
-    }), 'shop-screen shop-place');
+    }), `shop-screen shop-place ${carpetShown ? 'carpet-stay' : ''}`);
+    if (carpetOpen) { const c = root.querySelector<HTMLElement>('.carpet'); if (c) c.scrollTop = carpetScroll; carpetShown = true; } else carpetShown = false;
+    root.querySelector<HTMLElement>('.carpet')?.addEventListener('scroll', (ev) => { carpetScroll = (ev.target as HTMLElement).scrollTop; });
     root.querySelector('.shop-keeper')?.addEventListener('click', () => { carpetOpen = true; draw(); });
     root.querySelector('.shop-stall')?.addEventListener('click', () => { carpetOpen = true; draw(); });
     root.querySelector('.close-carpet')?.addEventListener('click', () => { carpetOpen = false; picked = pickedItem = pickedBerry = null; draw(); });

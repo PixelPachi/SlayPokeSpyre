@@ -1383,3 +1383,26 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .weave-box .choice { flex: 1 1 0; min-width: 0; }
 .weave-box h2 { margin: 0 0 14px; color: #f3d98b; }
 .weave-result { display: flex; justify-content: center; margin: 6px 0 14px; }
+
+/* ——— Marché Kecleon (tapis compact) ——— */
+.carpet-stay .carpet-wrap, .carpet-stay .carpet { animation: none !important; }
+.carpet-head .carpet-money { margin-left: auto; margin-right: 14px; font-family: var(--font-title); font-size: 22px; color: var(--gold); text-shadow: 0 2px 0 #000; }
+.card-row.shop { gap: 4px; flex-wrap: nowrap; justify-content: center; }
+.card-row.shop .shop-item { width: 140px; }
+.card-row.shop .card { transform: scale(0.74); transform-origin: top center; margin-bottom: -62px; }
+.shop-item .price { font-size: 18px; }
+.price.too-expensive, .too-expensive { color: #ff5a5a !important; }
+.shop-item.poor .card, .shop-tile.poor img, .choice.remove.poor { filter: grayscale(0.85) brightness(0.7); }
+.shop-item.poor .card { opacity: 0.75; }
+.shop-tile { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 104px; padding: 8px 6px; border-radius: 12px; cursor: pointer;
+  background: #0006; border: 2px solid #ffffff22; transition: transform .12s, border-color .12s; }
+.shop-tile:hover { transform: translateY(-4px); border-color: var(--gold); }
+.shop-tile img { width: 48px; height: 48px; image-rendering: pixelated; }
+.shop-tile .tile-name { font-size: 12px; font-weight: 700; color: #fff; text-align: center; line-height: 1.1; min-height: 26px; }
+.shop-tile .price { font-family: var(--font-title); font-size: 17px; color: var(--gold); text-shadow: 0 2px 0 #000; }
+.shop-tile.picked { border-color: #fff; box-shadow: 0 0 18px #ffd75e; }
+.shop-tile.sold { opacity: 0.25; pointer-events: none; }
+.shop-tile .btn { font-size: 13px; padding: 4px 10px; margin-top: 4px; }
+.carpet-bottom { align-items: center; }
+.carpet-bottom .choice.remove { max-width: 230px; }
+.bag-full { font-style: normal; font-size: 12px; color: #fff; background: #c0392b; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
