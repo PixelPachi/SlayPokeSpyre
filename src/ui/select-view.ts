@@ -1,4 +1,4 @@
-import { SKINS, skinSprite } from '../data/skins';
+import { SKINS, skinDef, skinSprite, primordialTypes } from '../data/skins';
 import { equipSkin, equippedSkin, skinDetail, skinProgress, skinUnlocked } from '../core/save';
 // Écran de sélection du personnage (section 9 du GDD : illustration plein écran + fiche à gauche).
 import type { CharacterId } from '../core/model';
@@ -44,7 +44,16 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
     const ch = CHARACTERS[current];
     const locked = !UNLOCKED.includes(current);
     const ill = ILLUSTRATIONS[current];
-    const deck = countDeck(ch.starterDeck);
+    // La fiche suit le skin équipé : types, talent, objet et deck de départ
+    const skin = locked ? undefined : skinDef(current, equippedSkin(save, current));
+    const types = skin?.types ?? (skin?.addDragon ? primordialTypes(ch.types) : ch.types);
+    const talent = skin?.talent ?? ch.talent;
+    const relic = skin?.relic ?? ch.starterRelic;
+    let starter = skin?.deck?.length ? [...skin.deck] : [...ch.starterDeck];
+    if (skin?.firstCard && starter.length) starter[0] = skin.firstCard;
+    starter = [...starter, ...(skin?.extraCards ?? [])];
+    const deck = countDeck(starter);
+    const changed = (b: boolean) => (b ? ' skin-changed' : '');
     root.innerHTML = `
       <div class="select ${locked ? 'locked' : ''}">
         ${ill ? `<img class="select-bg" src="${asset(ill)}" alt="">` : '<div class="select-bg secret"></div>'}
@@ -53,12 +62,13 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
         ${onBack ? '<button class="btn back-title">← Écran titre</button>' : ''}
         <div class="select-sheet">
           <div class="sheet-name">${locked && (current === 'mew' || current === 'quelorior') ? '???' : esc(ch.name)}</div>
-          <div class="sheet-types">${ch.types.map((t) => `<span class="type-badge" style="background:${TYPE_COLORS[t]}">${TYPE_LABELS[t]}</span>`).join('')}</div>
+          <div class="sheet-types">${types.map((t) => `<span class="type-badge" style="background:${TYPE_COLORS[t]}">${TYPE_LABELS[t]}</span>`).join('')}</div>
           ${locked ? `<p class="sheet-locked">Verrouillé<br><small>${esc(UNLOCK_TEXT[current])}</small></p>` : `
             <div class="sheet-row"><b>PV</b> ${ch.maxHp}</div>
-            <div class="sheet-row"><b>Talent — ${esc(ch.talent.name)}</b><br>${esc(ch.talent.text)}</div>
-            ${ch.starterRelic ? `<div class="sheet-row sheet-relic">${relicIcon(ch.starterRelic)}<div><b>Objet — ${esc(relicDef(ch.starterRelic).name)}</b><br>${esc(relicDef(ch.starterRelic).text)}</div></div>` : ''}
-            <div class="sheet-row"><b>Deck de départ</b><br>${deck}</div>
+            <div class="sheet-row${changed(!!skin?.talent)}"><b>Talent — ${esc(talent.name)}</b><br>${esc(talent.text)}</div>
+            ${relic ? `<div class="sheet-row sheet-relic${changed(!!skin?.relic)}">${relicIcon(relic)}<div><b>Objet — ${esc(relicDef(relic).name)}</b><br>${esc(relicDef(relic).text)}</div></div>` : ''}
+            <div class="sheet-row${changed(!!(skin?.deck || skin?.firstCard || skin?.extraCards))}"><b>Deck de départ</b><br>${deck}</div>
+            ${skin?.perks?.length ? `<div class="sheet-row skin-changed"><b>Skin ${esc(skin.name)}</b><br>${skin.perks.map(esc).join('<br>')}</div>` : ''}
             ${expBlock(save, current)}
             ${skinBlock(save, current)}
             <div class="sheet-actions">

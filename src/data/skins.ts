@@ -40,6 +40,10 @@ export interface SkinDef {
   extraCards?: string[];
   /** Le skin remplace la lignée d'évolution (ex. Arcanâme, évolution inventée du Chien de la Lanterne). */
   evolutions?: { act: number; dex: number; name: string; types: PokeType[]; hp: number }[];
+  /** Talent affiché sur la fiche de sélection quand le skin change le talent. */
+  talent?: { name: string; text: string };
+  /** Autres changements affichés sur la fiche de sélection. */
+  perks?: string[];
 }
 
 const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id: 'shiny', name: 'Chromatique', stat, goal, goalText });
@@ -50,32 +54,39 @@ const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouan
 // Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.
 const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): SkinDef => ({
   id: 'primordial', name: 'Primordial', stat: 'bosses', goal: 1, bosses: ['dialga-primal'], dex,
-  goalText: `Vaincre Dialga Primal en jouant ${name}. Le Pokémon gagne le type Dragon, et Hurle-Temps remplace une carte de son deck de départ.`, addDragon: true, firstCard: 'n-hurle-temps', ...extra,
+  goalText: `Vaincre Dialga Primal en jouant ${name}. Le Pokémon gagne le type Dragon, et Hurle-Temps remplace une carte de son deck de départ.`, addDragon: true, perks: ['Gagne le type Dragon.'], firstCard: 'n-hurle-temps', ...extra,
 });
 
 export const SKINS: Record<CharacterId, SkinDef[]> = {
   riolu: [SHINY_GOAL, {
     id: 'magma', name: 'Cramoisi', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
+    talent: { name: 'Justicier Cramoisi', text: 'Commence chaque combat avec 3 Aura. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).' },
     goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).',
   }, primordial('Riolu', [447, 448, 10059])],
   vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497]), {
     id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
     goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 25 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',
     kills: { type: 'poison', goal: 25 }, extraCards: ['vip-catalyse'], relic: 'plaque-toxik',
+    talent: { name: 'Contestation · Alchimie', text: 'Ses baisses d’Attaque et de Défense deviennent des hausses, et inversement. Toutes ses Vampigraines deviennent du Poison.' },
   }, {
     id: 'tisserand', name: 'Tisserand de Soie Astrale', stat: 'bosses', goal: 1, bosses: [], kills: { type: 'psy', goal: 25 }, dex: [495, 496, 497],
     goalText: 'Mettre K.O. 25 Pokémon de type Psy en jouant Vipélierre. Il devient Psy/Ténèbres et perd Contestation, il peut apprendre toutes les cartes Psy et Ténèbres débloquées, ses cartes peuvent porter plusieurs enchantements, il commence avec Permucœur (enchante une carte de ta main pour la run) et le Nœud Destin à la place du Grain Miracle (tisse une carte au Centre Pokémon).',
     types: ['psy', 'tenebres'], extraCards: ['vip-permucoeur'], relic: 'noeud-destin', noTalent: true, typeCards: ['psy', 'tenebres'], typeCardsUnlocked: true,
+    talent: { name: 'Soie Astrale', text: 'Perd Contestation. Ses cartes peuvent porter plusieurs enchantements.' },
+    perks: ['Peut apprendre toutes les cartes Psy et Ténèbres débloquées.'],
   }],
   kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true }), {
     id: 'oceanique', name: 'Gardien Océanique', stat: 'bosses', goal: 1, bosses: ['roigada'], dex: [115], baby: true,
     goalText: 'Vaincre le gardien du Puits Ramoloss (Roigada) en jouant Kangourex. Il devient de type Eau, le Corail remplace le Lait Meumeu (le Bébé gagne 3 Protection chaque tour), ses attaques de départ deviennent des Écumes (4 dégâts à tous les ennemis) et il peut obtenir toutes les cartes Eau du jeu. Pas de Méga-Évolution avec ce skin.',
     types: ['eau'], relic: 'corail', typeCards: ['eau'],
+    perks: ['Peut obtenir toutes les cartes Eau du jeu.', 'Pas de Méga-Évolution avec ce skin.'],
     deck: ['kan-ecume', 'kan-ecume', 'kan-ecume', 'kan-ecume', 'abri', 'abri', 'abri', 'abri', 'kan-coup-main', 'kan-coup-double'],
   }],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
     goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 12 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',
+    talent: { name: 'Feu des Âmes', text: 'Chaque fois qu’il pioche pendant son tour (pas la main de départ), inflige 12 dégâts à tous les ennemis.' },
+    perks: ['Peut obtenir toutes les cartes Spectre du jeu.', 'Évolue en Arcanin puis en Arcanâme (Feu/Spectre).'],
     relic: 'lanterne-bleue', deck: ['can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'abri', 'abri', 'abri', 'abri', 'flammeche', 'morsure'], typeCards: ['spectre'],
     evolutions: [
       { act: 2, dex: 59, name: 'Arcanin', types: ['feu'], hp: 12 },
@@ -86,6 +97,7 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   quelorior: [SHINY_GOAL, primordial('Quelorior', [235]), {
     id: 'flambeur', name: 'Flambeur', stat: 'maxMoney', goal: 500, maxMoney: 500, dex: [235],
     goalText: 'Avoir 500 Pokédollars en réserve pendant une run avec Quelorior. Son deck de départ devient 4 Jackpot (3 dégâts, +5 ₽), 4 Abri, ses Gribouilles et Atout, la Roulette remplace son objet de départ (+2 dégâts par tranche de 100 ₽) et il a −50 % au Marché Kecleon.',
+    perks: ['−50 % sur tous les prix du Marché Kecleon.'],
     relic: 'roulette', deck: ['quel-jackpot', 'quel-jackpot', 'quel-jackpot', 'quel-jackpot', 'abri', 'abri', 'abri', 'abri', 'quel-gribouille', 'quel-gribouille', 'quel-atout'],
   }],
 } as Record<CharacterId, SkinDef[]>;

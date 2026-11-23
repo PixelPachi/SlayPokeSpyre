@@ -1490,3 +1490,5 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes psyWave { to { background-size: 140% 140%, 100% 100%; } }
 .field-chip { font-size: 15px; box-shadow: 0 3px 10px #0008; }
 .field-chip .turns { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #ffffff22; font-size: 13px; }
+/* Fiche de sélection : ce que le skin équipé change */
+.select-sheet .sheet-row.skin-changed { border-left: 3px solid #ffd76a; padding-left: 8px; }
