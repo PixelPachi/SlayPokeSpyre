@@ -65,7 +65,12 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     goalText: 'Mettre K.O. 25 Pokémon de type Psy en jouant Vipélierre. Il devient Psy/Ténèbres et perd Contestation, il peut apprendre toutes les cartes Psy et Ténèbres débloquées, ses cartes peuvent porter plusieurs enchantements, il commence avec Permucœur (enchante une carte de ta main pour la run) et le Nœud Destin à la place du Grain Miracle (tisse une carte au Centre Pokémon).',
     types: ['psy', 'tenebres'], extraCards: ['vip-permucoeur'], relic: 'noeud-destin', noTalent: true, typeCards: ['psy', 'tenebres'], typeCardsUnlocked: true,
   }],
-  kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true })],
+  kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true }), {
+    id: 'oceanique', name: 'Gardien Océanique', stat: 'bosses', goal: 1, bosses: ['roigada'], dex: [115], baby: true,
+    goalText: 'Vaincre le gardien du Puits Ramoloss (Roigada) en jouant Kangourex. Il devient de type Eau, le Corail remplace le Lait Meumeu (le Bébé gagne 3 Protection chaque tour), ses attaques de départ deviennent des Écumes (4 dégâts à tous les ennemis) et il peut obtenir toutes les cartes Eau du jeu.',
+    types: ['eau'], relic: 'corail', typeCards: ['eau'],
+    deck: ['kan-ecume', 'kan-ecume', 'kan-ecume', 'kan-ecume', 'abri', 'abri', 'abri', 'abri', 'kan-coup-main', 'kan-coup-double'],
+  }],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
     goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 12 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',

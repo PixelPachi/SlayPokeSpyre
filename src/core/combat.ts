@@ -219,6 +219,9 @@ export class Combat {
     }
     // Skin primordial : gagne le type Dragon (remplace Acier)
     if (skinDef(ch.id, opts.skin)?.addDragon) this.player.types = primordialTypes(this.player.types);
+    // Skins qui changent le type (Tisserand, Gardien Océanique) : y compris en Méga-Évolution
+    const skinTypes = skinDef(ch.id, opts.skin)?.types;
+    if (skinTypes) this.player.types = [...skinTypes];
     this.crimson = ch.id === 'riolu' && opts.skin === 'magma';
     this.alchemist = ch.id === 'vipelierre' && opts.skin === 'alchimiste';
     this.enemyPower = opts.enemyPower;
@@ -765,6 +768,8 @@ export class Combat {
     this.oddUsed = false;
     this.gemsUsed.clear();
     if (this.player.familiar) this.player.familiar.block = 0;
+    // Corail (Gardien Océanique) : le Bébé se protège à chaque tour
+    if (this.has('corail') && this.player.familiar && this.player.familiar.hp > 0) this.player.familiar.block += 3;
     this.babyHits = 0;
     // Lumargile : la Protection n'est que divisée par deux au lieu de disparaître
     this.player.block = this.has('lumargile') ? Math.floor(this.player.block / 2) : 0;
