@@ -1,38 +1,7 @@
 {
   "_note": "Illustrations à générer avec Gemini. « pokemon » : avec le Pokémon du personnage (gabarit spsTplP) ; « sans » : sans Pokémon (gabarit spsTpl). Fichiers : <perso>-<slug> → illustrations/<perso>/<slug>.webp, carte-<slug> → illustrations/<slug>.webp (arts.py). Retirer l'artName de la carte une fois l'image installée.",
   "cartes_sans_illustration": [],
-  "cartes_qui_empruntent": [
-    [
-      "carte-aromate-rigide",
-      "sans",
-      "Aromate Rigide : branche d'aromate officielle (feuilles rouges) sur une assiette en cuisine (remplace le montage provisoire)"
-    ],
-    [
-      "carte-aromate-assure",
-      "sans",
-      "Aromate Assuré : branche d'aromate officielle (feuilles bleu indigo) sur une assiette en cuisine (remplace le montage provisoire)"
-    ],
-    [
-      "carte-aromate-calme",
-      "sans",
-      "Aromate Calme : branche d'aromate officielle (feuilles roses) sur une assiette en cuisine (remplace le montage provisoire)"
-    ],
-    [
-      "carte-aromate-jovial",
-      "sans",
-      "Aromate Jovial : branche d'aromate officielle (feuilles vertes) sur une assiette en cuisine (remplace le montage provisoire)"
-    ],
-    [
-      "carte-aromate-serieux",
-      "sans",
-      "Aromate Sérieux : branche d'aromate officielle (feuilles beige doré) sur une assiette en cuisine (remplace le montage provisoire)"
-    ],
-    [
-      "carte-aromate-modeste",
-      "sans",
-      "Aromate Modeste : branche d'aromate officielle (feuilles cyan) sur une assiette en cuisine (remplace le montage provisoire)"
-    ]
-  ],
+  "cartes_qui_empruntent": [],
   "attaques_ennemies": [],
   "optionnel": []
 }
