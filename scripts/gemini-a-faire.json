@@ -1,0 +1,26 @@
+{
+  "_note": "Illustrations à générer avec Gemini. « pokemon » : avec le Pokémon du personnage (gabarit spsTplP) ; « sans » : sans Pokémon (gabarit spsTpl). Fichiers : <perso>-<slug> → illustrations/<perso>/<slug>.webp, carte-<slug> → illustrations/<slug>.webp (arts.py). Retirer l'artName de la carte une fois l'image installée.",
+  "cartes_sans_illustration": [
+    ["vipelierre-permucoeur", "pokemon", "Permucœur : Vipélierre Tisserand (psy/ténèbres) tisse des fils violets et roses lumineux autour d'une carte, cœurs qui s'échangent"],
+    ["vipelierre-catalyse", "pokemon", "Catalyse : Vipélierre Alchimiste verse une fiole, le poison violet bouillonne et double de volume"],
+    ["quelorior-jackpot", "pokemon", "Jackpot : Quelorior Flambeur, pluie de pièces d'or qui jaillissent d'une machine à sous, éclats dorés"]
+  ],
+  "cartes_qui_empruntent": [
+    ["kangourex-ecume", "pokemon", "Écume : Kangourex Océanique (type eau) lance une vague d'écume et de bulles sur tous les ennemis"],
+    ["caninos-ame", "pokemon", "Âme : Caninos des Âmes, petite flamme bleue en forme d'âme qui flotte au-dessus de sa lanterne"],
+    ["caninos-lechouille-des-ames", "pokemon", "Léchouille des Âmes : Caninos des Âmes, langue spectrale bleue, feux follets"],
+    ["caninos-soleil-intense", "pokemon", "Soleil Intense : Caninos sous un soleil écrasant, sol craquelé, l'eau s'évapore en vapeur"],
+    ["carte-neige", "sans", "Neige : paysage enneigé, gros flocons qui tombent doucement, cristaux de glace"],
+    ["carte-deluge", "sans", "Déluge : pluie torrentielle diluvienne, nuages noirs, flammes éteintes en fumée"],
+    ["carte-turbulence", "sans", "Turbulence : vents mystérieux en spirale, courants d'air verts et blancs dans le ciel"],
+    ["carte-soleil-intense", "sans", "Soleil Intense : soleil écrasant, sol craquelé, vagues de chaleur, flaque qui s'évapore"]
+  ],
+  "attaques_ennemies": [
+    ["carte-charge-os-spectrale", "sans", "Charge Os Spectrale : os entouré de flammes spectrales violettes, frappe en avant"],
+    ["carte-champ-herbu", "sans", "Champ Herbu : sol couvert d'herbe luisante, pétales et spores vertes qui montent"],
+    ["carte-champ-psychique", "sans", "Champ Psychique : sol violet-rose parcouru d'ondes psychiques concentriques"]
+  ],
+  "optionnel": [
+    ["tapis-kecleon", "sans", "Tapis de marchand vu de dessus, laine bordeaux, bordure dorée et turquoise, franges, motifs losanges"]
+  ]
+}
