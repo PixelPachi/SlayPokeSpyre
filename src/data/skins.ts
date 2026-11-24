@@ -99,7 +99,8 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     ],
   }, {
     id: 'hisui', name: 'Caninos d’Hisui', stat: 'bosses', goal: 1, bosses: [], kills: { type: 'roche', goal: 25 }, dex: [58, 59],
-    goalText: 'Mettre K.O. 25 Pokémon de type Roche en jouant Caninos. Il devient Feu/Roche, la Pierre Dure remplace son objet de départ (ses attaques Normal deviennent Roche) et il peut apprendre toutes les cartes Roche du jeu.',
+    goalText: 'Mettre K.O. 25 Pokémon de type Roche en jouant Caninos. Il devient Feu/Roche, Tête de Roc remplace Intimidation (aucun contrecoup de ses attaques), la Pierre Dure remplace son objet de départ (ses attaques Normal deviennent Roche) et il peut apprendre toutes les cartes Roche du jeu.',
+    talent: { name: 'Tête de Roc', text: 'Il ne perd aucun PV à cause de ses propres attaques (Bélier, Fracass’Tête…). Remplace Intimidation.' },
     perks: ['Peut obtenir toutes les cartes Roche du jeu.', 'Évolue en Arcanin d’Hisui (Feu/Roche).'],
     types: ['feu', 'roche'], relic: 'pierre-dure', typeCards: ['roche'],
     evolutions: [{ act: 2, dex: 59, name: 'Arcanin d’Hisui', types: ['feu', 'roche'], hp: 12 }],

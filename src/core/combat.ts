@@ -252,7 +252,8 @@ export class Combat {
     this.weaver = ch.id === 'vipelierre' && opts.skin === 'tisserand';
     this.moneyStart = opts.money ?? 0;
     // Intimidation (Caninos) ; le Chien de la Lanterne a Feu des Âmes à la place
-    if (ch.id === 'caninos' && !this.soulDog) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
+    this.rockHead = ch.id === 'caninos' && opts.skin === 'hisui';
+    if (ch.id === 'caninos' && !this.soulDog && !this.rockHead) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
     // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
     const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
@@ -495,6 +496,8 @@ export class Combat {
   crimson = false;
   /** Lucario Féerique (Peau Féerique) : les attaques Normal deviennent Fée. */
   pixilate = false;
+  /** Caninos d'Hisui (Tête de Roc) : aucun contrecoup de ses propres attaques. */
+  rockHead = false;
   /** Foulard Rose : attaques reçues par chaque ennemi ce tour-ci. */
   private attacksOn: Record<number, number> = {};
   /** Skin Alchimiste (Vipélierre) : ses Vampigraines deviennent du Poison. */
@@ -1016,7 +1019,7 @@ export class Combat {
           }
         }
         if (eff.drain) this.healPlayer(Math.floor(dealt / 2));
-        if (recoil && this.phase === 'joueur') this.loseHp(p, 'player', eff.recul!, 'carte');
+        if (recoil && this.phase === 'joueur' && !this.rockHead) this.loseHp(p, 'player', eff.recul!, 'carte');
         return;
       }
       case 'degats-aura': {
@@ -1077,6 +1080,8 @@ export class Combat {
         this.changeEnergy(eff.amount, d.name);
         return;
       case 'perte-pv':
+        // Tête de Roc (Caninos d'Hisui) : pas de contrecoup de ses attaques (Bélier, Fracass'Tête…)
+        if (this.rockHead && d.category === 'attaque') { this.events.push({ type: 'player-move', name: 'Tête de Roc !' }); return; }
         this.loseHp(p, 'player', eff.amount, 'carte');
         return;
       case 'aura':

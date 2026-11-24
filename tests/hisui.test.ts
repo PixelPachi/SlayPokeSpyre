@@ -23,3 +23,19 @@ describe('Caninos d’Hisui', () => {
     expect(roche).toBe(true);
   });
 });
+
+describe('Tête de Roc', () => {
+  it('pas de contrecoup de Fracass’Tête ni de Bélier, mais Intimidation disparaît', () => {
+    const c = new Combat({ character: 'caninos', deck: [], enemies: ['rattata'], seed: 'TR', relics: [], skin: 'hisui' } as never);
+    c.drainEvents(); c.player.energy = 9;
+    expect(c.aliveEnemies()[0].statuses.attaque ?? 0).toBe(0);
+    const hp = c.player.hp;
+    c.hand = [{ uid: 1, defId: 'can-belier', upgraded: false }];
+    c.play(1, c.aliveEnemies()[0].uid);
+    expect(c.player.hp).toBe(hp);
+    const n = new Combat({ character: 'caninos', deck: [], enemies: ['rattata'], seed: 'TR', relics: [] } as never);
+    n.player.energy = 9; n.hand = [{ uid: 1, defId: 'can-belier', upgraded: false }];
+    const h2 = n.player.hp; n.play(1, n.aliveEnemies()[0].uid);
+    expect(n.player.hp).toBe(h2 - 3);
+  });
+});
