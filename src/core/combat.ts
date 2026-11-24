@@ -316,7 +316,6 @@ export class Combat {
     if (this.has('metronome')) b += this.attacksThisTurn;
     // Roulette : +2 dégâts par tranche de 100 Pokédollars
     if (this.has('roulette')) b += 2 * Math.floor((this.moneyStart + this.moneyGained) / 100);
-    b += this.player.statuses.elan ?? 0; // Élan (Caninos)
     if (this.has('loupe') && d.target === 'tous') b += 2;
     const gem = GEMS[d.pokeType];
     if (gem && this.has(gem) && !this.gemsUsed.has(d.pokeType)) b += 5;
@@ -502,6 +501,8 @@ export class Combat {
   /** Caninos d'Hisui (Tête de Roc) : aucun contrecoup de ses propres attaques. */
   rockHead = false;
   private mentalUsed = false;
+  /** Élan accumulé au tour précédent : devient de la Protection au début du tour. */
+  private elanBlock = 0;
   /** Foulard Rose : attaques reçues par chaque ennemi ce tour-ci. */
   private attacksOn: Record<number, number> = {};
   /** Skin Alchimiste (Vipélierre) : ses Vampigraines deviennent du Poison. */
@@ -643,6 +644,8 @@ export class Combat {
     if (this.cardsThisTurn >= 5 && this.bossAlive('ailes')) this.addStatus(this.player, 'player', 'confusion', 1);
     if (this.player.energy > 0 && this.bossAlive('sol-brulant')) this.addStatus(this.player, 'player', 'brulure', this.player.energy);
     if ((this.player.statuses.elan ?? 0) > 0) {
+      // Élan : la Protection du prochain tour vaut l'Élan de ce tour, puis l'Élan est divisé par deux
+      this.elanBlock = this.player.statuses.elan!;
       const half = Math.floor(this.player.statuses.elan! / 2);
       this.addStatus(this.player, 'player', 'elan', half - this.player.statuses.elan!);
     }
@@ -833,6 +836,7 @@ export class Combat {
     this.babyHits = 0;
     // Lumargile : la Protection n'est que divisée par deux au lieu de disparaître
     this.player.block = this.has('lumargile') ? Math.floor(this.player.block / 2) : 0;
+    if (this.elanBlock > 0) { const n = this.elanBlock; this.elanBlock = 0; this.gainBlock(this.player, 'player', n); }
     // Évoluroc : tant que le Pokémon n'a pas évolué, 3 Protection à chaque tour
     const chDef = CHARACTERS[this.player.character];
     if (this.has('evoluroc') && (chDef.evolutions?.length ?? 0) > 0 && this.player.dex === chDef.dex[0]) this.relicFired('evoluroc', () => this.gainBlock(this.player, 'player', 3));

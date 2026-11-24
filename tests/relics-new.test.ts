@@ -110,13 +110,13 @@ describe('Rage, Élan et skin primordial', () => {
     c.play(give(c, 'kan-degommage').uid, c.aliveEnemies()[0].uid);
     expect(c.player.statuses.rage ?? 0).toBe(0);
   });
-  it('Caninos : l’Élan renforce les attaques puis est divisé par deux en fin de tour', () => {
+  it('Caninos : l’Élan ne change plus les dégâts et est divisé par deux en fin de tour', () => {
     const c = start('caninos', [], ['onix']);
     const before = c.previewCardDamage(give(c, 'can-roue-de-feu')) ?? 0;
     c.player.energy = 9;
     c.play(give(c, 'can-hate').uid);
     expect(c.player.statuses.elan).toBe(3);
-    expect(c.previewCardDamage(give(c, 'can-roue-de-feu'))).toBeGreaterThan(before);
+    expect(c.previewCardDamage(give(c, 'can-roue-de-feu'))).toBe(before);
     c.endPlayerTurn();
     expect(c.player.statuses.elan).toBe(1);
   });

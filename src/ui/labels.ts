@@ -35,7 +35,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   rage: { label: 'Rage', color: '#e5484d', text: (n) => `${n} Rage. Kangourex en gagne 1 chaque fois qu’il perd des PV ; les cartes de Rage s’en servent.` },
   ligote: { label: 'Ligoté', color: '#c49a6c', text: (n) => `Perd ${6 * n} PV au début du tour (6 par cumul). Chaque cumul disparaît au bout de 3 tours.` },
   epine: { label: 'Épine', color: '#7fbf5a', text: (n) => `Chaque coup reçu d’un ennemi lui inflige ${n} dégât${n > 1 ? 's' : ''}. Dure tout le combat.` },
-  elan: { label: 'Élan', color: '#ffb84d', text: (n) => `Tes attaques infligent ${n} dégât${n > 1 ? 's' : ''} de plus. L’Élan est divisé par deux à la fin de ton tour.` },
+  elan: { label: 'Élan', color: '#ffb84d', text: (n) => `Au début de ton prochain tour, gagne ${n} Protection. L’Élan est ensuite divisé par deux à la fin de ton tour.` },
 };
 
 export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => string }> = {

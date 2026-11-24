@@ -30,3 +30,15 @@ describe('nouveaux objets communs', () => {
     expect(c.player.statuses.confusion).toBe(2);
   });
 });
+
+describe('Élan', () => {
+  it('donne de la Protection au tour suivant, puis se divise par deux', () => {
+    const c = new Combat({ character: 'caninos', deck: [], enemies: ['onix'], seed: 'EL', relics: [] } as never);
+    c.player.statuses.elan = 6;
+    const e = c.enemies[0];
+    e.intent = { id: 'x', name: 'x', weight: 1, intent: 'boost' } as never;
+    c.endPlayerTurn(); c.enemyAct(e.uid); c.endEnemyTurn();
+    expect(c.player.statuses.elan).toBe(3);
+    expect(c.player.block).toBeGreaterThanOrEqual(6);
+  });
+});
