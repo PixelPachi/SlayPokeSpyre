@@ -75,6 +75,8 @@ const RELICS: RelicDef[] = [
     text: 'Au Centre Pokémon, tu peux tisser une nouvelle carte en choisissant deux effets (trois propositions pour chacun).', shared: true },
   { id: 'lanterne-bleue', name: 'Lanterne Bleue', sprite: 'lanterne-bleue', rarity: 'quete', owner: 'caninos', free: true,
     text: '3 cartes Âme (0 PA, pioche 2, Épuisée) rejoignent ta pioche au début de chaque combat.', shared: true },
+  { id: 'pierre-dure', name: 'Pierre Dure', sprite: 'pierre-dure', rarity: 'quete', owner: 'caninos', free: true,
+    text: 'Tes attaques de type Normal deviennent de type Roche.', shared: true },
   { id: 'plaque-toxik', name: 'Plaque Toxik', sprite: 'toxic-plate', rarity: 'quete', owner: 'vipelierre', free: true,
     text: 'Tu peux transformer une baie en baie empoisonnée (clique sur la baie). Plus la baie est rare, plus le poison est fort et plus il inflige d’effets.', shared: true },
   { id: 'pic-venin', name: 'Pic Venin', sprite: 'poison-barb', rarity: 'rare', owner: 'vipelierre', free: true,

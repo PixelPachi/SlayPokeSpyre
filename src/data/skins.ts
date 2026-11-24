@@ -92,6 +92,12 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
       { act: 2, dex: 59, name: 'Arcanin', types: ['feu'], hp: 12 },
       { act: 3, dex: 9059, name: 'Arcanâme', types: ['feu', 'spectre'], hp: 8 },
     ],
+  }, {
+    id: 'hisui', name: 'Caninos d’Hisui', stat: 'bosses', goal: 1, bosses: [], kills: { type: 'roche', goal: 25 }, dex: [58, 59],
+    goalText: 'Mettre K.O. 25 Pokémon de type Roche en jouant Caninos. Il devient Feu/Roche, la Pierre Dure remplace son objet de départ (ses attaques Normal deviennent Roche) et il peut apprendre toutes les cartes Roche du jeu.',
+    perks: ['Peut obtenir toutes les cartes Roche du jeu.', 'Évolue en Arcanin d’Hisui (Feu/Roche).'],
+    types: ['feu', 'roche'], relic: 'pierre-dure', typeCards: ['roche'],
+    evolutions: [{ act: 2, dex: 59, name: 'Arcanin d’Hisui', types: ['feu', 'roche'], hp: 12 }],
   }],
   mew: [SHINY_GOAL, primordial('Mew', [151])],
   quelorior: [SHINY_GOAL, primordial('Quelorior', [235]), {

@@ -339,7 +339,10 @@ export class Combat {
   // ——— Lecture ———
 
   def(card: Card): CardDef {
-    return cardDef(card.defId, card.upgraded);
+    const d = cardDef(card.defId, card.upgraded);
+    // Pierre Dure : les attaques Normal deviennent Roche
+    if (d.category === 'attaque' && d.pokeType === 'normal' && this.has('pierre-dure')) return { ...d, pokeType: 'roche' };
+    return d;
   }
 
   aliveEnemies(): EnemyState[] {
