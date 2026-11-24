@@ -25,6 +25,7 @@ const FILE_TRACKS: Record<string, string> = {
   'mont-abrupt': 'music/mont-abrupt.mp3', // Stark Mountain
   'tour-dragospire': 'music/tour-dragospire.mp3', // Dragonspiral Tower
   'foret-d-empoigne': 'music/foret-d-empoigne.mp3', // Pinwheel Forest
+  'guilde-grodoudou': 'music/guilde-grodoudou.mp3', // Donjon Mystère : Guilde de Grodoudou
 };
 /** Vrai si une musique enregistrée existe pour cet identifiant. */
 export function hasTrack(id: string): boolean { return !!FILE_TRACKS[id]; }

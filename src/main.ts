@@ -310,6 +310,7 @@ function startRun(character: CharacterId): void {
   if (run.act === 1 && !params.get('combat') && !params.get('boutique') && !params.has('noeud') && !params.get('fin')) {
     clear();
     persist(run, false);
+    playTheme('guilde-grodoudou'); // la Guilde de Grodoudou (Donjon Mystère), puis la musique de la zone sur la carte
     return renderEvent(screen, run, () => showMap(run), 'accueil', (f) => duel(run, f));
   }
   if (run.act === LAST_ACT) return showSummit(run);
