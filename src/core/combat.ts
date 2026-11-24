@@ -131,7 +131,7 @@ const TYPE_NAMES: Record<string, string> = { normal: 'Normal', feu: 'Feu', eau: 
 const GEMS: Partial<Record<PokeType, string>> = { combat: 'gemme-combat', plante: 'gemme-plante', normal: 'gemme-normal', feu: 'gemme-feu', psy: 'gemme-psy' };
 
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
-const DURATIONS: StatusId[] = ['paralysie', 'peur', 'confusion'];
+const DURATIONS: StatusId[] = ['paralysie', 'peur', 'confusion', 'attraction'];
 
 /** Dégâts d'un coup : base + Attaque → bonus de type → table des types → Paralysie/Brûlure/Peur → arrondi. */
 export function computeDamage(base: number, attacker: Fighter, defender: Fighter, type: PokeType) {
@@ -229,6 +229,7 @@ export class Combat {
     const skinTypes = skinDef(ch.id, opts.skin)?.types;
     if (skinTypes) this.player.types = [...skinTypes];
     this.crimson = ch.id === 'riolu' && opts.skin === 'magma';
+    this.pixilate = ch.id === 'riolu' && opts.skin === 'feerique';
     this.alchemist = ch.id === 'vipelierre' && opts.skin === 'alchimiste';
     this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
@@ -246,7 +247,7 @@ export class Combat {
     this.drawPile.sort((a, b) => Number(this.hasKw(a, 'innee')) - Number(this.hasKw(b, 'innee')));
 
     // Talents de départ
-    if (ch.id === 'riolu') this.gainAura(3);
+    if (ch.id === 'riolu' && !this.pixilate) this.gainAura(3);
     this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
     this.weaver = ch.id === 'vipelierre' && opts.skin === 'tisserand';
     this.moneyStart = opts.money ?? 0;
@@ -342,6 +343,8 @@ export class Combat {
     const d = cardDef(card.defId, card.upgraded);
     // Pierre Dure : les attaques Normal deviennent Roche
     if (d.category === 'attaque' && d.pokeType === 'normal' && this.has('pierre-dure')) return { ...d, pokeType: 'roche' };
+    // Peau Féerique : les attaques Normal deviennent Fée
+    if (d.category === 'attaque' && d.pokeType === 'normal' && this.pixilate) return { ...d, pokeType: 'fee' };
     return d;
   }
 
@@ -490,6 +493,10 @@ export class Combat {
   rechargePa = 0;
   /** Skin Cramoisi (Riolu) : l'Aura brûle la cible au lieu d'ajouter des dégâts (sauf cartes d'Aura comme Aurasphère). */
   crimson = false;
+  /** Lucario Féerique (Peau Féerique) : les attaques Normal deviennent Fée. */
+  pixilate = false;
+  /** Foulard Rose : attaques reçues par chaque ennemi ce tour-ci. */
+  private attacksOn: Record<number, number> = {};
   /** Skin Alchimiste (Vipélierre) : ses Vampigraines deviennent du Poison. */
   alchemist = false;
   /** Skin Chien de la Lanterne (Caninos) : chaque pioche pendant son tour inflige 12 dégâts à tous les ennemis. */
@@ -567,6 +574,11 @@ export class Combat {
       if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
+    // Foulard Rose : deux attaques sur le même Pokémon dans un tour → Attraction
+    if (d.category === 'attaque' && target && this.has('foulard-rose') && target.hp > 0) {
+      this.attacksOn[target.uid] = (this.attacksOn[target.uid] ?? 0) + 1;
+      if (this.attacksOn[target.uid] === 2) this.addStatus(target, target.uid, 'attraction', 2);
+    }
     // Grelot Coque : chaque carte Attaque jouée soigne 1 PV
     if (d.category === 'attaque' && this.has('grelot-coque') && this.phase === 'joueur') this.healPlayer(1);
     this.cardsThisTurn++;
@@ -654,6 +666,9 @@ export class Combat {
     }
     if (frozen && !this.boss) {
       this.events.push({ type: 'enemy-move', uid, name: 'Gelé !' });
+    } else if ((e.statuses.attraction ?? 0) > 0 && this.rng.next() < 1 / 3) {
+      // Attraction : sous le charme, il en oublie d'agir
+      this.events.push({ type: 'enemy-move', uid, name: 'Sous le charme !' });
     } else if ((e.statuses.sommeil ?? 0) > 0 && !ENEMY_DEFS[e.defId]?.actsAsleep) {
       e.statuses.sommeil! -= 1;
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
@@ -842,6 +857,7 @@ export class Combat {
     if (this.bossAlive('distorsion') && this.turn >= 3) this.changeEnergy(-1, 'Distorsion du Temps');
     // Hurle-Temps : le tour suivant, 2 PA de moins
     if (this.timeRoar) { this.timeRoar = false; this.changeEnergy(-2, 'Hurle-Temps'); }
+    this.attacksOn = {};
     if (this.rechargePa) { const n = this.rechargePa; this.rechargePa = 0; this.changeEnergy(-n, 'Recharge'); }
     // Lance-Soleil chargé au tour précédent : le rayon frappe tous les ennemis
     for (const sol of this.pendingSolar.splice(0)) {

@@ -21,6 +21,7 @@ export type StatusId =
   | 'abri' // annule entièrement le prochain coup subi
   | 'ligote' // perd 6 PV par cumul au début du tour ; chaque cumul disparaît au bout de 3 tours
   | 'epine' // inflige X dégâts à l'ennemi qui l'attaque (chaque coup), dure tout le combat
+  | 'attraction' // sous le charme : 1 chance sur 3 de rater son action
   | 'clone' // Clonage : Protection persistante, ne disparaît que si elle est cassée
   | 'elan'; // Caninos : +1 dégât par point à toutes ses attaques, divisé par deux à la fin du tour
 

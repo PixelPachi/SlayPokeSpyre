@@ -62,7 +62,12 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     id: 'magma', name: 'Cramoisi', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
     talent: { name: 'Justicier Cramoisi', text: 'Commence chaque combat avec 3 Aura. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).' },
     goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).',
-  }, primordial('Riolu', [447, 448, 10059])],
+  }, primordial('Riolu', [447, 448, 10059]), {
+    id: 'feerique', name: 'Lucario Féerique', stat: 'bosses', goal: 1, bosses: [], kills: { type: 'dragon', goal: 25 }, dex: [447, 448, 10059],
+    goalText: 'Mettre K.O. 25 Pokémon de type Dragon en jouant Riolu. Il devient Fée, Peau Féerique remplace Justicier (ses attaques Normal deviennent Fée) et le Foulard Rose remplace la Ceinture Noire (attaquer deux fois le même Pokémon dans un tour lui inflige Attraction).',
+    talent: { name: 'Peau Féerique', text: 'Ses attaques de type Normal deviennent de type Fée. Il ne commence plus les combats avec de l’Aura.' },
+    types: ['fee'], relic: 'foulard-rose',
+  }],
   vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497]), {
     id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
     goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 25 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',

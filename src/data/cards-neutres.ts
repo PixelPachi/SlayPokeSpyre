@@ -114,7 +114,7 @@ export const NEUTRAL_CARDS: CardDef[] = [
   // ——— Fée ———
   n('vent-feerique', 'Vent Féérique', 'fee', 'attaque', 'commune', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),
   n('voix-enjoleuse', 'Voix Enjôleuse', 'fee', 'attaque', 'commune', 1, 'tous', [dmg(4)], { effects: [dmg(6)] }),
-  n('charme', 'Charme', 'fee', 'technique', 'commune', 1, 'ennemi', [st('attaque', -2)], { effects: [st('attaque', -3)] }, ['epuisee']),
+  n('charme', 'Charme', 'fee', 'technique', 'commune', 1, 'ennemi', [st('attraction', 2)], { effects: [st('attraction', 3)] }, ['epuisee']),
   n('eclat-magique', 'Éclat Magique', 'fee', 'attaque', 'peu-commune', 2, 'tous', [dmg(9)], { effects: [dmg(12)] }),
   n('pouvoir-lunaire', 'Pouvoir Lunaire', 'fee', 'attaque', 'rare', 2, 'ennemi', [dmg(18), st('peur', 1)], { effects: [dmg(24), st('peur', 1)] }),
 ];

@@ -26,6 +26,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   attaque: { label: 'Attaque', color: '#ff9b4a', text: (n) => `${n > 0 ? '+' : ''}${n} dégâts par coup.` },
   defense: { label: 'Défense', color: '#5aa5ff', text: (n) => `${n > 0 ? '+' : ''}${n} Protection par carte.` },
   tenace: { label: 'Tenace', color: '#ffd166', text: () => 'Ne peut pas tomber K.O. avant son prochain tour.' },
+  attraction: { label: 'Attraction', color: '#ff6fb5', text: (n) => `Sous le charme : 1 chance sur 3 de ne pas agir. Encore ${n} tour(s).` },
   clone: { label: 'Clone', color: '#c9b8ff', text: (n) => `${n} Protection persistante : elle ne disparaît pas en début de tour, seulement quand elle est cassée.` },
   gel: { label: 'Gel', color: '#9fe3ff', text: (n) => `${n}/3. À 3 Gel, passe son tour (un gardien n'inflige que la moitié de ses dégâts).` },
   concentration: { label: 'Concentration', color: '#ff8a5c', text: (n) => `Au début du prochain tour, inflige ${n} dégâts… si aucun dégât n'est subi d'ici là.` },
