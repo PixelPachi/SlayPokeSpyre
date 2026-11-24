@@ -270,6 +270,9 @@ export class Combat {
     if (this.has('pierre-plante')) this.relicFired('pierre-plante', () => { for (const e of this.enemies) this.addStatus(e, e.uid, 'vampigraine', 2); });
     if (this.has('pierre-feu')) this.relicFired('pierre-feu', () => { for (const e of this.enemies) this.addStatus(e, e.uid, 'brulure', 2); });
     if (this.has('bandeau-muscle')) this.relicFired('bandeau-muscle', () => this.addStatus(this.player, 'player', 'attaque', 1));
+    if (this.has('bracelet-macho')) this.relicFired('bracelet-macho', () => { this.addStatus(this.player, 'player', 'attaque', 2); this.addStatus(this.player, 'player', 'defense', -1); });
+    if (this.has('poke-poupee')) this.relicFired('poke-poupee', () => this.addStatus(this.player, 'player', 'clone', 5));
+    if (this.has('lunettes-noires')) this.relicFired('lunettes-noires', () => { for (const e of this.enemies) this.addStatus(e, e.uid, 'defense', -1); });
     if (mega) this.relicFired(mega.stone, () => {
       this.events.push({ type: 'player-move', name: `${ch.name} méga-évolue !` });
       if (ch.id === 'riolu') { this.addStatus(this.player, 'player', 'attaque', 2); this.gainAura(10); }
@@ -498,6 +501,7 @@ export class Combat {
   pixilate = false;
   /** Caninos d'Hisui (Tête de Roc) : aucun contrecoup de ses propres attaques. */
   rockHead = false;
+  private mentalUsed = false;
   /** Foulard Rose : attaques reçues par chaque ennemi ce tour-ci. */
   private attacksOn: Record<number, number> = {};
   /** Skin Alchimiste (Vipélierre) : ses Vampigraines deviennent du Poison. */
@@ -899,7 +903,7 @@ export class Combat {
       this.events.push({ type: 'player-move', name: 'Énergie illimitée !' });
     }
     this.handDraw = true;
-    this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0));
+    this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0) + (this.turn === 1 && this.has('pierre-ovale') ? 1 : 0));
     this.handDraw = false;
     this.checkLucarite();
   }
@@ -1721,6 +1725,8 @@ export class Combat {
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
     if (s > 0 && this.terrain?.id === 'champ-brumeux' && BAD_STATUSES.includes(status)) return;
     if (who === 'player' && s > 0 && this.has('carapace-mue') && (status === 'peur' || status === 'paralysie')) return void this.relicFired('carapace-mue');
+    // Herbe Mental : le premier statut négatif du combat est annulé
+    if (who === 'player' && s > 0 && BAD_STATUSES.includes(status) && this.has('herbe-mental') && !this.mentalUsed) { this.mentalUsed = true; return void this.relicFired('herbe-mental'); }
     if (who === 'player' && s > 0 && this.has('grosses-bottes') && status === 'brulure') return void this.relicFired('grosses-bottes');
     if (s > 0 && this.terrain?.id === 'champ-electrifie' && status === 'sommeil') return;
     if (s > 0 && this.terrain?.id === 'champ-psychique' && status === 'confusion') return;
