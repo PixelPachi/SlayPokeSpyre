@@ -145,6 +145,9 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
       case 'consomme-aura': parts.push(`Consomme <b>${e.amount}</b> Aura (requis).`); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
+      case 'double-tisse': parts.push('Double les valeurs de la prochaine carte <b>tissée</b> que tu joues.'); break;
+      case 'double-enchant': parts.push('Double les valeurs de la prochaine carte <b>enchantée</b> que tu joues.'); break;
+      case 'epuise-main': parts.push(`Épuise ta main et inflige ${e.perCard} dégâts par carte détruite.`); break;
       case 'si-relais': {
         const inner = cardText({ ...d, effects: e.fx }, null, null);
         parts.push(`<b>Relais</b> : ${inner.replace(/<br>/g, ' ')}`);

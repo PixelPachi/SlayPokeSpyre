@@ -222,7 +222,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `feu-follet-ardent.png` | Feu Follet Ardent | Spectre · Attaque | Caninos | **Caninos** lance la capacité | ombres violettes, flammes fantomatiques | ☐ |
 | `feu-sacre.png` | Feu Sacré | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `feuille-magik.png` | Feuille Magik | Plante · Attaque | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |
-| `fil-astral.png` | Fil Astral | Psy · Attaque | Vipélierre | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
+| `fil-astral.png` | Fil Astral | Psy · Technique | Vipélierre | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `fiole-toxique.png` | Fiole Toxique | Poison · Attaque | Vipélierre | **Vipélierre** lance la capacité | liquide et fumée violets, bulles toxiques | ☐ |
 | `flair.png` | Flair | Normal · Technique | Caninos | **Caninos** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `flammeche.png` | Flammèche | Feu · Attaque | Caninos | **Caninos** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |

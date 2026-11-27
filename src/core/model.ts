@@ -110,6 +110,9 @@ export type Effect =
   | { kind: 'multiplie-statut'; status: StatusId; mult: number } // multiplie le statut de la cible (Catalyse)
   | { kind: 'recharge'; amount: number } // au prochain tour, X PA de moins
   | { kind: 'trame'; trigger: string; fx: string[] } // Nœud Destin + : talent qui déclenche deux effets
+  | { kind: 'double-tisse' } // Fil Astral : la prochaine carte tissée a ses valeurs doublées
+  | { kind: 'double-enchant' } // Toile Onirique : la prochaine carte enchantée a ses valeurs doublées
+  | { kind: 'epuise-main'; perCard: number } // Lame du Néant : épuise la main, dégâts par carte épuisée
   | { kind: 'si-relais'; fx: Effect[] } // Duo : effets bonus si la carte a déclenché un Relais
   | { kind: 'duo-inversion' } // Duo : échange les PV de Posipi et Négapi
   | { kind: 'duo-relais' } // Duo : fait passer le partenaire en première ligne

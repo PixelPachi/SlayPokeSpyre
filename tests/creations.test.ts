@@ -51,3 +51,18 @@ it('Confusion : attaquer confus coûte autant de PV que de cumuls, et elle dispa
   turn();
   expect(c.player.statuses.confusion).toBeUndefined();
 });
+
+it('Tisserand : Lame du Néant épuise la main (7 par carte), Fil Astral double la prochaine carte tissée', () => {
+  const mk = (ids: string[]) => {
+    const deck = ids.map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
+    const c = new Combat2({ character: 'vipelierre', deck, enemies: ['rattata'], seed: 'TS', relics: [], skin: 'tisserand' } as never);
+    c.enemies[0].hp = c.enemies[0].maxHp = 999; c.player.energy = 10;
+    return c;
+  };
+  const c = mk(['vip-lame-du-neant', 'abri', 'abri', 'abri', 'abri']);
+  const hp = c.enemies[0].hp;
+  c.play(c.hand.find((x) => x.defId === 'vip-lame-du-neant')!.uid, c.enemies[0].uid);
+  expect(c.hand).toHaveLength(0);
+  expect(hp - c.enemies[0].hp).toBeGreaterThanOrEqual(28);
+  expect(c.enemies[0].statuses.peur).toBeGreaterThan(0);
+});

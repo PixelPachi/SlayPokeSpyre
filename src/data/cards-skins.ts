@@ -42,9 +42,9 @@ export const SKIN_CARDS: CardDef[] = [
   ]),
   // ——— Tisserand de Soie Astrale : Psy / Ténèbres, cartes tissées ———
   ...skin('vipelierre', 'vip', 'tisserand', [
-    vip('fil-astral', 'Fil Astral', 'psy', 'attaque', 'commune', 1, 'ennemi', [dmg(6), draw(1)], { effects: [dmg(8), draw(1)] }),
-    vip('toile-onirique', 'Toile Onirique', 'psy', 'technique', 'commune', 1, 'ennemi', [st('confusion', 2), prot(4)], { effects: [st('confusion', 3), prot(6)] }),
-    vip('lame-du-neant', 'Lame du Néant', 'tenebres', 'attaque', 'commune', 1, 'ennemi', [dmg(5), st('peur', 1)], { effects: [dmg(7), st('peur', 1)] }),
+    vip('fil-astral', 'Fil Astral', 'psy', 'technique', 'commune', 0, 'soi', [{ kind: 'double-tisse' }], { effects: [{ kind: 'double-tisse' }, draw(1)] }),
+    vip('toile-onirique', 'Toile Onirique', 'psy', 'technique', 'commune', 0, 'soi', [{ kind: 'double-enchant' }], { effects: [{ kind: 'double-enchant' }, draw(1)] }),
+    vip('lame-du-neant', 'Lame du Néant', 'tenebres', 'attaque', 'commune', 1, 'ennemi', [{ kind: 'epuise-main', perCard: 7 }, st('peur', 1)], { effects: [{ kind: 'epuise-main', perCard: 9 }, st('peur', 1)] }),
     vip('cocon-stellaire', 'Cocon Stellaire', 'psy', 'technique', 'commune', 1, 'soi', [prot(6), draw(1)], { effects: [prot(9), draw(1)] }),
     vip('trame-du-destin', 'Trame du Destin', 'psy', 'talent', 'legendaire', 3, 'soi', [power('trame-destin', 1)], { cost: 2 }),
   ]),

@@ -621,6 +621,8 @@ export class Combat {
   /** Duo Posipi & Négapi (null pour les autres personnages). */
   duo: { front: DuoSide; hp: Record<DuoSide, number>; max: number; plus: number; minus: number; seq: DuoSide[]; surged: boolean; posipiTurn: number; owner: Record<string, DuoSide> } | null = null;
   private duoRelayed = false;
+  private doubleWoven = 0;
+  private doubleEnchanted = 0;
   /** Multipi : Plus et Moins s'appliquent à toutes les cartes. */
   fused = false;
   fusedPlus = 0;
@@ -676,7 +678,10 @@ export class Combat {
 
     const paid = this.costOf(card);
     // Coût X : les valeurs de la carte sont multipliées par les PA dépensés
-    const xd = d.xCost ? scaleX(d, paid) : d;
+    let xd = d.xCost ? scaleX(d, paid) : d;
+    // Fil Astral / Toile Onirique : la prochaine carte tissée / enchantée frappe deux fois plus fort
+    if (this.doubleWoven > 0 && card.defId.includes('tissage:')) { this.doubleWoven--; xd = scaleX(xd, 2, true); this.events.push({ type: 'player-move', name: 'Fil Astral : valeurs doublées !' }); }
+    else if (this.doubleEnchanted > 0 && (d.enchant || d.enchants?.length)) { this.doubleEnchanted--; xd = scaleX(xd, 2, true); this.events.push({ type: 'player-move', name: 'Toile Onirique : valeurs doublées !' }); }
     if (d.cost >= 2 && paid === 0 && !this.player.freeTurn && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) {
       this.used.add('herbe-pouvoir'); this.relicFired('herbe-pouvoir');
     }
@@ -1294,6 +1299,16 @@ export class Combat {
       case 'soin':
         this.healPlayer(eff.amount);
         return;
+      case 'double-tisse': this.doubleWoven++; return;
+      case 'double-enchant': this.doubleEnchanted++; return;
+      case 'epuise-main': {
+        // Lame du Néant : toute la main part dans les cartes épuisées
+        const n = this.hand.length;
+        this.exhaustPile.push(...this.hand.splice(0));
+        if (n) this.events.push({ type: 'player-move', name: `Lame du Néant : ${n} carte${n > 1 ? 's' : ''} détruite${n > 1 ? 's' : ''}` });
+        if (n && target !== undefined) this.resolve({ kind: 'degats', amount: eff.perCard * n }, d, target);
+        return;
+      }
       case 'si-relais':
         if (this.duoRelayed) for (const f of eff.fx) this.resolve(f, d, target);
         return;
@@ -2082,10 +2097,10 @@ export class Combat {
 }
 
 /** Coût X : multiplie les valeurs des effets par X (le nombre de coups pour une carte à coups multiples). */
-function scaleX(d: CardDef, x: number): CardDef {
+function scaleX(d: CardDef, x: number, amountsOnly = false): CardDef {
   const effects = d.effects.map((e): Effect => {
     switch (e.kind) {
-      case 'degats': return e.hits !== undefined ? { ...e, hits: e.hits * x, hitsMax: undefined } : { ...e, amount: e.amount * x };
+      case 'degats': return e.hits !== undefined && !amountsOnly ? { ...e, hits: e.hits * x, hitsMax: undefined } : { ...e, amount: e.amount * x };
       case 'protection': case 'pioche': case 'soin': case 'pa': return { ...e, amount: e.amount * x };
       case 'statut': return { ...e, stacks: e.stacks * x };
       default: return e;
