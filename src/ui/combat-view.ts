@@ -321,6 +321,7 @@ export class CombatView {
     return `<div class="duo-back ${ko ? 'ko' : ''} ${Date.now() - this.duoSlideAt < 700 ? 'duo-out' : ''}" data-tip="<b>${name}</b> (en retrait) : ${hp}/${d.max} PV.${ko ? '<br><b>K.O.</b> — Court-Circuit : ses cartes sont injouables. Il se relèvera au Centre Pokémon, grâce à un événement qui rend des PV ou au prochain acte.' : '<br>Joue une de ses cartes pour le faire passer devant (Relais).'}">
         <img src="${asset(skinSprite(back === 'posipi' ? 311 : 312, this.run.skin))}" alt="${name}">
         <div class="duo-mini-hp"><div style="width:${pct}%"></div></div><span>${ko ? 'K.O.' : `${hp}/${d.max}`}</span>
+        ${c.player.block && !ko ? `<b class="duo-shared-block" data-tip="La Protection est partagée : elle couvre aussi ${name} quand il passe devant.">🛡 ${c.player.block}</b>` : ''}
       </div>
       <div class="duo-bonus">
         ${both && d.plus ? `<span class="plus" data-tip="<b>Plus</b> : ta prochaine carte Négapi inflige ${d.plus} dégâts de plus.">＋${d.plus}</span>` : ''}

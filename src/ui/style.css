@@ -1721,3 +1721,4 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes mirrorShimmer { 50% { filter: brightness(1.25) hue-rotate(20deg); } }
 .enemy-card.mirror .card { box-shadow: 0 0 0 3px #c79bff, 0 0 26px #a46bff; }
 .enemy-card .sig.mirror { background: linear-gradient(90deg, #8a5cff, #e0b3ff); color: #1b0b33; }
+.duo-shared-block { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 8px; background: #3f7fd9; color: #fff; font: 900 11px 'Nunito', sans-serif; box-shadow: 0 1px 3px #0008; }

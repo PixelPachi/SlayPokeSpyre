@@ -120,3 +120,14 @@ describe('Pointeau ADN : fusion en Multipi', () => {
     expect(hp - c.enemies[0].hp).toBeGreaterThanOrEqual(3 * 9);
   });
 });
+
+it('Duo : la Protection est partagée entre Posipi et Négapi (elle reste après un Relais)', () => {
+  const deck = ['duo-bouclier', 'duo-eclair', 'duo-eclair', 'duo-eclair', 'duo-eclair'].map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
+  const c = new Combat({ character: 'duo', deck, enemies: ['rattata'], seed: 'PB', relics: [] } as never);
+  c.player.energy = 10;
+  c.play(c.hand.find((x) => x.defId === 'duo-bouclier')!.uid); // Négapi passe devant : 3 + 5 + 2
+  const block = c.player.block;
+  c.play(c.hand.find((x) => x.defId === 'duo-eclair')!.uid); // Posipi revient devant
+  expect(c.duo!.front).toBe('posipi');
+  expect(c.player.block).toBe(block);
+});
