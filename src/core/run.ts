@@ -463,6 +463,8 @@ export class Run {
       const pa = allRelics().filter((r) => r.rarity === 'gardien' && !this.relics.includes(r.id)).map((r) => r.id);
       if (pa.length) out.push(this.rng.pick(pa));
     }
+    // Avec le Nœud Destin, le gardien propose aussi sa version + (tisser des talents)
+    if (this.relics.includes('noeud-destin') && !this.relics.includes('noeud-destin-plus')) out.push('noeud-destin-plus');
     for (const id of this.rollRelics(6)) if (out.length < 3 && !out.includes(id)) out.push(id);
     return this.rng.shuffle ? this.rng.shuffle(out) : out;
   }

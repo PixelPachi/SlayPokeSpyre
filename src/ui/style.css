@@ -1551,3 +1551,11 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .sheet-skins .skin-list { flex-wrap: wrap; }
 .sheet-skins .skin-btn { width: calc((100% - 24px) / 4) !important; min-width: 0; }
 .curse-warning { margin: 4px auto 8px; padding: 6px 14px; border-radius: 10px; background: #3a0d2ecc; border: 2px solid #c06bff; color: #f1d6ff; font-weight: 800; width: fit-content; }
+/* Pastille d'enchantement : survole-la pour voir le nom et l'effet de chaque enchantement */
+.card-ench { position: absolute; top: 6%; right: 5%; z-index: 6; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px;
+  display: grid; place-items: center; font-size: 13px; font-weight: 900; color: #fff6c8; background: radial-gradient(circle at 35% 30%, #c690ff, #6b2fbf);
+  border: 2px solid #ffe08a; box-shadow: 0 0 8px #c690ffaa; cursor: help; pointer-events: auto; }
+/* Nommer une carte créée */
+.named-card { display: flex; justify-content: center; margin: 6px 0 10px; }
+.name-card { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 auto 10px; font-weight: 800; color: #ffe9b0; }
+.name-card input { width: 260px; padding: 8px 12px; border-radius: 10px; border: 2px solid #e3b85c; background: #1b1530; color: #fff; font: 800 17px 'Nunito', sans-serif; text-align: center; }

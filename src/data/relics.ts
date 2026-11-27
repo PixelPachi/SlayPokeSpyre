@@ -71,6 +71,8 @@ const RELICS: RelicDef[] = [
     text: 'Tes attaques infligent 2 dégâts de plus par tranche de 100 Pokédollars que tu possèdes.' },
   { id: 'corail', name: 'Corail', sprite: 'corail', rarity: 'quete', owner: 'kangourex', free: true,
     text: 'Gardien Océanique : le Bébé Kangourex gagne 3 Protection au début de chaque tour.' },
+  { id: 'noeud-destin-plus', name: 'Nœud Destin +', sprite: 'noeud-destin-plus', rarity: 'quete', owner: 'commun',
+    text: 'Au Centre Pokémon, tu peux tisser un talent : une condition (début de tour, chaque Attaque…) qui déclenche deux effets.' },
   { id: 'noeud-destin', name: 'Nœud Destin', sprite: 'destiny-knot', rarity: 'quete', owner: 'vipelierre', free: true,
     text: 'Au Centre Pokémon, tu peux tisser une nouvelle carte en choisissant deux effets (trois propositions pour chacun).', shared: true },
   { id: 'lanterne-bleue', name: 'Lanterne Bleue', sprite: 'lanterne-bleue', rarity: 'quete', owner: 'caninos', free: true,

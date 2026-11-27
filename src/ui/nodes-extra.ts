@@ -5,7 +5,7 @@ import { cardPrice } from '../core/run';
 import { CURSES, ENCHANTS, canFuse, cardDef, enchantId, fusionId, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
-import { bindDeck, renderReward, shell, shopScene } from './node-views';
+import { bindDeck, nameCreatedCard, renderReward, shell, shopScene } from './node-views';
 import { openDeckOverlay, topbar } from './run-ui';
 import { asset, esc } from './util';
 import { sfx } from '../audio/audio';
@@ -96,10 +96,9 @@ export function renderPension(root: HTMLElement, run: Run, done: Done): void {
             sfx('soin');
             root.querySelector('.node-body')!.innerHTML = `
               <h1 class="node-title">Fusion réussie !</h1>
-              <div class="card-row fusion-result">${renderCard(cardDef(id))}</div>
-              <button class="btn primary leave">Continuer</button>`;
+              <div class="fusion-result"></div>`;
             refreshBar(root, run, label);
-            root.querySelector('.leave')!.addEventListener('click', done);
+            nameCreatedCard(root.querySelector('.fusion-result')!, run, run.deck[run.deck.length - 1].uid, done, 'Continuer');
           },
         }, run);
       },

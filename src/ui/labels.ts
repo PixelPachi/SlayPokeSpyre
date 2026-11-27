@@ -1,3 +1,4 @@
+import { TRIGGERS, trameFx } from '../data/tissage';
 import { TERRAINS, WEATHER, isWeather } from '../core/weather';
 // Textes et couleurs affichés à l'écran.
 import type { CardDef, Effect, PowerId, StatusId } from '../core/model';
@@ -71,10 +72,16 @@ const KEYWORD_LABELS: Record<NonNullable<CardDef['keywords']>[number], string> =
 const signed = (n: number) => (n > 0 ? `+${n}` : `−${-n}`);
 
 /** Texte d'effet d'une carte. `dmg` = dégâts réels à afficher à la place de la valeur de base. */
-export function cardText(d: CardDef, dmg: number | null, base: number | null): string {
+export function cardText(d: CardDef, dmgIn: number | null, base: number | null): string {
   const parts: string[] = [];
   const hl = (v: number, b: number) => `<b class="${v > b ? 'up' : v < b ? 'down' : ''}">${v}</b>`;
+  // Les dégâts calculés (Aura, types…) ne valent que pour le premier effet de dégâts de la carte :
+  // sur une carte fusionnée, l'Aura n'est ajoutée qu'une fois, les effets suivants gardent leur valeur.
+  let dmg = dmgIn;
+  let seenDmg = false;
   for (const e of d.effects as Effect[]) {
+    if (seenDmg) dmg = null;
+    if (['degats', 'degats-aura', 'degats-pv-perdus', 'tout-ou-rien', 'concentration', 'lance-soleil'].includes(e.kind)) seenDmg = true;
     switch (e.kind) {
       case 'degats': {
         const v = dmg ?? e.amount;
@@ -126,6 +133,12 @@ export function cardText(d: CardDef, dmg: number | null, base: number | null): s
       case 'consomme-aura': parts.push(`Consomme <b>${e.amount}</b> Aura (requis).`); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
+      case 'trame': {
+        const fx = e.fx.map((k) => trameFx(k));
+        const inner = cardText({ id: 'trame', name: '', character: 'normal', pokeType: 'psy', category: 'technique', rarity: 'rare', cost: 0, target: 'ennemi', effects: fx, upgrade: {} } as CardDef, null, null);
+        parts.push(`<b>${TRIGGERS[e.trigger]}</b> : ${inner.replace(/<br>/g, ' ')}`);
+        break;
+      }
       case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
       case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main.`); break;
       case 'bebe-attaque': parts.push(`${e.times > 1 ? `Le Bébé attaque ${e.times} fois` : 'Le Bébé attaque'}${e.status ? ` et inflige ${e.stacks} ${STATUS_INFO[e.status].label}` : ''}.`); break;

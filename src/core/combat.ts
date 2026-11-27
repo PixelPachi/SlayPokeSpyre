@@ -16,6 +16,7 @@ import '../data/balance';
 import '../data/weather-moves';
 import { FIELD_TURNS, TERRAINS, WEATHER, isWeather, type TerrainId, type WeatherId } from './weather';
 import { BAD_STATUSES, type BerryFx } from '../data/berries';
+import { trameFx } from '../data/tissage';
 
 export const HAND_SIZE = 5;
 export const MAX_HAND = 10;
@@ -500,6 +501,25 @@ export class Combat {
   /** Caninos d'Hisui (Tête de Roc) : aucun contrecoup de ses propres attaques. */
   rockHead = false;
   private mentalUsed = false;
+  /** Talents tissés (Nœud Destin +) actifs ce combat. */
+  trames: { trigger: string; fx: string[]; name: string }[] = [];
+
+  /** Déclenche les talents tissés d'une condition : effets offensifs sur un ennemi au hasard, les autres sur toi. */
+  private fireTrames(trigger: string): void {
+    for (const t of this.trames.filter((x) => x.trigger === trigger)) {
+      const effects = t.fx.map((k) => trameFx(k));
+      const foes = this.aliveEnemies();
+      if (!foes.length) return;
+      const target = this.rng.pick(foes);
+      const d = { id: 'trame', name: t.name, character: 'normal', pokeType: 'psy', category: 'technique', rarity: 'rare', cost: 0, target: 'ennemi', effects, upgrade: {} } as CardDef;
+      this.events.push({ type: 'player-move', name: t.name });
+      for (const e of effects) {
+        if (this.phase === 'victoire' || this.phase === 'defaite') return;
+        this.resolve(e, d, e.kind === 'degats' || (e.kind === 'statut' && e.on !== 'soi') ? target : undefined);
+      }
+      this.checkEnd();
+    }
+  }
   /** Élan accumulé au tour précédent : devient de la Protection au début du tour. */
   private elanBlock = 0;
   /** Foulard Rose : attaques reçues par chaque ennemi ce tour-ci. */
@@ -581,6 +601,7 @@ export class Combat {
       if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
+    if (d.category === 'attaque' || d.category === 'technique') this.fireTrames(d.category);
     // Foulard Rose : deux attaques sur le même Pokémon dans un tour → Attraction
     if (d.category === 'attaque' && target && this.has('foulard-rose') && target.hp > 0) {
       this.attacksOn[target.uid] = (this.attacksOn[target.uid] ?? 0) + 1;
@@ -623,6 +644,8 @@ export class Combat {
 
   endPlayerTurn(): void {
     if (this.phase !== 'joueur') return;
+    this.fireTrames('fin-tour');
+    if ((this.phase as string) !== 'joueur') return;
     this.endTurnRequested = false;
     this.skipTurn = false;
     for (const c of this.hand) {
@@ -910,6 +933,7 @@ export class Combat {
     this.handDraw = true;
     this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0) + (this.turn === 1 && this.has('pierre-ovale') ? 1 : 0));
     this.handDraw = false;
+    this.fireTrames('debut-tour');
     this.checkLucarite();
   }
 
@@ -1113,6 +1137,10 @@ export class Combat {
       case 'soin':
         this.healPlayer(eff.amount);
         return;
+      case 'trame':
+        this.trames.push({ trigger: eff.trigger, fx: eff.fx, name: d.name });
+        this.events.push({ type: 'player-move', name: `${d.name} est tissée !` });
+        return;
       case 'pouvoir':
         p.powers[eff.power] = (p.powers[eff.power] ?? 0) + eff.amount;
         this.events.push({ type: 'power', power: eff.power, amount: p.powers[eff.power]! });
@@ -1241,6 +1269,7 @@ export class Combat {
         card.defId = enchantId(k, card.defId);
         this.enchantedCards.push({ uid: card.uid, defId: card.defId });
         this.events.push({ type: 'player-move', name: `Permucœur : ${cd.name} devient ${ENCHANTS[k].name} !` });
+        this.events.push({ type: 'show-card', def: this.def(card), label: `Permucœur · ${ENCHANTS[k].name} : ${ENCHANTS[k].text}` });
         return;
       }
       case 'multiplie-statut': {

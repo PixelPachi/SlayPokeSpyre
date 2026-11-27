@@ -104,6 +104,7 @@ export type Effect =
   | { kind: 'permucoeur' } // enchante au hasard une carte de la main, pour le reste de la run
   | { kind: 'multiplie-statut'; status: StatusId; mult: number } // multiplie le statut de la cible (Catalyse)
   | { kind: 'recharge'; amount: number } // au prochain tour, X PA de moins
+  | { kind: 'trame'; trigger: string; fx: string[] } // Nœud Destin + : talent qui déclenche deux effets
   | { kind: 'clone'; amount: number } // Protection persistante (ne se dissipe pas en début de tour)
   | { kind: 'lance-soleil'; amount: number } // X dégâts à tous les ennemis au début du prochain tour (tout de suite au soleil)
   | { kind: 'affaiblit'; amount: number } // la cible a X Attaque de moins pour ce tour

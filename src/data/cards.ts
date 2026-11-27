@@ -1,7 +1,7 @@
 // Toutes les cartes du jeu. Ajouter une carte = ajouter une entrée ici (aucun code à écrire).
 // Règle du GDD : la plupart des cartes portent le nom d'une capacité que le Pokémon peut apprendre dans les jeux.
 import type { CardDef } from '../core/model';
-import { weaveDef } from './tissage';
+import { stackEffects, trameDef, weaveDef } from './tissage';
 import { QUELORIOR_CARDS } from './cards-quelorior';
 import { copyDef, isCopy } from './copies';
 import { VIPELIERRE_CARDS } from './cards-vipelierre';
@@ -155,7 +155,7 @@ function fusionDef(defId: string, upgraded: boolean): CardDef {
     category: A.category === 'attaque' || B.category === 'attaque' ? 'attaque' : 'technique',
     rarity: (RANK[A.rarity] ?? 0) >= (RANK[B.rarity] ?? 0) ? A.rarity : B.rarity,
     cost: Math.max(A.cost, B.cost, A.cost + B.cost - 1), target,
-    effects: [...A.effects, ...B.effects], keywords: kw.length ? kw : undefined,
+    effects: stackEffects([...A.effects, ...B.effects]), keywords: kw.length ? kw : undefined,
     upgrade: {}, artName: A.name.replace(/\+$/, ''), fusion: [ra, rb],
   };
 }
@@ -177,6 +177,11 @@ export const ENCHANTS: Record<string, { name: string; text: string; rarity?: Enc
     name: 'Venimeux', text: '+2 Poison', ok: (d) => d.target !== 'soi',
     apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'poison', stacks: 2, on: d.target === 'tous' ? 'tous' : 'cible' }] }),
   },
+  semeur: {
+    name: 'Semeur', text: '+3 Vampigraine', ok: (d) => d.target !== 'soi',
+    apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'vampigraine', stacks: 3, on: d.target === 'tous' ? 'tous' : 'cible' }] }),
+  },
+  epineux: { name: 'Épineux', text: '+3 Épine', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'epine', stacks: 3, on: 'soi' }] }) },
   eternel: {
     name: 'Éternel', text: 'reste en main à la fin du tour', ok: (d) => !d.keywords?.includes('conservee'),
     apply: (d) => ({ ...d, keywords: [...(d.keywords ?? []), 'conservee'] }),
@@ -188,9 +193,21 @@ export const ENCHANTS: Record<string, { name: string; text: string; rarity?: Enc
     name: 'Brûlant', rarity: 'rare', text: '+3 Brûlure', ok: (d) => d.target !== 'soi',
     apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'brulure', stacks: 3, on: d.target === 'tous' ? 'tous' : 'cible' }] }),
   },
+  glacial: {
+    name: 'Glacial', rarity: 'rare', text: '+1 Gel', ok: (d) => d.target !== 'soi',
+    apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'gel', stacks: 1, on: d.target === 'tous' ? 'tous' : 'cible' }] }),
+  },
+  charmeur: {
+    name: 'Charmeur', rarity: 'rare', text: '+1 Attraction', ok: (d) => d.target === 'ennemi',
+    apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'attraction', stacks: 1, on: 'cible' }] }),
+  },
   fortifiant: { name: 'Fortifiant', rarity: 'rare', text: '+1 Attaque', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'attaque', stacks: 1, on: 'soi' }] }) },
   // ——— Légendaires ———
   echo: { name: 'Écho', rarity: 'legendaire', text: 'se joue deux fois à sa première utilisation de chaque combat', ok: (d) => !d.effects.some((e) => e.kind === 'decouverte') && !d.keywords?.includes('echo'), apply: (d) => ({ ...d, keywords: [...(d.keywords ?? []), 'echo'] }) },
+  etreinte: {
+    name: 'Étreignant', rarity: 'legendaire', text: 'applique 1 Ligoté', ok: (d) => d.target === 'ennemi',
+    apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'ligote', stacks: 1, on: 'cible' }] }),
+  },
   gratuit: { name: 'Divin', rarity: 'legendaire', text: 'coûte 0 PA', ok: (d) => d.cost > 1, apply: (d) => ({ ...d, cost: 0 }) },
   titan: {
     name: 'Titanesque', rarity: 'legendaire', text: '+8 dégâts et +8 Protection', ok: (d) => d.effects.some((e) => e.kind === 'degats'),
@@ -222,7 +239,15 @@ export function enchantId(enchant: string, defId: string): string {
   return `ench:${enchant}:${defId}`;
 }
 
+/** Carte créée renommée par le joueur : « nom:<nom encodé>:<identifiant> ». */
+export const namedId = (name: string, id: string): string => `nom:${encodeURIComponent(name)}:${id.replace(/^nom:[^:]*:/, '')}`;
+
 export function cardDef(defId: string, upgraded = false): CardDef {
+  if (defId.startsWith('nom:')) {
+    const [, enc, ...rest] = defId.split(':');
+    const inner = cardDef(rest.join(':'), upgraded);
+    return { ...inner, id: defId, name: `${decodeURIComponent(enc)}${upgraded ? '+' : ''}`, artName: inner.artName ?? inner.name.replace(/\+$/, '') };
+  }
   if (defId.startsWith('ench:')) {
     const [, k, ...rest] = defId.split(':');
     const inner = cardDef(rest.join(':'), upgraded);
@@ -232,6 +257,7 @@ export function cardDef(defId: string, upgraded = false): CardDef {
   }
   if (defId.startsWith('fusion:')) return fusionDef(defId, upgraded);
   if (defId.startsWith('tissage:')) { const w = weaveDef(defId, upgraded); if (w) return w; }
+  if (defId.startsWith('trame:')) { const w = trameDef(defId, upgraded); if (w) return w; }
   if (isCopy(defId)) { const cp = copyDef(defId, upgraded); if (cp) return cp; }
   const base = CARD_DEFS[defId];
   if (!base) throw new Error(`Carte inconnue : ${defId}`);

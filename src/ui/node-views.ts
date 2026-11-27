@@ -1,12 +1,12 @@
 import { welcomeEvent } from '../data/events-accueil';
-import { WEAVE_FX, weaveChoices, weaveId } from '../data/tissage';
+import { TRIGGERS, WEAVE_FX, trameFx, trameId, triggerChoices, weaveChoices, weaveId } from '../data/tissage';
 import { ZONE_BG } from '../data/zone-bg';
 import { babySprite, skinSprite } from '../data/skins';
 import { sfx } from '../audio/audio';
 // Écrans des nœuds hors combat : récompenses, Centre Pokémon, Marché Kecleon, événement, trésor, fin de run.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
-import { cardDef, CURSES } from '../data/cards';
+import { cardDef, CURSES, namedId } from '../data/cards';
 import { LEVEL_EXP, MAX_LEVEL, levelFor, type ExpLine, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
 import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
@@ -145,6 +145,7 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
       <button class="choice heal" ${run.relics.includes('cendre-sacree') ? 'disabled' : ''}><b>Se soigner</b><span>${run.relics.includes('cendre-sacree') ? 'Impossible : la Cendre Sacrée t’en empêche' : `Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)`}</span></button>
       <button class="choice upgrade" ${upgradable.length ? '' : 'disabled'}><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
       ${run.relics.includes('noeud-destin') ? '<button class="choice weave"><b>Tisser une carte</b><span>Nœud Destin : crée une carte en choisissant deux effets</span></button>' : ''}
+      ${run.relics.includes('noeud-destin-plus') ? '<button class="choice weave-talent"><b>Tisser un talent</b><span>Nœud Destin + : une condition qui déclenche deux effets</span></button>' : ''}
     </div>`, 'centre');
   // Nœud Destin : premier effet parmi 3, second parmi 3 autres, puis la carte rejoint le deck
   root.querySelector('.weave')?.addEventListener('click', () => {
@@ -161,13 +162,33 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
       root.querySelector('.node-screen')!.appendChild(layer);
       layer.querySelectorAll<HTMLElement>('[data-k]').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.k!)));
     };
-    pickStep('Premier fil : choisis un effet', first, (a) => {
-      pickStep('Second fil : choisis un autre effet', weaveChoices(() => run.rng.next(), [a]), (b) => {
+    pickStep('Premier fil : choisis un effet (il donne son illustration à la carte)', first, (a) => {
+      pickStep('Second fil : choisis un effet (le même peut se cumuler)', weaveChoices(() => run.rng.next()), (b) => {
         const id = weaveId(a, b);
         run.addCard(id);
         const layer = root.querySelector('.weave-layer')!;
-        layer.innerHTML = `<div class="weave-box"><h2>Le Nœud Destin tisse une nouvelle carte !</h2><div class="weave-result">${renderCard(cardDef(id))}</div><button class="btn primary weave-ok">Ajouter au deck</button></div>`;
-        layer.querySelector('.weave-ok')!.addEventListener('click', done);
+        layer.innerHTML = `<div class="weave-box"><h2>Le Nœud Destin tisse une nouvelle carte !</h2><div class="weave-result"></div></div>`;
+        nameCreatedCard(layer.querySelector('.weave-result')!, run, run.deck[run.deck.length - 1].uid, done);
+      });
+    });
+  });
+  // Nœud Destin + : condition, puis deux effets, puis on nomme le talent
+  root.querySelector('.weave-talent')?.addEventListener('click', () => {
+    const layer = document.createElement('div');
+    layer.className = 'weave-layer';
+    root.querySelector('.node-screen')!.appendChild(layer);
+    const step = (title: string, opts: { k: string; name: string; txt: string }[], onPick: (k: string) => void) => {
+      layer.innerHTML = `<div class="weave-box"><h2>${title}</h2><div class="choice-row">${opts.map((o) => `<button class="choice" data-k="${o.k}"><b>${o.name}</b><span>${o.txt}</span></button>`).join('')}</div></div>`;
+      layer.querySelectorAll<HTMLElement>('[data-k]').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.k!)));
+    };
+    const fxOpt = (k: string) => ({ k, name: WEAVE_FX[k].name, txt: cardText({ ...cardDef(weaveId(k, k)), effects: [trameFx(k)] }, null, null) });
+    step('La condition du talent', triggerChoices(() => run.rng.next()).map((k) => ({ k, name: TRIGGERS[k], txt: 'déclenche les deux effets' })), (t) => {
+      step(`${TRIGGERS[t]}… premier effet`, weaveChoices(() => run.rng.next()).map(fxOpt), (a) => {
+        step(`${TRIGGERS[t]}… second effet`, weaveChoices(() => run.rng.next()).map(fxOpt), (b) => {
+          run.addCard(trameId(t, a, b));
+          layer.innerHTML = `<div class="weave-box"><h2>Le Nœud Destin + tisse un talent !</h2><div class="weave-result"></div></div>`;
+          nameCreatedCard(layer.querySelector('.weave-result')!, run, run.deck[run.deck.length - 1].uid, done);
+        });
       });
     });
   });
@@ -740,4 +761,25 @@ export function renderSummit(root: HTMLElement, run: Run, onNext: Done): void {
     </div>`;
   root.querySelector('.summit-step.next')?.addEventListener('click', onNext);
   bindDeck(root, run);
+}
+
+/** Carte créée (tissage, fusion) : on l'affiche et le joueur peut lui donner un nom avant de continuer. */
+export function nameCreatedCard(box: HTMLElement, run: Run, uid: number, done: () => void, okLabel = 'Ajouter au deck'): void {
+  const card = run.deck.find((c) => c.uid === uid)!;
+  const draw = () => {
+    const d = cardDef(card.defId, card.upgraded);
+    box.innerHTML = `<div class="named-card">${renderCard(d)}</div>
+      <label class="name-card"><span>Nomme ta carte</span><input maxlength="22" value="${esc(d.name.replace(/\+$/, ''))}" spellcheck="false"></label>
+      <button class="btn primary name-ok">${okLabel}</button>`;
+    const input = box.querySelector('input')!;
+    input.addEventListener('input', () => {
+      const v = input.value.trim();
+      if (!v) return;
+      card.defId = namedId(v, card.defId);
+      box.querySelector('.named-card')!.innerHTML = renderCard(cardDef(card.defId, card.upgraded));
+    });
+    input.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') (box.querySelector('.name-ok') as HTMLButtonElement).click(); });
+    box.querySelector('.name-ok')!.addEventListener('click', () => done());
+  };
+  draw();
 }
