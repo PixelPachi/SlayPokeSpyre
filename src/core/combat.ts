@@ -468,6 +468,7 @@ export class Combat {
     const d = this.def(card);
     // Coût X : tous les PA restants
     if (d.xCost) return this.player.energy;
+    if (this.freeUids.has(card.uid)) return 0;
     let cost = d.cost;
     // Herbe Pouvoir : une fois par combat, la première carte à 2 PA ou plus est gratuite
     if (cost >= 2 && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) return 0;
@@ -476,13 +477,15 @@ export class Combat {
     // Moins (Négapi) : la prochaine carte Posipi à 2 PA ou plus coûte moins cher
     if (this.duo && d.duoSide === 'posipi' && d.cost >= 2 && this.duo.minus > 0 && this.duoBoth()) cost -= this.duo.minus;
     if (this.fused && d.cost >= 2 && this.fusedMinus > 0) cost -= this.fusedMinus;
+    // Créativité (Mew) : les cartes créées pendant le combat coûtent 1 PA de moins
+    if (this.player.powers['creation-reduite'] && card.uid >= 100000) cost -= this.player.powers['creation-reduite'];
     return Math.max(0, cost);
   }
 
   canPlay(card: Card): boolean {
     if (this.phase !== 'joueur') return false;
     const d = this.def(card);
-    if (d.keywords?.includes('injouable') || this.skipTurn || this.pendingChoice) return false;
+    if (d.keywords?.includes('injouable') || this.skipTurn || this.pendingChoice || this.pendingTop) return false;
     // Court-Circuit : les cartes du partenaire K.O. sont injouables
     if (this.duo && d.duoSide && !this.duoSideAlive(d.duoSide)) return false;
     if (d.requires?.block && this.player.block < d.requires.block) return false;
@@ -622,6 +625,12 @@ export class Combat {
   duo: { front: DuoSide; hp: Record<DuoSide, number>; max: number; plus: number; minus: number; seq: DuoSide[]; surged: boolean; posipiTurn: number; owner: Record<string, DuoSide> } | null = null;
   private duoRelayed = false;
   private doubleWoven = 0;
+  /** Cartes gratuites jusqu'à la fin du tour (Machination de Mew). */
+  private freeUids = new Set<number>();
+  /** Prescience : dégâts qui tombent au début de ton prochain tour. */
+  private delayed: { uid: number; amount: number }[] = [];
+  /** Œil Spectral : choisir la carte du dessus de la pioche. */
+  pendingTop = false;
   private doubleEnchanted = 0;
   /** Multipi : Plus et Moins s'appliquent à toutes les cartes. */
   fused = false;
@@ -1006,6 +1015,10 @@ export class Combat {
     this.sprayUsed = false;
     this.oddUsed = false;
     this.gemsUsed.clear();
+    this.freeUids.clear();
+    // Prescience : les dégâts annoncés tombent maintenant
+    for (const x of this.delayed.splice(0)) { const e = this.enemy(x.uid); if (e && e.hp > 0) { this.events.push({ type: 'player-move', name: 'Prescience !' }); this.dealDamage(e, e.uid, x.amount, 'normal'); } }
+    if (this.aliveEnemies().length === 0) this.checkEnd();
     if (this.duo) { this.duo.seq = []; this.duo.surged = false; this.duo.posipiTurn = 0; }
     if (this.tempEpine) { this.player.statuses.epine = Math.max(0, (this.player.statuses.epine ?? 0) - this.tempEpine); this.tempEpine = 0; }
     if (this.player.familiar) this.player.familiar.block = 0;
@@ -1300,6 +1313,22 @@ export class Combat {
         this.healPlayer(eff.amount);
         return;
       case 'double-tisse': this.doubleWoven++; return;
+      case 'pioche-ame': {
+        const before = new Set(this.hand.map((c) => c.uid));
+        this.draw(eff.count);
+        if (this.hand.some((c) => !before.has(c.uid) && c.defId === 'can-ame')) {
+          this.events.push({ type: 'player-move', name: 'Une Âme répond à l’appel !' });
+          for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, eff.dmg, 'normal');
+          this.checkEnd();
+        }
+        return;
+      }
+      case 'choix-dessus':
+        if (this.drawPile.length) this.pendingTop = true;
+        return;
+      case 'degats-differes':
+        if (target) { this.delayed.push({ uid: target.uid, amount: eff.amount }); this.events.push({ type: 'player-move', name: `Prescience : ${eff.amount} dégâts au prochain tour` }); }
+        return;
       case 'double-enchant': this.doubleEnchanted++; return;
       case 'epuise-main': {
         // Lame du Néant : toute la main part dans les cartes épuisées
@@ -1417,7 +1446,9 @@ export class Combat {
           && !c.effects.some((e) => e.kind === 'ajoute-carte'));
         for (let i = 0; i < eff.count && this.hand.length < MAX_HAND; i++) {
           const pick = this.rng.pick(pool);
-          this.hand.push({ uid: this.nextTempUid++, defId: pick.id, upgraded: false });
+          const uid = this.nextTempUid++;
+          if (eff.free) this.freeUids.add(uid);
+          this.hand.push({ uid, defId: pick.id, upgraded: false });
           this.events.push({ type: 'player-move', name: `Nouvelle carte : ${pick.name}` });
         }
         return;
@@ -1795,6 +1826,17 @@ export class Combat {
   /** Message affiché au-dessus de ton Pokémon (utilisé par l'interface). */
   announce(name: string): void {
     this.events.push({ type: 'player-move', name });
+  }
+
+  /** Œil Spectral : la carte choisie passe au-dessus de la pioche. */
+  chooseTop(uid: number): void {
+    if (!this.pendingTop) return;
+    this.pendingTop = false;
+    const i = this.drawPile.findIndex((c) => c.uid === uid);
+    if (i < 0) return;
+    const [c] = this.drawPile.splice(i, 1);
+    this.drawPile.push(c);
+    this.events.push({ type: 'player-move', name: `${cardDef(c.defId, c.upgraded).name} au-dessus de la pioche` });
   }
 
   chooseCard(defId: string): void {

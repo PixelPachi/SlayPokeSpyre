@@ -526,7 +526,13 @@ export class Run {
       met.push(pick.join('+'));
       return [...pick];
     }
-    return [...this.rng.pick(this.zone.encounters)];
+    const group = [...this.rng.pick(this.zone.encounters)];
+    // Rarement (8 %, pas dans les tout premiers combats), une meute de 3 Pokémon
+    if (group.length < 3 && this.visited.length >= 3 && this.rng.next() < 0.08) {
+      const singles = this.zone.encounters.flat();
+      while (group.length < 3) group.push(this.rng.pick(singles));
+    }
+    return group;
   }
 
   moneyReward(type: 'combat' | 'elite' | 'boss', shinies: number): number {

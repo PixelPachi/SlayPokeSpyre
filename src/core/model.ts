@@ -38,6 +38,7 @@ export type PowerId =
   | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
   | 'zenith' | 'braises' | 'turbo' | 'elan-persistant' | 'brasier-eternel' // Caninos
   | 'plus-synchro' | 'moins-synchro' // Duo
+  | 'pioche-visible' | 'creation-reduite'
   | 'coeur-magma' | 'charme-celeste' | 'pierre-philosophale' | 'trame-destin' | 'maree-protectrice' | 'bucher-ames' | 'avalanche' // talents légendaires de skin
   | 'souvenir' | 'telekinesie'; // Mew
 
@@ -86,7 +87,7 @@ export type Effect =
   | { kind: 'metronome' } // joue l'effet d'une carte du personnage au hasard
   | { kind: 'pouvoir'; power: PowerId; amount: number }
   | { kind: 'statut-mult'; status: StatusId; mult: number; on: 'cible' | 'tous' } // multiplie un statut déjà posé
-  | { kind: 'ajoute-carte'; from: 'tous' | 'neutre'; count: number } // ajoute des cartes au hasard dans la main (pour ce combat)
+  | { kind: 'ajoute-carte'; from: 'tous' | 'neutre'; count: number; free?: boolean } // ajoute des cartes au hasard dans la main (pour ce combat)
   | { kind: 'bebe-attaque'; times: number; status?: StatusId; stacks?: number } // le Bébé Kangourex attaque tout de suite (et peut infliger un statut)
   | { kind: 'protection-par-statut'; status: StatusId; mult: number } // Protection = statut de la cible × mult
   | { kind: 'protection-aura'; per: number } // Protection +1 par tranche de « per » Aura (l'Aura n'est pas consommée)
@@ -110,6 +111,9 @@ export type Effect =
   | { kind: 'multiplie-statut'; status: StatusId; mult: number } // multiplie le statut de la cible (Catalyse)
   | { kind: 'recharge'; amount: number } // au prochain tour, X PA de moins
   | { kind: 'trame'; trigger: string; fx: string[] } // Nœud Destin + : talent qui déclenche deux effets
+  | { kind: 'pioche-ame'; count: number; dmg: number } // pioche ; si une Âme arrive, dégâts à tous les ennemis
+  | { kind: 'choix-dessus' } // choisis une carte de ta pioche à mettre au-dessus
+  | { kind: 'degats-differes'; amount: number } // Prescience : dégâts au début de ton prochain tour
   | { kind: 'double-tisse' } // Fil Astral : la prochaine carte tissée a ses valeurs doublées
   | { kind: 'double-enchant' } // Toile Onirique : la prochaine carte enchantée a ses valeurs doublées
   | { kind: 'epuise-main'; perCard: number } // Lame du Néant : épuise la main, dégâts par carte épuisée

@@ -39,7 +39,7 @@ import { allCards } from '../src/data/cards';
 it('cartes de skin : 4 communes + 1 talent légendaire par skin, proposées seulement avec ce skin', () => {
   for (const sk of ['magma', 'feerique', 'alchimiste', 'tisserand', 'oceanique', 'lanterne', 'hisui']) {
     const cs = allCards().filter((d) => d.skin === sk);
-    expect(cs.filter((d) => d.rarity === 'commune'), sk).toHaveLength(4);
+    expect(cs.filter((d) => d.rarity === 'commune' && d.category !== 'talent'), sk).toHaveLength(4);
     expect(cs.filter((d) => d.rarity === 'legendaire' && d.category === 'talent'), sk).toHaveLength(1);
   }
   const r = new Run('S', 'caninos');

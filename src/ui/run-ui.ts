@@ -70,6 +70,8 @@ export function relicCard(id: string, extra = ''): string {
 }
 
 export interface DeckPickOptions {
+  /** Garder l'ordre donné (Œil Spectral : la pioche dans l'ordre). */
+  keepOrder?: boolean;
   title: string;
   /** Cartes proposées (par défaut tout le deck). */
   cards?: Card[];
@@ -83,7 +85,7 @@ export interface DeckPickOptions {
 
 /** Fenêtre qui montre des cartes du deck ; un clic sur une carte la choisit. */
 export function openDeckOverlay(host: HTMLElement, o: DeckPickOptions, run: Run): void {
-  const cards = [...(o.cards ?? run.deck)].sort((a, b) => cardDef(a.defId).name.localeCompare(cardDef(b.defId).name));
+  const cards = o.keepOrder ? [...(o.cards ?? run.deck)] : [...(o.cards ?? run.deck)].sort((a, b) => cardDef(a.defId).name.localeCompare(cardDef(b.defId).name));
   const el = document.createElement('div');
   el.className = 'overlay deck-overlay';
   el.innerHTML = `

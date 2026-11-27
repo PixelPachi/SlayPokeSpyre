@@ -54,6 +54,8 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   turbo: { label: 'Turbo', text: (n) => `Au début de chaque tour, gagne ${n} Élan.` },
   'plus-synchro': { label: 'Plus Synchro', text: (n) => `Chaque carte Posipi donne ${n} dégâts de plus à la prochaine carte Négapi.` },
   'moins-synchro': { label: 'Moins Synchro', text: (n) => `Chaque carte Négapi donne ${n} Protection de plus.` },
+  'pioche-visible': { label: 'Œil Spectral', text: () => 'Tu vois ta pioche dans l’ordre.' },
+  'creation-reduite': { label: 'Créativité', text: (n) => `Les cartes créées pendant le combat coûtent ${n} PA de moins.` },
   'coeur-magma': { label: 'Cœur de Magma', text: (n) => `Au début de chaque tour, gagne ${2 * n} Aura et inflige ${2 * n} Brûlure à tous les ennemis.` },
   'charme-celeste': { label: 'Charme Céleste', text: (n) => `Au début de chaque tour, inflige ${n} Attraction à tous les ennemis.` },
   'pierre-philosophale': { label: 'Pierre Philosophale', text: () => 'Le Poison des ennemis ne diminue plus.' },
@@ -145,6 +147,9 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
       case 'consomme-aura': parts.push(`Consomme <b>${e.amount}</b> Aura (requis).`); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
+      case 'pioche-ame': parts.push(`Pioche ${e.count} cartes. Si tu pioches une <b>Âme</b>, inflige ${e.dmg} dégâts à tous les ennemis.`); break;
+      case 'choix-dessus': parts.push('Ce tour, choisis une carte de ta pioche à mettre au-dessus.'); break;
+      case 'degats-differes': parts.push(`Inflige ${e.amount} dégâts au début de ton prochain tour.`); break;
       case 'double-tisse': parts.push('Double les valeurs de la prochaine carte <b>tissée</b> que tu joues.'); break;
       case 'double-enchant': parts.push('Double les valeurs de la prochaine carte <b>enchantée</b> que tu joues.'); break;
       case 'epuise-main': parts.push(`Épuise ta main et inflige ${e.perCard} dégâts par carte détruite.`); break;
@@ -164,7 +169,7 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
         break;
       }
       case 'statut-mult': parts.push(`${e.mult === 2 ? 'Double' : `Multiplie par ${e.mult}`} la ${STATUS_INFO[e.status].label} ${e.on === 'tous' ? 'de tous les ennemis' : 'de la cible'}.`); break;
-      case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main.`); break;
+      case 'ajoute-carte': parts.push(`Ajoute ${e.count} carte${e.count > 1 ? 's' : ''} ${e.from === 'neutre' ? 'neutre' : 'de n’importe quel Pokémon'}${e.count > 1 ? 's' : ''} au hasard dans ta main${e.free ? ' (elles coûtent 0 PA ce tour)' : ''}.`); break;
       case 'bebe-attaque': parts.push(`${e.times > 1 ? `Le Bébé attaque ${e.times} fois` : 'Le Bébé attaque'}${e.status ? ` et inflige ${e.stacks} ${STATUS_INFO[e.status].label}` : ''}.`); break;
       case 'protection-aura': parts.push(`+1 Protection par ${e.per} Aura <i>(sans la consommer)</i>.`); break;
       case 'protection-par-soi': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}ta ${STATUS_INFO[e.status].label} en Protection.`); break;

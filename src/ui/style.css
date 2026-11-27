@@ -1577,10 +1577,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 @keyframes superEff { 50% { box-shadow: 0 0 0 3px #fff3a8, 0 0 26px 8px #ffd84add, 0 0 44px #fff3a8cc; } }
 /* ——— Contour des cartes légendaires ——— */
 .legend-deco { position: absolute; inset: 0; pointer-events: none; z-index: 5; border-radius: inherit; overflow: hidden; }
-.legend-deco i { position: absolute; width: 34%; aspect-ratio: 1; filter: drop-shadow(0 0 3px #ffb300); }
+.legend-deco i { position: absolute; width: 24%; aspect-ratio: 1; filter: drop-shadow(0 0 3px #ffb300); }
 .legend-deco i svg { width: 100%; height: 100%; display: block; }
-.legend-deco .tl { top: 1.5%; left: 2%; }
-.legend-deco .tr { top: 1.5%; right: 2%; transform: scaleX(-1); }
+.legend-deco .tl { top: 12%; left: 2%; }
+.legend-deco .tr { top: 12%; right: 2%; transform: scaleX(-1); }
 .legend-deco .bl { bottom: 1.5%; left: 2%; transform: scaleY(-1); }
 .legend-deco .br { bottom: 1.5%; right: 2%; transform: scale(-1, -1); }
 .legend-deco .gem { position: absolute; bottom: -1%; left: 50%; width: 16px; height: 16px; transform: translateX(-50%) rotate(45deg);
@@ -1727,3 +1727,9 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .gl-flip.up .card { box-shadow: 0 0 0 3px #7dff9a, 0 0 14px #7dff9a88; }
 .gl-flip.up { animation: glFlip .3s ease-out; }
 @keyframes glFlip { from { transform: rotateY(90deg); } }
+
+/* Légendaires : le nom passe toujours par-dessus le liseré et les ornements */
+.card.rarity-rare .card-banner, .card.rarity-legendaire .card-banner, .card.legend .card-banner { z-index: 8; }
+.card.rarity-rare .card-name, .card.rarity-legendaire .card-name { position: relative; z-index: 9; }
+.top-choice-row { flex-wrap: wrap; max-width: 1100px; justify-content: center; gap: 8px; max-height: 470px; overflow-y: auto; }
+.top-choice-row .card { width: 130px; }

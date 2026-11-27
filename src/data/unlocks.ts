@@ -47,7 +47,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['kan-ultimawashi', 'kan-damocles'],
   },
   caninos: {
-    1: ['can-feu-follet-ame', 'can-appel-des-ames', 'can-ombre-errante', 'can-voile-spectral', 'can-bucher-des-ames', 'can-fracass-roc', 'can-eboulis', 'can-roc-boulet', 'can-carapace-roc', 'can-avalanche', 'flammeche', 'morsure', 'can-garde-large', 'can-detection', 'can-rempart-brulant', 'can-vitesse-extreme', 'can-grondement', 'can-machouille', 'can-contre', 'can-hate', 'can-rugissement', 'can-groz-yeux', 'can-flair', 'can-coup-main', 'can-roue-de-feu', 'can-crocs-feu', 'can-crocs-eclair', 'can-plaquage', 'can-meteores', 'can-vive-attaque', 'can-poursuite', 'can-braises'],
+    1: ['can-feu-follet-ame', 'can-oeil-spectral', 'can-appel-des-ames', 'can-ombre-errante', 'can-voile-spectral', 'can-bucher-des-ames', 'can-fracass-roc', 'can-eboulis', 'can-roc-boulet', 'can-carapace-roc', 'can-avalanche', 'flammeche', 'morsure', 'can-garde-large', 'can-detection', 'can-rempart-brulant', 'can-vitesse-extreme', 'can-grondement', 'can-machouille', 'can-contre', 'can-hate', 'can-rugissement', 'can-groz-yeux', 'can-flair', 'can-coup-main', 'can-roue-de-feu', 'can-crocs-feu', 'can-crocs-eclair', 'can-plaquage', 'can-meteores', 'can-vive-attaque', 'can-poursuite', 'can-braises'],
     2: ['can-hurlement', 'can-belier', 'can-lance-flammes', 'can-damocles', 'can-grimace', 'can-facade', 'can-aeropique', 'can-pietisol', 'can-nitrocharge'],
     3: ['can-boutefeu', 'can-tunnel', 'can-repos', 'can-clonage', 'can-larcin', 'can-double-pied', 'can-vengeance', 'can-retour'],
     4: ['can-surchauffe', 'can-colere', 'can-tenacite', 'can-canicule', 'can-feu-follet', 'can-frustration', 'can-reflet', 'can-ronflement'],
@@ -71,7 +71,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['duo-ouragan'],
   },
   mew: {
-    1: ['mew-morphing', 'mew-choc-mental', 'mew-metronome', 'mew-psyko', 'mew-ultimapoing', 'mew-moi-d-abord', 'mew-mur-lumiere', 'mew-copietype', 'mew-relais', 'mew-bouclier', 'mew-amnesie', 'mew-protection', 'mew-meteores', 'mew-choc-psy', 'mew-vibraqua', 'mew-rayon-charge'],
+    1: ['mew-creativite', 'mew-morphing', 'mew-choc-mental', 'mew-metronome', 'mew-psyko', 'mew-ultimapoing', 'mew-moi-d-abord', 'mew-mur-lumiere', 'mew-copietype', 'mew-relais', 'mew-bouclier', 'mew-amnesie', 'mew-protection', 'mew-meteores', 'mew-choc-psy', 'mew-vibraqua', 'mew-rayon-charge'],
     2: ['mew-hate', 'mew-repos', 'mew-clonage', 'mew-ball-ombre', 'mew-boule-elek', 'mew-feu-ensorcele', 'mew-poing-de-feu', 'mew-poing-eclair', 'mew-poing-glace'],
     3: ['mew-tour-de-magie', 'mew-eco-sphere', 'mew-lance-flammes', 'mew-vibrobscur', 'mew-draco-choc', 'mew-plaquage', 'mew-facade', 'mew-coup-main'],
     4: ['mew-telekinesie', 'mew-luminocanon', 'mew-feu-follet', 'mew-danse-lames', 'mew-gonflette', 'mew-provoc', 'mew-encore', 'mew-interversion'],

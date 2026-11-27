@@ -42,8 +42,8 @@ export const SKIN_CARDS: CardDef[] = [
   ]),
   // ——— Tisserand de Soie Astrale : Psy / Ténèbres, cartes tissées ———
   ...skin('vipelierre', 'vip', 'tisserand', [
-    vip('fil-astral', 'Fil Astral', 'psy', 'technique', 'commune', 0, 'soi', [{ kind: 'double-tisse' }], { effects: [{ kind: 'double-tisse' }, draw(1)] }),
-    vip('toile-onirique', 'Toile Onirique', 'psy', 'technique', 'commune', 0, 'soi', [{ kind: 'double-enchant' }], { effects: [{ kind: 'double-enchant' }, draw(1)] }),
+    vip('fil-astral', 'Fil Astral', 'psy', 'technique', 'commune', 1, 'soi', [{ kind: 'double-tisse' }], { effects: [{ kind: 'double-tisse' }, draw(1)] }),
+    vip('toile-onirique', 'Toile Onirique', 'psy', 'technique', 'commune', 1, 'soi', [{ kind: 'double-enchant' }], { effects: [{ kind: 'double-enchant' }, draw(1)] }),
     vip('lame-du-neant', 'Lame du Néant', 'tenebres', 'attaque', 'commune', 1, 'ennemi', [{ kind: 'epuise-main', perCard: 7 }, st('peur', 1)], { effects: [{ kind: 'epuise-main', perCard: 9 }, st('peur', 1)] }),
     vip('cocon-stellaire', 'Cocon Stellaire', 'psy', 'technique', 'commune', 1, 'soi', [prot(6), draw(1)], { effects: [prot(9), draw(1)] }),
     vip('trame-du-destin', 'Trame du Destin', 'psy', 'talent', 'legendaire', 3, 'soi', [power('trame-destin', 1)], { cost: 2 }),
@@ -59,7 +59,9 @@ export const SKIN_CARDS: CardDef[] = [
   // ——— Caninos Chien de la Lanterne : la pioche brûle les ennemis ———
   ...skin('caninos', 'can', 'lanterne', [
     can('feu-follet-ame', 'Feu Follet Ardent', 'spectre', 'attaque', 'commune', 1, 'ennemi', [dmg(4), st('brulure', 2), draw(1)], { effects: [dmg(6), st('brulure', 2), draw(1)] }),
-    can('appel-des-ames', 'Appel des Âmes', 'spectre', 'technique', 'commune', 1, 'soi', [draw(3)], { effects: [draw(4)] }),
+    can('appel-des-ames', 'Appel des Âmes', 'spectre', 'technique', 'commune', 1, 'soi', [{ kind: 'pioche-ame', count: 3, dmg: 5 }], { effects: [{ kind: 'pioche-ame', count: 3, dmg: 8 }] }),
+    // Talent (commun) : voir sa pioche dans l'ordre, et choisir la carte du dessus ce tour
+    can('oeil-spectral', 'Œil Spectral', 'spectre', 'talent', 'commune', 1, 'soi', [power('pioche-visible', 1), { kind: 'choix-dessus' }], { cost: 0 }),
     can('ombre-errante', 'Ombre Errante', 'spectre', 'attaque', 'commune', 1, 'ennemi', [dmg(5), draw(1)], { effects: [dmg(7), draw(1)] }),
     can('voile-spectral', 'Voile Spectral', 'spectre', 'technique', 'commune', 1, 'soi', [prot(5), draw(1)], { effects: [prot(8), draw(1)] }),
     can('bucher-des-ames', 'Bûcher des Âmes', 'spectre', 'talent', 'legendaire', 3, 'soi', [power('bucher-ames', 2)], { cost: 2 }),

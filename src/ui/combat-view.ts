@@ -764,6 +764,27 @@ export class CombatView {
     if (money) money.textContent = `${this.run.money + this.combat.moneyGained} ₽`;
     this.showEvents(events);
     if (this.combat.pendingChoice) this.showChoice();
+    if (this.combat.pendingTop) this.showTopChoice();
+  }
+
+  /** Œil Spectral : choisir la carte à mettre au-dessus de la pioche. */
+  private showTopChoice(): void {
+    if (this.root.querySelector('.card-choice')) return;
+    const c = this.combat;
+    const box = document.createElement('div');
+    box.className = 'card-choice top-choice';
+    box.innerHTML = `<div class="card-choice-title">Œil Spectral : quelle carte mettre au-dessus de ta pioche ?</div>
+      <div class="card-row card-choice-row top-choice-row">${[...c.drawPile].reverse().map((x) => renderCard(c.def(x), { classes: 'pickable' }).replace('<div class="card', `<div data-top="${x.uid}" class="card`)).join('')}</div>`;
+    box.addEventListener('click', (ev) => {
+      const el = (ev.target as HTMLElement).closest<HTMLElement>('[data-top]');
+      if (!el) return;
+      ev.stopPropagation();
+      c.chooseTop(Number(el.dataset.top));
+      box.remove();
+      sfx('carte');
+      this.refresh();
+    });
+    this.root.appendChild(box);
   }
 
   /** Aromathérapie : 3 Aromates au centre de l'écran, on en choisit un. */
@@ -1087,7 +1108,8 @@ export class CombatView {
       if (t.closest('.tb-deck')) return openDeckOverlay(this.root, { title: 'Ton deck' }, this.run);
       // Piles : la pioche est montrée triée (pas dans l'ordre où elle sera piochée)
       const c = this.combat;
-      if (t.closest('.pile.draw')) return openDeckOverlay(this.root, { title: `Pioche · ${c.drawPile.length} carte(s), dans le désordre`, cards: c.drawPile }, this.run);
+      // Œil Spectral : la pioche est montrée dans l'ordre (la prochaine carte en premier)
+      if (t.closest('.pile.draw')) return c.player.powers['pioche-visible'] ? openDeckOverlay(this.root, { title: `Pioche · ${c.drawPile.length} carte(s), dans l'ordre (la prochaine en premier)`, cards: [...c.drawPile].reverse(), keepOrder: true }, this.run) : openDeckOverlay(this.root, { title: `Pioche · ${c.drawPile.length} carte(s), dans le désordre`, cards: c.drawPile }, this.run);
       if (t.closest('.pile.discard')) return openDeckOverlay(this.root, { title: `Défausse · ${c.discardPile.length} carte(s)`, cards: c.discardPile }, this.run);
       if (t.closest('.pile.exhaust')) return openDeckOverlay(this.root, { title: `Cartes épuisées · ${c.exhaustPile.length}`, cards: c.exhaustPile }, this.run);
     });

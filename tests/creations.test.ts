@@ -66,3 +66,19 @@ it('Tisserand : Lame du Néant épuise la main (7 par carte), Fil Astral double 
   expect(hp - c.enemies[0].hp).toBeGreaterThanOrEqual(28);
   expect(c.enemies[0].statuses.peur).toBeGreaterThan(0);
 });
+
+it('Mew : Prescience frappe au tour suivant, Machination ajoute 2 cartes gratuites ce tour, Créativité réduit le coût des cartes créées', () => {
+  const deck = ['mew-prescience', 'mew-machination', 'mew-creativite', 'abri', 'abri', 'abri', 'abri', 'abri'].map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
+  const c = new Combat2({ character: 'mew', deck, enemies: ['rattata'], seed: 'MW', relics: [] } as never);
+  c.enemies[0].hp = c.enemies[0].maxHp = 999; c.player.energy = 10;
+  for (const id of ['mew-prescience', 'mew-machination', 'mew-creativite']) if (!c.hand.some((x) => x.defId === id)) c.hand.push(deck.find((x) => x.defId === id)!);
+  const hp = c.enemies[0].hp;
+  c.play(c.hand.find((x) => x.defId === 'mew-prescience')!.uid, c.enemies[0].uid);
+  expect(c.enemies[0].hp).toBe(hp);
+  c.play(c.hand.find((x) => x.defId === 'mew-machination')!.uid);
+  const created = c.hand.filter((x) => x.uid >= 100000);
+  expect(created.length).toBe(2);
+  for (const x of created) expect(c.costOf(x)).toBe(0);
+  c.endPlayerTurn(); for (const e of c.aliveEnemies()) c.enemyAct(e.uid); c.endEnemyTurn();
+  expect(hp - c.enemies[0].hp).toBeGreaterThanOrEqual(30);
+});
