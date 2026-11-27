@@ -7,7 +7,7 @@ import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
 import { randomSeed } from './core/rng';
-import { BOSS_ROW, LAST_ACT, Run, SECRET_ACT, SUMMIT_STEPS } from './core/run';
+import { BOSS_ROW, LAST_ACT, Run, runHooks, SECRET_ACT, SUMMIT_STEPS } from './core/run';
 import { CombatView } from './ui/combat-view';
 import { renderMap } from './ui/map-view';
 import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
@@ -25,6 +25,28 @@ import { setStatusAlias } from './ui/labels';
 
 const stage = document.getElementById('stage')!;
 const screen = document.getElementById('screen')!;
+
+// Duo : à chaque nouvel objet tenu, on choisit qui le porte (il n'agit que quand son porteur est devant)
+runHooks.relicPicked = (run, id) => {
+  const r = RELIC_DEFS[id];
+  if (!r) return;
+  const box = document.createElement('div');
+  box.className = 'duo-owner-pick';
+  box.innerHTML = `<div class="dop-card">
+      <img class="dop-item" src="${asset(`sprites/items/${r.sprite}.png`)}" alt="">
+      <h2>Qui tient ${r.name} ?</h2>
+      <p>${r.text}<br><i>L'objet n'agit que lorsque son porteur est en première ligne.</i></p>
+      <div class="dop-row">
+        <button class="dop posipi" data-s="posipi"><img src="${asset('sprites/pokemon/front/311.png')}" alt=""><b>Posipi</b></button>
+        <button class="dop negapi" data-s="negapi"><img src="${asset('sprites/pokemon/front/312.png')}" alt=""><b>Négapi</b></button>
+      </div>
+    </div>`;
+  (screen.parentElement ?? screen).appendChild(box); // hors de l'écran : survit au rafraîchissement de la boutique
+  box.querySelectorAll<HTMLElement>('[data-s]').forEach((b) => b.addEventListener('click', () => {
+    run.relicOwner[id] = b.dataset.s as 'posipi' | 'negapi';
+    box.remove();
+  }));
+};
 fitStage(stage);
 installTooltips(stage);
 installAudioUnlock();
@@ -266,7 +288,7 @@ function startRun(character: CharacterId): void {
   run.applySkin(equippedSkin(save, character), skinDef(character, equippedSkin(save, character)));
   activeRun = run;
   // Rouages du Temps et de l'Espace : seulement après avoir apaisé Dialga Primal avec au moins 3 Pokémon différents
-  const dialgaWins = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as CharacterId[]).filter((c) => beatenBosses(save, c).includes('dialga-primal')).length;
+  const dialgaWins = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior', 'duo'] as CharacterId[]).filter((c) => beatenBosses(save, c).includes('dialga-primal')).length;
   run.cogsUnlocked = dialgaWins >= 3 || params.has('rouages') || params.has('tous');
   // Pour tester : ?acte=2 commence directement à l'acte 2 (?acte=5 : la Salle Originelle)
   const startAct = Math.min(SECRET_ACT, Number(params.get('acte') ?? 1));
@@ -278,7 +300,7 @@ function startRun(character: CharacterId): void {
   // Objets de départ des skins débloqués : tous les Pokémon peuvent les trouver (sauf ceux liés à une mécanique, comme le Corail)
   run.sharedRelics = (Object.keys(SKINS) as CharacterId[]).flatMap((c) => SKINS[c].filter((k) => k.relic && RELIC_DEFS[k.relic]?.shared && skinUnlocked(save, c, k)).map((k) => k.relic!));
   // Skins qui ouvrent les cartes d'autres types : on connaît les cartes débloquées par chaque Pokémon
-  if (skinDef(character, run.skin)?.typeCardsUnlocked) run.extraUnlocked = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'] as CharacterId[]).flatMap((c) => characterUnlocks(save, c));
+  if (skinDef(character, run.skin)?.typeCardsUnlocked) run.extraUnlocked = (['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior', 'duo'] as CharacterId[]).flatMap((c) => characterUnlocks(save, c));
   if (params.get('zone')) { const z = ZONES.find((x) => x.id === params.get('zone')); if (z) run.zone = z; }
   // Pour tester : ?cartes=vip-aromatherapie,vip-don-naturel ajoute des cartes au deck
   for (const id of (params.get('cartes') ?? '').split(',').filter(Boolean)) run.addCard(id);

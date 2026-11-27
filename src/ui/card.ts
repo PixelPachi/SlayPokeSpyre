@@ -25,10 +25,10 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const text = o.text ?? cardText(d, null, null);
   const enemy = d.id.startsWith('ennemi-') || d.id.includes('copie:');
   const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character);
-  const art = enemy ? artNoPokemon(d.name) : artUrl(d.artName ?? d.name, d.character);
+  const art = enemy ? artNoPokemon(d.name) : artUrl(d.artName ?? d.name, d.character) ?? (d.character === 'duo' ? artNoPokemon(d.artName ?? d.name) : undefined);
   const orb = orbUrl(d.character);
   return `
-    <div class="card ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+    <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-window">

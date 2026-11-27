@@ -1,7 +1,9 @@
 // Modèle de données du jeu (section 10 du GDD).
 import type { PokeType } from './types';
 
-export type CharacterId = 'riolu' | 'vipelierre' | 'kangourex' | 'caninos' | 'mew' | 'quelorior';
+export type CharacterId = 'riolu' | 'vipelierre' | 'kangourex' | 'caninos' | 'mew' | 'quelorior' | 'duo';
+/** Duo Posipi & Négapi : côté d'une carte (aucun = carte Duo bicolore). */
+export type DuoSide = 'posipi' | 'negapi';
 
 export type StatusId =
   | 'brulure' // perd X PV en début de tour, inflige 25 % de dégâts en moins, -1 par tour
@@ -35,6 +37,7 @@ export type PowerId =
   | 'champ-herbu' | 'racines' | 'zenith-plante' | 'peau-dure' // Vipélierre
   | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
   | 'zenith' | 'braises' | 'turbo' | 'elan-persistant' | 'brasier-eternel' // Caninos
+  | 'plus-synchro' | 'moins-synchro' // Duo
   | 'souvenir' | 'telekinesie'; // Mew
 
 export type Effect =
@@ -56,6 +59,7 @@ export type Effect =
       siBebe?: number; // + ces dégâts si le Bébé Kangourex est debout
       parBebe?: number; // + Puissance du Bébé × ce nombre
       parSoi?: StatusId; // + parSoiX dégâts par point de ce statut sur le lanceur (Rage, Élan)
+      parPosipi?: boolean; // Duo : frappe une fois par carte Posipi jouée ce tour
       parSoiX?: number;
     }
   | { kind: 'protection'; amount: number }
@@ -105,6 +109,11 @@ export type Effect =
   | { kind: 'multiplie-statut'; status: StatusId; mult: number } // multiplie le statut de la cible (Catalyse)
   | { kind: 'recharge'; amount: number } // au prochain tour, X PA de moins
   | { kind: 'trame'; trigger: string; fx: string[] } // Nœud Destin + : talent qui déclenche deux effets
+  | { kind: 'si-relais'; fx: Effect[] } // Duo : effets bonus si la carte a déclenché un Relais
+  | { kind: 'duo-inversion' } // Duo : échange les PV de Posipi et Négapi
+  | { kind: 'duo-relais' } // Duo : fait passer le partenaire en première ligne
+  | { kind: 'duo-soin'; amount: number } // Duo : soigne le partenaire en retrait
+  | { kind: 'epine-tour'; amount: number } // Épine pour ce tour seulement
   | { kind: 'clone'; amount: number } // Protection persistante (ne se dissipe pas en début de tour)
   | { kind: 'lance-soleil'; amount: number } // X dégâts à tous les ennemis au début du prochain tour (tout de suite au soleil)
   | { kind: 'affaiblit'; amount: number } // la cible a X Attaque de moins pour ce tour
@@ -152,6 +161,8 @@ export interface CardDef {
   fusion?: [string, string];
   /** Enchantement du Marché noir (id). */
   enchant?: string;
+  /** Duo : carte de Posipi ou de Négapi (aucune = carte Duo). */
+  duoSide?: DuoSide;
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

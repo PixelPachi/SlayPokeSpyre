@@ -3,6 +3,7 @@
 import type { CardDef } from '../core/model';
 import { stackEffects, trameDef, weaveDef } from './tissage';
 import { QUELORIOR_CARDS } from './cards-quelorior';
+import { DUO_CARDS } from './cards-duo';
 import { copyDef, isCopy } from './copies';
 import { VIPELIERRE_CARDS } from './cards-vipelierre';
 import { KANGOUREX_CARDS } from './cards-kangourex';
@@ -120,7 +121,7 @@ CARDS.push(
   bossCard('g-electrocution', 'Électrocution', 'electrik', [{ kind: 'perte-pv', amount: 4 }]),
   bossCard('g-felure-temporelle', 'Fêlure Temporelle', 'dragon', [{ kind: 'pa', amount: -1 }]),
 );
-CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS, ...RONDOUDOU_CARDS, ...QUELORIOR_CARDS);
+CARDS.push(...RIOLU_CARDS, ...VIPELIERRE_CARDS, ...KANGOUREX_CARDS, ...CANINOS_CARDS, ...MEW_CARDS, ...NEUTRAL_CARDS, ...RONDOUDOU_CARDS, ...QUELORIOR_CARDS, ...DUO_CARDS);
 // Ronflement et Blabla Dodo ne se jouent qu'endormi
 for (const d of CARDS) if (/-(ronflement|blabla-dodo)$/.test(d.id) || ['n-devoreve', 'n-cauchemar', 'n-baillement'].includes(d.id)) d.requires = { ...d.requires, asleep: true };
 

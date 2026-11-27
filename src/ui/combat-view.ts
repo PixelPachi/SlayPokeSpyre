@@ -3,7 +3,7 @@ import { attackShape, playBeam, playOrb, playShield, playSprouts, playStatusFx, 
 import { babySprite, skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
 import { FIELD_TYPE, TERRAINS, WEATHER } from '../core/weather';
-import { sfx, sfxType } from '../audio/audio';
+import { playCry, sfx, sfxType } from '../audio/audio';
 import type { BerryFx } from '../data/berries';
 // Écran de combat : affichage, glisser-déposer des cartes, animations des chiffres.
 import { saveHooks } from '../core/save';
@@ -50,7 +50,9 @@ export class CombatView {
     private opts: { seed: string; enemies: string[]; label: string; enemyPower?: number; boss?: boolean; oneHp?: boolean },
     private onEnd: (r: CombatResult) => void,
   ) {
+    run.syncDuo();
     this.combat = new Combat({
+      duoHp: run.duoHp ?? undefined, relicOwner: run.relicOwner,
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
       form: run.form, act: run.act, money: run.money, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin, oneHp: opts.oneHp,
@@ -188,9 +190,11 @@ export class CombatView {
     for (const ch of this.combat.enchantedCards) { const c = this.run.deck.find((x) => x.uid === ch.uid); if (c) c.defId = ch.defId; }
     // K.O. par type (objectifs de skins)
     for (const e of this.combat.enemies) if (e.hp <= 0) for (const t of e.types) this.run.typeKills[t] = (this.run.typeKills[t] ?? 0) + 1;
+    // Duo : on garde les PV de chacun pour la suite de la run
+    if (this.combat.duo && this.run.duoHp) this.run.duoHp = this.combat.duoHp();
     this.onEnd({
       victory: this.combat.phase === 'victoire',
-      hp: this.combat.player.hp,
+      hp: this.combat.duo ? this.combat.duoHp().posipi + this.combat.duoHp().negapi : this.combat.player.hp,
       consumed: this.combat.consumedRelics,
       shinies: this.combat.enemies.filter((e) => e.shiny).length,
       fled: this.combat.fled,
@@ -217,14 +221,15 @@ export class CombatView {
     ].join('');
     const prevHand = this.snapshotHand();
     this.el.innerHTML = `
-      ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp)}
+      ${topbar(this.run, `${this.opts.label} · tour ${c.turn}`, p.hp, c.duo ? { ...c.duoHp(), max: c.duo.max } : undefined)}
       ${fieldChips ? `<div class="field-chips">${fieldChips}</div>` : ''}
       <div class="field">
         <div class="fighter player ${p.block > 0 ? 'has-block' : ''} ${(p.statuses.sommeil ?? 0) > 0 ? 'asleep' : ''}" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
-          <img class="sprite player-sprite" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}">
+          <img class="sprite player-sprite ${c.duo && Date.now() - this.duoSlideAt < 700 ? 'duo-in' : ''}" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}">
           ${this.hpBar(p)}
+          ${c.duo ? this.duoBackHtml() : ''}
         </div>
         ${p.familiar ? this.babyHtml(p.familiar) : ''}
         <div class="enemies">
@@ -276,6 +281,27 @@ export class CombatView {
           <div class="hp-track"><div class="hp-fill" style="width:${pct}%;background:var(--hp-green)"></div></div>
           <div class="hp-text">${f.hp}/${f.maxHp}</div>
         </div>
+      </div>`;
+  }
+
+  /** Duo : le partenaire en retrait (derrière, plus petit) et les bonus Plus / Moins. */
+  private duoSlideAt = 0;
+  private duoBackHtml(): string {
+    const c = this.combat, d = c.duo!;
+    const back = d.front === 'posipi' ? 'negapi' : 'posipi';
+    const hp = d.hp[back], ko = hp <= 0;
+    const name = back === 'posipi' ? 'Posipi' : 'Négapi';
+    const pct = Math.max(0, (hp / d.max) * 100);
+    const both = c.duoBoth();
+    return `<div class="duo-back ${ko ? 'ko' : ''} ${Date.now() - this.duoSlideAt < 700 ? 'duo-out' : ''}" data-tip="<b>${name}</b> (en retrait) : ${hp}/${d.max} PV.${ko ? '<br><b>K.O.</b> — Court-Circuit : ses cartes sont injouables. Il ne se relèvera qu’au Centre Pokémon ou grâce à un événement qui rend des PV.' : '<br>Joue une de ses cartes pour le faire passer devant (Relais).'}">
+        <img src="${asset(skinSprite(back === 'posipi' ? 311 : 312, this.run.skin))}" alt="${name}">
+        <div class="duo-mini-hp"><div style="width:${pct}%"></div></div><span>${ko ? 'K.O.' : `${hp}/${d.max}`}</span>
+      </div>
+      <div class="duo-bonus">
+        ${both && d.plus ? `<span class="plus" data-tip="<b>Plus</b> : ta prochaine carte Négapi inflige ${d.plus} dégâts de plus.">＋${d.plus}</span>` : ''}
+        ${both && d.minus ? `<span class="minus" data-tip="<b>Moins</b> : ta prochaine carte Posipi à 2 PA ou plus coûte ${d.minus} PA de moins.">−${d.minus} PA</span>` : ''}
+        ${!both ? '<span class="cc" data-tip="<b>Court-Circuit</b> : un des deux est K.O., les bonus Plus et Moins sont perdus.">⚡ Court-Circuit</span>' : ''}
+        <span class="seq" data-tip="Surcharge : alterne Posipi → Négapi → Posipi → Négapi dans le même tour pour créer une Décharge Synchro.">${d.seq.slice(-4).map((s) => `<i class="${s}"></i>`).join('')}</span>
       </div>`;
   }
 
@@ -384,7 +410,7 @@ export class CombatView {
     }
     return renderCard(d, {
       uid: card.uid,
-      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff}`,
+      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff} ${c.duo && d.duoSide && d.duoSide !== c.duo.front && playable ? 'duo-relay' : ''}`,
       style: `--rot:${(i - mid) * 4}deg;--lift:${Math.abs(i - mid) * 6}px`,
       text: cardText(d, dmg, base && base.kind === 'degats' ? base.amount : null),
       stab: c.player.types.includes(d.pokeType),
@@ -529,6 +555,10 @@ export class CombatView {
           break;
         case 'card-added':
           this.showAddedCard(ev.def, ev.to, ev.count);
+          break;
+        case 'duo-swap':
+          this.duoSlideAt = Date.now();
+          playCry(`audio/cri-${ev.front === 'posipi' ? 311 : 312}.ogg`, 0.35);
           break;
         case 'energy':
           this.floatEnergy(`${ev.delta > 0 ? '+' : '−'}${Math.abs(ev.delta)} PA`, ev.reason, ev.delta > 0);

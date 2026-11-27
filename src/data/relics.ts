@@ -41,6 +41,8 @@ const RELICS: RelicDef[] = [
     text: 'Tes Vampigraines appliquent 2 de plus.' },
   { id: 'lait-meumeu', name: 'Lait Meumeu', sprite: 'moomoo-milk', rarity: 'depart', owner: 'kangourex',
     text: 'Le Bébé Kangourex commence chaque combat avec 4 PV de plus.' },
+  { id: 'pile-synchro', name: 'Pile Synchro', sprite: 'cell-battery', rarity: 'depart', owner: 'duo',
+    text: 'Chaque combat commence sur un Champ Électrifié.' },
   { id: 'charbon', name: 'Charbon', sprite: 'charcoal', rarity: 'depart', owner: 'caninos',
     text: 'La Brûlure que tu poses inflige 1 dégât de plus par tour.' },
 

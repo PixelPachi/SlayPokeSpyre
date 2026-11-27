@@ -45,4 +45,10 @@ export const CHARACTERS: Record<CharacterId, CharacterDef> = {
     talent: { name: 'Technicien', text: 'Les attaques copiées avec Gribouille infligent 25 % de dégâts en plus.' },
     starterDeck: ['ruse', 'ruse', 'ruse', 'ruse', 'abri', 'abri', 'abri', 'abri', 'quel-gribouille', 'quel-gribouille'],
   },
+  duo: {
+    id: 'duo', name: 'Posipi & Négapi', dex: [311, 312], types: ['electrik'], maxHp: 80,
+    talent: { name: 'Plus & Moins', text: 'Deux combattants de 40 PV : celui en première ligne encaisse les coups. Jouer une carte de celui en retrait le fait passer devant (Relais). Posipi : +2 dégâts à la prochaine carte Négapi. Négapi : +2 Protection et −1 PA à la prochaine carte Posipi à 2 PA ou plus. Alterner Posipi → Négapi → Posipi → Négapi dans un tour crée une Décharge Synchro.' },
+    starterRelic: 'pile-synchro',
+    starterDeck: ['duo-eclair', 'duo-eclair', 'duo-eclair', 'duo-eclair', 'duo-bouclier', 'duo-bouclier', 'duo-bouclier', 'duo-bouclier', 'duo-coup-main', 'duo-etincelle'],
+  },
 };

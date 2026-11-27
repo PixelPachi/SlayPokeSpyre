@@ -18,7 +18,7 @@ import { asset, esc } from './util';
 const ICON_FILES = import.meta.glob<string>('../assets/ui/icones/*.png', { eager: true, query: '?url', import: 'default' });
 const ICONS: Partial<Record<string, string>> = Object.fromEntries(Object.entries(ICON_FILES).map(([p, u]) => [p.split('/').pop()!.replace('.png', ''), u]));
 
-const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior'];
+const ORDER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior', 'duo'];
 const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
   riolu: 'illustrations/riolu.webp',
   vipelierre: 'illustrations/vipelierre.webp',
@@ -26,6 +26,7 @@ const ILLUSTRATIONS: Partial<Record<CharacterId, string>> = {
   caninos: 'illustrations/caninos.webp',
   mew: 'illustrations/mew.webp',
   quelorior: 'illustrations/quelorior.webp',
+  duo: 'illustrations/duo.webp',
 };
 const UNLOCK_TEXT: Record<CharacterId, string> = {
   riolu: '',
@@ -34,6 +35,7 @@ const UNLOCK_TEXT: Record<CharacterId, string> = {
   caninos: 'Atteindre le sommet de la tour',
   mew: '???',
   quelorior: '???',
+  duo: "Battre le gardien de l'acte 1",
 };
 
 export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: CharacterId) => void, onBack?: () => void): void {

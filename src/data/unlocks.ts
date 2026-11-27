@@ -59,6 +59,17 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['can-lance-soleil', 'can-malediction', 'can-vitesse-eternelle', 'can-brasier-eternel'],
   },
   quelorior: { 1: ['quel-atout'] },
+  duo: {
+    1: ['duo-coup-main', 'duo-etincelle', 'duo-etincelle-relais', 'duo-vive-attaque', 'duo-cage-magnetique', 'duo-ecran-lumiere', 'duo-inversion-poles', 'duo-relais', 'duo-feinte', 'duo-entrave'],
+    2: ['duo-rayon-signal', 'duo-torgnoles', 'duo-chargeur', 'duo-machoire-electrique', 'duo-tonnerre', 'duo-mur-lumiere'],
+    3: ['duo-toile-elek', 'duo-charme', 'duo-onde-folie', 'duo-armure', 'duo-charge-foudre', 'duo-coup-double'],
+    4: ['duo-cage-eclair', 'duo-eclat-magique', 'duo-gyroballe', 'duo-recharge', 'duo-synchrobruit'],
+    5: ['duo-machination', 'duo-electrocution', 'duo-electacle', 'duo-soin'],
+    6: ['duo-fatal-foudre', 'duo-forteresse', 'duo-champ-synchro'],
+    7: ['duo-luminocanon', 'duo-recuperation'],
+    8: ['duo-plus-synchro', 'duo-moins-synchro'],
+    10: ['duo-ouragan'],
+  },
   mew: {
     1: ['mew-morphing', 'mew-choc-mental', 'mew-metronome', 'mew-psyko', 'mew-ultimapoing', 'mew-moi-d-abord', 'mew-mur-lumiere', 'mew-copietype', 'mew-relais', 'mew-bouclier', 'mew-amnesie', 'mew-protection', 'mew-meteores', 'mew-choc-psy', 'mew-vibraqua', 'mew-rayon-charge'],
     2: ['mew-hate', 'mew-repos', 'mew-clonage', 'mew-ball-ombre', 'mew-boule-elek', 'mew-feu-ensorcele', 'mew-poing-de-feu', 'mew-poing-eclair', 'mew-poing-glace'],

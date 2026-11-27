@@ -1,6 +1,6 @@
 // Moteur de combat (section 4 du GDD). Aucune dépendance à l'affichage : l'interface lit l'état
 // et les événements produits, et appelle les actions (jouer une carte, finir le tour…).
-import type { Card, CardDef, CharacterId, EnemyMove, Effect, PowerId, StatusId, Statuses, Form } from './model';
+import type { Card, CardDef, CharacterId, DuoSide, EnemyMove, Effect, PowerId, StatusId, Statuses, Form } from './model';
 import { copyId, isCopy } from '../data/copies';
 import { Rng } from './rng';
 import {
@@ -89,6 +89,8 @@ export type CombatEvent =
   | { type: 'player-move'; name: string }
   /** Une carte en active une autre (Atout, Photocopie, Métronome) : on montre la carte jouée. */
   | { type: 'show-card'; def: CardDef; label: string; failed?: boolean }
+  /** Duo : Posipi et Négapi échangent leur place (Relais ou Court-Circuit). */
+  | { type: 'duo-swap'; front: DuoSide; ko?: boolean }
   /** Une carte rejoint une pile (Gribouille, cartes de gardien comme la Fêlure Temporelle…) : elle glisse vers sa place. */
   | { type: 'card-added'; def: CardDef; to: 'pioche' | 'defausse' | 'main' | 'deck'; count?: number }
   | { type: 'meteo'; id: string; name: string; ended?: boolean }
@@ -126,6 +128,9 @@ export interface CombatOptions {
   skin?: string;
   /** Encens Zen : les ennemis commencent à 1 PV. */
   oneHp?: boolean;
+  /** Duo : PV de Posipi et Négapi, et qui porte chaque objet. */
+  duoHp?: Record<DuoSide, number>;
+  relicOwner?: Record<string, DuoSide>;
 }
 
 const TYPE_NAMES: Record<string, string> = { normal: 'Normal', feu: 'Feu', eau: 'Eau', plante: 'Plante', electrik: 'Électrik', glace: 'Glace', combat: 'Combat', poison: 'Poison', sol: 'Sol', vol: 'Vol', psy: 'Psy', insecte: 'Insecte', roche: 'Roche', spectre: 'Spectre', dragon: 'Dragon', tenebres: 'Ténèbres', acier: 'Acier', fee: 'Fée' };
@@ -212,6 +217,16 @@ export class Combat {
     };
     this.relics = new Set(opts.relics ?? []);
     this.boss = !!opts.boss;
+    // Duo : deux combattants de 40 PV, celui en première ligne encaisse
+    if (ch.id === 'duo') {
+      const max = Math.floor((opts.maxHp ?? ch.maxHp) / 2);
+      const hp = opts.duoHp ?? { posipi: max, negapi: max };
+      const front: DuoSide = hp.posipi > 0 ? 'posipi' : 'negapi';
+      this.duo = { front, hp: { ...hp }, max, plus: 0, minus: 0, seq: [], surged: false, posipiTurn: 0, owner: { ...(opts.relicOwner ?? {}) } };
+      this.player.maxHp = max;
+      this.player.hp = Math.min(max, hp[front]);
+      this.duoForm();
+    }
     // Méga-Évolution : la Méga-Gemme tenue (et le bon stade) transforme le Pokémon pour tout le combat
     // Kangourex ne méga-évolue pas avec un skin (sauf chromatique)
     const megaLocked = ch.id === 'kangourex' && !!opts.skin && opts.skin !== 'shiny';
@@ -265,6 +280,8 @@ export class Combat {
     if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
     if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);
     if (this.has('orbe-flamme')) this.addStatus(this.player, 'player', 'brulure', 2);
+    // Pile Synchro (Duo) : chaque combat commence sur un Champ Électrifié
+    if (this.has('pile-synchro')) this.relicFired('pile-synchro', () => this.setField('champ-electrifie'));
     if (this.has('lunettes-sages')) this.relicFired('lunettes-sages', () => this.gainAura(5, true));
     if (this.has('herbe-blanche')) this.relicFired('herbe-blanche', () => {
       this.addStatus(this.player, 'player', 'attaque', -1);
@@ -293,7 +310,68 @@ export class Combat {
   // ——— Objets tenus ———
 
   has(relic: string): boolean {
+    // Duo : un objet tenu n'agit que si son porteur est en première ligne
+    if (this.duo) { const o = this.duo.owner[relic]; if (o && o !== this.duo.front) return false; }
     return this.relics.has(relic);
+  }
+
+  // ——— Duo Posipi & Négapi ———
+
+  private duoOther(s: DuoSide): DuoSide { return s === 'posipi' ? 'negapi' : 'posipi'; }
+  /** PV actuels de Posipi et Négapi (celui de devant = PV du joueur). */
+  duoHp(): Record<DuoSide, number> {
+    const d = this.duo!;
+    return { ...d.hp, [d.front]: this.player.hp };
+  }
+  duoSideAlive(s: DuoSide): boolean {
+    const d = this.duo!;
+    return s === d.front ? this.player.hp > 0 : d.hp[s] > 0;
+  }
+  /** Les deux sont debout : sinon Court-Circuit, les bonus Plus et Moins disparaissent. */
+  duoBoth(): boolean {
+    return !!this.duo && this.player.hp > 0 && this.duo.hp[this.duoOther(this.duo.front)] > 0;
+  }
+  private duoForm(): void {
+    const f = this.duo!.front;
+    this.player.name = f === 'posipi' ? 'Posipi' : 'Négapi';
+    this.player.dex = f === 'posipi' ? 311 : 312;
+  }
+  private duoSwap(reason: 'relais' | 'ko'): void {
+    const d = this.duo!;
+    const to = this.duoOther(d.front);
+    d.hp[d.front] = this.player.hp;
+    d.front = to;
+    this.player.hp = d.hp[to];
+    this.duoForm();
+    this.events.push({ type: 'duo-swap', front: to, ko: reason === 'ko' });
+    if (reason === 'ko') return;
+    // Entrée en scène : Posipi lance 2 dégâts à un ennemi au hasard, Négapi gagne 3 Protection
+    if (to === 'posipi') {
+      const alive = this.aliveEnemies();
+      if (alive.length) { const e = this.rng.pick(alive); this.dealDamage(e, e.uid, 2, 'normal'); }
+    } else this.gainBlock(this.player, 'player', 3);
+  }
+  /** Après une carte Posipi ou Négapi : bonus Plus / Moins et Surcharge. */
+  private duoAfterCard(d: CardDef): void {
+    const D = this.duo!;
+    const side = d.duoSide!;
+    const both = this.duoBoth();
+    if (side === 'posipi') {
+      D.posipiTurn++;
+      if (d.cost >= 2) D.minus = 0;
+      if (both) D.plus += 2 + (this.player.powers['plus-synchro'] ?? 0);
+    } else {
+      D.plus = 0;
+      if (both) { this.gainBlock(this.player, 'player', 2 + (this.player.powers['moins-synchro'] ?? 0)); D.minus += 1; }
+    }
+    D.seq.push(side);
+    if (!D.surged && both && D.seq.slice(-4).join(',') === 'posipi,negapi,posipi,negapi') {
+      D.surged = true;
+      const card: Card = { uid: this.nextTempUid++, defId: 'duo-decharge-synchro', upgraded: false };
+      if (this.hand.length < MAX_HAND) this.hand.push(card); else this.discardPile.push(card);
+      this.events.push({ type: 'player-move', name: 'Surcharge ! Décharge Synchro !' });
+      this.events.push({ type: 'card-added', def: cardDef('duo-decharge-synchro'), to: 'main' });
+    }
   }
 
   private relicFired(id: string, effect?: () => void): void {
@@ -320,6 +398,8 @@ export class Combat {
     // Roulette : +2 dégâts par tranche de 100 Pokédollars
     if (this.has('roulette')) b += 2 * Math.floor((this.moneyStart + this.moneyGained) / 100);
     if (this.has('loupe') && d.target === 'tous') b += 2;
+    // Plus (Posipi) : la prochaine carte Négapi frappe plus fort
+    if (this.duo && d.duoSide === 'negapi' && this.duoBoth()) b += this.duo.plus;
     const gem = GEMS[d.pokeType];
     if (gem && this.has(gem) && !this.gemsUsed.has(d.pokeType)) b += 5;
     return b;
@@ -382,6 +462,8 @@ export class Combat {
     if (cost >= 2 && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) return 0;
     // Encens Bizarre (Mew) : la première capacité d'un autre Pokémon de chaque tour coûte 1 PA de moins
     if (cost > 0 && this.has('encens-bizarre') && !this.oddUsed && d.character !== 'mew' && d.character !== 'normal') cost -= 1;
+    // Moins (Négapi) : la prochaine carte Posipi à 2 PA ou plus coûte moins cher
+    if (this.duo && d.duoSide === 'posipi' && d.cost >= 2 && this.duo.minus > 0 && this.duoBoth()) cost -= this.duo.minus;
     return Math.max(0, cost);
   }
 
@@ -389,6 +471,8 @@ export class Combat {
     if (this.phase !== 'joueur') return false;
     const d = this.def(card);
     if (d.keywords?.includes('injouable') || this.skipTurn || this.pendingChoice) return false;
+    // Court-Circuit : les cartes du partenaire K.O. sont injouables
+    if (this.duo && d.duoSide && !this.duoSideAlive(d.duoSide)) return false;
     if (d.requires?.block && this.player.block < d.requires.block) return false;
     if (d.requires?.aura && this.player.aura < d.requires.aura) return false;
     if (d.requires?.notBoss && this.boss) return false;
@@ -522,6 +606,10 @@ export class Combat {
       this.checkEnd();
     }
   }
+  /** Duo Posipi & Négapi (null pour les autres personnages). */
+  duo: { front: DuoSide; hp: Record<DuoSide, number>; max: number; plus: number; minus: number; seq: DuoSide[]; surged: boolean; posipiTurn: number; owner: Record<string, DuoSide> } | null = null;
+  private duoRelayed = false;
+  private tempEpine = 0;
   /** Élan accumulé au tour précédent : devient de la Protection au début du tour. */
   private elanBlock = 0;
   /** Foulard Rose : attaques reçues par chaque ennemi ce tour-ci. */
@@ -579,6 +667,9 @@ export class Combat {
     }
     this.player.energy -= paid;
     this.hand.splice(idx, 1);
+    // Relais : la carte de celui en retrait le fait passer en première ligne
+    this.duoRelayed = false;
+    if (this.duo && d.duoSide && d.duoSide !== this.duo.front) { this.duoSwap('relais'); this.duoRelayed = true; }
 
     // Photocopie : la prochaine carte est jouée deux fois
     let reps = this.doubleNext > 0 && !d.effects.some((e) => e.kind === 'double-jeu') ? 2 : 1;
@@ -603,6 +694,7 @@ export class Combat {
       if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
+    if (this.duo && d.duoSide && this.phase === 'joueur') this.duoAfterCard(d);
     if (d.category === 'attaque' || d.category === 'technique') this.fireTrames(d.category);
     // Foulard Rose : deux attaques sur le même Pokémon dans un tour → Attraction
     if (d.category === 'attaque' && target && this.has('foulard-rose') && target.hp > 0) {
@@ -854,6 +946,8 @@ export class Combat {
     this.sprayUsed = false;
     this.oddUsed = false;
     this.gemsUsed.clear();
+    if (this.duo) { this.duo.seq = []; this.duo.surged = false; this.duo.posipiTurn = 0; }
+    if (this.tempEpine) { this.player.statuses.epine = Math.max(0, (this.player.statuses.epine ?? 0) - this.tempEpine); this.tempEpine = 0; }
     if (this.player.familiar) this.player.familiar.block = 0;
     // Corail (Gardien Océanique) : le Bébé se protège à chaque tour
     if (this.has('corail') && this.player.familiar && this.player.familiar.hp > 0) this.player.familiar.block += 3;
@@ -1030,7 +1124,7 @@ export class Combat {
     const p = this.player;
     switch (eff.kind) {
       case 'degats': {
-        const hits = eff.hitsMax ? this.rng.int(eff.hits ?? 1, eff.hitsMax) : (eff.hits ?? 1);
+        const hits = eff.parPosipi ? (this.duo?.posipiTurn ?? 0) : eff.hitsMax ? this.rng.int(eff.hits ?? 1, eff.hitsMax) : (eff.hits ?? 1);
         let base = eff.amount + (eff.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
         if (eff.champ && this.terrain?.id === eff.champ) base *= 2;
         if (eff.facade && this.hasBadStatus()) base *= 2;
@@ -1138,6 +1232,34 @@ export class Combat {
         return;
       case 'soin':
         this.healPlayer(eff.amount);
+        return;
+      case 'si-relais':
+        if (this.duoRelayed) for (const f of eff.fx) this.resolve(f, d, target);
+        return;
+      case 'duo-inversion': {
+        if (!this.duo || !this.duoBoth()) return;
+        const o = this.duoOther(this.duo.front);
+        const a = this.player.hp;
+        this.player.hp = Math.min(this.duo.max, this.duo.hp[o]);
+        this.duo.hp[o] = Math.min(this.duo.max, a);
+        this.events.push({ type: 'player-move', name: 'Inversion de Pôles : les PV sont échangés !' });
+        return;
+      }
+      case 'duo-relais':
+        if (this.duo && this.duo.hp[this.duoOther(this.duo.front)] > 0) { this.duoSwap('relais'); this.duoRelayed = true; }
+        return;
+      case 'duo-soin': {
+        if (!this.duo) return void this.healPlayer(eff.amount);
+        const o = this.duoOther(this.duo.front);
+        if (this.duo.hp[o] <= 0) return;
+        const h = Math.min(eff.amount, this.duo.max - this.duo.hp[o]);
+        this.duo.hp[o] += h;
+        this.events.push({ type: 'player-move', name: `${o === 'posipi' ? 'Posipi' : 'Négapi'} récupère ${h} PV` });
+        return;
+      }
+      case 'epine-tour':
+        this.addStatus(p, 'player', 'epine', eff.amount);
+        this.tempEpine += eff.amount;
         return;
       case 'trame':
         this.trames.push({ trigger: eff.trigger, fx: eff.fx, name: d.name });
@@ -1747,6 +1869,13 @@ export class Combat {
         this.used.add('bandeau');
         this.relicFired('bandeau', () => this.gainAura(10));
       }
+    }
+    // Court-Circuit : si l'un tombe, l'autre prend sa place (la partie continue)
+    if (who === 'player' && f.hp <= 0 && this.duo && this.duo.hp[this.duoOther(this.duo.front)] > 0) {
+      f.hp = 0;
+      this.events.push({ type: 'player-move', name: `Court-Circuit ! ${this.player.name} est K.O. !` });
+      this.duoSwap('ko');
+      return;
     }
     if (f.hp <= 0) {
       f.hp = 0;

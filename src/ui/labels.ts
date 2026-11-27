@@ -13,7 +13,7 @@ export const TYPE_COLORS: Record<PokeType, string> = {
 
 /** Code couleur des cartes de chaque personnage (les cartes communes restent grises). */
 export const CHARACTER_COLORS: Record<string, string> = {
-  riolu: '#3a7bd5', vipelierre: '#3f9f45', kangourex: '#8b6343', caninos: '#d6402b', mew: '#e57bb8', quelorior: '#d9c08a', normal: '#8f8f8f',
+  riolu: '#3a7bd5', vipelierre: '#3f9f45', kangourex: '#8b6343', caninos: '#d6402b', mew: '#e57bb8', quelorior: '#d9c08a', duo: '#e8c33a', normal: '#8f8f8f',
 };
 
 export const STATUS_INFO: Record<StatusId, { label: string; color: string; text: (n: number) => string }> = {
@@ -52,6 +52,8 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   zenith: { label: 'Zénith', text: (n) => `Tes attaques Feu infligent ${n} dégâts de plus.` },
   rancune: { label: 'Rancune', text: (n) => `Chaque fois que tu perds des PV, gagne ${n} Rage de plus.` },
   turbo: { label: 'Turbo', text: (n) => `Au début de chaque tour, gagne ${n} Élan.` },
+  'plus-synchro': { label: 'Plus Synchro', text: (n) => `Chaque carte Posipi donne ${n} dégâts de plus à la prochaine carte Négapi.` },
+  'moins-synchro': { label: 'Moins Synchro', text: (n) => `Chaque carte Négapi donne ${n} Protection de plus.` },
   'elan-persistant': { label: 'Vitesse Éternelle', text: () => 'Ton Élan ne se divise plus par deux à la fin du tour.' },
   'brasier-eternel': { label: 'Brasier Éternel', text: () => 'La Brûlure des ennemis ne diminue plus.' },
   braises: { label: 'Braises', text: (n) => `Au début de chaque tour, applique ${n} Brûlure à tous les ennemis.` },
@@ -105,6 +107,7 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
         // En combat, le nombre affiché compte déjà le bonus du Bébé
         if (e.siBebe && dmg === null) parts.push(`+${e.siBebe} si le Bébé est debout.`);
         if (e.parSoi) parts.push(`+${e.parSoiX ?? 1} par ${STATUS_INFO[e.parSoi].label}.`);
+        if (e.parPosipi) parts.push('Frappe une fois par carte <b>Posipi</b> jouée ce tour.');
         if (e.parBebe && dmg === null) parts.push(`+${e.parBebe === 1 ? '' : `${e.parBebe} × `}la Puissance du Bébé.`);
         if ((e.parBebe || e.siBebe) && dmg !== null) parts.push('<i>(Bébé compris)</i>');
         break;
@@ -135,6 +138,15 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
       case 'consomme-aura': parts.push(`Consomme <b>${e.amount}</b> Aura (requis).`); break;
       case 'metronome': parts.push('Joue l’effet d’une de tes cartes au hasard.'); break;
       case 'pouvoir': parts.push(POWER_INFO[e.power].text(e.amount)); break;
+      case 'si-relais': {
+        const inner = cardText({ ...d, effects: e.fx }, null, null);
+        parts.push(`<b>Relais</b> : ${inner.replace(/<br>/g, ' ')}`);
+        break;
+      }
+      case 'duo-inversion': parts.push('Échange les PV de Posipi et Négapi.'); break;
+      case 'duo-relais': parts.push('Ton partenaire passe en première ligne (effet d’entrée compris).'); break;
+      case 'duo-soin': parts.push(`Soigne ${e.amount} PV à ton partenaire en retrait.`); break;
+      case 'epine-tour': parts.push(`${e.amount} Épine jusqu’à ton prochain tour.`); break;
       case 'trame': {
         const fx = e.fx.map((k) => trameFx(k));
         const inner = cardText({ id: 'trame', name: '', character: 'normal', pokeType: 'psy', category: 'technique', rarity: 'rare', cost: 0, target: 'ennemi', effects: fx, upgrade: {} } as CardDef, null, null);

@@ -1,7 +1,10 @@
 import type { PokeType } from './types';
 import { primordialTypes, skinDef } from '../data/skins';
 // État d'une run : carte de l'acte, deck, PV, Pokédollars (sections 3 et 6 du GDD).
-import type { Form, Card, CardDef, CharacterId } from './model';
+import type { Form, Card, CardDef, CharacterId, DuoSide } from './model';
+
+/** Rappels vers l'interface (Duo : choisir qui tient un nouvel objet). */
+export const runHooks: { relicPicked?: (run: Run, id: string) => void } = {};
 import { Rng } from './rng';
 import { BERRIES, MAX_BERRIES } from '../data/berries';
 import { allCards, CARD_DEFS, cardDef, enchantId, neutralPool, rewardPool, rollEnchant } from '../data/cards';
@@ -166,6 +169,7 @@ export class Run {
     this.hp = this.maxHp = ch.maxHp;
     for (const id of ch.starterDeck) this.addCard(id);
     if (ch.starterRelic) this.relics.push(ch.starterRelic);
+    if (character === 'duo') this.duoHp = { posipi: ch.maxHp / 2, negapi: ch.maxHp / 2 };
     this.zone = this.rng.pick(zonesOfAct(this.act));
     this.map = generateMap(this.rng);
   }
@@ -308,6 +312,7 @@ export class Run {
     this.pos = null;
     this.visited = [];
     this.hp = this.maxHp;
+    this.syncDuo(); // Duo : un partenaire K.O. ne se relève pas entre deux actes
   }
 
   nodeAt(row: number, col: number): MapNode | undefined {
@@ -369,9 +374,48 @@ export class Run {
   }
 
   heal(n: number): number {
+    if (this.duoHp) return this.duoHeal(n);
     const h = Math.min(n, this.maxHp - this.hp);
     this.hp += h;
     return h;
+  }
+
+  /** Duo : PV de Posipi et Négapi (0 = K.O.), et qui porte chaque objet tenu. */
+  duoHp: Record<DuoSide, number> | null = null;
+  relicOwner: Record<string, DuoSide> = {};
+  get duoMax(): number { return Math.floor(this.maxHp / 2); }
+
+  /** Remet d'accord les PV du Duo avec `hp` (soins ou dégâts appliqués ailleurs) : un K.O. ne se relève pas ici. */
+  syncDuo(): void {
+    const d = this.duoHp;
+    if (!d) return;
+    const max = this.duoMax;
+    let delta = this.hp - (d.posipi + d.negapi);
+    const sides: DuoSide[] = ['posipi', 'negapi'];
+    if (delta > 0) {
+      for (const s of [...sides].sort((a, b) => d[a] - d[b])) {
+        if (d[s] <= 0) continue;
+        const g = Math.min(delta, max - d[s]);
+        d[s] += g; delta -= g;
+      }
+    } else if (delta < 0) {
+      for (const s of sides) { const l = Math.min(-delta, Math.max(0, d[s] - 1)); d[s] -= l; delta += l; }
+    }
+    for (const s of sides) d[s] = Math.min(max, Math.max(0, d[s]));
+    this.hp = d.posipi + d.negapi;
+  }
+
+  /** Soin du Duo (Centre Pokémon, événements) : partagé entre les deux, relève un partenaire K.O. */
+  private duoHeal(n: number): number {
+    this.syncDuo();
+    const d = this.duoHp!, max = this.duoMax;
+    let left = n;
+    const order: DuoSide[] = (['posipi', 'negapi'] as DuoSide[]).sort((a, b) => d[a] - d[b]);
+    const half = Math.ceil(n / 2);
+    for (const s of order) { const g = Math.min(half, max - d[s], left); d[s] += g; left -= g; }
+    for (const s of order) { const g = Math.min(max - d[s], left); d[s] += g; left -= g; }
+    this.hp = d.posipi + d.negapi;
+    return n - left;
   }
 
   /** Une rareté tirée comme dans Slay the Spire (chances qui montent sans rare). */
@@ -502,7 +546,10 @@ export class Run {
   }
 
   addRelic(id: string): void {
-    if (!this.relics.includes(id)) this.relics.push(id);
+    if (this.relics.includes(id)) return;
+    this.relics.push(id);
+    // Duo : chaque objet tenu a un porteur, choisi à la récupération (Posipi par défaut)
+    if (this.duoHp) { this.relicOwner[id] = 'posipi'; runHooks.relicPicked?.(this, id); }
   }
 }
 
