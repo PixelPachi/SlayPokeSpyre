@@ -203,6 +203,9 @@ export type IntentKind = 'attaque' | 'defense' | 'boost' | 'handicap' | 'recharg
 export interface EnemyMove {
   id: string;
   name: string;
+  /** Miroir Originel (Arceus) : la carte du joueur copiée (et si elle est améliorée). */
+  mirrorOf?: string;
+  mirrorUp?: boolean;
   weight: number;
   intent: IntentKind;
   /** Type de l'attaque (pour les dégâts). */

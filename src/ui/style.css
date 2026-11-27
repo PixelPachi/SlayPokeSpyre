@@ -1712,3 +1712,12 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .glc-enemy img { width: 48px; height: 48px; image-rendering: pixelated; margin: -10px 0; }
 /* Sommet : fond illustré de la zone (comme les cartes des autres actes) */
 .summit.has-bg { background: linear-gradient(#0007, #000a), var(--summit-bg) center / cover, radial-gradient(ellipse at 50% 10%, var(--sky), var(--shade) 80%); }
+/* Arceus · Miroir Originel : la carte copiée est montrée au-dessus de lui, et rejouée avec ton cadre */
+.mirror-preview { position: absolute; right: calc(100% + 6px); top: 0; transform: none; z-index: 6; text-align: center; filter: drop-shadow(0 0 10px #c79bff); }
+.mirror-preview small { display: block; font: 900 11px 'Nunito', sans-serif; color: #e9d8ff; text-shadow: 0 1px 3px #000; margin-bottom: 2px; white-space: nowrap; }
+.mp-row { display: flex; gap: 6px; }
+.mp-card { width: 75px; height: 105px; }
+.mirror-preview .card { transform: scale(.5); transform-origin: top left; margin: 0; animation: mirrorShimmer 2s ease-in-out infinite; }
+@keyframes mirrorShimmer { 50% { filter: brightness(1.25) hue-rotate(20deg); } }
+.enemy-card.mirror .card { box-shadow: 0 0 0 3px #c79bff, 0 0 26px #a46bff; }
+.enemy-card .sig.mirror { background: linear-gradient(90deg, #8a5cff, #e0b3ff); color: #1b0b33; }

@@ -27,7 +27,7 @@ describe('Chien de la Lanterne', () => {
     c.hand.push({ uid: 9999, defId: 'can-ame', upgraded: false });
     c.drawPile.push(...makeDeck(['abri', 'abri']));
     c.play(9999);
-    c.aliveEnemies().forEach((e, i) => expect(hp[i] - (e.hp + e.block)).toBe(12));
+    c.aliveEnemies().forEach((e, i) => expect(hp[i] - (e.hp + e.block)).toBe(2));
   });
   it('peut obtenir les cartes Spectre des autres Pokémon (sans celles du Bébé ou de l’Aura)', () => {
     const r = skinRun();

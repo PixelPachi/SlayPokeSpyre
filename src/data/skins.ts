@@ -5,6 +5,8 @@ import type { PokeType } from '../core/types';
 export type SkinStat = 'shinies' | 'elites' | 'bosses' | 'combats' | 'wins' | 'maxMoney' | `ko-${PokeType}`;
 
 export interface SkinDef {
+  /** Cartes propres au skin (rangées sous ce skin dans le Glossaire). */
+  cards?: string[];
   id: string;
   name: string;
   /** Statistique cumulée (avec ce personnage) et objectif à atteindre. */
@@ -89,9 +91,10 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   }],
   caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
-    goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 12 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',
-    talent: { name: 'Feu des Âmes', text: 'Chaque fois qu’il pioche pendant son tour (pas la main de départ), inflige 12 dégâts à tous les ennemis.' },
+    goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 2 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',
+    talent: { name: 'Feu des Âmes', text: 'Chaque fois qu’il pioche pendant son tour (pas la main de départ), inflige 2 dégâts à tous les ennemis.' },
     perks: ['Peut obtenir toutes les cartes Spectre du jeu.', 'Évolue en Arcanin puis en Arcanâme (Feu/Spectre).'],
+    cards: ['can-lechouille-ame', 'can-ame'],
     relic: 'lanterne-bleue', deck: ['can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'can-lechouille-ame', 'abri', 'abri', 'abri', 'abri', 'flammeche', 'morsure'], typeCards: ['spectre'],
     evolutions: [
       { act: 2, dex: 59, name: 'Arcanin', types: ['feu'], hp: 12 },

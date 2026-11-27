@@ -186,7 +186,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   if (skinSel) {
     const k = skins.find((x) => x.id === skinSel)!;
     const base = new Set(CHARACTERS[c].starterDeck);
-    const ids = [...new Set([...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])].filter((id) => !base.has(id));
+    const ids = [...new Set([...(k.cards ?? []), ...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])].filter((id) => !base.has(id));
     const typeCards = k.typeCards?.length ? allCards().filter((d) => d.character === 'normal' && k.typeCards!.includes(d.pokeType) && d.rarity !== 'depart') : [];
     return `${chips}${skinChips}
       <p class="gl-note"><b>${esc(k.name)}</b> — ${esc(k.goalText)}</p>
@@ -199,7 +199,10 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   const levelOf = new Map<string, number>();
   for (const [l, ids] of Object.entries(UNLOCKS[c] ?? {})) for (const id of ids) levelOf.set(id, Number(l));
   const order = ['depart', 'commune', 'peu-commune', 'rare', 'legendaire'];
-  const cards = allCards().filter((d) => d.character === c && d.id !== 'duo-decharge-synchro')
+  // Les cartes propres à un skin sont rangées sous ce skin, pas avec le Pokémon de base
+  const skinOnly = new Set((SKINS[c] ?? []).flatMap((k) => [...(k.cards ?? []), ...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])
+    .filter((id) => !CHARACTERS[c].starterDeck.includes(id) && !Object.values(UNLOCKS[c] ?? {}).flat().includes(id)));
+  const cards = allCards().filter((d) => d.character === c && d.id !== 'duo-decharge-synchro' && !skinOnly.has(d.id))
     .sort((a, b) => (levelOf.get(a.id) ?? 0) - (levelOf.get(b.id) ?? 0) || order.indexOf(a.rarity) - order.indexOf(b.rarity));
   const unlocked = cards.filter((d) => (levelOf.get(d.id) ?? 0) <= lvl).length;
   return `${chips}${skinChips}

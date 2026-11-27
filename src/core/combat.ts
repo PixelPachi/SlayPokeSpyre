@@ -64,6 +64,8 @@ export interface EnemyState extends Fighter {
   uid: number;
   defId: string;
   intent: EnemyMove;
+  /** Miroir Originel : actions jouées en plus de `intent` dans le même tour. */
+  extraIntents?: EnemyMove[];
   history: string[];
   shiny: boolean;
   /** Phase du combat (gardiens à deux phases) et position dans leur ordre d'actions. */
@@ -827,77 +829,84 @@ export class Combat {
       e.statuses.sommeil! -= 1;
       this.events.push({ type: 'enemy-move', uid, name: 'Dort…' });
     } else {
-      const m = frozen && this.boss && m0(e.intent).damage ? { ...e.intent, damage: Math.floor(e.intent.damage! / 2) } : e.intent;
-      if (m.id === 'hurle-temps') this.timeRoar = true;
-      this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
-      if (m.meteo) this.setField(m.meteo);
-      // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
-      if (this.gimmickOf(e) === 'miroir-originel' && m.pokeType && e.types[0] !== m.pokeType) {
-        e.types = [m.pokeType];
-        e.form = m.pokeType;
-        this.events.push({ type: 'enemy-move', uid, name: `Arceus devient de type ${TYPE_NAMES[m.pokeType] ?? m.pokeType} !` });
-      }
-      // Soutien (Lumivole) : la Protection, le soin et le bonus vont à un allié encore debout
-      const mate = m.ally ? this.aliveEnemies().find((x) => x.uid !== uid) : undefined;
-      const sup = mate ?? e, supUid = mate ? mate.uid : uid;
-      if (mate) this.events.push({ type: 'enemy-move', uid: mate.uid, name: `Soutenu par ${e.name} !` });
-      if (m.block) this.gainBlock(sup, supUid, m.block);
-      if (m.heal) this.healEnemy(sup, m.heal);
-      const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
-      if (m.escalate) e.flags[m.id] = (e.flags[m.id] ?? 0) + 1;
-      if (m.damage !== undefined) {
-        // Le Bébé Kangourex peut être visé (3 chances sur 10)
-        const fam = this.player.familiar;
-        let dealt = 0;
-        for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
-          // Le Bébé fait bouclier : tant qu'il est debout, il encaisse les coups ; le surplus touche Kangourex
-          if (fam && fam.hp > 0) {
-            const { amount, effectiveness } = computeDamage(m.damage + extra, e, BABY_FIGHTER, m.pokeType ?? 'normal');
-            const left = this.hitFamiliar(Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))), effectiveness);
-            dealt += amount;
-            if (left > 0) this.dealDamage(this.player, 'player', left, effectiveness);
-            const thornsB = this.player.statuses.epine ?? 0;
-            if (thornsB > 0 && e.hp > 0) this.dealDamage(e, uid, thornsB, 'normal');
-            continue;
-          }
-          let { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
-          amount = Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre')));
-          if (this.resists.has(m.pokeType ?? 'normal')) amount = Math.floor(amount / 2);
-          // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
-          const hidden = m.pierce ? this.player.block : (this.gimmickOf(e) === 'teravolt' || this.gimmickOf(e) === 'turbobrasier') ? Math.ceil(this.player.block / 2) : 0;
-          this.player.block -= hidden;
-          this.dealDamage(this.player, 'player', amount, effectiveness);
-          this.player.block += hidden;
-          dealt += amount;
-          // Épine : l'attaquant se pique à chaque coup
-          const thorns = this.player.statuses.epine ?? 0;
-          if (thorns > 0 && e.hp > 0) this.dealDamage(e, uid, thorns, 'normal');
-        }
-        // Confusion : l'ennemi confus se blesse en attaquant
-        if ((e.statuses.confusion ?? 0) > 0 && e.hp > 0) { this.events.push({ type: 'enemy-move', uid, name: 'Confus, il se blesse !' }); this.dealDamage(e, uid, e.statuses.confusion!, 'normal'); }
-        // Drain : récupère la moitié des dégâts ; Contrecoup : se blesse
-        if (m.drain && e.hp > 0 && dealt > 0) this.healEnemy(e, Math.floor(dealt / 2));
-        // Bulbe : une attaque Eau te renforce
-        if (m.pokeType === 'eau' && m.damage !== undefined && this.has('bulbe') && this.player.hp > 0) {
-          this.relicFired('bulbe', () => { this.addStatus(this.player, 'player', 'attaque', 1); this.addStatus(this.player, 'player', 'defense', 1); });
-        }
-        if (m.recoil && e.hp > 0) this.dealDamage(e, uid, m.recoil, 'normal');
-        if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
-          this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
-        }
-      }
-      if (m.playerStatus && this.phase === 'ennemi') {
-        if (m.playerStatus.status === 'vampigraine') this.seedSource = uid; // c'est lui qui se soignera
-        this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
-      }
-      if (m.selfStatus) this.addStatus(sup, supUid, m.selfStatus.status, m.selfStatus.stacks);
-      if (m.addCards && this.phase === 'ennemi') this.addBossCards(m.addCards.id, m.addCards.count, m.addCards.to);
-      if (m.discard && this.phase === 'ennemi') this.discardRandom(m.discard);
-      if (m.summon) this.summon(m.summon.id, m.summon.max);
-      e.history.push(m.id);
+      this.runMove(e, uid, e.intent, frozen);
+      // Miroir Originel : Arceus joue aussi une deuxième de tes cartes
+      for (const x of e.extraIntents ?? []) if (this.phase === 'ennemi' && e.hp > 0) this.runMove(e, uid, x, frozen);
     }
     this.tickDurations(e);
     this.rollIntent(e);
+  }
+
+  /** Une action d'ennemi (Arceus peut en enchaîner plusieurs dans un tour). */
+  private runMove(e: EnemyState, uid: number, mv: EnemyMove, frozen: boolean): void {
+    const m = frozen && this.boss && m0(mv).damage ? { ...mv, damage: Math.floor(mv.damage! / 2) } : mv;
+    if (m.id === 'hurle-temps') this.timeRoar = true;
+    this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
+    if (m.meteo) this.setField(m.meteo);
+    // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
+    if (this.gimmickOf(e) === 'miroir-originel' && m.pokeType && e.types[0] !== m.pokeType) {
+      e.types = [m.pokeType];
+      e.form = m.pokeType;
+      this.events.push({ type: 'enemy-move', uid, name: `Arceus devient de type ${TYPE_NAMES[m.pokeType] ?? m.pokeType} !` });
+    }
+    // Soutien (Lumivole) : la Protection, le soin et le bonus vont à un allié encore debout
+    const mate = m.ally ? this.aliveEnemies().find((x) => x.uid !== uid) : undefined;
+    const sup = mate ?? e, supUid = mate ? mate.uid : uid;
+    if (mate) this.events.push({ type: 'enemy-move', uid: mate.uid, name: `Soutenu par ${e.name} !` });
+    if (m.block) this.gainBlock(sup, supUid, m.block);
+    if (m.heal) this.healEnemy(sup, m.heal);
+    const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
+    if (m.escalate) e.flags[m.id] = (e.flags[m.id] ?? 0) + 1;
+    if (m.damage !== undefined) {
+      // Le Bébé Kangourex peut être visé (3 chances sur 10)
+      const fam = this.player.familiar;
+      let dealt = 0;
+      for (let i = 0; i < (m.hits ?? 1) && this.phase === 'ennemi'; i++) {
+        // Le Bébé fait bouclier : tant qu'il est debout, il encaisse les coups ; le surplus touche Kangourex
+        if (fam && fam.hp > 0) {
+          const { amount, effectiveness } = computeDamage(m.damage + extra, e, BABY_FIGHTER, m.pokeType ?? 'normal');
+          const left = this.hitFamiliar(Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))), effectiveness);
+          dealt += amount;
+          if (left > 0) this.dealDamage(this.player, 'player', left, effectiveness);
+          const thornsB = this.player.statuses.epine ?? 0;
+          if (thornsB > 0 && e.hp > 0) this.dealDamage(e, uid, thornsB, 'normal');
+          continue;
+        }
+        let { amount, effectiveness } = computeDamage(m.damage + extra, e, this.player, m.pokeType ?? 'normal');
+        amount = Math.floor(amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre')));
+        if (this.resists.has(m.pokeType ?? 'normal')) amount = Math.floor(amount / 2);
+        // Perce-Protection (capacité) ou Téra-Voltage (moitié de la Protection ignorée)
+        const hidden = m.pierce ? this.player.block : (this.gimmickOf(e) === 'teravolt' || this.gimmickOf(e) === 'turbobrasier') ? Math.ceil(this.player.block / 2) : 0;
+        this.player.block -= hidden;
+        this.dealDamage(this.player, 'player', amount, effectiveness);
+        this.player.block += hidden;
+        dealt += amount;
+        // Épine : l'attaquant se pique à chaque coup
+        const thorns = this.player.statuses.epine ?? 0;
+        if (thorns > 0 && e.hp > 0) this.dealDamage(e, uid, thorns, 'normal');
+      }
+      // Confusion : l'ennemi confus se blesse en attaquant
+      if ((e.statuses.confusion ?? 0) > 0 && e.hp > 0) { this.events.push({ type: 'enemy-move', uid, name: 'Confus, il se blesse !' }); this.dealDamage(e, uid, e.statuses.confusion!, 'normal'); }
+      // Drain : récupère la moitié des dégâts ; Contrecoup : se blesse
+      if (m.drain && e.hp > 0 && dealt > 0) this.healEnemy(e, Math.floor(dealt / 2));
+      // Bulbe : une attaque Eau te renforce
+      if (m.pokeType === 'eau' && m.damage !== undefined && this.has('bulbe') && this.player.hp > 0) {
+        this.relicFired('bulbe', () => { this.addStatus(this.player, 'player', 'attaque', 1); this.addStatus(this.player, 'player', 'defense', 1); });
+      }
+      if (m.recoil && e.hp > 0) this.dealDamage(e, uid, m.recoil, 'normal');
+      if (this.has('casque-brut') && this.phase === 'ennemi' && e.hp > 0) {
+        this.relicFired('casque-brut', () => this.dealDamage(e, uid, 3, 'normal'));
+      }
+    }
+    if (m.playerStatus && this.phase === 'ennemi') {
+      if (m.playerStatus.status === 'vampigraine') this.seedSource = uid; // c'est lui qui se soignera
+      this.addStatus(this.player, 'player', m.playerStatus.status, m.playerStatus.stacks);
+    }
+    if (m.selfStatus) this.addStatus(sup, supUid, m.selfStatus.status, m.selfStatus.stacks);
+    if (m.addCards && this.phase === 'ennemi') this.addBossCards(m.addCards.id, m.addCards.count, m.addCards.to);
+    if (m.discard && this.phase === 'ennemi') this.discardRandom(m.discard);
+    if (m.summon) this.summon(m.summon.id, m.summon.max);
+    e.history.push(m.id);
   }
 
   endEnemyTurn(): void {
@@ -928,27 +937,39 @@ export class Combat {
   private mirrorMove(e: EnemyState): EnemyMove {
     const def = ENEMY_DEFS[e.defId];
     e.step++;
+    e.extraIntents = [];
     // Jugement prend le type de la plaque actuelle d'Arceus
     if (e.step % 4 === 0) return { ...def.moves.find((m) => m.id === 'jugement')!, pokeType: e.types[0] ?? 'normal' };
+    // Il joue deux de tes cartes, avec exactement leurs effets (version améliorée comprise)
     const pool = [...this.hand, ...this.drawPile, ...this.discardPile, ...this.exhaustPile];
-    const card = pool.length ? this.rng.pick(pool) : null;
-    if (!card) return def.moves[0];
+    if (!pool.length) return def.moves[0];
+    const a = this.rng.pick(pool);
+    const rest = pool.filter((c) => c !== a);
+    const b = rest.length ? this.rng.pick(rest) : null;
+    if (b) e.extraIntents = [this.cardAsMove(b)];
+    return this.cardAsMove(a);
+  }
+
+  /** Une carte du joueur jouée par Arceus : mêmes valeurs que la carte (améliorée ou non). */
+  private cardAsMove(card: Card): EnemyMove {
     const d = this.def(card);
-    let damage = 0, hits = 1, block = 0;
+    let damage = 0, hits = 1, block = 0, heal = 0;
     let playerStatus: EnemyMove['playerStatus'];
     let selfStatus: EnemyMove['selfStatus'];
     for (const eff of d.effects) {
-      if (eff.kind === 'degats') { damage += eff.amount; hits = Math.max(hits, eff.hits ?? 1); }
-      else if (eff.kind === 'degats-aura' || eff.kind === 'degats-pv-perdus' || eff.kind === 'concentration') damage += 12;
+      if (eff.kind === 'degats') { damage += eff.amount + (eff.parProtection ? block : 0); hits = Math.max(hits, eff.hitsMax ? this.rng.int(eff.hits ?? 1, eff.hitsMax) : eff.hits ?? 1); }
+      else if (eff.kind === 'degats-aura' || eff.kind === 'degats-pv-perdus' || eff.kind === 'concentration' || eff.kind === 'lance-soleil') damage += 'amount' in eff && typeof eff.amount === 'number' ? eff.amount : 12;
       else if (eff.kind === 'protection') block += eff.amount;
-      else if (eff.kind === 'statut' && eff.on !== 'soi' && eff.stacks > 0 && !playerStatus) playerStatus = { status: eff.status, stacks: eff.stacks };
-      else if (eff.kind === 'statut' && eff.on === 'soi' && eff.stacks > 0 && !selfStatus && (eff.status === 'attaque' || eff.status === 'defense')) selfStatus = { status: eff.status, stacks: eff.stacks };
+      else if (eff.kind === 'soin') heal += eff.amount;
+      else if (eff.kind === 'statut' && eff.on !== 'soi' && !playerStatus) playerStatus = { status: eff.status, stacks: eff.stacks };
+      else if (eff.kind === 'statut' && eff.on === 'soi' && !selfStatus) selfStatus = { status: eff.status, stacks: eff.stacks };
     }
-    const name = `${d.name} (copie)`;
-    // Plus fort que la carte d'origine : ×1,6 sur les dégâts, ×2 sur la Protection
-    if (damage > 0) return { id: `miroir-${d.id}`, name, weight: 0, intent: 'attaque', pokeType: d.pokeType, damage: Math.max(8, Math.round(damage * 1.6 / hits)), hits, playerStatus, selfStatus, block: block ? block * 2 : undefined, signature: true };
-    if (playerStatus) return { id: `miroir-${d.id}`, name, weight: 0, intent: 'handicap', pokeType: d.pokeType, playerStatus: { status: playerStatus.status, stacks: playerStatus.stacks + 1 }, signature: true };
-    return { id: `miroir-${d.id}`, name, weight: 0, intent: 'boost', block: Math.max(16, block * 2), selfStatus: selfStatus ?? { status: 'attaque', stacks: 1 }, signature: true };
+    const base = { id: `miroir-${d.id}`, name: d.name, weight: 0, pokeType: d.pokeType, signature: true, mirrorOf: card.defId, mirrorUp: card.upgraded,
+      block: block || undefined, heal: heal || undefined, playerStatus, selfStatus };
+    if (damage > 0) return { ...base, intent: 'attaque', damage: Math.round(damage / 1), hits };
+    if (playerStatus) return { ...base, intent: 'handicap' };
+    if (block && !selfStatus) return { ...base, intent: 'defense' };
+    return { ...base, intent: 'boost', selfStatus: selfStatus ?? (block ? undefined : { status: 'attaque', stacks: 1 }) };
   }
 
   private rollIntent(e: EnemyState): void {
@@ -1069,7 +1090,7 @@ export class Combat {
     // Feu des Âmes (Chien de la Lanterne) : chaque pioche pendant le tour brûle tous les ennemis
     if (this.soulDog && !this.handDraw && this.phase === 'joueur' && this.hand.length > before) {
       this.events.push({ type: 'player-move', name: 'Feu des Âmes !' });
-      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, 12, 'normal');
+      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, 2, 'normal');
       this.checkEnd();
     }
   }

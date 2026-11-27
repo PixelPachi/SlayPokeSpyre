@@ -411,7 +411,10 @@ export class CombatView {
     const mate = m.ally ? this.combat.aliveEnemies().find((x) => x.uid !== e.uid) : undefined;
     if (mate) { tip = tip.replace('gagne', `donne à ${mate.name}`).replace('récupère', `soigne ${mate.name} de`).replace('se renforce', `renforce ${mate.name}`); label = `${label} → ${mate.name}`; }
     const color = m.pokeType ? TYPE_COLORS[m.pokeType] : '#888';
-    return `
+    // Miroir Originel : on voit à l'avance quelle carte de ton deck Arceus va copier
+    const mirrors = [m, ...(e.extraIntents ?? [])].filter((x) => x.mirrorOf).map((x) => this.combat.def({ uid: -1, defId: x.mirrorOf!, upgraded: !!x.mirrorUp }));
+    if (mirrors.length) tip = `<b>Miroir Originel</b> : Arceus va jouer ${mirrors.map((d) => `<b>${esc(d.name)}</b>`).join(' puis ')}, avec les mêmes effets que tes cartes.`;
+    return `${mirrors.length ? `<div class="mirror-preview n${mirrors.length}" data-tip="${tip}"><small>Va jouer tes cartes</small><div class="mp-row">${mirrors.map((d) => `<div class="mp-card">${renderCard({ ...d, enchants: undefined, enchant: undefined }, { classes: 'no-cost' })}</div>`).join('')}</div></div>` : ''}
       <div class="intent intent-${m.intent}" data-tip="${tip}" style="--tc:${color}">
         ${iconImg(`intent-${m.intent}`, 'intent-ico') || INTENT_ICONS[m.intent]}<span>${label}</span>
       </div>`;
@@ -615,7 +618,17 @@ export class CombatView {
   }
 
   /** Carte de l'attaque ennemie, affichée au milieu de l'écran. */
-  private showEnemyCard(uid: number, m: EnemyMove, dmg: number): void {
+  private enemyCardFreeAt = 0;
+  private showEnemyCard(uid: number, m: EnemyMove, dmg: number, queued = false): void {
+    // Arceus joue deux cartes d'affilée : la seconde attend que la première ait été vue
+    const now = performance.now();
+    if (!queued && this.enemyCardFreeAt > now) {
+      const wait = this.enemyCardFreeAt - now;
+      this.enemyCardFreeAt += 1300;
+      setTimeout(() => this.showEnemyCard(uid, m, dmg, true), wait);
+      return;
+    }
+    if (!queued) this.enemyCardFreeAt = now + 1300;
     const e = this.combat.enemy(uid);
     const effects: Effect[] = m.damage !== undefined ? [{ kind: 'degats', amount: dmg, hits: m.hits, drain: m.drain }] : [];
     if (m.recoil) effects.push({ kind: 'perte-pv', amount: m.recoil });
@@ -623,10 +636,11 @@ export class CombatView {
     if (m.selfStatus) effects.push({ kind: 'statut', status: m.selfStatus.status, stacks: m.selfStatus.stacks, on: 'soi' });
     if (m.block) effects.push({ kind: 'protection', amount: m.block });
     if (m.heal) effects.push({ kind: 'soin', amount: m.heal });
-    const def: CardDef = {
-      id: `ennemi-${m.id}`, name: m.name, character: 'normal', pokeType: m.pokeType ?? 'normal', category: 'attaque',
-      rarity: 'depart', cost: 0, target: 'ennemi', effects, upgrade: {},
-    };
+    // Miroir Originel : la carte copiée garde le cadre et l'illustration de TA carte
+    const orig = m.mirrorOf ? this.combat.def({ uid: -1, defId: m.mirrorOf, upgraded: !!m.mirrorUp }) : null;
+    const def: CardDef = orig
+      ? { ...orig, id: `miroir-${orig.id}`, artName: orig.artName ?? orig.name.replace(/\+$/, ''), enchants: undefined, enchant: undefined }
+      : { id: `ennemi-${m.id}`, name: m.name, character: 'normal', pokeType: m.pokeType ?? 'normal', category: 'attaque', rarity: 'depart', cost: 0, target: 'ennemi', effects, upgrade: {} };
     this.fx.querySelector('.enemy-card')?.remove();
     const box = document.createElement('div');
     box.className = 'enemy-card';
@@ -636,7 +650,10 @@ export class CombatView {
     if (m.discard) extra.push(`Défausse ${m.discard} de tes cartes au hasard.`);
     if (m.summon) extra.push('Appelle une ouvrière en renfort.');
     const text = [cardText(def, null, null), ...extra].filter(Boolean).join(' ');
-    box.innerHTML = `<div class="enemy-card-who">${m.signature ? '<span class="sig">Capacité exclusive</span>' : ''}${esc(e?.name ?? '')} utilise</div>${renderCard(def, { classes: `no-cost ${m.signature ? 'signature' : ''}`, text })}`;
+    box.innerHTML = orig
+      ? `<div class="enemy-card-who"><span class="sig mirror">Miroir Originel</span>${esc(e?.name ?? '')} utilise TA carte !</div>${renderCard(def, { classes: 'no-cost mirror-card' })}`
+      : `<div class="enemy-card-who">${m.signature ? '<span class="sig">Capacité exclusive</span>' : ''}${esc(e?.name ?? '')} utilise</div>${renderCard(def, { classes: `no-cost ${m.signature ? 'signature' : ''}`, text })}`;
+    if (orig) box.classList.add('mirror');
     this.fx.appendChild(box);
     this.lastEnemyCard = performance.now();
     setTimeout(() => box.remove(), 1500);
