@@ -917,11 +917,10 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.rarity-commune .card-tint { --rt: #3fbf4f; }
 .card.rarity-peu-commune .card-tint { --rt: #2f8cff; }
 .card.rarity-rare .card-tint { --rt: #ffb300; }
-.card.rarity-legendaire .card-tint { background: linear-gradient(90deg, #ff3cac, #ffd76a, #3cf0ff, #b46cff, #ff3cac); background-size: 300% 100%; animation: legendBanner 3s linear infinite; opacity: 1; }
-@keyframes legendBanner { to { background-position: 300% 0; } }
+.card.rarity-legendaire .card-tint { --rt: #ffb300; }
 /* Cartes légendaires : halo doré pulsant + liseré arc-en-ciel autour du cadre */
-.card.rarity-legendaire { animation: legendGlow 1.6s ease-in-out infinite; }
-.card.rarity-legendaire .card-inner::after { content: ''; position: absolute; inset: -3px; border-radius: 12px; z-index: 4; pointer-events: none; padding: 3px;
+.card.rarity-rare, .card.rarity-legendaire { animation: legendGlow 1.6s ease-in-out infinite; }
+.card.rarity-rare .card-inner::after, .card.rarity-legendaire .card-inner::after { content: ''; position: absolute; inset: -3px; border-radius: 12px; z-index: 4; pointer-events: none; padding: 3px;
   background: conic-gradient(from var(--la, 0deg), #ffd76a, #ff3cac, #3cf0ff, #b46cff, #ffd76a); animation: legendSpin 4s linear infinite;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 @property --la { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
@@ -1589,8 +1588,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .legend-deco .shine { position: absolute; top: -40%; left: -60%; width: 40%; height: 180%; transform: rotate(20deg);
   background: linear-gradient(90deg, #fff0, #fff6d066, #fff0); animation: legendShine 3.2s ease-in-out infinite; }
 @keyframes legendShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
-.card.rarity-legendaire { box-shadow: 0 0 0 2px #ffd76a, 0 0 18px #ffb300aa; }
-.card.rarity-legendaire .card-banner { --rb: #ff8fc0; }
+.card.rarity-rare, .card.rarity-legendaire { box-shadow: 0 0 0 2px #ffd76a, 0 0 18px #ffb300aa; }
+.card.rarity-legendaire .card-banner { --rb: #e8b93a; }
 /* ——— Animations : rayons, projectiles, pousses de Vampigraine, Zzz ——— */
 .vfx-beam { position: absolute; height: 16px; margin-top: -8px; transform-origin: 0 50%; pointer-events: none; z-index: 30; border-radius: 10px;
   background: linear-gradient(180deg, transparent, var(--c) 30%, #fff 50%, var(--c) 70%, transparent);

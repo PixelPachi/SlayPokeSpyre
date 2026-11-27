@@ -35,3 +35,19 @@ describe('cartes créées', () => {
     expect(c.player.block).toBeGreaterThan(0);
   });
 });
+
+import { Combat as Combat2 } from '../src/core/combat';
+it('Confusion : attaquer confus coûte autant de PV que de cumuls, et elle disparaît 2 tours après', () => {
+  const deck = Array.from({ length: 10 }, (_, i) => ({ uid: i + 1, defId: 'ruse', upgraded: false }));
+  const c = new Combat2({ character: 'riolu', deck, enemies: ['rattata'], seed: 'CF', relics: [] } as never);
+  c.enemies[0].hp = c.enemies[0].maxHp = 999;
+  (c as unknown as { addStatus: (f: unknown, w: string, s: string, n: number) => void }).addStatus(c.player, 'player', 'confusion', 3);
+  const hp = c.player.hp;
+  c.play(c.hand[0].uid);
+  expect(hp - c.player.hp).toBe(3);
+  const turn = () => { c.endPlayerTurn(); for (const e of c.aliveEnemies()) c.enemyAct(e.uid); c.endEnemyTurn(); };
+  turn();
+  expect(c.player.statuses.confusion).toBe(3);
+  turn();
+  expect(c.player.statuses.confusion).toBeUndefined();
+});

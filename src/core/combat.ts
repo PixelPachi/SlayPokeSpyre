@@ -141,7 +141,9 @@ const TYPE_NAMES: Record<string, string> = { normal: 'Normal', feu: 'Feu', eau: 
 const GEMS: Partial<Record<PokeType, string>> = { combat: 'gemme-combat', plante: 'gemme-plante', normal: 'gemme-normal', feu: 'gemme-feu', psy: 'gemme-psy' };
 
 const DOTS: StatusId[] = ['poison', 'brulure', 'vampigraine'];
-const DURATIONS: StatusId[] = ['paralysie', 'peur', 'confusion', 'attraction'];
+const DURATIONS: StatusId[] = ['paralysie', 'peur', 'attraction'];
+/** Confusion : disparaît deux tours (du porteur) après avoir été infligée. */
+const CONF_TURNS = new WeakMap<object, number>();
 
 /** Dégâts d'un coup : base + Attaque → bonus de type → table des types → Paralysie/Brûlure/Peur → arrondi. */
 export function computeDamage(base: number, attacker: Fighter, defender: Fighter, type: PokeType) {
@@ -738,6 +740,11 @@ export class Combat {
         this.relicFired('spray-gorge', () => this.changeEnergy(1, 'Spray Gorge'));
       }
     }
+    // Confusion : attaquer en étant confus coûte autant de PV que de cumuls de Confusion
+    if (d.category === 'attaque' && (this.player.statuses.confusion ?? 0) > 0 && this.phase === 'joueur') {
+      this.events.push({ type: 'player-move', name: 'Confus, il se blesse !' });
+      this.loseHp(this.player, 'player', this.player.statuses.confusion!, 'carte');
+    }
     if (d.category === 'attaque') {
       if (GEMS[d.pokeType] && this.has(GEMS[d.pokeType]!)) this.gemsUsed.add(d.pokeType);
       if (this.has('roche-royale') && this.phase === 'joueur') {
@@ -866,6 +873,8 @@ export class Combat {
           const thorns = this.player.statuses.epine ?? 0;
           if (thorns > 0 && e.hp > 0) this.dealDamage(e, uid, thorns, 'normal');
         }
+        // Confusion : l'ennemi confus se blesse en attaquant
+        if ((e.statuses.confusion ?? 0) > 0 && e.hp > 0) { this.events.push({ type: 'enemy-move', uid, name: 'Confus, il se blesse !' }); this.dealDamage(e, uid, e.statuses.confusion!, 'normal'); }
         // Drain : récupère la moitié des dégâts ; Contrecoup : se blesse
         if (m.drain && e.hp > 0 && dealt > 0) this.healEnemy(e, Math.floor(dealt / 2));
         // Bulbe : une attaque Eau te renforce
@@ -1814,7 +1823,6 @@ export class Combat {
 
   private gainBlock(f: Fighter, who: Who, amount: number): void {
     let n = amount;
-    if ((f.statuses.confusion ?? 0) > 0) n *= 0.75;
     n = Math.max(0, Math.floor(n));
     f.block += n;
     this.events.push({ type: 'block', target: who, amount: n });
@@ -1927,6 +1935,7 @@ export class Combat {
     const v = (f.statuses[status] ?? 0) + s;
     if (v === 0) delete f.statuses[status];
     else f.statuses[status] = v;
+    if (status === 'confusion' && s > 0) CONF_TURNS.set(f, 2);
     this.events.push({ type: 'status', target: who, status, stacks: s });
   }
 
@@ -2018,6 +2027,10 @@ export class Combat {
 
   /** Fin du tour du porteur : Paralysie, Peur, Confusion baissent de 1. */
   private tickDurations(f: Fighter): void {
+    if ((f.statuses.confusion ?? 0) > 0) {
+      const t = (CONF_TURNS.get(f) ?? 2) - 1;
+      if (t <= 0) { delete f.statuses.confusion; CONF_TURNS.delete(f); } else CONF_TURNS.set(f, t);
+    }
     for (const s of DURATIONS) {
       const n = f.statuses[s] ?? 0;
       if (n <= 0) continue;

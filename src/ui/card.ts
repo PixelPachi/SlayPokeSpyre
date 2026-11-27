@@ -44,7 +44,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
         <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${withStatusTips(text)}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
-        ${d.rarity === 'legendaire' || (d.enchants ?? []).some((k) => ENCHANTS[k]?.rarity === 'legendaire') ? LEGEND_DECO : ''}
+        ${d.rarity === 'legendaire' || d.rarity === 'rare' || (d.enchants ?? []).some((k) => ENCHANTS[k]?.rarity === 'legendaire') ? LEGEND_DECO : ''}
         ${d.enchants?.length ? `<div class="card-ench" data-tip="<b>Enchantement${d.enchants.length > 1 ? 's' : ''}</b>${d.enchants.map((k) => ENCHANTS[k] ? `<br>• <b>${ENCHANTS[k].name}</b> : ${ENCHANTS[k].text}` : '').join('')}">✦${d.enchants.length > 1 ? d.enchants.length : ''}</div>` : ''}
       </div>
       <div class="card-cost ${orb ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orb ? `style="--orb:url('${orb}')"` : ''}>${d.xCost ? 'X' : o.cost ?? d.cost}</div>

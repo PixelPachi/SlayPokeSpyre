@@ -22,7 +22,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   vampigraine: { label: 'Vampigraine', color: '#5fbf4a', text: (n) => `Perd ${n} PV au début du tour ; celui qui l'a posée récupère la moitié. Baisse de 1 chaque tour.` },
   paralysie: { label: 'Paralysie', color: '#f2cf2c', text: (n) => `Toi : 1 PA de moins au début de ton tour. Ennemi : inflige 25 % de dégâts en moins. Encore ${n} tour${n > 1 ? 's' : ''}.` },
   peur: { label: 'Peur', color: '#d94b4b', text: (n) => `Subit 50 % de dégâts en plus pendant ${n} tour${n > 1 ? 's' : ''}.` },
-  confusion: { label: 'Confusion', color: '#c78bd9', text: (n) => `Gagne 25 % de Protection en moins pendant ${n} tour${n > 1 ? 's' : ''}.` },
+  confusion: { label: 'Confusion', color: '#c78bd9', text: (n) => `Lancer une attaque en étant confus inflige ${n} PV à soi-même. Disparaît deux tours après avoir été infligée.` },
   sommeil: { label: 'Sommeil', color: '#8fa7d9', text: (n) => `Endormi (encore ${n} tour${n > 1 ? 's' : ''} au plus) : un ennemi ne peut pas agir, et toi tu ne peux jouer que les cartes de sommeil (Ronflement, Blabla Dodo, Dévorêve, Cauchemar, Bâillement). Se réveille dès qu'il subit des dégâts.` },
   attaque: { label: 'Attaque', color: '#ff9b4a', text: (n) => `${n > 0 ? '+' : ''}${n} dégâts par coup.` },
   defense: { label: 'Défense', color: '#5aa5ff', text: (n) => `${n > 0 ? '+' : ''}${n} Protection par carte.` },
