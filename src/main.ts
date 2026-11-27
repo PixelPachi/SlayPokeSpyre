@@ -360,7 +360,7 @@ function showActIntro(root: HTMLElement, run: Run, done: () => void): void {
   const act = run.act > LAST_ACT ? 'Acte secret' : run.act === LAST_ACT ? 'Acte 4 · Le sommet' : `Acte ${run.act}`;
   const zone = run.act === LAST_ACT ? 'Sommet de la Tour du Temps' : run.zone.name;
   root.innerHTML = `<div class="act-intro"><div class="act-num">${act}</div><div class="act-zone">${zone}</div><div class="act-region">${run.act >= LAST_ACT ? '' : `Une faille venue de ${run.zone.region}`}</div></div>`;
-  setTimeout(() => playCry('audio/cri-arceus.ogg', 0.9), 450);
+  setTimeout(() => playCry('audio/cri-arceus.ogg', 0.3), 450);
   let left = false;
   const go = () => { if (left) return; left = true; root.querySelector('.act-intro')?.classList.add('out'); setTimeout(done, 700); };
   root.querySelector('.act-intro')!.addEventListener('click', go);

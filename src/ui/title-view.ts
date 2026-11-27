@@ -13,7 +13,6 @@ import { SKINS } from '../data/skins';
 import { characterLevel, playableCharacters } from '../core/save';
 import { UNLOCKS } from '../data/unlocks';
 import { copyDef, copyId } from '../data/copies';
-import { relicsFor } from './select-view';
 import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { asset, esc } from './util';
@@ -90,8 +89,8 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
   // Un Pokémon par n° (les variantes de duel partagent le même Pokémon)
   const mons = [...new Map(Object.values(ENEMY_DEFS).map((e) => [e.dex, e.name.replace(/ \(.*\)$/, '')])).entries()].sort((a, b) => a[0] - b[0]);
   const relics = allRelics();
-  const order = ['depart', 'commun', 'peu-commun', 'rare', 'gardien'];
-  const label: Record<string, string> = { depart: 'Objets de départ', commun: 'Communs', 'peu-commun': 'Peu communs', rare: 'Rares', gardien: 'Reliques de gardien' };
+  const order = ['depart', 'commun', 'peu-commun', 'rare', 'gardien', 'quete'];
+  const label: Record<string, string> = { depart: 'Objets de départ', commun: 'Communs', 'peu-commun': 'Peu communs', rare: 'Rares', gardien: 'Reliques de gardien', quete: 'Objets spéciaux et de quête' };
 
   const body = (): string => {
     if (tab === 'cartes') return cardsHtml(save, who, skinSel, seen);
@@ -193,7 +192,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
       ${ids.length ? `<h3>Cartes propres au skin</h3><div class="deck-grid gl-cards">${ids.map((id) => renderCard(cardDef(id))).join('')}</div>` : ''}
       ${typeCards.length ? `<h3>Cartes de type ${k.typeCards!.map((t) => TYPE_LABELS[t]).join(', ')} qu'il peut apprendre</h3><div class="deck-grid gl-cards">${typeCards.map((d) => renderCard(d)).join('')}</div>` : ''}
       ${!ids.length && !typeCards.length ? '<p class="gl-note">Ce skin garde les mêmes cartes que le Pokémon de base.</p>' : ''}
-      ${k.relic ? `<h3>Objet de départ</h3><div class="gl-grid">${relicCard(k.relic)}</div>` : ''}`;
+`;
   }
   const lvl = characterLevel(save, c);
   const levelOf = new Map<string, number>();
@@ -211,8 +210,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
       const need = levelOf.get(d.id) ?? 0;
       const locked = need > lvl;
       return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
-    }).join('')}</div>
-    <h3>Objets tenus</h3><div class="relic-grid">${relicsFor(c, lvl)}</div>`;
+    }).join('')}</div>`;
 }
 
 /** Écran Sauvegarde : sauvegarde automatique, export / import d'un fichier. */
