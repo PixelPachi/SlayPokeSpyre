@@ -8,7 +8,14 @@ import { berryCard, berryIcon, relicCard, relicIcon } from './run-ui';
 import { CHARACTERS } from '../data/characters';
 import { skinSprite } from '../data/skins';
 import { renderCard } from './card';
-import { cardDef } from '../data/cards';
+import { allCards, cardDef, CURSES, neutralPool } from '../data/cards';
+import { SKINS } from '../data/skins';
+import { characterLevel, playableCharacters } from '../core/save';
+import { UNLOCKS } from '../data/unlocks';
+import { copyDef, copyId } from '../data/copies';
+import { relicsFor } from './select-view';
+import type { CharacterId } from '../core/model';
+import { TYPE_LABELS } from '../core/types';
 import { asset, esc } from './util';
 
 export interface TitleActions {
@@ -70,11 +77,14 @@ export function confirmBox(root: HTMLElement, title: string, text: string, ok: s
   root.appendChild(box);
 }
 
-type Tab = 'objets' | 'baies' | 'pokemon' | 'historique';
+type Tab = 'cartes' | 'objets' | 'baies' | 'pokemon' | 'historique';
 
 export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => void): void {
-  let tab: Tab = 'objets';
+  let tab: Tab = 'cartes';
   let openDeck = -1;
+  // Onglet Cartes : un Pokémon (ou « neutres » / « ennemis ») et un skin
+  let who: CharacterId | 'neutres' | 'ennemis' = 'riolu';
+  let skinSel = '';
   const seen = new Set(save.seen ?? []);
   const shiny = new Set(save.seenShiny ?? []);
   // Un Pokémon par n° (les variantes de duel partagent le même Pokémon)
@@ -84,6 +94,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
   const label: Record<string, string> = { depart: 'Objets de départ', commun: 'Communs', 'peu-commun': 'Peu communs', rare: 'Rares', gardien: 'Reliques de gardien' };
 
   const body = (): string => {
+    if (tab === 'cartes') return cardsHtml(save, who, skinSel, seen);
     if (tab === 'objets') {
       return order.map((r) => {
         const list = relics.filter((x) => x.rarity === r);
@@ -118,7 +129,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
           <button class="btn gl-back">← Retour</button>
           <h1>Glossaire</h1>
           <div class="gl-tabs">
-            ${(['objets', 'baies', 'pokemon', 'historique'] as Tab[]).map((t) => `<button class="gl-tab ${t === tab ? 'on' : ''}" data-tab="${t}">${({ objets: 'Objets tenus', baies: 'Baies', pokemon: 'Pokémon', historique: 'Historique' })[t]}</button>`).join('')}
+            ${(['cartes', 'objets', 'baies', 'pokemon', 'historique'] as Tab[]).map((t) => `<button class="gl-tab ${t === tab ? 'on' : ''}" data-tab="${t}">${({ cartes: 'Cartes', objets: 'Objets tenus', baies: 'Baies', pokemon: 'Pokémon', historique: 'Historique' })[t]}</button>`).join('')}
           </div>
         </div>
         <div class="gl-body">${body()}</div>
@@ -128,11 +139,77 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
     const t = ev.target as HTMLElement;
     const b = t.closest<HTMLElement>('.gl-tab');
     if (b) { tab = b.dataset.tab as Tab; return draw(); }
+    const w = t.closest<HTMLElement>('[data-who]');
+    if (w) { who = w.dataset.who as typeof who; skinSel = ''; return draw(); }
+    const sk = t.closest<HTMLElement>('[data-skinsel]');
+    if (sk) { skinSel = sk.dataset.skinsel!; return draw(); }
     const hd = t.closest<HTMLElement>('.hist-deck-btn');
     if (hd) { const i = Number(hd.dataset.i); openDeck = openDeck === i ? -1 : i; return draw(); }
     if (t.closest('.gl-back')) { root.onclick = null; onBack(); }
   };
   draw();
+}
+
+const ROSTER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior', 'duo'];
+
+/** Glossaire › Cartes : par Pokémon (et skin), les cartes neutres, et les capacités des ennemis croisés. */
+function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', skinSel: string, seen: Set<number>): string {
+  const playable = playableCharacters(save);
+  const chips = `<div class="glc-chips">
+    ${ROSTER.map((c) => {
+      const locked = !playable.includes(c);
+      return `<button class="glc-chip ${who === c ? 'on' : ''} ${locked ? 'locked' : ''}" data-who="${c}" data-tip="${locked ? 'Pas encore débloqué' : esc(CHARACTERS[c].name)}"><img src="${asset(skinSprite(CHARACTERS[c].dex[0]))}" alt=""><span>${locked ? '???' : esc(CHARACTERS[c].name)}</span></button>`;
+    }).join('')}
+    <button class="glc-chip ${who === 'neutres' ? 'on' : ''}" data-who="neutres"><span>Neutres</span></button>
+    <button class="glc-chip ${who === 'ennemis' ? 'on' : ''}" data-who="ennemis"><span>Ennemis</span></button>
+  </div>`;
+  if (who === 'neutres') {
+    return `${chips}<p class="gl-note">Tous les Pokémon peuvent les apprendre : elles apparaissent parfois en récompense et au Marché Kecleon.</p>
+      <div class="deck-grid gl-cards">${neutralPool().map((d) => renderCard(d)).join('')}</div>`;
+  }
+  if (who === 'ennemis') {
+    const enemies = Object.entries(ENEMY_DEFS).filter(([, e]) => seen.has(e.dex));
+    const total = new Set(Object.values(ENEMY_DEFS).map((e) => e.dex)).size;
+    return `${chips}<p class="gl-note">Les capacités des Pokémon que tu as croisés (${new Set(enemies.map(([, e]) => e.dex)).size} / ${total}). Gribouille peut les copier.</p>
+      <h3>Malédictions et cartes de gardien</h3>
+      <div class="deck-grid gl-cards">${CURSES.map((id) => renderCard(cardDef(id))).join('')}${allCards().filter((d) => d.onDraw && !CURSES.includes(d.id)).map((d) => renderCard(d)).join('')}</div>
+      ${enemies.map(([id, e]) => `<h3 class="glc-enemy"><img src="${asset(`sprites/pokemon/front/${e.dex}.png`)}" alt="">${esc(e.name)}</h3>
+        <div class="deck-grid gl-cards">${e.moves.map((m) => { const d = copyDef(copyId(id, m.id), false); return d ? renderCard(d) : ''; }).join('')}</div>`).join('')}`;
+  }
+  const c = who;
+  if (!playable.includes(c)) return `${chips}<p class="gl-note">Débloque ce Pokémon pour voir ses cartes.</p>`;
+  const skins = (SKINS[c] ?? []).filter((k) => k.id !== 'shiny');
+  const skinChips = `<div class="glc-skins">
+    <button class="glc-skin ${!skinSel ? 'on' : ''}" data-skinsel="">Normal</button>
+    ${skins.map((k) => `<button class="glc-skin ${skinSel === k.id ? 'on' : ''}" data-skinsel="${k.id}"><img src="${asset(skinSprite(k.dex?.[0] ?? CHARACTERS[c].dex[0], k.id))}" alt="">${esc(k.name)}</button>`).join('')}
+  </div>`;
+  if (skinSel) {
+    const k = skins.find((x) => x.id === skinSel)!;
+    const base = new Set(CHARACTERS[c].starterDeck);
+    const ids = [...new Set([...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])].filter((id) => !base.has(id));
+    const typeCards = k.typeCards?.length ? allCards().filter((d) => d.character === 'normal' && k.typeCards!.includes(d.pokeType) && d.rarity !== 'depart') : [];
+    return `${chips}${skinChips}
+      <p class="gl-note"><b>${esc(k.name)}</b> — ${esc(k.goalText)}</p>
+      ${ids.length ? `<h3>Cartes propres au skin</h3><div class="deck-grid gl-cards">${ids.map((id) => renderCard(cardDef(id))).join('')}</div>` : ''}
+      ${typeCards.length ? `<h3>Cartes de type ${k.typeCards!.map((t) => TYPE_LABELS[t]).join(', ')} qu'il peut apprendre</h3><div class="deck-grid gl-cards">${typeCards.map((d) => renderCard(d)).join('')}</div>` : ''}
+      ${!ids.length && !typeCards.length ? '<p class="gl-note">Ce skin garde les mêmes cartes que le Pokémon de base.</p>' : ''}
+      ${k.relic ? `<h3>Objet de départ</h3><div class="gl-grid">${relicCard(k.relic)}</div>` : ''}`;
+  }
+  const lvl = characterLevel(save, c);
+  const levelOf = new Map<string, number>();
+  for (const [l, ids] of Object.entries(UNLOCKS[c] ?? {})) for (const id of ids) levelOf.set(id, Number(l));
+  const order = ['depart', 'commune', 'peu-commune', 'rare', 'legendaire'];
+  const cards = allCards().filter((d) => d.character === c && d.id !== 'duo-decharge-synchro')
+    .sort((a, b) => (levelOf.get(a.id) ?? 0) - (levelOf.get(b.id) ?? 0) || order.indexOf(a.rarity) - order.indexOf(b.rarity));
+  const unlocked = cards.filter((d) => (levelOf.get(d.id) ?? 0) <= lvl).length;
+  return `${chips}${skinChips}
+    <p class="gl-note">${unlocked} / ${cards.length} cartes débloquées (niveau ${lvl}). Gagne de l'EXP en fin de run pour en débloquer de nouvelles dans les récompenses.</p>
+    <div class="deck-grid gl-cards">${cards.map((d) => {
+      const need = levelOf.get(d.id) ?? 0;
+      const locked = need > lvl;
+      return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
+    }).join('')}</div>
+    <h3>Objets tenus</h3><div class="relic-grid">${relicsFor(c, lvl)}</div>`;
 }
 
 /** Écran Sauvegarde : sauvegarde automatique, export / import d'un fichier. */

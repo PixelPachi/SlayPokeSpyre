@@ -75,7 +75,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
             ${skinBlock(save, current)}
             <div class="sheet-actions">
               <button class="btn primary start">Grimper la Tour du Temps</button>
-              <button class="btn collection">Voir les capacités</button>
+
             </div>`}
         </div>
         <div class="select-roster">
@@ -102,7 +102,6 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
       equipSkin(save, current, sk.dataset.skin || undefined);
       return draw();
     }
-    if (t.closest('.collection')) return openCollection(root, save, current);
     if (t.closest('.back-title') && onBack) {
       root.onclick = null;
       return onBack();
@@ -139,45 +138,7 @@ function expBlock(save: SaveData, c: CharacterId): string {
     </div>`;
 }
 
-/** Toutes les capacités du Pokémon : débloquées, ou verrouillées avec le niveau requis. */
-function openCollection(host: HTMLElement, save: SaveData, c: CharacterId): void {
-  const lvl = characterLevel(save, c);
-  const levelOf = new Map<string, number>();
-  for (const [l, ids] of Object.entries(UNLOCKS[c] ?? {})) for (const id of ids) levelOf.set(id, Number(l));
-  const cards = allCards().filter((d) => d.character === c);
-  const order = ['depart', 'commune', 'peu-commune', 'rare'];
-  cards.sort((a, b) => (levelOf.get(a.id) ?? 0) - (levelOf.get(b.id) ?? 0) || order.indexOf(a.rarity) - order.indexOf(b.rarity));
-  const unlocked = cards.filter((d) => (levelOf.get(d.id) ?? 0) <= lvl).length;
-  const el = document.createElement('div');
-  el.className = 'overlay deck-overlay';
-  el.innerHTML = `
-    <div class="deck-panel">
-      <h2>Capacités de ${esc(CHARACTERS[c].name)} · ${unlocked}/${cards.length}</h2>
-      <p class="collection-hint">Gagne de l'EXP en fin de run pour débloquer de nouvelles capacités dans les récompenses.</p>
-      <div class="deck-grid">
-        ${cards.map((d) => {
-          const need = levelOf.get(d.id) ?? 0;
-          const locked = need > lvl;
-          return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
-        }).join('')}
-      </div>
-      <h2>Cartes neutres · ${neutralPool().length}</h2>
-      <p class="collection-hint">Tous les Pokémon peuvent les apprendre : elles apparaissent parfois en récompense et au Marché Kecleon.</p>
-      <div class="deck-grid">${neutralPool().map((d) => renderCard(d)).join('')}</div>
-      <h2>Objets tenus</h2>
-      <div class="relic-grid">
-        ${relicsFor(c, lvl)}
-      </div>
-      <button class="btn close">Fermer</button>
-    </div>`;
-  host.appendChild(el);
-  el.addEventListener('click', (ev) => {
-    const t = ev.target as HTMLElement;
-    if (t.closest('.close') || t === el) el.remove();
-  });
-}
-
-function relicsFor(c: CharacterId, lvl: number): string {
+export function relicsFor(c: CharacterId, lvl: number): string {
   const need = new Map<string, number>();
   for (const [l, ids] of Object.entries(RELIC_UNLOCKS[c] ?? {})) for (const id of ids) need.set(id, Number(l));
   const mine = allRelics().filter((r) => r.owner === c);
