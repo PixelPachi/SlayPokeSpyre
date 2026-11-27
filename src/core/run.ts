@@ -204,6 +204,7 @@ export class Run {
   get weaver(): boolean { return this.character === 'vipelierre' && this.skin === 'tisserand'; }
 
   get form(): Form {
+    if (this.duoFused) return { dex: 9311, name: 'Posipi X', types: ['electrik'] };
     const ch = CHARACTERS[this.character];
     const evo = this.evolutions.filter((e) => e.act <= this.act).pop();
     const f = evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
@@ -313,6 +314,7 @@ export class Run {
     this.visited = [];
     // Duo : Posipi et Négapi gagnent chacun 3 PV max par acte, et un partenaire K.O. se relève
     if (this.duoHp) { this.maxHp += 6; this.duoHp = { posipi: this.duoMax, negapi: this.duoMax }; }
+    else if (this.duoFused) this.maxHp += 6;
     this.hp = this.maxHp;
   }
 
@@ -379,6 +381,21 @@ export class Run {
     const h = Math.min(n, this.maxHp - this.hp);
     this.hp += h;
     return h;
+  }
+
+  /** Duo fusionné (Pointeau ADN) : Posipi X. */
+  duoFused = false;
+
+  /** Fusion au Centre Pokémon : PV réunis, objets regroupés, cartes de départ fusionnées. */
+  fuseDuo(): void {
+    if (!this.duoHp || this.duoFused) return;
+    this.syncDuo();
+    this.hp = Math.max(1, this.duoHp.posipi + this.duoHp.negapi);
+    this.duoHp = null;
+    this.relicOwner = {};
+    this.duoFused = true;
+    // Éclair Plus et Bouclier deviennent des Éclair Pôle X (cartes violettes : attaque + défense)
+    for (const c of this.deck) if (c.defId === 'duo-eclair' || c.defId === 'duo-bouclier') c.defId = 'duo-fusion-eclair';
   }
 
   /** Duo : PV de Posipi et Négapi (0 = K.O.), et qui porte chaque objet tenu. */
@@ -466,7 +483,9 @@ export class Run {
 
   /** Cartes neutres vendues au Marché Kecleon. */
   /** Quelorior n'apprend aucune attaque : ses attaques viennent de Gribouille (et de Jackpot pour le Flambeur). */
-  offerable<T extends { category: string }>(pool: T[]): T[] {
+  offerable<T extends { category: string; duoFusion?: boolean; duoSide?: string }>(pool: T[]): T[] {
+    // Duo : les cartes de Posipi X n'arrivent qu'après la fusion
+    if (this.character === 'duo') return pool.filter((c) => !c.duoFusion || this.duoFused);
     return this.character === 'quelorior' ? pool.filter((c) => c.category !== 'attaque') : pool;
   }
 
@@ -521,6 +540,8 @@ export class Run {
     }
     // Avec le Nœud Destin, le gardien propose aussi sa version + (tisser des talents)
     if (this.relics.includes('noeud-destin') && !this.relics.includes('noeud-destin-plus')) out.push('noeud-destin-plus');
+    // Duo : le Pointeau ADN (objet légendaire) peut tomber chez les gardiens
+    if (this.character === 'duo' && !this.duoFused && !this.relics.includes('pointeau-adn') && this.rng.next() < 0.5) out.push('pointeau-adn');
     for (const id of this.rollRelics(6)) if (out.length < 3 && !out.includes(id)) out.push(id);
     return this.rng.shuffle ? this.rng.shuffle(out) : out;
   }

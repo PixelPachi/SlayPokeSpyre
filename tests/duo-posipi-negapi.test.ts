@@ -87,3 +87,35 @@ it('Duo : +3 PV max chacun à chaque acte, et un partenaire K.O. se relève', ()
   expect(r.maxHp).toBe(86);
   expect(r.duoHp).toEqual({ posipi: 43, negapi: 43 });
 });
+
+describe('Pointeau ADN : fusion en Posipi X', () => {
+  it('PV réunis, cartes de départ fusionnées, cartes X proposées seulement après', () => {
+    const r = new Run('F', 'duo');
+    r.duoHp = { posipi: 30, negapi: 20 }; r.hp = 50;
+    r.fuseDuo();
+    expect(r.duoFused).toBe(true);
+    expect(r.hp).toBe(50);
+    expect(r.form.name).toBe('Posipi X');
+    expect(r.deck.filter((c) => c.defId === 'duo-fusion-eclair')).toHaveLength(8);
+    expect(r.offerable([{ category: 'attaque', duoFusion: true }])).toHaveLength(1);
+    const r2 = new Run('G', 'duo');
+    expect(r2.offerable([{ category: 'attaque', duoFusion: true }])).toHaveLength(0);
+  });
+  it('+1 PA, Plus et Moins sur toutes les cartes, coût X', () => {
+    const deck = ['duo-fusion-eclair', 'duo-fusion-eclair', 'duo-decharge-x', 'duo-fusion-eclair', 'duo-fusion-eclair'].map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
+    const c = new Combat({ character: 'duo', deck, enemies: ['rattata'], seed: 'X', relics: [], duoFused: true, hp: 70, maxHp: 80 } as never);
+    c.enemies[0].hp = c.enemies[0].maxHp = 999;
+    expect(c.player.maxEnergy).toBe(4);
+    expect(c.duo).toBeNull();
+    const e = c.hand.find((x) => x.defId === 'duo-fusion-eclair')!;
+    c.play(e.uid);
+    expect(c.player.block).toBe(5 + 2);
+    expect(c.fusedPlus).toBe(2);
+    const x = c.hand.find((k) => k.defId === 'duo-decharge-x')!;
+    expect(c.costOf(x)).toBe(3);
+    const hp = c.enemies[0].hp;
+    c.play(x.uid);
+    expect(c.player.energy).toBe(0);
+    expect(hp - c.enemies[0].hp).toBeGreaterThanOrEqual(3 * 9);
+  });
+});

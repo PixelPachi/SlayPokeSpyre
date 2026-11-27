@@ -163,6 +163,10 @@ export interface CardDef {
   enchant?: string;
   /** Duo : carte de Posipi ou de Négapi (aucune = carte Duo). */
   duoSide?: DuoSide;
+  /** Carte de Posipi X (Duo fusionné par le Pointeau ADN) : cadre violet, proposée seulement après la fusion. */
+  duoFusion?: boolean;
+  /** Coût X : dépense tous les PA restants ; les valeurs des effets sont multipliées par X (le nombre de coups si la carte frappe plusieurs fois). */
+  xCost?: boolean;
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

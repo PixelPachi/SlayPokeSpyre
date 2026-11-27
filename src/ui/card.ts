@@ -25,14 +25,14 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const text = o.text ?? cardText(d, null, null);
   const enemy = d.id.startsWith('ennemi-') || d.id.includes('copie:');
   // Duo : même cadre que les autres, recoloré (bordeaux / turquoise / bicolore, liserés dorés)
-  const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character === 'duo' ? `duo-${d.duoSide ?? 'both'}` : d.character);
+  const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character === 'duo' ? `duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : d.character);
   // Duo : d'abord l'illustration Gemini avec Posipi / Négapi (au nom de la carte), sinon l'attaque d'origine
   const art = enemy ? artNoPokemon(d.name) : d.character === 'duo'
     ? artUrl(d.name, 'duo') ?? artUrl(d.artName ?? d.name, 'duo') ?? artNoPokemon(d.artName ?? d.name)
     : artUrl(d.artName ?? d.name, d.character);
   const orb = orbUrl(d.character);
   return `
-    <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+    <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-window">
@@ -47,7 +47,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
         ${d.rarity === 'legendaire' || (d.enchants ?? []).some((k) => ENCHANTS[k]?.rarity === 'legendaire') ? LEGEND_DECO : ''}
         ${d.enchants?.length ? `<div class="card-ench" data-tip="<b>Enchantement${d.enchants.length > 1 ? 's' : ''}</b>${d.enchants.map((k) => ENCHANTS[k] ? `<br>• <b>${ENCHANTS[k].name}</b> : ${ENCHANTS[k].text}` : '').join('')}">✦${d.enchants.length > 1 ? d.enchants.length : ''}</div>` : ''}
       </div>
-      <div class="card-cost ${orb ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orb ? `style="--orb:url('${orb}')"` : ''}>${o.cost ?? d.cost}</div>
+      <div class="card-cost ${orb ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orb ? `style="--orb:url('${orb}')"` : ''}>${d.xCost ? 'X' : o.cost ?? d.cost}</div>
     </div>`;
 }
 

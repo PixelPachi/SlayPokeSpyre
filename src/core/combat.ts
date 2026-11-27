@@ -130,6 +130,8 @@ export interface CombatOptions {
   oneHp?: boolean;
   /** Duo : PV de Posipi et Négapi, et qui porte chaque objet. */
   duoHp?: Record<DuoSide, number>;
+  /** Duo fusionné en Posipi X (Pointeau ADN). */
+  duoFused?: boolean;
   relicOwner?: Record<string, DuoSide>;
 }
 
@@ -218,7 +220,8 @@ export class Combat {
     this.relics = new Set(opts.relics ?? []);
     this.boss = !!opts.boss;
     // Duo : deux combattants de 40 PV, celui en première ligne encaisse
-    if (ch.id === 'duo') {
+    this.fused = ch.id === 'duo' && !!opts.duoFused;
+    if (ch.id === 'duo' && !this.fused) {
       const max = Math.floor((opts.maxHp ?? ch.maxHp) / 2);
       const hp = opts.duoHp ?? { posipi: max, negapi: max };
       const front: DuoSide = hp.posipi > 0 ? 'posipi' : 'negapi';
@@ -276,6 +279,7 @@ export class Combat {
     // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
     const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
     this.player.maxEnergy = Math.min(5, this.player.maxEnergy + bossRelics.length); // 5 PA au maximum
+    if (this.fused) this.player.maxEnergy += 1; // Posipi X : 1 PA de plus à chaque tour
     this.player.energy = this.player.maxEnergy;
     if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
     if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);
@@ -400,6 +404,7 @@ export class Combat {
     if (this.has('loupe') && d.target === 'tous') b += 2;
     // Plus (Posipi) : la prochaine carte Négapi frappe plus fort
     if (this.duo && d.duoSide === 'negapi' && this.duoBoth()) b += this.duo.plus;
+    if (this.fused) b += this.fusedPlus;
     const gem = GEMS[d.pokeType];
     if (gem && this.has(gem) && !this.gemsUsed.has(d.pokeType)) b += 5;
     return b;
@@ -457,6 +462,8 @@ export class Combat {
   costOf(card: Card): number {
     if (this.player.freeTurn) return 0;
     const d = this.def(card);
+    // Coût X : tous les PA restants
+    if (d.xCost) return this.player.energy;
     let cost = d.cost;
     // Herbe Pouvoir : une fois par combat, la première carte à 2 PA ou plus est gratuite
     if (cost >= 2 && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) return 0;
@@ -464,6 +471,7 @@ export class Combat {
     if (cost > 0 && this.has('encens-bizarre') && !this.oddUsed && d.character !== 'mew' && d.character !== 'normal') cost -= 1;
     // Moins (Négapi) : la prochaine carte Posipi à 2 PA ou plus coûte moins cher
     if (this.duo && d.duoSide === 'posipi' && d.cost >= 2 && this.duo.minus > 0 && this.duoBoth()) cost -= this.duo.minus;
+    if (this.fused && d.cost >= 2 && this.fusedMinus > 0) cost -= this.fusedMinus;
     return Math.max(0, cost);
   }
 
@@ -609,6 +617,10 @@ export class Combat {
   /** Duo Posipi & Négapi (null pour les autres personnages). */
   duo: { front: DuoSide; hp: Record<DuoSide, number>; max: number; plus: number; minus: number; seq: DuoSide[]; surged: boolean; posipiTurn: number; owner: Record<string, DuoSide> } | null = null;
   private duoRelayed = false;
+  /** Posipi X : Plus et Moins s'appliquent à toutes les cartes. */
+  fused = false;
+  fusedPlus = 0;
+  fusedMinus = 0;
   private tempEpine = 0;
   /** Élan accumulé au tour précédent : devient de la Protection au début du tour. */
   private elanBlock = 0;
@@ -659,6 +671,8 @@ export class Combat {
     }
 
     const paid = this.costOf(card);
+    // Coût X : les valeurs de la carte sont multipliées par les PA dépensés
+    const xd = d.xCost ? scaleX(d, paid) : d;
     if (d.cost >= 2 && paid === 0 && !this.player.freeTurn && this.has('herbe-pouvoir') && !this.used.has('herbe-pouvoir')) {
       this.used.add('herbe-pouvoir'); this.relicFired('herbe-pouvoir');
     }
@@ -686,15 +700,22 @@ export class Combat {
     for (let r = 0; r < reps; r++) {
       this.cardAuraUsed = false;
       const t = target && target.hp > 0 ? target : d.target === 'ennemi' ? this.aliveEnemies()[0] : undefined;
-      for (const eff of d.effects) {
+      for (const eff of xd.effects) {
         if (this.phase !== 'joueur') break;
-        this.resolve(eff, d, t);
+        this.resolve(eff, xd, t);
       }
       const hit = d.effects.find((e): e is Extract<Effect, { kind: 'degats' }> => e.kind === 'degats');
       if (hit?.cumul) this.cumul[baseName(d.name)] = (this.cumul[baseName(d.name)] ?? 0) + hit.cumul;
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
     if (this.duo && d.duoSide && this.phase === 'joueur') this.duoAfterCard(d);
+    // Posipi X : chaque carte donne +2 dégâts à la suivante (Plus), +2 Protection et −1 PA à la prochaine carte à 2 PA ou plus (Moins)
+    if (this.fused && this.phase === 'joueur') {
+      if (d.cost >= 2) this.fusedMinus = 0;
+      this.fusedPlus = 2 + (this.player.powers['plus-synchro'] ?? 0);
+      this.gainBlock(this.player, 'player', 2 + (this.player.powers['moins-synchro'] ?? 0));
+      this.fusedMinus = 1;
+    }
     if (d.category === 'attaque' || d.category === 'technique') this.fireTrames(d.category);
     // Foulard Rose : deux attaques sur le même Pokémon dans un tour → Attraction
     if (d.category === 'attaque' && target && this.has('foulard-rose') && target.hp > 0) {
@@ -2013,6 +2034,19 @@ export class Combat {
       if (this.has('restes') && this.player.hp < this.player.maxHp) this.relicFired('restes', () => this.healPlayer(3));
     }
   }
+}
+
+/** Coût X : multiplie les valeurs des effets par X (le nombre de coups pour une carte à coups multiples). */
+function scaleX(d: CardDef, x: number): CardDef {
+  const effects = d.effects.map((e): Effect => {
+    switch (e.kind) {
+      case 'degats': return e.hits !== undefined ? { ...e, hits: e.hits * x, hitsMax: undefined } : { ...e, amount: e.amount * x };
+      case 'protection': case 'pioche': case 'soin': case 'pa': return { ...e, amount: e.amount * x };
+      case 'statut': return { ...e, stacks: e.stacks * x };
+      default: return e;
+    }
+  });
+  return { ...d, effects };
 }
 
 /** Le Bébé Kangourex comme combattant (type Normal), pour le calcul des dégâts. */

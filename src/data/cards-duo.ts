@@ -63,6 +63,19 @@ export const DUO_CARDS: CardDef[] = [
   // Ouragan : frappe tous les ennemis une fois par carte Posipi jouée ce tour
   N('ouragan', 'Ouragan', 'electrik', 'attaque', 'legendaire', 2, 'tous', [dmg(6, { parPosipi: true })], { effects: [dmg(9, { parPosipi: true })] }),
 
+  // ——— Posipi X (fusion par le Pointeau ADN) : cartes violettes ———
+  // Les attaques et défenses de départ fusionnent
+  { ...c('fusion-eclair', 'Éclair Pôle X', 'electrik', 'attaque', 'depart', 1, 'ennemi', [dmg(6), prot(5)], { effects: [dmg(9), prot(8)] }), duoFusion: true, artName: 'Éclair' },
+  // Cartes à coût X (proposées seulement une fois fusionné)
+  ...([
+    c('decharge-x', 'Décharge X', 'electrik', 'attaque', 'commune', 0, 'ennemi', [multi(7, 1)], { effects: [multi(9, 1)] }),
+    c('rempart-x', 'Rempart X', 'electrik', 'technique', 'commune', 0, 'soi', [prot(7)], { effects: [prot(9)] }),
+    c('orage-x', 'Orage X', 'electrik', 'attaque', 'peu-commune', 0, 'tous', [dmg(5)], { effects: [dmg(7)] }),
+    c('surtension-x', 'Surtension X', 'electrik', 'technique', 'peu-commune', 0, 'soi', [draw(1), prot(3)], { effects: [draw(1), prot(5)] }),
+    c('champ-magnetique-x', 'Champ Magnétique X', 'electrik', 'technique', 'rare', 0, 'tous', [st('paralysie', 1, 'tous'), prot(4)], { effects: [st('paralysie', 1, 'tous'), prot(6)] }),
+    c('pole-x', 'Pôle X', 'electrik', 'attaque', 'rare', 0, 'ennemi', [dmg(6), prot(6)], { effects: [dmg(8), prot(8)] }),
+  ] as CardDef[]).map((d) => ({ ...d, duoFusion: true, xCost: true })),
+
   // ——— Duo (bicolores) ———
   c('inversion-poles', 'Inversion de Pôles', 'electrik', 'technique', 'commune', 1, 'soi', [{ kind: 'duo-inversion' }, draw(1)], { cost: 0 }),
   c('relais', 'Relais', 'normal', 'technique', 'commune', 0, 'soi', [{ kind: 'duo-relais' }, draw(1)], { effects: [{ kind: 'duo-relais' }, draw(2)] }),

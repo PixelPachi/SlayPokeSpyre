@@ -1647,6 +1647,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.duo-posipi { --tc: #de4a41; }
 .card.duo-negapi { --tc: #5a83ee; }
 .card.duo-both { --tc: #de4a41; }
+.card.duo-fusion { --tc: #9b4fd6; }
 .card.duo-relay::after { content: '⇄ Relais'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border-radius: 8px; background: #f6cc2a; color: #3a2400; font: 900 11px 'Nunito', sans-serif; box-shadow: 0 2px 4px #0008; z-index: 5; }
 .fighter.player .duo-back { position: absolute; left: -90px; bottom: 70px; width: 220px; text-align: center; filter: brightness(.85); z-index: 0; }
 .fighter.player .player-sprite { position: relative; z-index: 1; }
@@ -1680,3 +1681,11 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .dop img { width: 130px; height: 130px; margin: -14px 0 -10px; image-rendering: pixelated; }
 .dop.posipi { background: #8e1b34; } .dop.negapi { background: #138a8a; }
 .dop:hover { transform: translateY(-3px); filter: brightness(1.15); }
+.fuse-anim { position: relative; width: 260px; height: 200px; margin: 0 auto; }
+.fuse-anim img { position: absolute; top: 10px; width: 180px; height: 180px; image-rendering: pixelated; }
+.fa-p { left: -30px; animation: faP 1.6s ease-in forwards; }
+.fa-n { right: -30px; animation: faN 1.6s ease-in forwards; }
+.fa-x { left: 40px; opacity: 0; animation: faX .6s 1.5s ease-out forwards; filter: drop-shadow(0 0 16px #b46cff); }
+@keyframes faP { to { left: 40px; opacity: 0; filter: brightness(3); } }
+@keyframes faN { to { right: 40px; opacity: 0; filter: brightness(3); } }
+@keyframes faX { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }

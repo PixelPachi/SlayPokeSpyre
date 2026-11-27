@@ -77,7 +77,7 @@ export class CombatView {
   ) {
     run.syncDuo();
     this.combat = new Combat({
-      duoHp: run.duoHp ?? undefined, relicOwner: run.relicOwner,
+      duoHp: run.duoHp ?? undefined, relicOwner: run.relicOwner, duoFused: run.duoFused,
       character: run.character, deck: run.deck, enemies: opts.enemies, seed: opts.seed,
       hp: run.hp, maxHp: run.maxHp, relics: run.relics,
       form: run.form, act: run.act, money: run.money, familiarBonus: (run.act - 1) * 3, enemyPower: opts.enemyPower, boss: opts.boss, skin: run.skin, oneHp: opts.oneHp,

@@ -220,5 +220,6 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
   if (d.requires?.aura && !d.effects.some((e) => e.kind === 'consomme-aura')) parts.push(`<i>Demande ${d.requires.aura} Aura.</i>`);
   if (d.id === 'voeu-brise') parts.push('Malédiction. À la fin de ton tour, si elle est dans ta main : perds <b class="down">2</b> PV.');
   for (const k of d.keywords ?? []) parts.push(`<i>${KEYWORD_LABELS[k]}.</i>`);
+  if (d.xCost) parts.push('<i>Coût X : × les PA dépensés.</i>');
   return parts.join(' ');
 }

@@ -60,7 +60,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
   },
   quelorior: { 1: ['quel-atout'] },
   duo: {
-    1: ['duo-coup-main', 'duo-etincelle', 'duo-etincelle-relais', 'duo-vive-attaque', 'duo-cage-magnetique', 'duo-ecran-lumiere', 'duo-inversion-poles', 'duo-relais', 'duo-feinte', 'duo-entrave'],
+    1: ['duo-decharge-x', 'duo-rempart-x', 'duo-orage-x', 'duo-surtension-x', 'duo-champ-magnetique-x', 'duo-pole-x', 'duo-coup-main', 'duo-etincelle', 'duo-etincelle-relais', 'duo-vive-attaque', 'duo-cage-magnetique', 'duo-ecran-lumiere', 'duo-inversion-poles', 'duo-relais', 'duo-feinte', 'duo-entrave'],
     2: ['duo-rayon-signal', 'duo-torgnoles', 'duo-chargeur', 'duo-machoire-electrique', 'duo-tonnerre', 'duo-mur-lumiere'],
     3: ['duo-toile-elek', 'duo-charme', 'duo-onde-folie', 'duo-armure', 'duo-charge-foudre', 'duo-coup-double'],
     4: ['duo-cage-eclair', 'duo-eclat-magique', 'duo-gyroballe', 'duo-recharge', 'duo-synchrobruit'],
