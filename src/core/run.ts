@@ -505,8 +505,16 @@ export class Run {
     return out;
   }
 
+  /** Sommet : le dominant qui barre le passage est tiré une fois (Noctunoir ou Massko) pour être annoncé à l'avance. */
+  summitEliteIds: string[] | null = null;
+  get summitElite(): string[] {
+    if (!this.summitEliteIds) this.summitEliteIds = [...this.rng.pick(this.zone.elites)];
+    return this.summitEliteIds;
+  }
+
   encounter(type: 'combat' | 'elite' | 'boss'): string[] {
     if (type === 'boss') return this.bossId.split('+');
+    if (type === 'elite' && this.act === LAST_ACT) return [...this.summitElite];
     if (type === 'elite') {
       const met = this.elitesMet ?? (this.elitesMet = []);
       const fresh = this.zone.elites.filter((g) => !met.includes(g.join('+')));

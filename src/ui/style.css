@@ -1710,3 +1710,5 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .gl-cards .card { position: relative; }
 .glc-enemy { display: flex; align-items: center; gap: 6px; }
 .glc-enemy img { width: 48px; height: 48px; image-rendering: pixelated; margin: -10px 0; }
+/* Sommet : fond illustré de la zone (comme les cartes des autres actes) */
+.summit.has-bg { background: linear-gradient(#0007, #000a), var(--summit-bg) center / cover, radial-gradient(ellipse at 50% 10%, var(--sky), var(--shade) 80%); }

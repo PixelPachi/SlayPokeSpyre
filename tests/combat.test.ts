@@ -557,8 +557,10 @@ describe('sommet et Dialga Primal', async () => {
     expect(run.zone.id).toBe('sommet-tour-du-temps');
     expect(SUMMIT_STEPS[SUMMIT_STEPS.length - 1]).toBe('boss');
     expect(run.encounter('boss')).toEqual(['dialga-primal']);
-    const a = run.encounter('elite'), b = run.encounter('elite');
-    expect([a[0], b[0]].sort()).toEqual(['massko', 'noctunoir']);
+    // Le dominant du sommet (Noctunoir ou Massko) est tiré une fois : celui annoncé est celui qu'on affronte
+    const shown = run.summitElite[0];
+    expect(['massko', 'noctunoir']).toContain(shown);
+    expect(run.encounter('elite')).toEqual([shown]);
   });
 
   it('Dialga annonce Hurle-Temps puis se recharge, et passe en phase 2 sous 50 % de PV', () => {

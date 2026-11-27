@@ -1,3 +1,4 @@
+import { ENEMY_DEFS } from '../data/enemies';
 import { welcomeEvent } from '../data/events-accueil';
 import { TRIGGERS, WEAVE_FX, trameFx, trameId, triggerChoices, weaveChoices, weaveId } from '../data/tissage';
 import { ZONE_BG } from '../data/zone-bg';
@@ -749,21 +750,27 @@ const SUMMIT_INFO: Record<string, { label: string; text: string; icon: string }>
   boss: { label: 'Dialga Primal', text: 'Le maître du temps, devenu fou. Apaise-le.', icon: 'boss' },
 };
 
+/** Le dominant du sommet, annoncé avec son vrai nom. */
+function eliteInfo(run: Run): { label: string; text: string; icon: string } {
+  const e = ENEMY_DEFS[run.summitElite[0]];
+  return e?.dex === 477 ? SUMMIT_INFO.elite : { label: e?.name ?? 'Pokémon dominant', text: 'Un gardien de la forêt du futur barre le passage.', icon: 'elite' };
+}
+
 /** Le sommet : un escalier de quatre étapes. */
 export function renderSummit(root: HTMLElement, run: Run, onNext: Done): void {
   const steps = ['elite', 'centre', 'boutique', 'boss'];
   const z = run.zone;
   root.innerHTML = `
-    <div class="summit" style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]}">
+    <div class="summit has-bg" style="--sky:${z.palette[0]};--ground:${z.palette[1]};--shade:${z.palette[2]};--summit-bg:url('${new URL(asset(`illustrations/cartes/${z.id}.webp`), location.href).href}')">
       ${topbar(run, `${z.name}`)}
       <div class="weather weather-temps">${weatherParticles('temps')}</div>
       <h1 class="summit-title">Sommet de la Tour du Temps</h1>
       <div class="summit-steps">
         ${steps.map((s, i) => {
-          const info = SUMMIT_INFO[s];
+          const info = s === 'elite' ? eliteInfo(run) : SUMMIT_INFO[s];
           const state = i < run.summitStep ? 'done' : i === run.summitStep ? 'next' : 'later';
           const img = s === 'boss' ? `<img class="summit-boss primal" src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">`
-            : s === 'elite' ? `<img src="${asset('sprites/pokemon/front/477.png')}" alt="">`
+            : s === 'elite' ? `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[run.summitElite[0]]?.dex ?? 477}.png`)}" alt="">`
             : s === 'boutique' ? `<img src="${asset('sprites/pokemon/front/352.png')}" alt="">`
             : '<span class="summit-cross">✚</span>';
           return `<button class="summit-step ${state} step-${s}" ${state === 'next' ? '' : 'disabled'}>
