@@ -394,8 +394,12 @@ export class Run {
     this.duoHp = null;
     this.relicOwner = {};
     this.duoFused = true;
-    // Éclair Plus et Bouclier deviennent des Éclair Pôle X (cartes violettes : attaque + défense)
-    for (const c of this.deck) if (c.defId === 'duo-eclair' || c.defId === 'duo-bouclier') c.defId = 'duo-fusion-eclair';
+    // Chaque paire Éclair Plus + Bouclier fusionne en une Éclair Pôle X (carte violette : attaque + défense)
+    const atk = this.deck.filter((c) => c.defId === 'duo-eclair');
+    const def = this.deck.filter((c) => c.defId === 'duo-bouclier');
+    const n = Math.max(atk.length, def.length);
+    const fused = Array.from({ length: n }, (_, i) => ({ uid: (atk[i] ?? def[i]).uid, defId: 'duo-fusion-eclair', upgraded: !!(atk[i]?.upgraded || def[i]?.upgraded) }));
+    this.deck = [...this.deck.filter((c) => c.defId !== 'duo-eclair' && c.defId !== 'duo-bouclier'), ...fused];
   }
 
   /** Duo : PV de Posipi et Négapi (0 = K.O.), et qui porte chaque objet tenu. */

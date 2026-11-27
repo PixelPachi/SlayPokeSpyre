@@ -201,7 +201,7 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
     layer.className = 'weave-layer fuse-layer';
     layer.innerHTML = `<div class="weave-box"><h2>Posipi et Négapi fusionnent !</h2>
       <div class="fuse-anim"><img class="fa-p" src="${asset('sprites/pokemon/front/311.png')}" alt=""><img class="fa-n" src="${asset('sprites/pokemon/front/312.png')}" alt=""><img class="fa-x" src="${asset('sprites/pokemon/front/9311.png')}" alt=""></div>
-      <p><b>Multipi</b> : ${run.hp}/${run.maxHp} PV, 1 PA de plus par tour, Plus et Moins sur toutes les cartes, objets regroupés.<br>Tes Éclair Plus et Bouclier deviennent des Éclair Pôle X.</p>
+      <p><b>Multipi</b> : ${run.hp}/${run.maxHp} PV, 1 PA de plus par tour, Plus et Moins sur toutes les cartes, objets regroupés.<br>Chaque paire Éclair Plus + Bouclier fusionne en une Éclair Pôle X.</p>
       <button class="btn primary">Continuer</button></div>`;
     root.querySelector('.node-screen')!.appendChild(layer);
     layer.querySelector('button')!.addEventListener('click', () => done());

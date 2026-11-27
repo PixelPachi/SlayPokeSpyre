@@ -96,7 +96,8 @@ describe('Pointeau ADN : fusion en Multipi', () => {
     expect(r.duoFused).toBe(true);
     expect(r.hp).toBe(50);
     expect(r.form.name).toBe('Multipi');
-    expect(r.deck.filter((c) => c.defId === 'duo-fusion-eclair')).toHaveLength(8);
+    expect(r.deck.filter((c) => c.defId === 'duo-fusion-eclair')).toHaveLength(4);
+    expect(r.deck).toHaveLength(6);
     expect(r.offerable([{ category: 'attaque', duoFusion: true }])).toHaveLength(1);
     const r2 = new Run('G', 'duo');
     expect(r2.offerable([{ category: 'attaque', duoFusion: true }])).toHaveLength(0);
