@@ -24,6 +24,31 @@ const ENEMY_STEP_MS = 700;
 /** Fonds de zone déjà testés (vrai = l'image existe). */
 const BG_LOADED = new Map<string, boolean>();
 
+/** Les petits Pokémon ont beaucoup de vide sous les pieds dans leur sprite : on les pose sur la plateforme.
+ *  Renvoie le décalage vers le bas (px, pour un sprite affiché à `size`), calculé une fois par image. */
+const FOOT = new Map<string, number>();
+function footOffset(src: string, size: number, onReady: () => void): number {
+  const pad = FOOT.get(src);
+  if (pad !== undefined) return Math.round((pad - 0.16) * size);
+  FOOT.set(src, 0.16);
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const cv = document.createElement('canvas');
+      cv.width = img.width; cv.height = img.height;
+      const g = cv.getContext('2d')!;
+      g.drawImage(img, 0, 0);
+      const data = g.getImageData(0, 0, img.width, img.height).data;
+      let bottom = img.height - 1;
+      outer: for (; bottom > 0; bottom--) for (let x = 0; x < img.width; x++) if (data[(bottom * img.width + x) * 4 + 3] > 20) break outer;
+      FOOT.set(src, (img.height - 1 - bottom) / img.height);
+      onReady();
+    } catch { /* image d'une autre origine : on garde la valeur par défaut */ }
+  };
+  img.src = src;
+  return 0;
+}
+
 export interface CombatResult {
   victory: boolean;
   /** Objets tenus consommés (Rappel Max). */
@@ -227,7 +252,7 @@ export class CombatView {
         <div class="fighter player ${p.block > 0 ? 'has-block' : ''} ${(p.statuses.sommeil ?? 0) > 0 ? 'asleep' : ''}" data-who="player">
           ${this.statusRow(p, true)}
           <div class="platform"></div>
-          <img class="sprite player-sprite ${c.duo && Date.now() - this.duoSlideAt < 700 ? 'duo-in' : ''}" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}">
+          <img class="sprite player-sprite ${c.duo && Date.now() - this.duoSlideAt < 700 ? 'duo-in' : ''}" src="${asset(skinSprite(p.dex, this.run.skin))}" alt="${esc(p.name)}" style="top:${footOffset(asset(skinSprite(p.dex, this.run.skin)), 340, () => this.render())}px">
           ${this.hpBar(p)}
           ${c.duo ? this.duoBackHtml() : ''}
         </div>
