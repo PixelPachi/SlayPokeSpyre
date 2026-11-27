@@ -742,6 +742,10 @@ export class Combat {
         this.relicFired('spray-gorge', () => this.changeEnergy(1, 'Spray Gorge'));
       }
     }
+    // Avalanche (Caninos d'Hisui) : chaque attaque Roche frappe aussi tous les ennemis
+    if (d.category === 'attaque' && d.pokeType === 'roche' && this.player.powers.avalanche && this.phase === 'joueur') {
+      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, this.player.powers.avalanche, 'normal');
+    }
     // Confusion : attaquer en étant confus coûte autant de PV que de cumuls de Confusion
     if (d.category === 'attaque' && (this.player.statuses.confusion ?? 0) > 0 && this.phase === 'joueur') {
       this.events.push({ type: 'player-move', name: 'Confus, il se blesse !' });
@@ -1069,6 +1073,10 @@ export class Combat {
     if (pw.croissance) this.invoke(pw.croissance);
     if (pw.turbo) this.addStatus(this.player, 'player', 'elan', pw.turbo);
     if (pw.braises) for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'brulure', pw.braises);
+    // Talents légendaires de skin
+    if (pw['coeur-magma']) { this.gainAura(2 * pw['coeur-magma']); for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'brulure', 2 * pw['coeur-magma']); }
+    if (pw['charme-celeste']) for (const e of this.aliveEnemies()) this.addStatus(e, e.uid, 'attraction', pw['charme-celeste']);
+    if (pw['maree-protectrice']) { this.gainBlock(this.player, 'player', 4 * pw['maree-protectrice']); if (this.player.familiar && this.player.familiar.hp > 0) this.player.familiar.block += 4 * pw['maree-protectrice']; }
     if (pw.souvenir) this.resolve({ kind: 'ajoute-carte', from: 'tous', count: pw.souvenir }, cardDef('abri'), undefined);
     if (pw.telekinesie) this.draw(pw.telekinesie);
     if (pw['lire-esprit'] && this.player.aura >= 30) {
@@ -1081,6 +1089,8 @@ export class Combat {
     this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0) + (this.turn === 1 && this.has('pierre-ovale') ? 1 : 0));
     this.handDraw = false;
     this.fireTrames('debut-tour');
+    // Trame du Destin (Tisserand) : une carte de la main est enchantée à chaque tour
+    for (let i = 0; i < (this.player.powers['trame-destin'] ?? 0); i++) this.resolve({ kind: 'permucoeur' }, cardDef('vip-permucoeur'), undefined);
     this.checkLucarite();
   }
 
@@ -1090,7 +1100,7 @@ export class Combat {
     // Feu des Âmes (Chien de la Lanterne) : chaque pioche pendant le tour brûle tous les ennemis
     if (this.soulDog && !this.handDraw && this.phase === 'joueur' && this.hand.length > before) {
       this.events.push({ type: 'player-move', name: 'Feu des Âmes !' });
-      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, 2, 'normal');
+      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, 2 + (this.player.powers['bucher-ames'] ?? 0), 'normal');
       this.checkEnd();
     }
   }
@@ -1986,6 +1996,7 @@ export class Combat {
       }
       if (s === 'poison' && who === 'player' && this.bossAlive('venin-tenace')) continue; // Venin Tenace
       if (s === 'brulure' && who !== 'player' && this.player.powers['brasier-eternel']) continue; // Brasier Éternel
+      if (s === 'poison' && who !== 'player' && this.player.powers['pierre-philosophale']) continue; // Pierre Philosophale
       if (n - 1 <= 0) delete f.statuses[s];
       else f.statuses[s] = n - 1;
     }

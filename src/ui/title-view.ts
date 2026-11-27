@@ -189,7 +189,8 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
     const typeCards = k.typeCards?.length ? allCards().filter((d) => d.character === 'normal' && k.typeCards!.includes(d.pokeType) && d.rarity !== 'depart') : [];
     return `${chips}${skinChips}
       <p class="gl-note"><b>${esc(k.name)}</b> — ${esc(k.goalText)}</p>
-      ${ids.length ? `<h3>Cartes propres au skin</h3><div class="deck-grid gl-cards">${ids.map((id) => renderCard(cardDef(id))).join('')}</div>` : ''}
+      ${ids.length ? `<h3>Cartes de départ du skin</h3><div class="deck-grid gl-cards">${ids.map((id) => renderCard(cardDef(id))).join('')}</div>` : ''}
+      ${allCards().some((d) => d.skin === k.id) ? `<h3>Cartes obtenables seulement avec ce skin</h3><div class="deck-grid gl-cards">${allCards().filter((d) => d.skin === k.id).map((d) => renderCard(d)).join('')}</div>` : ''}
       ${typeCards.length ? `<h3>Cartes de type ${k.typeCards!.map((t) => TYPE_LABELS[t]).join(', ')} qu'il peut apprendre</h3><div class="deck-grid gl-cards">${typeCards.map((d) => renderCard(d)).join('')}</div>` : ''}
       ${!ids.length && !typeCards.length ? '<p class="gl-note">Ce skin garde les mêmes cartes que le Pokémon de base.</p>' : ''}
 `;
@@ -201,7 +202,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   // Les cartes propres à un skin sont rangées sous ce skin, pas avec le Pokémon de base
   const skinOnly = new Set((SKINS[c] ?? []).flatMap((k) => [...(k.cards ?? []), ...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])
     .filter((id) => !CHARACTERS[c].starterDeck.includes(id) && !Object.values(UNLOCKS[c] ?? {}).flat().includes(id)));
-  const cards = allCards().filter((d) => d.character === c && d.id !== 'duo-decharge-synchro' && !skinOnly.has(d.id))
+  const cards = allCards().filter((d) => d.character === c && d.id !== 'duo-decharge-synchro' && !skinOnly.has(d.id) && !d.skin)
     .sort((a, b) => (levelOf.get(a.id) ?? 0) - (levelOf.get(b.id) ?? 0) || order.indexOf(a.rarity) - order.indexOf(b.rarity));
   const unlocked = cards.filter((d) => (levelOf.get(d.id) ?? 0) <= lvl).length;
   return `${chips}${skinChips}

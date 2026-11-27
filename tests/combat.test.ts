@@ -270,8 +270,8 @@ describe('objets tenus', async () => {
     return c;
   };
 
-  it('Riolu a 79 cartes possibles en récompense', () => {
-    expect(rewardPool('riolu')).toHaveLength(81);
+  it('Riolu a 91 cartes (dont 10 de skin) possibles en récompense', () => {
+    expect(rewardPool('riolu')).toHaveLength(91);
   });
 
   it('chaque objet a un sprite et un texte', () => {
@@ -403,7 +403,7 @@ describe('cartes de tous les personnages', async () => {
   const chars = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as const;
 
   it('toutes les cartes de récompense sont débloquables, sans doublon de nom (75 + cartes de Protection ajoutées)', () => {
-    const extra: Record<string, number> = { riolu: 6, vipelierre: 6, kangourex: 6, caninos: 13, mew: 2 }; // + les 2 cartes non basiques du deck de départ
+    const extra: Record<string, number> = { riolu: 16, vipelierre: 16, kangourex: 11, caninos: 23, mew: 2 }; // + les 2 cartes non basiques du deck de départ
     for (const ch of chars) {
       const n = 75 + extra[ch];
       const pool = rewardPool(ch);
