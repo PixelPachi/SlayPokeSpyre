@@ -549,7 +549,8 @@ export class Run {
     if (this.relics.includes(id)) return;
     this.relics.push(id);
     // Duo : chaque objet tenu a un porteur, choisi à la récupération (Posipi par défaut)
-    if (this.duoHp) { this.relicOwner[id] = 'posipi'; runHooks.relicPicked?.(this, id); }
+    // (les objets de quête comme les Rouages ne se portent pas)
+    if (this.duoHp && allRelics().find((r) => r.id === id)?.rarity !== 'quete') { this.relicOwner[id] = 'posipi'; runHooks.relicPicked?.(this, id); }
   }
 }
 

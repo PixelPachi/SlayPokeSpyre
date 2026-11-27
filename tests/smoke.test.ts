@@ -16,7 +16,7 @@ import { RELIC_DEFS } from '../src/data/relics';
 const RELICS = Object.values(RELIC_DEFS);
 import { ZONES } from '../src/data/zones';
 
-const CHARS: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'];
+const CHARS: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'duo'];
 
 function sane(c: Combat, where: string): void {
   const all = [c.player, ...c.enemies];

@@ -1683,6 +1683,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .dop-card p { font-size: 14px; color: #ddd; margin: 0 0 12px; }
 .dop-row { display: flex; gap: 16px; justify-content: center; }
 .dop { width: 150px; padding: 8px; border-radius: 14px; border: 3px solid #f6cc2a; cursor: pointer; color: #fff; font: 900 18px 'Nunito', sans-serif; display: flex; flex-direction: column; align-items: center; }
-.dop img { width: 96px; height: 96px; image-rendering: pixelated; }
+.dop img { width: 130px; height: 130px; margin: -14px 0 -10px; image-rendering: pixelated; }
 .dop.posipi { background: #8e1b34; } .dop.negapi { background: #138a8a; }
 .dop:hover { transform: translateY(-3px); filter: brightness(1.15); }
