@@ -1570,9 +1570,9 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Efficacité du type sur les cartes de la main */
 .hand .card.super-eff { box-shadow: 0 0 0 3px #ffe36b, 0 0 18px 4px #ffd84acc, 0 0 34px #fff3a8aa; animation: superEff 1.4s ease-in-out infinite; }
 .hand .card.not-eff { box-shadow: 0 0 0 3px #ff5a4a, 0 0 16px 3px #ff3b2ecc; }
-.hand .card.super-eff::after { content: 'Super efficace !'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); z-index: 8; white-space: nowrap;
+.hand .card.super-eff::before { content: 'Super efficace !'; position: absolute; top: -14px; right: auto; bottom: auto; left: 50%; transform: translateX(-50%); z-index: 8; white-space: nowrap;
   font: 900 11px 'Nunito', sans-serif; color: #3a2a00; background: #ffe36b; padding: 1px 7px; border-radius: 8px; box-shadow: 0 2px 6px #0008; }
-.hand .card.not-eff::after { content: 'Pas très efficace…'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); z-index: 8; white-space: nowrap;
+.hand .card.not-eff::before { content: 'Pas très efficace…'; position: absolute; top: -14px; right: auto; bottom: auto; left: 50%; transform: translateX(-50%); z-index: 8; white-space: nowrap;
   font: 900 11px 'Nunito', sans-serif; color: #fff; background: #c8322a; padding: 1px 7px; border-radius: 8px; box-shadow: 0 2px 6px #0008; }
 @keyframes superEff { 50% { box-shadow: 0 0 0 3px #fff3a8, 0 0 26px 8px #ffd84add, 0 0 44px #fff3a8cc; } }
 /* ——— Contour des cartes légendaires ——— */
@@ -1656,7 +1656,7 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.duo-negapi { --tc: #5a83ee; }
 .card.duo-both { --tc: #de4a41; }
 .card.duo-fusion { --tc: #9b4fd6; }
-.card.duo-relay::after { content: '⇄ Relais'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border-radius: 8px; background: #f6cc2a; color: #3a2400; font: 900 11px 'Nunito', sans-serif; box-shadow: 0 2px 4px #0008; z-index: 5; }
+.card.duo-relay::before { content: '⇄ Relais'; position: absolute; top: -12px; right: auto; bottom: auto; left: 50%; transform: translateX(-50%); padding: 1px 8px; border-radius: 8px; background: #f6cc2a; color: #3a2400; font: 900 11px 'Nunito', sans-serif; box-shadow: 0 2px 4px #0008; z-index: 5; }
 .fighter.player .duo-back { position: absolute; left: -90px; bottom: 70px; width: 220px; text-align: center; filter: brightness(.85); z-index: 0; }
 .fighter.player .player-sprite { position: relative; z-index: 1; }
 .fighter.player .duo-back img { width: 220px; height: 220px; margin: -40px 0 -40px; image-rendering: pixelated; transform: scaleX(-1); }
