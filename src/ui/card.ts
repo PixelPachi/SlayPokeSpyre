@@ -40,6 +40,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
         <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${withStatusTips(text)}</span></div>
         ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
+        ${d.rarity === 'legendaire' || (d.enchants ?? []).some((k) => ENCHANTS[k]?.rarity === 'legendaire') ? LEGEND_DECO : ''}
         ${d.enchants?.length ? `<div class="card-ench" data-tip="<b>Enchantement${d.enchants.length > 1 ? 's' : ''}</b>${d.enchants.map((k) => ENCHANTS[k] ? `<br>• <b>${ENCHANTS[k].name}</b> : ${ENCHANTS[k].text}` : '').join('')}">✦${d.enchants.length > 1 ? d.enchants.length : ''}</div>` : ''}
       </div>
       <div class="card-cost ${orb ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orb ? `style="--orb:url('${orb}')"` : ''}>${o.cost ?? d.cost}</div>
@@ -106,3 +107,7 @@ function withStatusTips(html: string): string {
     return `${pre}<span class="kw" style="--c:${info.color}" data-tip="${tip}">${w}</span>`;
   })).join('');
 }
+
+/** Cartes légendaires : coins dorés en filigrane, gemme au sommet et reflet qui passe. */
+const LEGEND_CORNER = '<svg viewBox="0 0 40 40"><path d="M2 38V14C2 7 7 2 14 2h24" fill="none" stroke="#fff3b0" stroke-width="2.4"/><path d="M6 38V16c0-6 4-10 10-10h22" fill="none" stroke="#c98a1a" stroke-width="1.6"/><path d="M2 14c6 0 10 2 12 6M14 2c0 6 2 10 6 12" fill="none" stroke="#ffd76a" stroke-width="1.4"/><circle cx="12" cy="12" r="3.4" fill="#ff5d8f" stroke="#fff3b0" stroke-width="1.2"/></svg>';
+const LEGEND_DECO = `<div class="legend-deco"><i class="tl">${LEGEND_CORNER}</i><i class="tr">${LEGEND_CORNER}</i><i class="bl">${LEGEND_CORNER}</i><i class="br">${LEGEND_CORNER}</i><b class="gem"></b><span class="shine"></span></div>`;

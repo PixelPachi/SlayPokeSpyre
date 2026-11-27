@@ -88,12 +88,18 @@ export function openDeckOverlay(host: HTMLElement, o: DeckPickOptions, run: Run)
   el.innerHTML = `
     <div class="deck-panel">
       <h2>${esc(o.title)}</h2>
+      ${o.onPick ? '' : '<label class="deck-up-toggle"><input type="checkbox"> Voir les versions améliorées</label>'}
       <div class="deck-grid">
         ${cards.map((c) => renderCard(cardDef(c.defId, c.upgraded), { uid: c.uid, classes: o.onPick ? 'pickable' : '' })).join('')}
       </div>
       <button class="btn close">${esc(o.cancelLabel ?? 'Fermer')}</button>
     </div>`;
   host.appendChild(el);
+  // Aperçu des améliorations : chaque carte montre sa version + (pour envisager un entraînement)
+  el.querySelector<HTMLInputElement>('.deck-up-toggle input')?.addEventListener('change', (ev) => {
+    const up = (ev.target as HTMLInputElement).checked;
+    el.querySelector('.deck-grid')!.innerHTML = cards.map((c) => renderCard(cardDef(c.defId, up || c.upgraded), { uid: c.uid, classes: up && !c.upgraded ? 'preview-up' : '' })).join('');
+  });
   el.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement;
     // Amélioration : on montre la carte de base à gauche et sa version améliorée à droite avant de confirmer

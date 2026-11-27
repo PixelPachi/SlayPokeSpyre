@@ -125,7 +125,7 @@ export type Effect =
 export type Keyword = 'epuisee' | 'conservee' | 'ephemere' | 'innee' | 'injouable' | 'echo';
 
 export type CardCategory = 'attaque' | 'technique' | 'talent' | 'statut';
-export type Rarity = 'depart' | 'commune' | 'peu-commune' | 'rare';
+export type Rarity = 'depart' | 'commune' | 'peu-commune' | 'rare' | 'legendaire';
 
 export interface CardDef {
   id: string;

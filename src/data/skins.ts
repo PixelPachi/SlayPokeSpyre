@@ -70,7 +70,7 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
   }],
   vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497]), {
     id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
-    goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 25 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',
+    goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 15 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',
     kills: { type: 'poison', goal: 15 }, extraCards: ['vip-catalyse'], relic: 'plaque-toxik',
     talent: { name: 'Contestation · Alchimie', text: 'Ses baisses d’Attaque et de Défense deviennent des hausses, et inversement. Toutes ses Vampigraines deviennent du Poison.' },
   }, {

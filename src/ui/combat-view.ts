@@ -1,5 +1,5 @@
 import { ZONE_BG } from '../data/zone-bg';
-import { playShield, playTalent, playVfx } from './vfx';
+import { attackShape, playBeam, playOrb, playShield, playSprouts, playStatusFx, playTalent, playVfx } from './vfx';
 import { babySprite, skinSprite } from '../data/skins';
 import { BERRY_DEFS } from '../data/berries';
 import { FIELD_TYPE, TERRAINS, WEATHER } from '../core/weather';
@@ -11,7 +11,7 @@ import { backUrl, iconImg, iconUrl, orbUrl } from './card-assets';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, CardDef, Effect, EnemyMove, PowerId, StatusId } from '../core/model';
-import { TYPE_LABELS, type PokeType } from '../core/types';
+import { TYPE_LABELS, typeMultiplier, type PokeType } from '../core/types';
 import type { Run } from '../core/run';
 import { renderCard } from './card';
 import { cardDef } from '../data/cards';
@@ -374,9 +374,17 @@ export class CombatView {
     const target = this.selected === card.uid && this.hoverEnemy !== null ? this.hoverEnemy : undefined;
     const dmg = c.previewCardDamage(card, target);
     const mid = (n - 1) / 2;
+    // Efficacité du type : brille si un ennemi y est faible, lueur rouge si tous y résistent
+    let eff = '';
+    if (d.category === 'attaque' && (dmg !== null || base)) {
+      const foes = target !== undefined ? c.aliveEnemies().filter((e) => e.uid === target) : c.aliveEnemies();
+      const mults = foes.map((e) => typeMultiplier(d.pokeType, e.types));
+      if (mults.some((m) => m > 1)) eff = 'super-eff';
+      else if (mults.length && mults.every((m) => m < 1)) eff = 'not-eff';
+    }
     return renderCard(d, {
       uid: card.uid,
-      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''}`,
+      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff}`,
       style: `--rot:${(i - mid) * 4}deg;--lift:${Math.abs(i - mid) * 6}px`,
       text: cardText(d, dmg, base && base.kind === 'degats' ? base.amount : null),
       stab: c.player.types.includes(d.pokeType),
@@ -407,6 +415,14 @@ export class CombatView {
   demoTalent(): void { this.fxAt('player', (x, y) => playTalent(this.fx, x, y, '#c9a6ff')); }
 
   /** Position (dans le calque d'effets) du centre d'un combattant, mise à l'échelle de l'écran comprise. */
+  /** Au pied du combattant (Vampigraine qui pousse du sol). */
+  private fxAtFeet(who: Who, fn: (x: number, y: number, w: number) => void): void {
+    const el = this.whoEl(who)?.querySelector('.sprite') ?? this.whoEl(who);
+    if (!el) return;
+    const r = el.getBoundingClientRect(), s = this.root.getBoundingClientRect(), k = s.width / this.root.offsetWidth || 1;
+    fn((r.left - s.left + r.width / 2) / k, (r.bottom - s.top - r.height * 0.06) / k, r.width / k);
+  }
+
   private fxAt(who: Who, fn: (x: number, y: number, w: number) => void): void {
     const el = this.whoEl(who)?.querySelector('.sprite') ?? this.whoEl(who);
     if (!el) return;
@@ -414,6 +430,18 @@ export class CombatView {
     const s = this.root.getBoundingClientRect();
     const k = s.width / this.root.offsetWidth || 1;
     fn((r.left - s.left + r.width / 2) / k, (r.top - s.top + r.height * 0.55) / k, r.width / k);
+  }
+
+  /** Coordonnées (dans le calque d'effets) de deux combattants, pour les rayons et projectiles. */
+  private fromTo(a: Who, b: Who, fn: (x1: number, y1: number, x2: number, y2: number) => void): void {
+    const pos = (w: Who) => {
+      const el = this.whoEl(w)?.querySelector('.sprite') ?? this.whoEl(w);
+      if (!el) return null;
+      const r = el.getBoundingClientRect(), s = this.root.getBoundingClientRect(), k = s.width / this.root.offsetWidth || 1;
+      return [(r.left - s.left + r.width / 2) / k, (r.top - s.top + r.height * 0.5) / k];
+    };
+    const p = pos(a), q = pos(b);
+    if (p && q) fn(p[0], p[1], q[0], q[1]);
   }
 
   /** Type de la dernière carte jouée (couleur de l'effet de talent). */
@@ -469,12 +497,21 @@ export class CombatView {
           const info = STATUS_INFO[ev.status];
           const n = ev.status === 'attaque' || ev.status === 'defense' ? (ev.stacks > 0 ? ` +${ev.stacks}` : ` −${-ev.stacks}`) : '';
           this.float(ev.target, `${info.label}${n}`, 'status', at(ev.target), info.color);
+          if (ev.stacks > 0) {
+            if (ev.status === 'vampigraine') this.fxAtFeet(ev.target, (x, y, w) => playSprouts(this.fx, x, y, w));
+            else this.fxAt(ev.target, (x, y) => playStatusFx(this.fx, x, y, ev.status));
+          }
           break;
         }
         case 'enemy-move': {
           const el = this.whoEl(ev.uid);
           el?.classList.add('lunge');
-          if (ev.move?.damage !== undefined) { sfxType(ev.move.pokeType ?? 'normal', 1.2); setTimeout(() => this.vfxOn('player', ev.move!.pokeType ?? 'normal', (ev.move!.hits ?? 1) > 1 ? 1.3 : 1), 180); }
+          if (ev.move?.damage !== undefined) {
+            sfxType(ev.move.pokeType ?? 'normal', 1.2);
+            const shape = attackShape(ev.move.name), t = ev.move.pokeType ?? 'normal';
+            if (shape) this.fromTo(ev.uid, 'player', (x1, y1, x2, y2) => (shape === 'beam' ? playBeam : playOrb)(this.fx, x1, y1, x2, y2, t));
+            setTimeout(() => this.vfxOn('player', t, (ev.move!.hits ?? 1) > 1 ? 1.3 : 1), shape ? 320 : 180);
+          }
           else if (ev.move) sfx('statut');
           if (ev.move && (ev.move.damage !== undefined || ev.move.signature)) this.showEnemyCard(ev.uid, ev.move, ev.damage ?? ev.move.damage ?? 0);
           else this.float(ev.uid, ev.name, 'move', 0);
@@ -489,6 +526,9 @@ export class CombatView {
           break;
         case 'show-card':
           this.showPlayedCard(ev.def, ev.label, ev.failed);
+          break;
+        case 'card-added':
+          this.showAddedCard(ev.def, ev.to, ev.count);
           break;
         case 'energy':
           this.floatEnergy(`${ev.delta > 0 ? '+' : '−'}${Math.abs(ev.delta)} PA`, ev.reason, ev.delta > 0);
@@ -548,6 +588,30 @@ export class CombatView {
   }
 
   private lastEnemyCard = 0;
+
+  /** Une carte rejoint ton deck ou une pile : elle apparaît au centre puis glisse vers sa place. */
+  private addedQueue = 0;
+  private showAddedCard(def: CardDef, to: 'pioche' | 'defausse' | 'main' | 'deck', count = 1): void {
+    const delay = this.addedQueue++ * 650;
+    setTimeout(() => {
+      this.addedQueue = Math.max(0, this.addedQueue - 1);
+      const box = document.createElement('div');
+      box.className = 'added-card';
+      box.innerHTML = `<div class="added-label">${to === 'deck' ? 'Rejoint ton deck' : to === 'defausse' ? 'Dans ta défausse' : to === 'main' ? 'Dans ta main' : 'Dans ta pioche'}${count > 1 ? ` ×${count}` : ''}</div>${renderCard(def)}`;
+      this.fx.appendChild(box);
+      const sel = to === 'defausse' ? '.pile.discard' : to === 'pioche' ? '.pile.draw' : to === 'main' ? '.hand' : '.tb-deck';
+      const dest = this.root.querySelector(sel) ?? this.root.querySelector('.pile.discard');
+      setTimeout(() => {
+        if (dest) {
+          const r = dest.getBoundingClientRect(), b = box.getBoundingClientRect(), s = this.root.getBoundingClientRect(), k = s.width / this.root.offsetWidth || 1;
+          box.style.setProperty('--tx', `${(r.left + r.width / 2 - (b.left + b.width / 2)) / k}px`);
+          box.style.setProperty('--ty', `${(r.top + r.height / 2 - (b.top + b.height / 2)) / k}px`);
+        }
+        box.classList.add('go');
+      }, 750);
+      setTimeout(() => box.remove(), 1350);
+    }, delay);
+  }
 
   /** Carte activée par une autre carte (Atout, Photocopie, Métronome) : affichée au centre un instant. */
   private showPlayedCard(def: CardDef, label: string, failed = false): void {
@@ -702,7 +766,13 @@ export class CombatView {
     this.lastPlayedType = d0.pokeType;
     const targets = isAttack ? (d0.target === 'tous' ? this.combat.aliveEnemies().map((e) => e.uid) : [targetUid ?? this.combat.aliveEnemies()[0]?.uid]) : [];
     this.combat.play(uid, targetUid);
-    for (const t of targets) if (t !== undefined) setTimeout(() => this.vfxOn(t, d0.pokeType), 120);
+    // Rayons et projectiles partent de ton Pokémon vers la cible, puis l'impact par type
+    const shape = attackShape(d0.name);
+    for (const t of targets) {
+      if (t === undefined) continue;
+      if (shape) this.fromTo('player', t, (x1, y1, x2, y2) => (shape === 'beam' ? playBeam : playOrb)(this.fx, x1, y1, x2, y2, d0.pokeType));
+      setTimeout(() => this.vfxOn(t, d0.pokeType), shape ? 300 : 120);
+    }
     if (cost > 0) this.floatEnergy(`−${cost} PA`, '', false);
     this.refresh();
     if (isAttack) this.whoEl('player')?.classList.add('lunge'); // petit pas en avant vers les ennemis

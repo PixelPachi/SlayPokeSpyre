@@ -9,6 +9,8 @@ const COL_W = 104;
 const LEFT = 330; // marge à gauche (légende)
 const BOTTOM = 90;
 const BOSS_GAP = 170;
+// Case de départ (accueil de la Guilde) sous le premier étage, à l'acte 1
+let START = 0;
 // Nombre d'étages de la carte affichée (l'acte secret en a moins)
 let ROWS = MAP_ROWS;
 let HEIGHT = BOTTOM + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
@@ -28,7 +30,7 @@ export const NODE_INFO: Record<NodeType, { label: string; text: string }> = {
 
 const pos = (n: { row: number; col: number; dx?: number; dy?: number }) => ({
   x: LEFT + n.col * COL_W + (n.dx ?? 0),
-  y: HEIGHT - BOTTOM - n.row * ROW_H + (n.dy ?? 0),
+  y: HEIGHT - BOTTOM - START - n.row * ROW_H + (n.dy ?? 0),
 });
 let BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (ROWS - 1) * ROW_H - BOSS_GAP };
 
@@ -38,10 +40,11 @@ export function nodeIcon(type: NodeType, bossDex = 15): string {
   return `<img src="${asset(`sprites/pokemon/front/${bossDex}.png`)}" alt="">`;
 }
 
-export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void): void {
+export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void, onStart?: () => void): void {
   ROWS = run.map.length || MAP_ROWS;
-  HEIGHT = BOTTOM + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
-  BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - (ROWS - 1) * ROW_H - BOSS_GAP };
+  START = run.act === 1 ? ROW_H + 20 : 0;
+  HEIGHT = BOTTOM + START + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
+  BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - START - (ROWS - 1) * ROW_H - BOSS_GAP };
   const zone = run.zone;
   const bossIds = run.bossId.split('+');
   const boss = ENEMY_DEFS[bossIds[0]];
@@ -66,6 +69,12 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
     }
   }
 
+  // Case de départ : l'accueil de la Guilde (Grodoudou), d'où partent tous les chemins
+  const startPos = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - 10 };
+  if (START) for (const n of run.map[0] ?? []) {
+    const b = pos(n);
+    lines.unshift(`<line x1="${startPos.x}" y1="${startPos.y}" x2="${b.x}" y2="${b.y}" class="path ${run.welcomeDone && visited(0, n.col) ? 'walked' : ''} ${run.needsWelcome ? '' : !current ? 'open' : ''}"/>`);
+  }
   const nodes = run.map.flat().map((n) => {
     const p = pos(n);
     const cls = [
@@ -77,6 +86,8 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
     return `<button class="${cls}" style="left:${p.x}px;top:${p.y}px" data-row="${n.row}" data-col="${n.col}"
               data-tip="<b>${NODE_INFO[n.type].label}</b><br>${NODE_INFO[n.type].text}">${nodeIcon(n.type)}</button>`;
   });
+  if (START) nodes.unshift(`<button class="map-node node-start ${run.needsWelcome ? 'available' : 'visited'}" style="left:${startPos.x}px;top:${startPos.y}px" data-start="1"
+      data-tip="<b>La Guilde de Grodoudou</b><br>Grodoudou et Pijako t'accueillent et te proposent leur aide avant l'ascension."><img src="${asset('sprites/pokemon/front/40.png')}" alt=""></button>`);
   const bossAvail = avail === 'boss';
   nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
       data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien${bossIds.length > 1 ? "s" : ""} : ${bossName}</b><br>Le boss de la zone ${zone.name}.">${boss.look === 'primal' ? `<img src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">` : bossIds.length > 1 ? `<span class="duo-boss">${bossIds.map((id) => `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[id].dex}.png`)}" alt="">`).join('')}</span>` : nodeIcon('boss', boss.dex)}</button>`);
@@ -102,11 +113,12 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
 
   // Défilement : montrer l'étage actuel
   const scroll = root.querySelector<HTMLElement>('.map-scroll')!;
-  const focusY = current ? pos({ row: Math.min(current.row, ROWS - 1), col: 0 }).y : HEIGHT;
+  const focusY = current ? pos({ row: Math.min(current.row, ROWS - 1), col: 0 }).y : HEIGHT + 60;
   scroll.scrollTop = Math.max(0, focusY - scroll.clientHeight + 160);
 
   root.onclick = (ev) => {
     const t = ev.target as HTMLElement;
+    if (t.closest('[data-start]') && run.needsWelcome) return onStart?.();
     if (t.closest('.tb-deck')) return openDeckOverlay(root, { title: 'Ton deck' }, run);
     const b = t.closest<HTMLElement>('.map-node.available');
     if (!b) return;

@@ -89,6 +89,8 @@ export type CombatEvent =
   | { type: 'player-move'; name: string }
   /** Une carte en active une autre (Atout, Photocopie, Métronome) : on montre la carte jouée. */
   | { type: 'show-card'; def: CardDef; label: string; failed?: boolean }
+  /** Une carte rejoint une pile (Gribouille, cartes de gardien comme la Fêlure Temporelle…) : elle glisse vers sa place. */
+  | { type: 'card-added'; def: CardDef; to: 'pioche' | 'defausse' | 'main' | 'deck'; count?: number }
   | { type: 'meteo'; id: string; name: string; ended?: boolean }
   | { type: 'energy'; delta: number; reason: string }
   | { type: 'break'; target: Who }
@@ -1308,6 +1310,7 @@ export class Combat {
         this.copiedCards.push(id);
         this.discardPile.push({ uid: this.nextTempUid++, defId: id, upgraded: false });
         this.events.push({ type: 'player-move', name: `Gribouille copie ${cardDef(id).name} !` });
+        this.events.push({ type: 'card-added', def: cardDef(id), to: 'deck' });
         return;
       }
       case 'bebe-furie':
@@ -1843,6 +1846,7 @@ export class Combat {
     }
     const where = to === 'main' ? 'ta main' : to === 'defausse' ? 'ta défausse' : 'ta pioche';
     this.events.push({ type: 'player-move', name: `${count} ${cardDef(id).name} dans ${where}` });
+    this.events.push({ type: 'card-added', def: cardDef(id), to, count });
   }
 
   private discardRandom(n: number): void {

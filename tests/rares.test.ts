@@ -6,7 +6,7 @@ it('chance de rare fixe : faible en combat, bien plus forte sur les dominants, g
     let rares = 0, total = 0;
     for (let s = 0; s < 60; s++) {
       const run = new Run(`R${s}`, 'riolu');
-      for (let i = 0; i < 20; i++) for (const id of run.cardChoices(kind)) { total++; if (cardDef(id).rarity === 'rare') rares++; }
+      for (let i = 0; i < 20; i++) for (const id of run.cardChoices(kind)) { total++; if (['rare', 'legendaire'].includes(cardDef(id).rarity)) rares++; }
     }
     return rares / total;
   };

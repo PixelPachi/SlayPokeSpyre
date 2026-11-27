@@ -112,3 +112,61 @@ export function playTalent(layer: HTMLElement, x: number, y: number, color: stri
   layer.appendChild(box);
   setTimeout(() => box.remove(), 1500);
 }
+
+const TYPE_GLOW: Record<PokeType, string> = {
+  normal: '#ffffff', feu: '#ff8c1a', eau: '#3fa9ff', plante: '#6cc644', electrik: '#ffe14a', glace: '#9fe6ff', combat: '#ff7a3d',
+  poison: '#b25cff', sol: '#d4a35a', vol: '#cfe8ff', psy: '#ff6fd0', insecte: '#a8d63a', roche: '#c9b48a', spectre: '#8a5cd6',
+  dragon: '#7a5cff', tenebres: '#5a3a8a', acier: '#dfe8f5', fee: '#ff9ad8',
+};
+
+/** Attaques en rayon (Ultralaser, Laser Glace, Hydrocanon…) : un faisceau de la couleur du type part du lanceur vers la cible. */
+export function playBeam(layer: HTMLElement, x1: number, y1: number, x2: number, y2: number, type: PokeType): void {
+  const c = TYPE_GLOW[type] ?? '#fff';
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const beam = document.createElement('div');
+  beam.className = 'vfx-beam';
+  beam.style.cssText = `left:${x1}px;top:${y1}px;width:${len}px;transform:rotate(${Math.atan2(y2 - y1, x2 - x1)}rad);--c:${c}`;
+  layer.appendChild(beam);
+  setTimeout(() => beam.remove(), 650);
+}
+
+/** Attaques en projectile (Aurasphère, Ball'Ombre, Bulles d'O…) : une sphère file vers la cible. */
+export function playOrb(layer: HTMLElement, x1: number, y1: number, x2: number, y2: number, type: PokeType): void {
+  const orb = document.createElement('div');
+  orb.className = 'vfx-orb';
+  orb.style.cssText = `left:${x1}px;top:${y1}px;--dx:${x2 - x1}px;--dy:${y2 - y1}px;--c:${TYPE_GLOW[type] ?? '#fff'}`;
+  layer.appendChild(orb);
+  setTimeout(() => orb.remove(), 520);
+}
+
+/** Vampigraine : trois pousses sortent du sol au pied de la cible. */
+export function playSprouts(layer: HTMLElement, x: number, y: number, w: number): void {
+  const box = document.createElement('div');
+  box.className = 'vfx-sprouts';
+  box.style.cssText = `left:${x}px;top:${y}px`;
+  const leaf = '<svg viewBox="0 0 30 40"><path d="M15 40V18" stroke="#3f8a2a" stroke-width="3"/><path d="M15 22C6 22 2 14 3 6c8 0 12 6 12 14z" fill="#6cc644" stroke="#2f6b1f" stroke-width="1.5"/><path d="M15 18c8 0 12-7 11-14-7 0-11 5-11 12z" fill="#8ad65a" stroke="#2f6b1f" stroke-width="1.5"/></svg>';
+  box.innerHTML = [-1, 0, 1].map((i) => `<i style="left:${i * w * 0.28}px;animation-delay:${(i + 1) * 90}ms">${leaf}</i>`).join('');
+  layer.appendChild(box);
+  setTimeout(() => box.remove(), 1300);
+}
+
+/** Petite animation quand un statut est infligé (flammèches, bulles, étincelles, givre, cœurs, Zzz…). */
+const STATUS_FX: Partial<Record<string, PokeType>> = { brulure: 'feu', poison: 'poison', paralysie: 'electrik', gel: 'glace', confusion: 'psy', attraction: 'fee', peur: 'tenebres', ligote: 'plante' };
+export function playStatusFx(layer: HTMLElement, x: number, y: number, status: string): void {
+  if (status === 'sommeil') {
+    const z = document.createElement('div');
+    z.className = 'vfx-zzz'; z.style.cssText = `left:${x}px;top:${y}px`;
+    z.innerHTML = '<i>z</i><i>Z</i><i>Z</i>';
+    layer.appendChild(z); setTimeout(() => z.remove(), 1400); return;
+  }
+  const t = STATUS_FX[status];
+  if (t) playVfx(layer, x, y, t, 0.5);
+}
+
+/** Les attaques qui partent du lanceur : rayons et projectiles. */
+export function attackShape(name: string): 'beam' | 'orb' | null {
+  const n = name.toLowerCase();
+  if (/laser|rayon|ultralaser|hydrocanon|lance-soleil|psyko|éco-sphère|giga impact|vibraqua|tonnerre|blizzard|lance-flammes|flamme bleue|flamme croix|draco-météore|canon|onde|luminocanon|dracochoc|souffle/.test(n)) return 'beam';
+  if (/sphère|ball|bulle|boule|graine|bombe|pisto|aéropique|éclat|ombre portée|balle|flammèche|écume|projectile/.test(n)) return 'orb';
+  return null;
+}

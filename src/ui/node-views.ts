@@ -141,12 +141,13 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
   root.innerHTML = shell(run, 'Centre Pokémon', `
     <h1 class="node-title">Centre Pokémon</h1>
     <p class="node-sub">« Bonjour ! Bienvenue au Centre Pokémon de la Tour du Temps. »</p>
-    <div class="choice-row">
-      <button class="choice heal" ${run.relics.includes('cendre-sacree') ? 'disabled' : ''}><b>Se soigner</b><span>${run.relics.includes('cendre-sacree') ? 'Impossible : la Cendre Sacrée t’en empêche' : `Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)`}</span></button>
-      <button class="choice upgrade" ${upgradable.length ? '' : 'disabled'}><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
-      ${run.relics.includes('noeud-destin') ? '<button class="choice weave"><b>Tisser une carte</b><span>Nœud Destin : crée une carte en choisissant deux effets</span></button>' : ''}
-      ${run.relics.includes('noeud-destin-plus') ? '<button class="choice weave-talent"><b>Tisser un talent</b><span>Nœud Destin + : une condition qui déclenche deux effets</span></button>' : ''}
+    <div class="choice-row centre-row">
+      <button class="choice centre-act heal" ${run.relics.includes('cendre-sacree') ? 'disabled' : ''}><img src="${asset('ui/centre/soin.webp')}" alt=""><b>Se soigner</b><span>${run.relics.includes('cendre-sacree') ? 'Impossible : la Cendre Sacrée t’en empêche' : `Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)`}</span></button>
+      <button class="choice centre-act upgrade" ${upgradable.length ? '' : 'disabled'}><img src="${asset('ui/centre/entrainement.webp')}" alt=""><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
+      ${run.relics.includes('noeud-destin') ? `<button class="choice centre-act weave"><img src="${asset('ui/centre/tissage.webp')}" alt=""><b>Tisser une carte</b><span>Nœud Destin : crée une carte en choisissant deux effets</span></button>` : ''}
+      ${run.relics.includes('noeud-destin-plus') ? `<button class="choice centre-act weave-talent"><img src="${asset('ui/centre/talent.webp')}" alt=""><b>Tisser un talent</b><span>Nœud Destin + : une condition qui déclenche deux effets</span></button>` : ''}
     </div>`, 'centre');
+  root.querySelector<HTMLElement>('.node-screen')!.style.setProperty('--centre-bg', `url("${new URL(asset('ui/centre/fond.webp'), location.href).href}")`);
   // Nœud Destin : premier effet parmi 3, second parmi 3 autres, puis la carte rejoint le deck
   root.querySelector('.weave')?.addEventListener('click', () => {
     const first = weaveChoices(() => run.rng.next());

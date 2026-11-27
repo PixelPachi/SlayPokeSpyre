@@ -141,7 +141,7 @@ export function canFuse(a: CardDef, b: CardDef): boolean {
   return !(t.has('ennemi') && t.has('tous'));
 }
 
-const RANK = { depart: 0, commune: 1, 'peu-commune': 2, rare: 3 } as Record<string, number>;
+const RANK = { depart: 0, commune: 1, 'peu-commune': 2, rare: 3, legendaire: 4 } as Record<string, number>;
 
 function fusionDef(defId: string, upgraded: boolean): CardDef {
   const [ra, rb] = defId.slice(7).split('|');

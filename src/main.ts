@@ -1,8 +1,8 @@
-import { SKINS, skinDef } from './data/skins';
+import { SKINS, skinDef, skinSprite } from './data/skins';
 import { RELIC_DEFS } from './data/relics';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
 import { ZONES } from './data/zones';
-import { hasTrack, installAudioUnlock, playTheme, setSoundMode, setVolume, sfx, soundIcon, soundMode, volumes } from './audio/audio';
+import { hasTrack, installAudioUnlock, playCry, playTheme, setSoundMode, setVolume, sfx, soundIcon, soundMode, volumes } from './audio/audio';
 import '@fontsource/lilita-one/400.css';
 import './ui/style.css';
 import type { CharacterId } from './core/model';
@@ -12,7 +12,7 @@ import { CombatView } from './ui/combat-view';
 import { renderMap } from './ui/map-view';
 import { renderActIntro, renderSummit, renderCentre, renderEvent, renderReward, renderRunEnd, renderShop, renderTreasure } from './ui/node-views';
 import { renderSelect } from './ui/select-view';
-import { fitStage, installTooltips, toast } from './ui/util';
+import { asset, fitStage, installTooltips, toast } from './ui/util';
 import { CHARACTERS } from './data/characters';
 import { addHistory, beatenBosses, equippedSkin, skinUnlocked, recordRunStats, characterRelics, characterUnlocks, clearRun, exportAll, grantExp, importAll, loadRunData, loadSave, recordEncounter, saveHooks, saveRun, unlockCharacters } from './core/save';
 import { confirmBox, renderGlossary, renderSaveScreen, renderTitle } from './ui/title-view';
@@ -306,19 +306,18 @@ function startRun(character: CharacterId): void {
   if (params.get('noeud') === 'ct') { clear(); return renderTmShop(screen, run, () => showMap(run)); }
   if (params.get('noeud') === 'centre') { clear(); return renderCentre(screen, run, () => showMap(run)); }
   if (params.get('evenement')) { clear(); return renderEvent(screen, run, () => showMap(run), params.get('evenement')!, (f) => duel(run, f)); }
-  // Début de run : Grodoudou et Pijako accueillent le joueur et lui proposent leur aide
-  if (run.act === 1 && !params.get('combat') && !params.get('boutique') && !params.has('noeud') && !params.get('fin')) {
-    clear();
-    persist(run, false);
-    playTheme('guilde-grodoudou'); // la Guilde de Grodoudou (Donjon Mystère), puis la musique de la zone sur la carte
-    return renderEvent(screen, run, () => showMap(run), 'accueil', (f) => duel(run, f));
-  }
   if (run.act === LAST_ACT) return showSummit(run);
   showMap(run);
 }
 
 function showMap(run: Run): void {
   clear();
+  // Début de run et début de chaque acte : fondu au noir avec le numéro de l'acte, la zone et le cri d'Arceus
+  if (run.introAct !== run.act) {
+    run.introAct = run.act;
+    persist(run, false);
+    return showActIntro(screen, run, () => showMap(run));
+  }
   playTheme(run.act === LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
   if (run.act === LAST_ACT) return showSummit(run);
   persist(run, false);
@@ -326,7 +325,24 @@ function showMap(run: Run): void {
     run.moveTo(row, col);
     persist(run, true);
     enterNode(run, row, col);
+  }, () => {
+    // Première case : l'accueil de la Guilde de Grodoudou
+    clear();
+    playTheme('guilde-grodoudou');
+    renderEvent(screen, run, () => { run.welcomeDone = true; showMap(run); }, 'accueil', (f) => duel(run, f));
   });
+}
+
+/** Cinématique d'ouverture d'un acte : écran noir, « Acte 2 », le nom de la zone, et le cri d'Arceus. */
+function showActIntro(root: HTMLElement, run: Run, done: () => void): void {
+  const act = run.act > LAST_ACT ? 'Acte secret' : run.act === LAST_ACT ? 'Acte 4 · Le sommet' : `Acte ${run.act}`;
+  const zone = run.act === LAST_ACT ? 'Sommet de la Tour du Temps' : run.zone.name;
+  root.innerHTML = `<div class="act-intro"><div class="act-num">${act}</div><div class="act-zone">${zone}</div><div class="act-region">${run.act >= LAST_ACT ? '' : `Une faille venue de ${run.zone.region}`}</div></div>`;
+  setTimeout(() => playCry('audio/cri-arceus.ogg', 0.9), 450);
+  let left = false;
+  const go = () => { if (left) return; left = true; root.querySelector('.act-intro')?.classList.add('out'); setTimeout(done, 700); };
+  root.querySelector('.act-intro')!.addEventListener('click', go);
+  setTimeout(go, 3600);
 }
 
 /** Ouvre le nœud de la carte où se trouve le joueur. */
@@ -520,10 +536,29 @@ function endRun(run: Run, victory: boolean): void {
     ...Object.fromEntries(Object.entries(run.typeKills ?? {}).map(([t, n]) => [`ko-${t}`, n])),
     maxMoney: Math.max(run.maxMoney ?? 0, run.money),
   }, run.bossIds);
-  for (const k of newSkins) setTimeout(() => toast(`Skin débloqué : ${CHARACTERS[run.character].name} ${k.name.toLowerCase()} ! Choisis-le sur l'écran de sélection.`), 1200);
   const fresh = unlockCharacters(save, run.bossesDefeated, victory, run.bossIds.includes('arceus'));
   if (fresh.length) toast(`Nouveau Pokémon jouable : ${fresh.map((c) => CHARACTERS[c].name).join(', ')} !`);
   renderRunEnd(screen, run, victory, { exp, lines, ...result, total: save.exp[run.character] ?? 0 }, title, () => startRun(run.character));
+  // Skin débloqué : un grand cadre avec le visuel du skin, par-dessus l'écran de fin
+  showSkinUnlocks(run.character, newSkins);
+}
+
+function showSkinUnlocks(character: CharacterId, skins: { id: string; name: string; dex?: number[]; goalText: string }[]): void {
+  const k = skins[0];
+  if (!k) return;
+  const dex = k.dex?.[0] ?? CHARACTERS[character].dex[0];
+  const box = document.createElement('div');
+  box.className = 'skin-unlock';
+  box.innerHTML = `<div class="skin-unlock-card">
+      <div class="su-ribbon">Skin débloqué !</div>
+      <div class="su-sprite"><img src="${asset(skinSprite(dex, k.id))}" alt=""></div>
+      <div class="su-name">${CHARACTERS[character].name} · ${k.name}</div>
+      <p>${k.goalText.split(/(?<=\.)\s+(?=[A-ZÀÂÉÈÊÎÔÙÇŒ])/).slice(1).join(' ') || 'Choisis-le sur l’écran de sélection.'}</p>
+      <button class="btn primary su-ok">${skins.length > 1 ? 'Suivant' : 'Génial !'}</button>
+    </div>`;
+  screen.appendChild(box);
+  setTimeout(() => sfx('shiny'), 300);
+  box.querySelector('.su-ok')!.addEventListener('click', () => { box.remove(); showSkinUnlocks(character, skins.slice(1)); });
 }
 
 // Les paramètres de test (?tous, ?seed, ?acte, ?evenement, ?boutique) mènent directement au choix du Pokémon

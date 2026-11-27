@@ -533,3 +533,11 @@ export function audioDebug(): { state: string; theme: string | null; step: numbe
   return { state: ctx?.state ?? 'aucun', theme: current, step };
 }
 (window as unknown as { __audio?: typeof audioDebug }).__audio = audioDebug;
+
+/** Cri d'Arceus (cinématique d'ouverture des actes). */
+export function playCry(file: string, gain = 1): void {
+  if (mode === 'muet') return;
+  const a = new Audio(`${import.meta.env.BASE_URL}${file}`);
+  a.volume = Math.max(0, Math.min(1, levels.effets * gain));
+  void a.play().catch(() => undefined);
+}

@@ -235,6 +235,12 @@ export class Run {
   kecleonHostile = false;
   /** Dialga apaisé avec au moins 3 Pokémon : les Rouages du Temps et de l'Espace peuvent apparaître. */
   cogsUnlocked = false;
+  /** Acte dont la cinématique d'ouverture (fondu au noir) a déjà été jouée. */
+  introAct = 0;
+  /** Première case de l'acte 1 : l'accueil de la Guilde (Grodoudou et Pijako), d'où partent tous les chemins. */
+  welcomeDone = false;
+  /** L'accueil reste à faire (vieilles sauvegardes : déjà fait si la run a avancé). */
+  get needsWelcome(): boolean { return this.act === 1 && !this.welcomeDone && !this.pos && this.visited.length === 0; }
   /** Combats restants avec l'Encens Zen (ennemis à 1 PV). */
   zenFights = 0;
   /** Vrai si le joueur possède les deux Rouages (l'acte secret s'ouvre après Dialga). */
@@ -310,6 +316,7 @@ export class Run {
 
   /** Nœuds où l'on peut aller maintenant. */
   available(): MapNode[] | 'boss' {
+    if (this.needsWelcome) return [];
     if (!this.pos) return this.map[0];
     if (this.pos.row === this.map.length - 1) return 'boss';
     if (this.pos.row === BOSS_ROW) return [];
@@ -369,7 +376,9 @@ export class Run {
 
   /** Une rareté tirée comme dans Slay the Spire (chances qui montent sans rare). */
   rollRarity(kind: 'combat' | 'elite' | 'boss' | 'boutique'): CardDef['rarity'] {
-    if (kind === 'boss') return 'rare';
+    // Cartes légendaires : surtout chez les gardiens (15 %), parfois chez les dominants (3 %)
+    if (kind === 'boss') return this.rng.next() < 0.15 ? 'legendaire' : 'rare';
+    if (kind === 'elite' && this.rng.next() < 0.03) return 'legendaire';
     // Chance fixe de carte rare : 3 % en combat, 25 % sur un Pokémon dominant (les gardiens donnent toujours des rares)
     const rare = kind === 'elite' ? 25 : kind === 'boutique' ? 6 : 3;
     const unc = kind === 'elite' ? 45 : 37;
@@ -401,8 +410,10 @@ export class Run {
     for (let i = 0; i < count * 10 && out.length < count; i++) {
       const rarity = this.rollRarity(kind);
       const pool = this.offerable(this.character === 'mew' || this.character === 'quelorior' ? [...own, ...neutralPool()] : !own.length || this.rng.next() < neutralChance ? neutralPool() : own);
-      const options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
-      const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare'));
+      let options = pool.filter((c) => c.rarity === rarity && !out.includes(c.id));
+      // pas de légendaire disponible : on retombe sur une rare
+      if (!options.length && rarity === 'legendaire') options = pool.filter((c) => c.rarity === 'rare' && !out.includes(c.id));
+      const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare' && c.rarity !== 'legendaire'));
       if (pick) out.push(pick.id);
     }
     return out;
@@ -497,7 +508,7 @@ export class Run {
 
 export function cardPrice(defId: string): number {
   const d = CARD_DEFS[defId];
-  const base = d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50;
+  const base = d.rarity === 'legendaire' ? 260 : d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50;
   return d.character === 'normal' ? Math.round(base * 1.2) : base; // cartes neutres un peu plus chères
 }
 
