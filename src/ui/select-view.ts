@@ -58,7 +58,7 @@ export function renderSelect(root: HTMLElement, save: SaveData, onStart: (c: Cha
     const changed = (b: boolean) => (b ? ' skin-changed' : '');
     root.innerHTML = `
       <div class="select ${locked ? 'locked' : ''}">
-        ${ill ? `<img class="select-bg" src="${asset(ill)}" alt="">` : '<div class="select-bg secret"></div>'}
+        ${ill ? `<img class="select-bg" src="${asset(skin && skin.id !== 'normal' ? `illustrations/skins/${current}-${skin.id}.webp` : ill)}" onerror="this.onerror=null;this.src='${asset(ill)}'" alt="">` : '<div class="select-bg secret"></div>'}
         <div class="select-shade"></div>
         <h1 class="logo">SlayPoke<span>Spyre</span></h1>
         ${onBack ? '<button class="btn back-title">← Écran titre</button>' : ''}
