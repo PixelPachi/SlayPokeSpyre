@@ -318,7 +318,7 @@ export class CombatView {
     const name = back === 'posipi' ? 'Posipi' : 'Négapi';
     const pct = Math.max(0, (hp / d.max) * 100);
     const both = c.duoBoth();
-    return `<div class="duo-back ${ko ? 'ko' : ''} ${Date.now() - this.duoSlideAt < 700 ? 'duo-out' : ''}" data-tip="<b>${name}</b> (en retrait) : ${hp}/${d.max} PV.${ko ? '<br><b>K.O.</b> — Court-Circuit : ses cartes sont injouables. Il ne se relèvera qu’au Centre Pokémon ou grâce à un événement qui rend des PV.' : '<br>Joue une de ses cartes pour le faire passer devant (Relais).'}">
+    return `<div class="duo-back ${ko ? 'ko' : ''} ${Date.now() - this.duoSlideAt < 700 ? 'duo-out' : ''}" data-tip="<b>${name}</b> (en retrait) : ${hp}/${d.max} PV.${ko ? '<br><b>K.O.</b> — Court-Circuit : ses cartes sont injouables. Il se relèvera au Centre Pokémon, grâce à un événement qui rend des PV ou au prochain acte.' : '<br>Joue une de ses cartes pour le faire passer devant (Relais).'}">
         <img src="${asset(skinSprite(back === 'posipi' ? 311 : 312, this.run.skin))}" alt="${name}">
         <div class="duo-mini-hp"><div style="width:${pct}%"></div></div><span>${ko ? 'K.O.' : `${hp}/${d.max}`}</span>
       </div>

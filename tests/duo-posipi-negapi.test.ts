@@ -78,3 +78,12 @@ describe('Duo Posipi & Négapi', () => {
     expect(r.duoHp.posipi).toBe(20);
   });
 });
+
+it('Duo : +3 PV max chacun à chaque acte, et un partenaire K.O. se relève', () => {
+  const r = new Run('D2', 'duo');
+  r.duoHp = { posipi: 0, negapi: 12 };
+  r.hp = 12;
+  r.nextAct();
+  expect(r.maxHp).toBe(86);
+  expect(r.duoHp).toEqual({ posipi: 43, negapi: 43 });
+});

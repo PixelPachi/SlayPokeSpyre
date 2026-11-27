@@ -311,8 +311,9 @@ export class Run {
     this.map = generateMap(this.rng, this.act > LAST_ACT ? SECRET_ROWS : MAP_ROWS);
     this.pos = null;
     this.visited = [];
+    // Duo : Posipi et Négapi gagnent chacun 3 PV max par acte, et un partenaire K.O. se relève
+    if (this.duoHp) { this.maxHp += 6; this.duoHp = { posipi: this.duoMax, negapi: this.duoMax }; }
     this.hp = this.maxHp;
-    this.syncDuo(); // Duo : un partenaire K.O. ne se relève pas entre deux actes
   }
 
   nodeAt(row: number, col: number): MapNode | undefined {

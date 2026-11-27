@@ -15,7 +15,7 @@ export function topbar(run: Run, label: string, hp = run.hp, duo?: { posipi: num
   return `
     <div class="topbar">
       <span class="tb-name">${esc(run.form.name)}</span>
-      ${duo ? `<span class="tb-hp" data-tip="Points de vie de Posipi et Négapi (0 = K.O. jusqu’au prochain Centre Pokémon ou soin d’événement)">Posipi ${duo.posipi}/${duo.max} · Négapi ${duo.negapi}/${duo.max}</span>` : `<span class="tb-hp" data-tip="Points de vie">PV ${hp}/${run.maxHp}</span>`}
+      ${duo ? `<span class="tb-hp" data-tip="Points de vie de Posipi et Négapi (0 = K.O. jusqu’au prochain Centre Pokémon, soin d’événement ou acte)">Posipi ${duo.posipi}/${duo.max} · Négapi ${duo.negapi}/${duo.max}</span>` : `<span class="tb-hp" data-tip="Points de vie">PV ${hp}/${run.maxHp}</span>`}
       <span class="tb-money" data-tip="Pokédollars : à dépenser au Marché Kecleon">${run.money} ₽</span>
       <span class="tb-zone">${esc(label)}</span>
       <span class="tb-floor" data-tip="Étage de la Tour du Temps">Étage ${run.floor}</span>
