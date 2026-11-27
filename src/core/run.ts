@@ -204,7 +204,7 @@ export class Run {
   get weaver(): boolean { return this.character === 'vipelierre' && this.skin === 'tisserand'; }
 
   get form(): Form {
-    if (this.duoFused) return { dex: 9311, name: 'Posipi X', types: ['electrik'] };
+    if (this.duoFused) return { dex: 9311, name: 'Multipi', types: ['electrik'] };
     const ch = CHARACTERS[this.character];
     const evo = this.evolutions.filter((e) => e.act <= this.act).pop();
     const f = evo ? { dex: evo.dex, name: evo.name, types: evo.types } : { dex: ch.dex[0], name: ch.name, types: ch.types };
@@ -383,7 +383,7 @@ export class Run {
     return h;
   }
 
-  /** Duo fusionné (Pointeau ADN) : Posipi X. */
+  /** Duo fusionné (Pointeau ADN) : Multipi. */
   duoFused = false;
 
   /** Fusion au Centre Pokémon : PV réunis, objets regroupés, cartes de départ fusionnées. */
@@ -484,7 +484,7 @@ export class Run {
   /** Cartes neutres vendues au Marché Kecleon. */
   /** Quelorior n'apprend aucune attaque : ses attaques viennent de Gribouille (et de Jackpot pour le Flambeur). */
   offerable<T extends { category: string; duoFusion?: boolean; duoSide?: string }>(pool: T[]): T[] {
-    // Duo : les cartes de Posipi X n'arrivent qu'après la fusion
+    // Duo : les cartes de Multipi n'arrivent qu'après la fusion
     if (this.character === 'duo') return pool.filter((c) => !c.duoFusion || this.duoFused);
     return this.character === 'quelorior' ? pool.filter((c) => c.category !== 'attaque') : pool;
   }

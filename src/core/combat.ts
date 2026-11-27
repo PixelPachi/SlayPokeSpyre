@@ -130,7 +130,7 @@ export interface CombatOptions {
   oneHp?: boolean;
   /** Duo : PV de Posipi et Négapi, et qui porte chaque objet. */
   duoHp?: Record<DuoSide, number>;
-  /** Duo fusionné en Posipi X (Pointeau ADN). */
+  /** Duo fusionné en Multipi (Pointeau ADN). */
   duoFused?: boolean;
   relicOwner?: Record<string, DuoSide>;
 }
@@ -279,7 +279,7 @@ export class Combat {
     // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
     const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
     this.player.maxEnergy = Math.min(5, this.player.maxEnergy + bossRelics.length); // 5 PA au maximum
-    if (this.fused) this.player.maxEnergy += 1; // Posipi X : 1 PA de plus à chaque tour
+    if (this.fused) this.player.maxEnergy += 1; // Multipi : 1 PA de plus à chaque tour
     this.player.energy = this.player.maxEnergy;
     if (this.has('orbe-adamant')) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', 1);
     if (this.has('orbe-toxique')) this.addStatus(this.player, 'player', 'poison', 4);
@@ -617,7 +617,7 @@ export class Combat {
   /** Duo Posipi & Négapi (null pour les autres personnages). */
   duo: { front: DuoSide; hp: Record<DuoSide, number>; max: number; plus: number; minus: number; seq: DuoSide[]; surged: boolean; posipiTurn: number; owner: Record<string, DuoSide> } | null = null;
   private duoRelayed = false;
-  /** Posipi X : Plus et Moins s'appliquent à toutes les cartes. */
+  /** Multipi : Plus et Moins s'appliquent à toutes les cartes. */
   fused = false;
   fusedPlus = 0;
   fusedMinus = 0;
@@ -709,7 +709,7 @@ export class Combat {
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
     if (this.duo && d.duoSide && this.phase === 'joueur') this.duoAfterCard(d);
-    // Posipi X : chaque carte donne +2 dégâts à la suivante (Plus), +2 Protection et −1 PA à la prochaine carte à 2 PA ou plus (Moins)
+    // Multipi : chaque carte donne +2 dégâts à la suivante (Plus), +2 Protection et −1 PA à la prochaine carte à 2 PA ou plus (Moins)
     if (this.fused && this.phase === 'joueur') {
       if (d.cost >= 2) this.fusedMinus = 0;
       this.fusedPlus = 2 + (this.player.powers['plus-synchro'] ?? 0);

@@ -88,14 +88,14 @@ it('Duo : +3 PV max chacun à chaque acte, et un partenaire K.O. se relève', ()
   expect(r.duoHp).toEqual({ posipi: 43, negapi: 43 });
 });
 
-describe('Pointeau ADN : fusion en Posipi X', () => {
+describe('Pointeau ADN : fusion en Multipi', () => {
   it('PV réunis, cartes de départ fusionnées, cartes X proposées seulement après', () => {
     const r = new Run('F', 'duo');
     r.duoHp = { posipi: 30, negapi: 20 }; r.hp = 50;
     r.fuseDuo();
     expect(r.duoFused).toBe(true);
     expect(r.hp).toBe(50);
-    expect(r.form.name).toBe('Posipi X');
+    expect(r.form.name).toBe('Multipi');
     expect(r.deck.filter((c) => c.defId === 'duo-fusion-eclair')).toHaveLength(8);
     expect(r.offerable([{ category: 'attaque', duoFusion: true }])).toHaveLength(1);
     const r2 = new Run('G', 'duo');

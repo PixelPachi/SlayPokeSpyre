@@ -145,7 +145,7 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
       <button class="choice centre-act heal" ${run.relics.includes('cendre-sacree') ? 'disabled' : ''}><img src="${asset('ui/centre/soin.webp')}" alt=""><b>Se soigner</b><span>${run.relics.includes('cendre-sacree') ? 'Impossible : la Cendre Sacrée t’en empêche' : `Récupère ${Math.min(heal, run.maxHp - run.hp)} PV (30 % des PV max)`}</span></button>
       <button class="choice centre-act upgrade" ${upgradable.length ? '' : 'disabled'}><img src="${asset('ui/centre/entrainement.webp')}" alt=""><b>S'entraîner</b><span>Améliore une carte de ton deck</span></button>
       ${run.relics.includes('noeud-destin') ? `<button class="choice centre-act weave"><img src="${asset('ui/centre/tissage.webp')}" alt=""><b>Tisser une carte</b><span>Nœud Destin : crée une carte en choisissant deux effets</span></button>` : ''}
-      ${run.relics.includes('pointeau-adn') && run.duoHp ? `<button class="choice centre-act fuse"><img src="${asset('ui/centre/fusion.webp')}" onerror="this.src='${asset('sprites/items/dna-splicers.png')}'" alt=""><b>Fusionner</b><span>Pointeau ADN : Posipi et Négapi deviennent Posipi X pour le reste de la run</span></button>` : ''}
+      ${run.relics.includes('pointeau-adn') && run.duoHp ? `<button class="choice centre-act fuse"><img src="${asset('ui/centre/fusion.webp')}" onerror="this.src='${asset('sprites/items/dna-splicers.png')}'" alt=""><b>Fusionner</b><span>Pointeau ADN : Posipi et Négapi deviennent Multipi pour le reste de la run</span></button>` : ''}
       ${run.relics.includes('noeud-destin-plus') ? `<button class="choice centre-act weave-talent"><img src="${asset('ui/centre/talent.webp')}" alt=""><b>Tisser un talent</b><span>Nœud Destin + : une condition qui déclenche deux effets</span></button>` : ''}
     </div>`, 'centre');
   root.querySelector<HTMLElement>('.node-screen')!.style.setProperty('--centre-bg', `url("${new URL(asset('ui/centre/fond.webp'), location.href).href}")`);
@@ -194,14 +194,14 @@ export function renderCentre(root: HTMLElement, run: Run, done: Done): void {
       });
     });
   });
-  // Pointeau ADN : la fusion en Posipi X
+  // Pointeau ADN : la fusion en Multipi
   root.querySelector('.fuse')?.addEventListener('click', () => {
     run.fuseDuo();
     const layer = document.createElement('div');
     layer.className = 'weave-layer fuse-layer';
     layer.innerHTML = `<div class="weave-box"><h2>Posipi et Négapi fusionnent !</h2>
       <div class="fuse-anim"><img class="fa-p" src="${asset('sprites/pokemon/front/311.png')}" alt=""><img class="fa-n" src="${asset('sprites/pokemon/front/312.png')}" alt=""><img class="fa-x" src="${asset('sprites/pokemon/front/9311.png')}" alt=""></div>
-      <p><b>Posipi X</b> : ${run.hp}/${run.maxHp} PV, 1 PA de plus par tour, Plus et Moins sur toutes les cartes, objets regroupés.<br>Tes Éclair Plus et Bouclier deviennent des Éclair Pôle X.</p>
+      <p><b>Multipi</b> : ${run.hp}/${run.maxHp} PV, 1 PA de plus par tour, Plus et Moins sur toutes les cartes, objets regroupés.<br>Tes Éclair Plus et Bouclier deviennent des Éclair Pôle X.</p>
       <button class="btn primary">Continuer</button></div>`;
     root.querySelector('.node-screen')!.appendChild(layer);
     layer.querySelector('button')!.addEventListener('click', () => done());

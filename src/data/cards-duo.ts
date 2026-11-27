@@ -63,7 +63,7 @@ export const DUO_CARDS: CardDef[] = [
   // Ouragan : frappe tous les ennemis une fois par carte Posipi jouée ce tour
   N('ouragan', 'Ouragan', 'electrik', 'attaque', 'legendaire', 2, 'tous', [dmg(6, { parPosipi: true })], { effects: [dmg(9, { parPosipi: true })] }),
 
-  // ——— Posipi X (fusion par le Pointeau ADN) : cartes violettes ———
+  // ——— Multipi (fusion par le Pointeau ADN) : cartes violettes ———
   // Les attaques et défenses de départ fusionnent
   { ...c('fusion-eclair', 'Éclair Pôle X', 'electrik', 'attaque', 'depart', 1, 'ennemi', [dmg(6), prot(5)], { effects: [dmg(9), prot(8)] }), duoFusion: true, artName: 'Éclair' },
   // Cartes à coût X (proposées seulement une fois fusionné)
