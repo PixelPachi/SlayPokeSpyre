@@ -13,7 +13,7 @@ import { SKINS } from '../data/skins';
 import { characterLevel, playableCharacters } from '../core/save';
 import { UNLOCKS } from '../data/unlocks';
 import { copyDef, copyId } from '../data/copies';
-import type { CharacterId } from '../core/model';
+import type { CardDef, CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { asset, esc } from './util';
 
@@ -84,6 +84,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
   // Onglet Cartes : un Pokémon (ou « neutres » / « ennemis ») et un skin
   let who: CharacterId | 'neutres' | 'ennemis' = 'riolu';
   let skinSel = '';
+  const upSet = new Set<string>();
   const seen = new Set(save.seen ?? []);
   const shiny = new Set(save.seenShiny ?? []);
   // Un Pokémon par n° (les variantes de duel partagent le même Pokémon)
@@ -93,7 +94,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
   const label: Record<string, string> = { depart: 'Objets de départ', commun: 'Communs', 'peu-commun': 'Peu communs', rare: 'Rares', gardien: 'Reliques de gardien', quete: 'Objets spéciaux et de quête' };
 
   const body = (): string => {
-    if (tab === 'cartes') return cardsHtml(save, who, skinSel, seen);
+    if (tab === 'cartes') return cardsHtml(save, who, skinSel, seen, upSet);
     if (tab === 'objets') {
       return order.map((r) => {
         const list = relics.filter((x) => x.rarity === r);
@@ -140,6 +141,8 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
     if (b) { tab = b.dataset.tab as Tab; return draw(); }
     const w = t.closest<HTMLElement>('[data-who]');
     if (w) { who = w.dataset.who as typeof who; skinSel = ''; return draw(); }
+    const fl = t.closest<HTMLElement>('[data-flip]');
+    if (fl) { const id = fl.dataset.flip!; if (upSet.has(id)) upSet.delete(id); else upSet.add(id); const y = root.querySelector('.gl-body')?.scrollTop ?? 0; draw(); const b2 = root.querySelector('.gl-body'); if (b2) b2.scrollTop = y; return; }
     const sk = t.closest<HTMLElement>('[data-skinsel]');
     if (sk) { skinSel = sk.dataset.skinsel!; return draw(); }
     const hd = t.closest<HTMLElement>('.hist-deck-btn');
@@ -152,7 +155,12 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
 const ROSTER: CharacterId[] = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior', 'duo'];
 
 /** Glossaire › Cartes : par Pokémon (et skin), les cartes neutres, et les capacités des ennemis croisés. */
-function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', skinSel: string, seen: Set<number>): string {
+function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', skinSel: string, seen: Set<number>, up: Set<string>): string {
+  // Clic sur une carte : elle se retourne sur sa version améliorée
+  const fc = (d: CardDef): string => {
+    const u = up.has(d.id) && !!Object.keys(d.upgrade ?? {}).length;
+    return `<div class="gl-flip ${u ? 'up' : ''}" data-flip="${d.id}" data-tip="${u ? 'Version améliorée — clique pour revenir' : 'Clique pour voir la version améliorée'}">${renderCard(u ? cardDef(d.id, true) : d)}</div>`;
+  };
   const playable = playableCharacters(save);
   const chips = `<div class="glc-chips">
     ${ROSTER.map((c) => {
@@ -164,14 +172,14 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   </div>`;
   if (who === 'neutres') {
     return `${chips}<p class="gl-note">Tous les Pokémon peuvent les apprendre : elles apparaissent parfois en récompense et au Marché Kecleon.</p>
-      <div class="deck-grid gl-cards">${neutralPool().map((d) => renderCard(d)).join('')}</div>`;
+      <div class="deck-grid gl-cards">${neutralPool().map((d) => fc(d)).join('')}</div>`;
   }
   if (who === 'ennemis') {
     const enemies = Object.entries(ENEMY_DEFS).filter(([, e]) => seen.has(e.dex));
     const total = new Set(Object.values(ENEMY_DEFS).map((e) => e.dex)).size;
     return `${chips}<p class="gl-note">Les capacités des Pokémon que tu as croisés (${new Set(enemies.map(([, e]) => e.dex)).size} / ${total}). Gribouille peut les copier.</p>
       <h3>Malédictions et cartes de gardien</h3>
-      <div class="deck-grid gl-cards">${CURSES.map((id) => renderCard(cardDef(id))).join('')}${allCards().filter((d) => d.onDraw && !CURSES.includes(d.id)).map((d) => renderCard(d)).join('')}</div>
+      <div class="deck-grid gl-cards">${CURSES.map((id) => fc(cardDef(id))).join('')}${allCards().filter((d) => d.onDraw && !CURSES.includes(d.id)).map((d) => fc(d)).join('')}</div>
       ${enemies.map(([id, e]) => `<h3 class="glc-enemy"><img src="${asset(`sprites/pokemon/front/${e.dex}.png`)}" alt="">${esc(e.name)}</h3>
         <div class="deck-grid gl-cards">${e.moves.map((m) => { const d = copyDef(copyId(id, m.id), false); return d ? renderCard(d) : ''; }).join('')}</div>`).join('')}`;
   }
@@ -189,9 +197,9 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
     const typeCards = k.typeCards?.length ? allCards().filter((d) => d.character === 'normal' && k.typeCards!.includes(d.pokeType) && d.rarity !== 'depart') : [];
     return `${chips}${skinChips}
       <p class="gl-note"><b>${esc(k.name)}</b> — ${esc(k.goalText)}</p>
-      ${ids.length ? `<h3>Cartes de départ du skin</h3><div class="deck-grid gl-cards">${ids.map((id) => renderCard(cardDef(id))).join('')}</div>` : ''}
-      ${allCards().some((d) => d.skin === k.id) ? `<h3>Cartes obtenables seulement avec ce skin</h3><div class="deck-grid gl-cards">${allCards().filter((d) => d.skin === k.id).map((d) => renderCard(d)).join('')}</div>` : ''}
-      ${typeCards.length ? `<h3>Cartes de type ${k.typeCards!.map((t) => TYPE_LABELS[t]).join(', ')} qu'il peut apprendre</h3><div class="deck-grid gl-cards">${typeCards.map((d) => renderCard(d)).join('')}</div>` : ''}
+      ${ids.length ? `<h3>Cartes de départ du skin</h3><div class="deck-grid gl-cards">${ids.map((id) => fc(cardDef(id))).join('')}</div>` : ''}
+      ${allCards().some((d) => d.skin === k.id) ? `<h3>Cartes obtenables seulement avec ce skin</h3><div class="deck-grid gl-cards">${allCards().filter((d) => d.skin === k.id).map((d) => fc(d)).join('')}</div>` : ''}
+      ${typeCards.length ? `<h3>Cartes de type ${k.typeCards!.map((t) => TYPE_LABELS[t]).join(', ')} qu'il peut apprendre</h3><div class="deck-grid gl-cards">${typeCards.map((d) => fc(d)).join('')}</div>` : ''}
       ${!ids.length && !typeCards.length ? '<p class="gl-note">Ce skin garde les mêmes cartes que le Pokémon de base.</p>' : ''}
 `;
   }
@@ -210,7 +218,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
     <div class="deck-grid gl-cards">${cards.map((d) => {
       const need = levelOf.get(d.id) ?? 0;
       const locked = need > lvl;
-      return `<div class="collect ${locked ? 'locked' : ''}">${renderCard(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
+      return `<div class="collect ${locked ? 'locked' : ''}">${fc(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
     }).join('')}</div>`;
 }
 
