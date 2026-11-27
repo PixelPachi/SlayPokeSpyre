@@ -2,7 +2,7 @@ import { skinSprite } from '../data/skins';
 // Nouveaux nœuds de la carte : Coffre mystère, Pension Pokémon (fusion de cartes), Marchand de CT.
 import type { Run } from '../core/run';
 import { cardPrice } from '../core/run';
-import { ENCHANTS, canFuse, cardDef, enchantId, fusionId, rollEnchant } from '../data/cards';
+import { CURSES, ENCHANTS, canFuse, cardDef, enchantId, fusionId, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { renderCard } from './card';
 import { bindDeck, renderReward, shell, shopScene } from './node-views';
@@ -45,11 +45,15 @@ export function renderChest(root: HTMLElement, run: Run, done: Done): void {
     const money = run.rng.int(big ? 60 : 25, big ? 110 : 55);
     const withRelic = big || run.rng.next() < 0.5;
     const cog = run.cogsUnlocked && !run.relics.includes('rouage-temps');
+    // 1 chance sur 4 : le coffre était piégé, une malédiction rejoint ton deck
+    const curse = run.rng.next() < 0.25 ? run.rng.pick(CURSES) : undefined;
+    if (curse) run.addCard(curse);
     renderReward(root, run, {
       // Premier coffre ouvert : le Rouage du Temps (si Dialga a été apaisé avec 3 Pokémon)
       money, cards: [], relic: cog ? 'rouage-temps' : withRelic ? run.rollRelics(1)[0] : undefined, berry: withRelic || cog ? undefined : run.rollBerry(),
       title: big ? 'Un gros trésor !' : 'Le coffre s’ouvre…', label: 'Coffre mystère',
     }, done);
+    if (curse) root.querySelector('h1')?.insertAdjacentHTML('afterend', `<div class="curse-warning">Le coffre était maudit ! <b>${cardDef(curse).name}</b> rejoint ton deck.</div>`);
     // le coffre ouvert reste visible au-dessus du butin
     root.querySelector('h1')?.insertAdjacentHTML('beforebegin', `<img class="event-illus reward-illus" src="${openImg.src}" alt="">`);
   };

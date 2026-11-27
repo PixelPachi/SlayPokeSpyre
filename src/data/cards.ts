@@ -44,13 +44,13 @@ const CARDS: CardDef[] = [
   // ——— Vipélierre : départ ———
   {
     id: 'vampigraine', name: 'Vampigraine', character: 'vipelierre', pokeType: 'plante', category: 'technique',
-    rarity: 'depart', cost: 1, target: 'ennemi',
+    rarity: 'commune', cost: 1, target: 'ennemi',
     effects: [{ kind: 'statut', status: 'vampigraine', stacks: 4, on: 'cible' }],
     upgrade: { effects: [{ kind: 'statut', status: 'vampigraine', stacks: 6, on: 'cible' }] },
   },
   {
     id: 'tempete-verte', name: 'Tempête Verte', character: 'vipelierre', pokeType: 'plante', category: 'attaque',
-    rarity: 'depart', cost: 2, target: 'ennemi',
+    rarity: 'commune', cost: 2, target: 'ennemi',
     effects: [{ kind: 'degats', amount: 12 }, { kind: 'statut', status: 'attaque', stacks: -2, on: 'soi' }],
     upgrade: { effects: [{ kind: 'degats', amount: 16 }, { kind: 'statut', status: 'attaque', stacks: -2, on: 'soi' }] },
   },
@@ -58,13 +58,13 @@ const CARDS: CardDef[] = [
   // ——— Caninos : départ ———
   {
     id: 'flammeche', name: 'Flammèche', character: 'caninos', pokeType: 'feu', category: 'attaque',
-    rarity: 'depart', cost: 2, target: 'ennemi',
+    rarity: 'commune', cost: 2, target: 'ennemi',
     effects: [{ kind: 'degats', amount: 8 }, { kind: 'statut', status: 'brulure', stacks: 2, on: 'cible' }],
     upgrade: { effects: [{ kind: 'degats', amount: 10 }, { kind: 'statut', status: 'brulure', stacks: 3, on: 'cible' }] },
   },
   {
     id: 'morsure', name: 'Morsure', character: 'caninos', pokeType: 'tenebres', category: 'attaque',
-    rarity: 'depart', cost: 1, target: 'ennemi',
+    rarity: 'commune', cost: 1, target: 'ennemi',
     effects: [{ kind: 'degats', amount: 7 }, { kind: 'statut', status: 'peur', stacks: 1, on: 'cible' }],
     upgrade: { effects: [{ kind: 'degats', amount: 9 }, { kind: 'statut', status: 'peur', stacks: 2, on: 'cible' }] },
   },

@@ -139,7 +139,7 @@ export function computeDamage(base: number, attacker: Fighter, defender: Fighter
   if (attacker.types.includes(type)) dmg *= SAME_TYPE_BONUS;
   const mult = typeMultiplier(type, defender.types);
   dmg *= mult;
-  if ((attacker.statuses.paralysie ?? 0) > 0) dmg *= 0.75;
+  if ((attacker.statuses.paralysie ?? 0) > 0 && !('character' in attacker)) dmg *= 0.75; // le joueur paralysé perd 1 PA à la place
   if ((attacker.statuses.brulure ?? 0) > 0) dmg *= 0.75;
   if ((defender.statuses.peur ?? 0) > 0) dmg *= 1.5;
   return {
@@ -440,7 +440,6 @@ export class Combat {
       // Sans cible : bonus de type et statuts du joueur seulement
       let dmg = Math.max(0, base + this.relicFlat(d) + (this.player.statuses.attaque ?? 0));
       if (this.player.types.includes(d.pokeType)) dmg *= SAME_TYPE_BONUS;
-      if ((this.player.statuses.paralysie ?? 0) > 0) dmg *= 0.75;
       if ((this.player.statuses.brulure ?? 0) > 0) dmg *= 0.75;
       return Math.floor(Math.floor(dmg + 1e-9) * this.relicMult(false) + 1e-9);
     }
@@ -869,6 +868,8 @@ export class Combat {
     // Hurle-Temps : le tour suivant, 2 PA de moins
     if (this.timeRoar) { this.timeRoar = false; this.changeEnergy(-2, 'Hurle-Temps'); }
     this.attacksOn = {};
+    // Paralysie : 1 PA de moins ce tour
+    if ((this.player.statuses.paralysie ?? 0) > 0) this.changeEnergy(-1, 'Paralysie');
     if (this.rechargePa) { const n = this.rechargePa; this.rechargePa = 0; this.changeEnergy(-n, 'Recharge'); }
     // Lance-Soleil chargé au tour précédent : le rayon frappe tous les ennemis
     for (const sol of this.pendingSolar.splice(0)) {
@@ -1759,14 +1760,17 @@ export class Combat {
         if (n - 1 <= 0) delete f.statuses[s]; else f.statuses[s] = n - 1;
         continue;
       }
+      const hpBefore = f.hp;
       this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0), s);
+      // Vampigraine : on ne récupère que la moitié des PV vraiment perdus par la cible
+      const drained = Math.min(n, Math.max(0, hpBefore - f.hp));
       if (s === 'vampigraine' && who !== 'player') {
-        this.healPlayer(Math.floor(n / 2));
+        this.healPlayer(Math.floor(drained / 2));
       }
       // Vampigraine posée par un ennemi : c'est lui qui récupère la moitié des PV drainés
       if (s === 'vampigraine' && who === 'player') {
         const src = this.enemies.find((e) => e.uid === this.seedSource && e.hp > 0) ?? this.aliveEnemies()[0];
-        if (src) this.healEnemy(src, Math.floor(n / 2));
+        if (src) this.healEnemy(src, Math.floor(drained / 2));
       }
       if (s === 'poison' && who === 'player' && this.bossAlive('venin-tenace')) continue; // Venin Tenace
       if (n - 1 <= 0) delete f.statuses[s];

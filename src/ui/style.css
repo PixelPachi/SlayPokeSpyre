@@ -1550,3 +1550,4 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Plus de 4 skins : ils passent à la ligne au lieu de sortir de la fiche */
 .sheet-skins .skin-list { flex-wrap: wrap; }
 .sheet-skins .skin-btn { width: calc((100% - 24px) / 4) !important; min-width: 0; }
+.curse-warning { margin: 4px auto 8px; padding: 6px 14px; border-radius: 10px; background: #3a0d2ecc; border: 2px solid #c06bff; color: #f1d6ff; font-weight: 800; width: fit-content; }

@@ -23,8 +23,8 @@ export const RIOLU_CARDS: CardDef[] = [
   // ——— Départ ———
   c('ruse', 'Ruse', 'normal', 'attaque', 'depart', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),
   c('detection', 'Détection', 'combat', 'technique', 'depart', 1, 'soi', [prot(5)], { effects: [prot(8)] }),
-  c('poing-karate', 'Poing-Karaté', 'combat', 'attaque', 'depart', 1, 'ennemi', [dmg(8)], { effects: [dmg(11)] }),
-  c('aurasphere', 'Aurasphère', 'combat', 'attaque', 'depart', 3, 'ennemi', [{ kind: 'degats-aura', mult: 2 }], { cost: 2 }),
+  c('poing-karate', 'Poing-Karaté', 'combat', 'attaque', 'commune', 1, 'ennemi', [dmg(8)], { effects: [dmg(11)] }),
+  c('aurasphere', 'Aurasphère', 'combat', 'attaque', 'commune', 3, 'ennemi', [{ kind: 'degats-aura', mult: 2 }], { cost: 2 }),
 
   // ——— Communes ———
   c('garde-aura', 'Garde Aura', 'combat', 'technique', 'commune', 1, 'soi', [prot(5), eff('protection-aura', { per: 3 })], { effects: [prot(7), eff('protection-aura', { per: 2 })] }),

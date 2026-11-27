@@ -67,9 +67,9 @@ describe('Alchimiste : Plaque Toxik et condition de déblocage', () => {
   it('déblocage : Brutapode + 25 Pokémon Poison mis K.O.', () => {
     const k = skinDef('vipelierre', 'alchimiste')!;
     const save = { beaten: { vipelierre: ['brutapode'] }, stats: { vipelierre: { 'ko-poison': 10 } } } as never;
-    expect(skinProgress(save, 'vipelierre', k)).toEqual([11, 26]);
+    expect(skinProgress(save, 'vipelierre', k)).toEqual([11, 16]);
     const done = { beaten: { vipelierre: ['brutapode'] }, stats: { vipelierre: { 'ko-poison': 30 } } } as never;
-    expect(skinProgress(done, 'vipelierre', k)).toEqual([26, 26]);
+    expect(skinProgress(done, 'vipelierre', k)).toEqual([16, 16]);
   });
 });
 

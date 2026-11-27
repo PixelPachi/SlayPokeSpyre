@@ -8,8 +8,8 @@ const c = cardMaker('mew', 'mew');
 export const MEW_CARDS: CardDef[] = [
   // ——— Départ ———
   c('ecras-face', "Écras'Face", 'normal', 'attaque', 'depart', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),
-  c('morphing', 'Morphing', 'normal', 'technique', 'depart', 1, 'soi', [addCards(1)], { cost: 0 }),
-  c('choc-mental', 'Choc Mental', 'psy', 'attaque', 'depart', 1, 'ennemi', [dmg(6), st('confusion', 1)], { effects: [dmg(9), st('confusion', 1)] }),
+  c('morphing', 'Morphing', 'normal', 'technique', 'commune', 1, 'soi', [addCards(1)], { cost: 0 }),
+  c('choc-mental', 'Choc Mental', 'psy', 'attaque', 'commune', 1, 'ennemi', [dmg(6), st('confusion', 1)], { effects: [dmg(9), st('confusion', 1)] }),
 
   // ——— Communes (28) ———
   c('copietype', 'Copietype', 'normal', 'technique', 'commune', 0, 'soi', [addCards(1, 'neutre')], { effects: [addCards(1, 'neutre'), draw(1)] }, ['epuisee']),

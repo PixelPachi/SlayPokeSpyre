@@ -235,7 +235,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `laser-glace.png` | Laser Glace | Glace · Attaque | Neutre | Aucun (capacité seule) | cristaux de glace, givre, brume froide bleutée | ☐ |
 | `lechouille.png` | Léchouille | Spectre · Attaque | Neutre | Aucun (capacité seule) | ombres violettes, flammes fantomatiques | ☐ |
 | `lechouille-des-ames.png` | Léchouille des Âmes | Spectre · Attaque | Caninos | **Caninos** lance la capacité | ombres violettes, flammes fantomatiques | ☐ |
-| `ligotage.png` | Ligotage | Normal · Attaque | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
+| `ligotage.png` | Ligotage | Normal · Technique | Vipélierre | **Vipélierre** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `lire-esprit.png` | Lire-Esprit | Normal · Talent | Riolu | **Riolu** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `luminocanon.png` | Luminocanon | Acier · Attaque | Riolu, Mew | **Riolu** lance la capacité | métal brillant, reflets argentés, étincelles | ☐ |
 | `mach-punch.png` | Mach Punch | Combat · Attaque | Riolu | **Riolu** lance la capacité | poings et coups, aura bleue, impact martial | ☐ |
