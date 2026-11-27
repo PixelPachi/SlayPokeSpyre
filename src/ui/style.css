@@ -1647,12 +1647,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.duo-posipi { --tc: #8e1b34; }
 .card.duo-negapi { --tc: #138a8a; }
 .card.duo-both { --tc: #8e1b34; }
-.card.duo-card .card-inner { background: linear-gradient(160deg, var(--duo-a) 0%, var(--duo-a) 45%, #f2c418 46%, #f2c418 50%, var(--duo-b) 51%, var(--duo-b) 100%); }
-.card.duo-posipi .card-inner { --duo-a: #8e1b34; --duo-b: #5e0f22; box-shadow: inset 0 0 0 3px #f6cc2a; }
-.card.duo-negapi .card-inner { --duo-a: #18a3a3; --duo-b: #0b6363; box-shadow: inset 0 0 0 3px #f6cc2a; }
-.card.duo-both .card-inner { --duo-a: #8e1b34; --duo-b: #138a8a; box-shadow: inset 0 0 0 3px #f6cc2a; }
-.card.duo-card .card-banner { background: linear-gradient(90deg, #f6cc2a, #ffe680, #f6cc2a); color: #3a2400; }
-.card.duo-both .card-banner { background: linear-gradient(90deg, #c0283f 0 48%, #f6cc2a 48% 52%, #1aa5a5 52%); color: #fff; text-shadow: 0 1px 2px #000; }
 .card.duo-relay::after { content: '⇄ Relais'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border-radius: 8px; background: #f6cc2a; color: #3a2400; font: 900 11px 'Nunito', sans-serif; box-shadow: 0 2px 4px #0008; z-index: 5; }
 .fighter.player .duo-back { position: absolute; left: -90px; bottom: 70px; width: 220px; text-align: center; filter: brightness(.85); z-index: 0; }
 .fighter.player .player-sprite { position: relative; z-index: 1; }

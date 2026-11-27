@@ -24,7 +24,8 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const base = d.effects.find((e) => e.kind === 'degats');
   const text = o.text ?? cardText(d, null, null);
   const enemy = d.id.startsWith('ennemi-') || d.id.includes('copie:');
-  const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character);
+  // Duo : même cadre que les autres, recoloré (bordeaux / turquoise / bicolore, liserés dorés)
+  const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character === 'duo' ? `duo-${d.duoSide ?? 'both'}` : d.character);
   const art = enemy ? artNoPokemon(d.name) : artUrl(d.artName ?? d.name, d.character) ?? (d.character === 'duo' ? artNoPokemon(d.artName ?? d.name) : undefined);
   const orb = orbUrl(d.character);
   return `
