@@ -186,7 +186,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   if (skinSel) {
     const k = skins.find((x) => x.id === skinSel)!;
     const base = new Set(CHARACTERS[c].starterDeck);
-    const ids = [...new Set([...(k.cards ?? []), ...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])].filter((id) => !base.has(id));
+    const ids = [...new Set([...(k.cards ?? []), ...(k.deck ?? []), ...(k.firstCard ? [k.firstCard] : []), ...(k.extraCards ?? [])])].filter((id) => !base.has(id) && ((k.cards ?? []).includes(id) || !Object.values(UNLOCKS[c] ?? {}).flat().includes(id)));
     const typeCards = k.typeCards?.length ? allCards().filter((d) => d.character === 'normal' && k.typeCards!.includes(d.pokeType) && d.rarity !== 'depart') : [];
     return `${chips}${skinChips}
       <p class="gl-note"><b>${esc(k.name)}</b> — ${esc(k.goalText)}</p>

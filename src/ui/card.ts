@@ -30,7 +30,7 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const art = enemy ? artNoPokemon(d.name) : d.character === 'duo'
     ? artUrl(d.name, 'duo') ?? artUrl(d.artName ?? d.name, 'duo') ?? artNoPokemon(d.artName ?? d.name)
     : artUrl(d.artName ?? d.name, d.character);
-  const orb = orbUrl(d.character);
+  const orb = d.character === 'duo' ? orbUrl(`duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}`) : orbUrl(d.character);
   return `
     <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">

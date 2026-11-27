@@ -262,7 +262,7 @@ export class CombatView {
         </div>
       </div>
       <div class="hud">
-        <div class="energy ${orbUrl(p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(p.character) ? `style="--orb:url('${orbUrl(p.character)}')"` : ''} data-tip="Points d'Action (PA) : ${p.energy} sur ${p.maxEnergy}. Chaque carte coûte des PA ; ils se rechargent à chaque tour.">
+        <div class="energy ${orbUrl(c.fused ? 'duo-fusion' : p.character) ? 'has-orb' : ''} ${p.energy === 0 ? 'empty' : ''}" ${orbUrl(c.fused ? 'duo-fusion' : p.character) ? `style="--orb:url('${orbUrl(c.fused ? 'duo-fusion' : p.character)}')"` : ''} data-tip="Points d'Action (PA) : ${p.energy} sur ${p.maxEnergy}. Chaque carte coûte des PA ; ils se rechargent à chaque tour.">
           <span class="energy-num">${p.energy}</span>
         </div>
         ${p.character === 'riolu' || p.character === 'mew' ? `<div class="aura-counter ${p.aura >= 25 ? 'high' : ''} ${p.aura !== this.lastAura ? 'bump' : ''}" data-tip="<b>Aura : ${p.aura}</b><br>${this.combat.crimson ? 'Cramoisi : ta prochaine attaque inflige autant de Brûlure que d’Aura à sa cible (l’Aura est alors consommée). Seules Aurasphère et les cartes d’Aura s’en servent pour les dégâts.' : 'Chaque point d’Aura ajoute 1 dégât à ta prochaine attaque (l’Aura est alors consommée).'} Tu en gagnes en jouant certaines cartes et en perdant des PV.">
