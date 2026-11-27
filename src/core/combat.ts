@@ -670,7 +670,7 @@ export class Combat {
     if ((this.player.statuses.elan ?? 0) > 0) {
       // Élan : la Protection du prochain tour vaut l'Élan de ce tour, puis l'Élan est divisé par deux
       this.elanBlock = this.player.statuses.elan!;
-      const half = Math.floor(this.player.statuses.elan! / 2);
+      const half = this.player.powers['elan-persistant'] ? this.player.statuses.elan! : Math.floor(this.player.statuses.elan! / 2);
       this.addStatus(this.player, 'player', 'elan', half - this.player.statuses.elan!);
     }
     this.tickDurations(this.player);
@@ -1805,6 +1805,7 @@ export class Combat {
         if (src) this.healEnemy(src, Math.floor(drained / 2));
       }
       if (s === 'poison' && who === 'player' && this.bossAlive('venin-tenace')) continue; // Venin Tenace
+      if (s === 'brulure' && who !== 'player' && this.player.powers['brasier-eternel']) continue; // Brasier Éternel
       if (n - 1 <= 0) delete f.statuses[s];
       else f.statuses[s] = n - 1;
     }

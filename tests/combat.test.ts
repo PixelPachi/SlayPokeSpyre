@@ -403,7 +403,7 @@ describe('cartes de tous les personnages', async () => {
   const chars = ['riolu', 'vipelierre', 'kangourex', 'caninos', 'mew'] as const;
 
   it('toutes les cartes de récompense sont débloquables, sans doublon de nom (75 + cartes de Protection ajoutées)', () => {
-    const extra: Record<string, number> = { riolu: 6, vipelierre: 6, kangourex: 6, caninos: 6, mew: 2 }; // + les 2 cartes non basiques du deck de départ
+    const extra: Record<string, number> = { riolu: 6, vipelierre: 6, kangourex: 6, caninos: 13, mew: 2 }; // + les 2 cartes non basiques du deck de départ
     for (const ch of chars) {
       const n = 75 + extra[ch];
       const pool = rewardPool(ch);

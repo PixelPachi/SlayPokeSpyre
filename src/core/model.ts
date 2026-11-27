@@ -34,7 +34,7 @@ export type PowerId =
   | 'plenitude' | 'lire-esprit' // Riolu
   | 'champ-herbu' | 'racines' | 'zenith-plante' | 'peau-dure' // Vipélierre
   | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
-  | 'zenith' | 'braises' | 'turbo' // Caninos
+  | 'zenith' | 'braises' | 'turbo' | 'elan-persistant' | 'brasier-eternel' // Caninos
   | 'souvenir' | 'telekinesie'; // Mew
 
 export type Effect =
