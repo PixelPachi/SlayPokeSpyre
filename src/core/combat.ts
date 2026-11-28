@@ -6,7 +6,7 @@ import { Rng } from './rng';
 import {
   type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier,
 } from './types';
-import { CARD_DEFS, cardDef, ENCHANTS, enchantId, rollEnchant, scaleX, chromaScale } from '../data/cards';
+import { CARD_DEFS, cardDef, ENCHANTS, enchantId, rollEnchant, scaleX } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { primordialTypes, skinDef } from '../data/skins';
 import { ENEMY_DEFS } from '../data/enemies';
@@ -342,10 +342,9 @@ export class Combat {
 
   /** Carte chromatique : valeurs doublées, plus l'effet propre au Pokémon. */
   private chromaTransform(d: CardDef): CardDef {
-    // mêmes valeurs doublées qu'une carte chromatique (dégâts, Protection, statuts, multiplicateurs, bonus, coups du Bébé…)
-    let x = chromaScale(d);
+    let x = scaleX(d, 2, true);
     const ch = this.player.character;
-    let effects = x.effects;
+    let effects = x.effects.map((e): Effect => (e.kind === 'bebe-attaque' ? { ...e, times: e.times * 2 } : e)); // Kangourex : le Bébé frappe deux fois plus
     if (ch === 'riolu' && /aurasph/i.test(d.name)) effects = [{ kind: 'casse-protection' }, ...effects]; // Aura Dorée : transperce la Protection
     if (ch === 'vipelierre') effects = [...effects, { kind: 'statut', status: 'vampigraine', stacks: 2, on: 'tous' }]; // Vampigraine Scintillante
     x = { ...x, effects };
