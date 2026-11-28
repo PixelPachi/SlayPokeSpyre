@@ -514,6 +514,8 @@ describe('acte 2', async () => {
     expect(run.hp).toBe(run.maxHp);
     expect(run.pos).toBeNull();
     expect(run.floor).toBe(16);
+    expect(run.available()).toEqual([]); // Célébi d'abord (premier nœud de l'acte 2)
+    run.celebiDone = true;
     expect(run.available()).toEqual(run.map[0]);
     expect(run.encounter('boss')).toEqual([run.zone.boss]);
   });

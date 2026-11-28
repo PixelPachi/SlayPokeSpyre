@@ -42,7 +42,7 @@ export function nodeIcon(type: NodeType, bossDex = 15): string {
 
 export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col: number) => void, onStart?: () => void): void {
   ROWS = run.map.length || MAP_ROWS;
-  START = run.act === 1 ? ROW_H + 20 : 0;
+  START = run.act === 1 || run.act === 2 ? ROW_H + 20 : 0; // Guilde (acte 1), Célébi (acte 2)
   HEIGHT = BOTTOM + START + (ROWS - 1) * ROW_H + BOSS_GAP + 150;
   BOSS_POS = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - START - (ROWS - 1) * ROW_H - BOSS_GAP };
   const zone = run.zone;
@@ -73,7 +73,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
   const startPos = { x: LEFT + ((MAP_COLS - 1) / 2) * COL_W, y: HEIGHT - BOTTOM - 10 };
   if (START) for (const n of run.map[0] ?? []) {
     const b = pos(n);
-    lines.unshift(`<line x1="${startPos.x}" y1="${startPos.y}" x2="${b.x}" y2="${b.y}" class="path ${run.welcomeDone && visited(0, n.col) ? 'walked' : ''} ${run.needsWelcome ? '' : !current ? 'open' : ''}"/>`);
+    lines.unshift(`<line x1="${startPos.x}" y1="${startPos.y}" x2="${b.x}" y2="${b.y}" class="path ${!run.needsWelcome && visited(0, n.col) ? 'walked' : ''} ${run.needsWelcome ? '' : !current ? 'open' : ''}"/>`);
   }
   const nodes = run.map.flat().map((n) => {
     const p = pos(n);
@@ -86,8 +86,8 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
     return `<button class="${cls}" style="left:${p.x}px;top:${p.y}px" data-row="${n.row}" data-col="${n.col}"
               data-tip="<b>${NODE_INFO[n.type].label}</b><br>${NODE_INFO[n.type].text}">${nodeIcon(n.type)}</button>`;
   });
-  if (START) nodes.unshift(`<button class="map-node node-start ${run.needsWelcome ? 'available' : 'visited'}" style="left:${startPos.x}px;top:${startPos.y}px" data-start="1"
-      data-tip="<b>La Guilde de Grodoudou</b><br>Grodoudou et Pijako t'accueillent et te proposent leur aide avant l'ascension."><img src="${asset('sprites/pokemon/front/40.png')}" alt=""></button>`);
+  if (START) nodes.unshift(`<button class="map-node node-start ${run.act === 2 ? 'celebi-start' : ''} ${run.needsWelcome ? 'available' : 'visited'}" style="left:${startPos.x}px;top:${startPos.y}px" data-start="1"
+      data-tip="${run.act === 2 ? "<b>Célébi</b><br>Célébi traverse le temps pour t'aider à calmer Dialga." : "<b>La Guilde de Grodoudou</b><br>Grodoudou et Pijako t'accueillent et te proposent leur aide avant l'ascension."}"><img src="${asset(`sprites/pokemon/front/${run.act === 2 ? 251 : 40}.png`)}" alt=""></button>`);
   const bossAvail = avail === 'boss';
   nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
       data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien${bossIds.length > 1 ? "s" : ""} : ${bossName}</b><br>Le boss de la zone ${zone.name}.">${boss.look === 'primal' ? `<img src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">` : bossIds.length > 1 ? `<span class="duo-boss">${bossIds.map((id) => `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[id].dex}.png`)}" alt="">`).join('')}</span>` : nodeIcon('boss', boss.dex)}</button>`);

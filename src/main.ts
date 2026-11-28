@@ -343,19 +343,15 @@ function showMap(run: Run): void {
   }
   playTheme(run.act === LAST_ACT ? 'sommet-tour-du-temps' : run.zone.id);
   if (run.act === LAST_ACT) return showSummit(run);
-  // Début de l'acte 2 : Célébi apparaît (rencontre obligatoire, une fois par run)
-  if (run.act === 2 && !run.celebiDone && !run.pos && run.visited.length === 0) {
-    clear();
-    return renderEvent(screen, run, () => { run.celebiDone = true; persist(run, false); showMap(run); }, 'celebi', (f) => duel(run, f));
-  }
   persist(run, false);
   renderMap(screen, run, (row, col) => {
     run.moveTo(row, col);
     persist(run, true);
     enterNode(run, row, col);
   }, () => {
-    // Première case : l'accueil de la Guilde de Grodoudou
+    // Première case : l'accueil de la Guilde de Grodoudou (acte 1), Célébi (acte 2)
     clear();
+    if (run.act === 2) return renderEvent(screen, run, () => { run.celebiDone = true; showMap(run); }, 'celebi', (f) => duel(run, f));
     playTheme('guilde-grodoudou');
     renderEvent(screen, run, () => { run.welcomeDone = true; showMap(run); }, 'accueil', (f) => duel(run, f));
   });

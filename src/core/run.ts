@@ -258,7 +258,7 @@ export class Run {
   /** Première case de l'acte 1 : l'accueil de la Guilde (Grodoudou et Pijako), d'où partent tous les chemins. */
   welcomeDone = false;
   /** L'accueil reste à faire (vieilles sauvegardes : déjà fait si la run a avancé). */
-  get needsWelcome(): boolean { return this.act === 1 && !this.welcomeDone && !this.pos && this.visited.length === 0; }
+  get needsWelcome(): boolean { return ((this.act === 1 && !this.welcomeDone) || (this.act === 2 && !this.celebiDone)) && !this.pos && this.visited.length === 0; }
   /** Combats restants avec l'Encens Zen (ennemis à 1 PV). */
   zenFights = 0;
   /** Vrai si le joueur possède les deux Rouages (l'acte secret s'ouvre après Dialga). */

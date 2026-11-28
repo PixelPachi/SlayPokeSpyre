@@ -194,7 +194,7 @@ describe('événements', () => {
 describe('runs complètes', () => {
   it('runs simulées de bout en bout pour chaque personnage (carte, nœuds, actes, évolutions)', () => {
     for (const ch of CHARS) for (let s = 0; s < 4; s++) {
-      const run = new Run(`RUN${s}${ch}`, ch); run.welcomeDone = true;
+      const run = new Run(`RUN${s}${ch}`, ch); run.welcomeDone = true; run.celebiDone = true;
       let steps = 0;
       while (run.act <= 3 && steps++ < 200) {
         const av = run.available();

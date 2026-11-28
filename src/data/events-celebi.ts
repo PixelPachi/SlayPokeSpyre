@@ -21,8 +21,8 @@ export function celebiEvent(run: Run): GameEvent {
         apply: (r) => { r.addCard(sig!); return `Célébi pose son front contre le tien. Une force nouvelle t’envahit : ${cardDef(sig!).name} rejoint ton deck !`; },
       },
       {
-        label: 'Renforcer ta vitalité', detail: '+20 PV max',
-        apply: (r) => { r.maxHp += 20; r.hp += 20; return 'Une pluie de lumière verte t’enveloppe : +20 PV max !'; },
+        label: 'Renforcer ta vitalité', detail: '+10 PV max',
+        apply: (r) => { r.maxHp += 10; r.hp += 10; return 'Une pluie de lumière verte t’enveloppe : +10 PV max !'; },
       },
       {
         label: 'Alléger ton fardeau', detail: 'Retire 3 cartes de ton deck',
