@@ -26,6 +26,11 @@ const FILE_TRACKS: Record<string, string> = {
   'tour-dragospire': 'music/tour-dragospire.mp3', // Dragonspiral Tower
   'foret-d-empoigne': 'music/foret-d-empoigne.mp3', // Pinwheel Forest
   'guilde-grodoudou': 'music/guilde-grodoudou.mp3', // Donjon Mystère : Guilde de Grodoudou
+  'repaire-rocket': 'music/repaire-rocket.mp3', // Team Rocket Hideout (Rouge Feu / Vert Feuille)
+  // Combats de gardiens des actes 1, 2 et 3 : Boss Battle (Explorateurs du Ciel)
+  'gardien-1': 'music/gardien.mp3',
+  'gardien-2': 'music/gardien.mp3',
+  'gardien-3': 'music/gardien.mp3',
 };
 /** Vrai si une musique enregistrée existe pour cet identifiant. */
 export function hasTrack(id: string): boolean { return !!FILE_TRACKS[id]; }
