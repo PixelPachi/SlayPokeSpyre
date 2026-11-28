@@ -13,6 +13,8 @@ const P = side('posipi');
 const N = side('negapi');
 
 export const DUO_CARDS: CardDef[] = [
+  // ——— Carte signature full art (bénédiction de Célébi) ———
+  { ...c('frotte-frimousse', 'Frotte-Frimousse', 'electrik', 'talent', 'rare', 2, 'soi', [power('frotte-frimousse', 4)], { cost: 1 }), fullArt: true, special: true },
   // ——— Départ ———
   { ...P('eclair', 'Éclair Plus', 'electrik', 'attaque', 'depart', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }), artName: 'Éclair' },
   N('bouclier', 'Bouclier', 'electrik', 'technique', 'depart', 1, 'soi', [prot(5)], { effects: [prot(8)] }),

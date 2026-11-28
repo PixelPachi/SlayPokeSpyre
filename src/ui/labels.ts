@@ -56,6 +56,7 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   'plus-synchro': { label: 'Plus Synchro', text: (n) => `Chaque carte Posipi donne ${n} dégâts de plus à la prochaine carte Négapi.` },
   'moins-synchro': { label: 'Moins Synchro', text: (n) => `Chaque carte Négapi donne ${n} Protection de plus.` },
   'eclat-absolu': { label: 'Éclat Absolu', text: (n) => `Chaque carte jouée te donne ${n} Étincelle${n > 1 ? 's' : ''} de plus.` },
+  'frotte-frimousse': { label: 'Frotte-Frimousse', text: (n) => `Chaque Relais inflige ${n} dégâts à tous les ennemis.` },
   'coeur-aura': { label: 'Cœur d’Aura', text: () => 'Quand ton Aura est consommée, elle ne retombe qu’à moitié.' },
   'pioche-visible': { label: 'Œil Spectral', text: () => 'Tu vois ta pioche dans l’ordre.' },
   'creation-reduite': { label: 'Créativité', text: (n) => `Les cartes créées pendant le combat coûtent ${n} PA de moins.` },
@@ -182,6 +183,7 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
       case 'pioche-par-soi': parts.push(`Pioche 1 carte par ${e.per} ${STATUS_INFO[e.status].label}.`); break;
       case 'protection-par-statut': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en Protection.`); break;
       case 'soin-par-statut': parts.push(`Récupère ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en PV.`); break;
+      case 'inspiration': parts.push('Au prochain tour, chaque carte jouée est jouée <b>deux fois</b>.'); break;
       case 'choix-type': parts.push(`Choisis un type : ${e.count > 1 ? `<b>${e.count}</b> cartes` : 'une carte'} de ce type au hasard, à 0 PA ce tour.`); break;
       case 'statut-par-soi': parts.push(`${STATUS_INFO[e.status].label} égale à ton ${STATUS_INFO[e.from].label}.`); break;
       case 'detonation': if (e.status === 'brulure' && e.per === 2) { parts.push(`Déclenche Détonation${d.target === 'tous' ? ' sur tous les ennemis' : ''}.`); break; }

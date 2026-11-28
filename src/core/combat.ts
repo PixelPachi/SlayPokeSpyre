@@ -412,6 +412,13 @@ export class Combat {
     d.front = to;
     this.player.hp = d.hp[to];
     this.duoForm();
+    // Frotte-Frimousse : chaque Relais électrise tous les ennemis
+    const ff = this.player.powers['frotte-frimousse'] ?? 0;
+    if (reason === 'relais' && ff > 0) {
+      this.events.push({ type: 'player-move', name: `Frotte-Frimousse : ${ff} dégâts à tous !` });
+      for (const e of this.aliveEnemies()) this.dealDamage(e, e.uid, ff, 'normal');
+      this.checkEnd();
+    }
     if (reason === 'relais' && this.has('aimant')) this.relicFired('aimant', () => this.gainBlock(this.player, 'player', 3)); // Aimant
     this.events.push({ type: 'duo-swap', front: to, ko: reason === 'ko' });
     if (reason === 'ko') return;
@@ -840,6 +847,11 @@ export class Combat {
       this.doubleNext--;
       this.events.push({ type: 'player-move', name: `Photocopie : ${d.name} × 2` });
     }
+    // Inspiration (Quelorior) : ce tour-ci, chaque carte est jouée deux fois
+    if (this.inspireActive && !d.effects.some((e) => e.kind === 'inspiration')) {
+      reps += 1;
+      this.events.push({ type: 'player-move', name: `Inspiration : ${d.name} × 2` });
+    }
     // Écho : la première fois de chaque combat, la carte se joue deux fois
     if (d.keywords?.includes('echo') && !this.echoed.has(card.uid)) {
       this.echoed.add(card.uid);
@@ -1167,6 +1179,8 @@ export class Combat {
   private startPlayerTurn(): void {
     this.turn++;
     this.logMark({ type: 'turn', who: 'joueur' });
+    this.inspireActive = this.inspirePending;
+    this.inspirePending = false;
     this.phase = 'joueur';
     this.attacksThisTurn = 0;
     this.cardsThisTurn = 0;
@@ -1565,6 +1579,10 @@ export class Combat {
         if (n > 0) this.healPlayer(n);
         return;
       }
+      case 'inspiration':
+        this.inspirePending = true;
+        this.events.push({ type: 'player-move', name: 'Inspiration : au prochain tour, tout se joue deux fois !' });
+        return;
       case 'choix-type':
         this.pendingType = { count: eff.count };
         return;
@@ -2000,6 +2018,9 @@ export class Combat {
   pendingChoice: { ids: string[]; upgraded: boolean } | null = null;
   /** Don Ancestral : en attente du type choisi (nombre de cartes à créer). */
   pendingType: { count: number } | null = null;
+  /** Inspiration (Quelorior) : demandée ce tour, active au tour suivant. */
+  private inspirePending = false;
+  inspireActive = false;
 
   /** Don Ancestral : crée des cartes au hasard du type choisi, qui coûtent 0 ce tour. */
   chooseType(t: PokeType): void {

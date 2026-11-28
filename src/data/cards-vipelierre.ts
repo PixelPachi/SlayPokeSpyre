@@ -7,6 +7,8 @@ import { cardMaker, dmg, draw, heal, hpLoss, multi, pa, power, prot, smult, st }
 const c = cardMaker('vipelierre', 'vip');
 
 export const VIPELIERRE_CARDS: CardDef[] = [
+  // ——— Carte signature full art (bénédiction de Célébi) ———
+  { ...c('tempete-majestueuse', 'Tempête Majestueuse', 'plante', 'attaque', 'rare', 2, 'tous', [dmg(15), st('attaque', -5, 'soi')], { effects: [dmg(20), st('attaque', -6, 'soi')] }, ['epuisee']), fullArt: true, special: true },
   // ——— Communes (28) ———
   c('garde-florale', 'Garde Florale', 'fee', 'technique', 'commune', 1, 'soi', [prot(6), heal(2)], { effects: [prot(8), heal(3)] }),
   c('cotogarde', 'Cotogarde', 'plante', 'technique', 'peu-commune', 1, 'soi', [prot(8), st('defense', -1, 'soi')], { effects: [prot(11), st('defense', -1, 'soi')] }),

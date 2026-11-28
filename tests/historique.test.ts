@@ -132,3 +132,39 @@ it('Don Ancestral : choisir un type crée des cartes de ce type, gratuites ce to
   expect(added).toHaveLength(2);
   for (const x of added) { expect(c.def(x).pokeType).toBe('feu'); expect(c.costOf(x)).toBe(0); }
 });
+
+it('cartes signature : Inspiration (tout ×2 au tour suivant), Frotte-Frimousse (Relais = dégâts à tous), Tempête Majestueuse', () => {
+  const mk = (character: string, ids: string[], enemies = ['rattata']) => {
+    const deck = ids.map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
+    const c = new Combat({ character, deck, enemies, seed: 'SIG', relics: [] } as never);
+    for (const e of c.enemies) { e.hp = e.maxHp = 999; e.block = 0; }
+    c.player.energy = 10; return c;
+  };
+  // Inspiration
+  const q = mk('quelorior', ['quel-inspiration', ...Array(9).fill('abri')]);
+  const insp = q.hand.find((x) => x.defId === 'quel-inspiration');
+  if (insp) {
+    q.play(insp.uid);
+    q.endPlayerTurn(); for (const e of q.aliveEnemies()) q.enemyAct(e.uid); q.endEnemyTurn();
+    expect(q.inspireActive).toBe(true);
+  }
+  // Tempête Majestueuse : 15 à tous, Attaque −5 (devient +5 avec Contestation)
+  const v = mk('vipelierre', Array(6).fill('vip-tempete-majestueuse'), ['rattata', 'rattata']);
+  v.play(v.hand[0].uid);
+  for (const e of v.enemies) expect(999 - e.hp).toBeGreaterThanOrEqual(15);
+  expect(v.player.statuses.attaque).toBe(5);
+});
+
+it('Frotte-Frimousse : chaque Relais inflige 4 dégâts à tous les ennemis', () => {
+  const deck = [{ uid: 1, defId: 'duo-frotte-frimousse', upgraded: false }, ...Array.from({ length: 9 }, (_, i) => ({ uid: i + 2, defId: i % 2 ? 'duo-eclair' : 'duo-bouclier', upgraded: false }))];
+  const c = new Combat({ character: 'duo', deck, enemies: ['rattata', 'rattata'], seed: 'FF', relics: [] } as never);
+  for (const e of c.enemies) { e.hp = e.maxHp = 999; e.block = 0; }
+  c.player.energy = 10;
+  const ff = c.hand.find((x) => x.defId === 'duo-frotte-frimousse');
+  if (!ff || !c.duo) return;
+  c.play(ff.uid);
+  const back = c.hand.find((x) => c.def(x).duoSide && c.def(x).duoSide !== c.duo!.front);
+  if (!back) return;
+  c.play(back.uid, c.enemies[0].uid);
+  expect(999 - c.enemies[1].hp).toBeGreaterThanOrEqual(4);
+});

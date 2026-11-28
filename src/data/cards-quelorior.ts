@@ -5,6 +5,8 @@ import { cardMaker } from './card-kit';
 const c = cardMaker('quelorior', 'quel');
 
 export const QUELORIOR_CARDS: CardDef[] = [
+  // ——— Carte signature full art (bénédiction de Célébi) ———
+  { ...c('inspiration', 'Inspiration', 'normal', 'technique', 'rare', 3, 'soi', [{ kind: 'inspiration' }], { cost: 2 }), fullArt: true, special: true },
   // Flambeur : attaque de départ qui rapporte des Pokédollars
   c('jackpot', 'Jackpot', 'normal', 'attaque', 'depart', 1, 'ennemi', [{ kind: 'degats', amount: 3 }, { kind: 'argent', amount: 5 }], { effects: [{ kind: 'degats', amount: 5 }, { kind: 'argent', amount: 8 }] }),
   // Atout : joue les 2 cartes du dessus de la pioche (deck de départ du Flambeur, trouvable sans skin)

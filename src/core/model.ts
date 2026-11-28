@@ -39,7 +39,7 @@ export type PowerId =
   | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
   | 'zenith' | 'braises' | 'turbo' | 'elan-persistant' | 'brasier-eternel' // Caninos
   | 'plus-synchro' | 'moins-synchro' // Duo
-  | 'pioche-visible' | 'creation-reduite' | 'eclat-absolu' | 'coeur-aura'
+  | 'pioche-visible' | 'creation-reduite' | 'eclat-absolu' | 'coeur-aura' | 'frotte-frimousse'
   | 'coeur-magma' | 'charme-celeste' | 'pierre-philosophale' | 'trame-destin' | 'maree-protectrice' | 'bucher-ames' | 'avalanche' // talents légendaires de skin
   | 'souvenir' | 'telekinesie'; // Mew
 
@@ -99,6 +99,7 @@ export type Effect =
   | { kind: 'pioche-par-soi'; status: StatusId; per: number } // pioche 1 carte par tranche de « per » points de ton statut
   | { kind: 'soin-par-statut'; status: StatusId; mult: number } // soin = statut de la cible × mult
   | { kind: 'detonation'; status: StatusId; per: number } // consomme le statut de la cible : dégâts = statut × per
+  | { kind: 'inspiration' } // Inspiration (Quelorior) : au prochain tour, chaque carte jouée est jouée deux fois
   | { kind: 'choix-type'; count: number } // Don Ancestral (Mew) : choisis un type, crée autant de cartes de ce type, gratuites ce tour
   | { kind: 'statut-par-soi'; status: StatusId; from: StatusId } // applique à la cible autant de « status » que ton « from » (Détonation Arcanine : Brûlure = Élan)
   | { kind: 'propage-statut'; status: StatusId } // copie le statut de la cible sur tous les autres ennemis
