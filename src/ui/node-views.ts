@@ -1,5 +1,6 @@
 import { ENEMY_DEFS } from '../data/enemies';
 import { welcomeEvent } from '../data/events-accueil';
+import { celebiEvent } from '../data/events-celebi';
 import { TRIGGERS, WEAVE_FX, trameFx, trameId, triggerChoices, weaveChoices, weaveId } from '../data/tissage';
 import { ZONE_BG } from '../data/zone-bg';
 import { babySprite, skinSprite } from '../data/skins';
@@ -446,7 +447,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   const unown = run.zone.id === 'ruines-alpha' ? classic.filter((e) => e.id === 'zarbi-mots' || e.id === 'miroir-zarbi') : [];
   const pool = unown.length && run.rng.next() < 0.5 ? unown : tarot.length && (run.rng.next() < 0.4 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
   const forced = forcedId?.replace(/-inverse$/, '');
-  const ev: GameEvent = forced === 'accueil' ? welcomeEvent(run) : [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
+  const ev: GameEvent = forced === 'accueil' ? welcomeEvent(run) : forced === 'celebi' ? celebiEvent(run) : [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
   run.seenEvents.push(ev.id);
   // Arcane inversé (1 chance sur 4) : la carte est retournée, avec des effets extrêmes
   const reversed = !!ev.reversed && (forcedId ? forcedId.endsWith('-inverse') : run.rng.next() < 0.25);
@@ -503,6 +504,16 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
     : ev.images ? `<div class="event-duo">${ev.images.map((im) => `<img class="event-img poke" src="${asset(im)}" alt="">`).join('')}</div>`
     : ev.image.includes('illustrations/') ? `<img class="event-illus" src="${asset(ev.image)}" alt="">`
     : `<img class="event-img ${ev.image.includes('sprites/pokemon') ? 'poke' : ''}" src="${asset(ev.image)}" alt="">`;
+  // Célébi : l'illustration en plein écran, le dialogue et les choix par-dessus
+  if (ev.id === 'celebi') {
+    root.innerHTML = `<div class="node-screen welcome celebi">${topbar(run, run.zone.name)}
+      <div class="welcome-scene celebi-scene" style="background-image:url('${asset(ev.image)}')">
+        <div class="welcome-dialog"><b>${esc(title)}</b><p class="event-text">${esc(text)}</p></div>
+        <div class="event-choices welcome-choices celebi-choices">
+          ${choices.map((c, i) => `<button class="choice" data-i="${i}" ${(c.available?.(run) ?? true) ? '' : 'disabled'}><b>${esc(c.label)}</b><span>${esc(c.detail)}</span></button>`).join('')}
+        </div>
+      </div></div>`;
+  } else
   // Accueil de Grodoudou : la scène se passe dans le décor de la zone, ton Pokémon à gauche, la Guilde à droite
   if (ev.images && ev.id === 'accueil') {
     const fr = ZONE_BG[run.zone.id];

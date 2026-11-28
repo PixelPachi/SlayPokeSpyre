@@ -253,6 +253,8 @@ export class Run {
   cogsUnlocked = false;
   /** Acte dont la cinématique d'ouverture (fondu au noir) a déjà été jouée. */
   introAct = 0;
+  /** Rencontre obligatoire avec Célébi au début de l'acte 2. */
+  celebiDone = false;
   /** Première case de l'acte 1 : l'accueil de la Guilde (Grodoudou et Pijako), d'où partent tous les chemins. */
   welcomeDone = false;
   /** L'accueil reste à faire (vieilles sauvegardes : déjà fait si la run a avancé). */

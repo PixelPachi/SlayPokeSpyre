@@ -1795,3 +1795,16 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.full-art .card-cost { left: -3px; top: -2px; width: 33px; height: 33px; font-size: 20px; }
 .card.full-art .card-cost.has-orb { left: -5px; top: -4px; width: 37px; height: 37px; }
 .card.full-art.rarity-rare, .card.full-art.rarity-legendaire { animation: legendGlow 1.6s ease-in-out infinite; }
+
+/* Célébi (début de l'acte 2) : l'illustration en plein écran */
+.celebi-scene { background-size: cover; background-position: center; }
+.celebi-scene::after { background: linear-gradient(to top, rgba(6, 14, 10, 0.9) 0%, rgba(6, 14, 10, 0.55) 30%, transparent 55%) !important; }
+.celebi .welcome-dialog { top: auto; bottom: 150px; background: rgba(8, 20, 14, 0.82); border: 1px solid #6fd39a66; }
+.celebi .welcome-dialog b { color: #9ff0be; }
+.celebi-choices { left: 50%; transform: translateX(-50%); top: auto; bottom: 22px; width: 1080px; flex-direction: row; }
+.celebi-choices .choice { flex: 1; }
+.celebi-choices .event-result, .celebi-choices .event-after { flex: 1; }
+.celebi-choices:has(.event-result) { flex-direction: column; width: 760px; }
+.celebi:has(.event-result) .welcome-dialog { display: none; }
+.celebi-choices:has(.event-result) { bottom: 18px; align-items: center; text-align: center; }
+.celebi-choices:has(.event-result) .event-after { display: flex; align-items: center; gap: 24px; }
