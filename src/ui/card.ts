@@ -107,6 +107,7 @@ function nameSize(name: string): number {
 /** Infobulle sur les noms de statuts dans le texte d'une carte (Brûlure, Poison, Peur…). */
 const kw = (label: string, color: string, text: string) => ({ label, color, text: () => text });
 const EXTRA_KW = [
+  kw('Détonation', '#ff6a2f', 'Consomme toute la Brûlure de la cible et lui inflige 2 dégâts par point de Brûlure consommé, tout de suite.'),
   kw('Invocation', '#e8b04a', 'Le Bébé gagne autant de PV max et de PV. S’il est K.O., il revient avec autant de PV.'),
   kw('Aura', '#4aa8ff', 'Chaque point d’Aura ajoute 1 dégât à ta prochaine attaque, puis l’Aura retombe à 0. Chaque PV perdu donne 1 Aura.'),
   // météos et terrains

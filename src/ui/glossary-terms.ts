@@ -68,6 +68,7 @@ export function glossaryTermSections(): { title: string; note?: string; terms: T
         { name: 'Invocation', color: '#e8b04a', text: 'Le Bébé gagne autant de PV max et de PV. S’il est K.O., il revient avec autant de PV.' },
         { name: 'Puissance', color: '#e8b04a', text: 'Dégâts supplémentaires du Bébé à chacune de ses attaques.' },
         { name: 'Rage (Kangourex)', color: '#e5484d', text: 'Gagnée à chaque perte de PV ; les cartes de Rage s’en servent.' },
+        { name: 'Détonation (Caninos)', color: '#ff6a2f', text: 'Consomme toute la Brûlure de la cible et lui inflige 2 dégâts par point de Brûlure consommé, tout de suite.' },
         { name: 'Élan (Caninos)', color: '#ffb84d', text: 'Protection gagnée au début du tour suivant, puis divisée par deux à la fin du tour.' },
         { name: 'Âme (Chien de la Lanterne)', text: 'Carte Spectre (0 PA, pioche 2, Épuisée) : la Lanterne Bleue en ajoute 3 à ta pioche au début de chaque combat, et certaines cartes réagissent quand tu en pioches une.' },
         { name: 'Copie (Quelorior)', text: 'Gribouille copie la capacité que prépare l’ennemi : elle rejoint ton deck pour la run.' },
