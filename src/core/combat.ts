@@ -322,6 +322,15 @@ export class Combat {
 
   // ——— Objets tenus ———
 
+  /** Combo Griffe : exemplaires de cette carte dans tout le deck (main, pioche, défausse, épuisées). */
+  private playingCard: Card | null = null;
+  copiesOf(d: CardDef): number {
+    const id = d.id.replace(/^.*:/, '');
+    const all = [...this.hand, ...this.drawPile, ...this.discardPile, ...this.exhaustPile];
+    if (this.playingCard && !all.includes(this.playingCard)) all.push(this.playingCard);
+    return all.filter((c) => c.defId === d.id || c.defId.endsWith(':' + id) || c.defId === id).length;
+  }
+
   has(relic: string): boolean {
     // Duo : un objet tenu n'agit que si son porteur est en première ligne
     if (this.duo) { const o = this.duo.owner[relic]; if (o && o !== this.duo.front) return false; }
@@ -511,7 +520,7 @@ export class Combat {
       switch (e.kind) {
         case 'degats': {
           const mult = d.effects.find((x): x is Extract<Effect, { kind: 'aura-mult' }> => x.kind === 'aura-mult');
-          let base = e.amount + (e.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (e.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
+          let base = e.amount + (e.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (e.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0) + (e.parCopie ? e.parCopie * this.copiesOf(d) : 0);
           if (e.champ && this.terrain?.id === e.champ) base *= 2;
           if (e.facade && this.hasBadStatus()) base *= 2;
           if (e.revanche && p.hpLostEnemyTurn > 0) base *= 2;
@@ -704,6 +713,7 @@ export class Combat {
     }
     this.player.energy -= paid;
     this.hand.splice(idx, 1);
+    this.playingCard = card;
     // Relais : la carte de celui en retrait le fait passer en première ligne
     this.duoRelayed = false;
     if (this.duo && d.duoSide && d.duoSide !== this.duo.front) { this.duoSwap('relais'); this.duoRelayed = true; }
@@ -1209,7 +1219,7 @@ export class Combat {
     switch (eff.kind) {
       case 'degats': {
         const hits = eff.parPosipi ? (this.duo?.posipiTurn ?? 0) : eff.hitsMax ? this.rng.int(eff.hits ?? 1, eff.hitsMax) : (eff.hits ?? 1);
-        let base = eff.amount + (eff.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0);
+        let base = eff.amount + (eff.parProtection ? p.block + (p.statuses.clone ?? 0) : 0) + (eff.cumul ? this.cumul[baseName(d.name)] ?? 0 : 0) + (eff.parCopie ? eff.parCopie * this.copiesOf(d) : 0);
         if (eff.champ && this.terrain?.id === eff.champ) base *= 2;
         if (eff.facade && this.hasBadStatus()) base *= 2;
         if (eff.revanche && p.hpLostEnemyTurn > 0) base *= 2;

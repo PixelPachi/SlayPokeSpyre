@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (417 images)
+## 2. Les illustrations des capacités (418 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -36,7 +36,7 @@ Prompt commun :
 
 Puis, selon la colonne « Pokémon dans l'image » :
 
-- **Capacité exclusive (251 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
+- **Capacité exclusive (252 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
 - **Capacité partagée (166 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
@@ -135,6 +135,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `cocon-stellaire.png` | Cocon Stellaire | Psy · Technique | Vipélierre | **Vipélierre** lance la capacité | ondes psychiques roses et violettes, distorsion | ☐ |
 | `coeur-de-magma.png` | Cœur de Magma | Feu · Talent | Riolu | **Riolu** lance la capacité | flammes orange et rouges, braises, chaleur | ☐ |
 | `colere.png` | Colère | Dragon · Attaque | Vipélierre, Kangourex, Caninos | Aucun (capacité seule) | énergie draconique bleue et violette, écailles | ☐ |
+| `combo-griffe.png` | Combo Griffe | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `contre.png` | Contre | Combat · Attaque | Riolu, Kangourex, Caninos | Aucun (capacité seule) | poings et coups, aura bleue, impact martial | ☐ |
 | `copietype.png` | Copietype | Normal · Technique | Mew | **Mew** lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |
 | `cotogarde.png` | Cotogarde | Plante · Technique | Vipélierre | **Vipélierre** lance la capacité | lianes, feuilles, graines et lumière verte | ☐ |

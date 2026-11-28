@@ -13,6 +13,7 @@ const c = cardMaker('kangourex', 'kan');
 export const KANGOUREX_CARDS: CardDef[] = [
   // ——— Départ ———
   c('coup-main', "Coup d'Main", 'normal', 'technique', 'commune', 1, 'soi', [invoc(3), bebePow(1)], { effects: [invoc(5), bebePow(1)] }),
+  c('combo-griffe', 'Combo Griffe', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(4, { parCopie: 4 })], { effects: [dmg(6, { parCopie: 4 })] }),
   c('coup-double', 'Coup Double', 'normal', 'attaque', 'commune', 1, 'ennemi', [multi(4, 2)], { effects: [multi(6, 2)] }),
 
   // ——— Communes (28) ———

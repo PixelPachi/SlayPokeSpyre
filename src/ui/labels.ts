@@ -105,6 +105,7 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
         if (e.parProtection && dmg !== null) parts.push(`<i>(${e.amount ? `${e.amount} + ` : ''}ta Protection)</i>`);
         if (e.noAura) parts.push('<i>Sans bonus d’Aura.</i>');
         if (e.cumul) parts.push(`+${e.cumul} dégâts à chaque utilisation.`);
+        if (e.parCopie) parts.push(`+${e.parCopie} par exemplaire de <b>${d.name.replace(/\+$/, '')}</b> dans ton deck.`);
         if (e.peurChance) parts.push(`${Math.round(e.peurChance * 100)} % : 1 Peur.`);
         if (e.recul) parts.push(`Perd <b class="down">${e.recul}</b> PV si la cible avait de la Protection.`);
         if (e.facade) parts.push('Double si tu as un statut ou une baisse de stat.');

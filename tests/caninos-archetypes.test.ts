@@ -48,3 +48,12 @@ it('cartes de skin : 4 communes + 1 talent légendaire par skin, proposées seul
   r.skin = 'hisui';
   expect(r.offerable(pool)).toHaveLength(5);
 });
+
+it('Combo Griffe : +4 dégâts par exemplaire dans le deck', () => {
+  const deck = ['kan-combo-griffe', 'kan-combo-griffe', 'kan-combo-griffe', 'abri', 'abri'].map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
+  const c = new Combat({ character: 'kangourex', deck, enemies: ['rattata'], seed: 'CG', relics: [] } as never);
+  c.enemies[0].hp = c.enemies[0].maxHp = 999; c.player.energy = 10; c.player.statuses = {};
+  const hp = c.enemies[0].hp;
+  c.play(c.hand.find((x) => x.defId === 'kan-combo-griffe')!.uid, c.enemies[0].uid);
+  expect(hp - c.enemies[0].hp).toBeGreaterThanOrEqual(4 + 3 * 4);
+});

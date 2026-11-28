@@ -55,6 +55,7 @@ export type Effect =
       noAura?: boolean; // l'Aura ne s'ajoute pas (et n'est pas consommée)
       parProtection?: boolean; // + la Protection actuelle du lanceur
       champ?: string; // dégâts doublés si ce champ est actif
+      parCopie?: number; // +parCopie dégâts par exemplaire de cette carte dans le deck (Combo Griffe)
       cumul?: number; // chaque utilisation donne +cumul dégâts à toutes les cartes du même nom (pour le combat)
       peurChance?: number; // chance d'appliquer 1 Peur à chaque cible touchée
       recul?: number; // le lanceur perd ce nombre de PV si la cible avait de la Protection
