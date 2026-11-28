@@ -350,6 +350,8 @@ export class Combat {
 
   /** Combo Griffe : exemplaires de cette carte dans tout le deck (main, pioche, défausse, épuisées). */
   private playingCard: Card | null = null;
+  /** Évite qu'un objet qui pose un statut se redéclenche lui-même (Graine Herbe, Croc Rasoir). */
+  private spreading = false;
   copiesOf(d: CardDef): number {
     const id = d.id.replace(/^.*:/, '');
     const all = [...this.hand, ...this.drawPile, ...this.discardPile, ...this.exhaustPile];
@@ -1571,7 +1573,7 @@ export class Combat {
           const v = t.statuses[eff.status] ?? 0;
           if (v <= 0) continue;
           delete t.statuses[eff.status];
-          this.strike(t, v * (eff.per + (eff.status === 'brulure' && this.has('croc-rasoir') ? 1 : 0)), d);
+          this.strike(t, v * eff.per, d);
         }
         this.checkEnd();
         return;
@@ -2202,7 +2204,20 @@ export class Combat {
     if (status === 'confusion' && s > 0) CONF_TURNS.set(f, 2);
     if (status === 'brulure' && s > 0 && who !== 'player' && this.phase === 'joueur' && this.player.character === 'caninos') this.gainSpark(1); // Flamme Dorée
     this.events.push({ type: 'status', target: who, status, stacks: s });
-    if (who !== 'player' && status === 'vampigraine' && s > 0 && this.phase === 'joueur' && this.has('herbe-miroir')) this.gainBlock(this.player, 'player', 2); // Herbe Miroir
+    if (who !== 'player' && status === 'vampigraine' && s > 0 && this.phase === 'joueur') {
+      if (this.has('herbe-miroir')) this.gainBlock(this.player, 'player', 2); // Herbe Miroir
+      if (this.has('piquants')) this.addStatus(this.player, 'player', 'epine', 2); // Piquants
+      // Graine Herbe : la Vampigraine posée sur un ennemi se propage à tous les autres
+      if (this.has('graine-herbe') && !this.spreading) {
+        this.spreading = true;
+        for (const e of this.aliveEnemies()) if (e !== f) this.addStatus(e, e.uid, 'vampigraine', stacks);
+        this.spreading = false;
+      }
+    }
+    // Croc Rasoir : la Brûlure que tu infliges inflige aussi 1 Peur
+    if (who !== 'player' && status === 'brulure' && s > 0 && this.phase === 'joueur' && this.has('croc-rasoir') && !this.spreading) {
+      this.spreading = true; this.addStatus(f, who, 'peur', 1); this.spreading = false;
+    }
     if (who === 'player' && status === 'rage' && s > 0 && this.has('balle-fer')) this.gainBlock(this.player, 'player', 2 * s); // Balle Fer
   }
 
@@ -2219,11 +2234,11 @@ export class Combat {
         continue;
       }
       const hpBefore = f.hp;
-      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0) + (s === 'vampigraine' && who !== 'player' && this.has('piquants') ? 2 : 0), s);
+      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0), s);
       // Vampigraine : on ne récupère que la moitié des PV vraiment perdus par la cible
       const drained = Math.min(n, Math.max(0, hpBefore - f.hp));
       if (s === 'vampigraine' && who !== 'player') {
-        this.healPlayer(this.has('graine-herbe') ? drained : Math.floor(drained / 2)); // Graine Herbe : tout le drain
+        this.healPlayer(Math.floor(drained / 2));
         if (drained > 0 && this.player.character === 'vipelierre') this.gainSpark(1); // Vampigraine Scintillante
       }
       // Vampigraine posée par un ennemi : c'est lui qui récupère la moitié des PV drainés

@@ -88,11 +88,23 @@ it('objets d’archétype débloqués par niveau pour chaque Pokémon', async ()
   const run = new Run('REL', 'caninos', undefined, unlockedRelics('caninos', 9));
   expect(run.relicPool()).toContain('croc-rasoir');
   expect(new Run('REL', 'caninos').relicPool()).not.toContain('croc-rasoir');
-  // Roche Chaude : +1 Brûlure ; Croc Rasoir : +1 dégât par Brûlure consommée
+  // Roche Chaude : +1 Brûlure ; Croc Rasoir : Peur avec la Brûlure
   const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: 'can-detonation-arcanine', upgraded: false }));
   const c = new Combat({ character: 'caninos', deck, enemies: ['rattata'], seed: 'RC', relics: ['roche-chaude', 'croc-rasoir'] } as never);
   const e = c.enemies[0]; e.hp = e.maxHp = 999; e.block = 0; e.statuses = {};
   c.player.statuses.elan = 4; c.player.energy = 5;
   c.play(c.hand[0].uid, e.uid);
-  expect(999 - e.hp).toBeGreaterThanOrEqual(15); // (4 + 1) Brûlure × 3
+  expect(999 - e.hp).toBeGreaterThanOrEqual(10); // (4 + 1) Brûlure × 2
+  expect(e.statuses.peur ?? 0).toBeGreaterThan(0); // Croc Rasoir : la Brûlure inflige aussi Peur
+});
+
+it('Graine Herbe propage la Vampigraine à tous les ennemis, Piquants donne 2 Épine', () => {
+  const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: 'vampigraine', upgraded: false }));
+  const c = new Combat({ character: 'vipelierre', deck, enemies: ['rattata', 'rattata', 'rattata'], seed: 'GH', relics: ['graine-herbe', 'piquants'] } as never);
+  c.player.energy = 5;
+  const card = c.hand.find((x) => c.def(x).effects.some((e) => e.kind === 'statut' && (e as { status: string }).status === 'vampigraine'));
+  if (!card) return;
+  c.play(card.uid, c.enemies[0].uid);
+  for (const e of c.enemies) expect(e.statuses.vampigraine ?? 0).toBeGreaterThan(0);
+  expect(c.player.statuses.epine ?? 0).toBeGreaterThanOrEqual(2);
 });
