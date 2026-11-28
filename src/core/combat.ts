@@ -578,7 +578,7 @@ export class Combat {
   canPlay(card: Card): boolean {
     if (this.phase !== 'joueur') return false;
     const d = this.def(card);
-    if (d.keywords?.includes('injouable') || this.skipTurn || this.pendingChoice || this.pendingTop) return false;
+    if (d.keywords?.includes('injouable') || this.skipTurn || this.pendingChoice || this.pendingTop || this.pendingType) return false;
     // Court-Circuit : les cartes du partenaire K.O. sont injouables
     if (this.duo && d.duoSide && !this.duoSideAlive(d.duoSide)) return false;
     if (d.requires?.block && this.player.block < d.requires.block) return false;
@@ -1565,6 +1565,9 @@ export class Combat {
         if (n > 0) this.healPlayer(n);
         return;
       }
+      case 'choix-type':
+        this.pendingType = { count: eff.count };
+        return;
       case 'statut-par-soi': {
         const v = p.statuses[eff.from] ?? 0;
         if (v > 0) for (const t of d.target === 'tous' ? this.aliveEnemies() : target ? [target] : []) this.addStatus(t, t.uid, eff.status, v);
@@ -1995,6 +1998,25 @@ export class Combat {
   berryGifts = 0;
   /** Choix de carte en attente (Aromathérapie) : on ne peut rien jouer tant qu'on n'a pas choisi. */
   pendingChoice: { ids: string[]; upgraded: boolean } | null = null;
+  /** Don Ancestral : en attente du type choisi (nombre de cartes à créer). */
+  pendingType: { count: number } | null = null;
+
+  /** Don Ancestral : crée des cartes au hasard du type choisi, qui coûtent 0 ce tour. */
+  chooseType(t: PokeType): void {
+    if (!this.pendingType) return;
+    const n = this.pendingType.count;
+    this.pendingType = null;
+    const pool = Object.values(CARD_DEFS).filter((c) => c.pokeType === t && c.rarity !== 'depart' && !c.special && !c.skin && c.category !== 'statut'
+      && !c.effects.some((e) => e.kind === 'ajoute-carte' || e.kind === 'choix-type') && !c.keywords?.includes('injouable'));
+    for (let i = 0; i < n && pool.length; i++) {
+      const pick = this.rng.pick(pool);
+      const uid = this.nextTempUid++;
+      this.freeUids.add(uid);
+      if (this.hand.length < MAX_HAND) this.hand.push({ uid, defId: pick.id, upgraded: false });
+      else this.discardPile.push({ uid, defId: pick.id, upgraded: false });
+      this.events.push({ type: 'player-move', name: `Don Ancestral : ${pick.name}` });
+    }
+  }
 
   /** Message affiché au-dessus de ton Pokémon (utilisé par l'interface). */
   announce(name: string): void {

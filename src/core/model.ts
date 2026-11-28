@@ -99,6 +99,7 @@ export type Effect =
   | { kind: 'pioche-par-soi'; status: StatusId; per: number } // pioche 1 carte par tranche de « per » points de ton statut
   | { kind: 'soin-par-statut'; status: StatusId; mult: number } // soin = statut de la cible × mult
   | { kind: 'detonation'; status: StatusId; per: number } // consomme le statut de la cible : dégâts = statut × per
+  | { kind: 'choix-type'; count: number } // Don Ancestral (Mew) : choisis un type, crée autant de cartes de ce type, gratuites ce tour
   | { kind: 'statut-par-soi'; status: StatusId; from: StatusId } // applique à la cible autant de « status » que ton « from » (Détonation Arcanine : Brûlure = Élan)
   | { kind: 'propage-statut'; status: StatusId } // copie le statut de la cible sur tous les autres ennemis
   | { kind: 'pioche-si-statut'; status: StatusId; amount: number } // pioche si la cible a ce statut

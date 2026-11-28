@@ -118,3 +118,17 @@ it('Îles Écume : Artikodin (Glaciation) installe la Grêle, qui revient tant q
   for (let t = 0; t < 7; t++) { c.endPlayerTurn(); for (const e of c.aliveEnemies()) c.enemyAct(e.uid); c.endEnemyTurn(); if (c.phase !== 'joueur') break; }
   if (c.phase === 'joueur') expect(c.weather?.id).toBe('grele');
 });
+
+it('Don Ancestral : choisir un type crée des cartes de ce type, gratuites ce tour (2 si améliorée)', () => {
+  const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: 'mew-don-ancestral', upgraded: true }));
+  const c = new Combat({ character: 'mew', deck, enemies: ['rattata'], seed: 'DA2', relics: [] } as never);
+  c.player.energy = 3;
+  const n = c.hand.length;
+  c.play(c.hand[0].uid);
+  expect(c.pendingType?.count).toBe(2);
+  expect(c.canPlay(c.hand[0])).toBe(false);
+  c.chooseType('feu');
+  const added = c.hand.slice(n - 1);
+  expect(added).toHaveLength(2);
+  for (const x of added) { expect(c.def(x).pokeType).toBe('feu'); expect(c.costOf(x)).toBe(0); }
+});

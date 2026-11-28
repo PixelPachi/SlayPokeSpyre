@@ -774,6 +774,26 @@ export class CombatView {
     this.showEvents(events);
     if (this.combat.pendingChoice) this.showChoice();
     if (this.combat.pendingTop) this.showTopChoice();
+    if (this.combat.pendingType) this.showTypeChoice();
+  }
+
+  /** Don Ancestral (Mew) : choisir un type ; des cartes de ce type arrivent en main, gratuites ce tour. */
+  private showTypeChoice(): void {
+    if (this.root.querySelector('.card-choice')) return;
+    const box = document.createElement('div');
+    box.className = 'card-choice type-choice';
+    box.innerHTML = `<div class="card-choice-title">Don Ancestral : choisis un type</div>
+      <div class="type-choice-grid">${(Object.keys(TYPE_LABELS) as PokeType[]).map((t) => `<button class="type-pick" data-type="${t}" style="--tc:${TYPE_COLORS[t]}">${TYPE_LABELS[t]}</button>`).join('')}</div>`;
+    box.addEventListener('click', (ev) => {
+      const el = (ev.target as HTMLElement).closest<HTMLElement>('[data-type]');
+      if (!el) return;
+      ev.stopPropagation();
+      this.combat.chooseType(el.dataset.type as PokeType);
+      box.remove();
+      sfx('carte');
+      this.refresh();
+    });
+    this.root.appendChild(box);
   }
 
   /** Œil Spectral : choisir la carte à mettre au-dessus de la pioche. */

@@ -1816,3 +1816,9 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .card.full-art .card-text.xlong { font-size: 9.5px; height: 68px; }
 .card.full-art:has(.card-text.long) .card-cat, .card.full-art:has(.card-text.xlong) .card-cat { bottom: 74px; }
 .collect .tag.celebi-tag { background: #2f8a52; color: #eafff0; }
+
+/* Don Ancestral (Mew) : choix du type */
+.type-choice-grid { display: grid; grid-template-columns: repeat(6, 110px); gap: 10px; justify-content: center; margin: 14px 0; }
+.type-pick { padding: 10px 0; border-radius: 10px; border: 2px solid color-mix(in srgb, var(--tc) 60%, #000); background: var(--tc); color: #fff; font: 900 15px 'Nunito', sans-serif; text-shadow: 0 1px 2px #0009; cursor: pointer; transition: transform .1s; }
+.type-pick:hover { transform: scale(1.08); box-shadow: 0 0 14px var(--tc); }
+.card.full-art .card-text { font-size: 11px; line-height: 1.15; }

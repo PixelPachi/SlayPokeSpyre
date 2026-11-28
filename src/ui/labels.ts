@@ -182,6 +182,7 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
       case 'pioche-par-soi': parts.push(`Pioche 1 carte par ${e.per} ${STATUS_INFO[e.status].label}.`); break;
       case 'protection-par-statut': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en Protection.`); break;
       case 'soin-par-statut': parts.push(`Récupère ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en PV.`); break;
+      case 'choix-type': parts.push(`Choisis un type : ${e.count > 1 ? `<b>${e.count}</b> cartes` : 'une carte'} de ce type au hasard, à 0 PA ce tour.`); break;
       case 'statut-par-soi': parts.push(`${STATUS_INFO[e.status].label} égale à ton ${STATUS_INFO[e.from].label}.`); break;
       case 'detonation': if (e.status === 'brulure' && e.per === 2) { parts.push(`Déclenche Détonation${d.target === 'tous' ? ' sur tous les ennemis' : ''}.`); break; }
         parts.push(`Consomme la ${STATUS_INFO[e.status].label} ${d.target === 'tous' ? 'de tous les ennemis' : 'de la cible'} : <b>${e.per}</b> dégâts par point.`); break;

@@ -6,6 +6,8 @@ import { addCards, breakBlock, cardMaker, dmg, draw, hpLoss, pa, power, prot, st
 const c = cardMaker('mew', 'mew');
 
 export const MEW_CARDS: CardDef[] = [
+  // ——— Carte signature full art (bénédiction de Célébi) ———
+  { ...c('don-ancestral', 'Don Ancestral', 'psy', 'technique', 'rare', 1, 'soi', [{ kind: 'choix-type', count: 1 }], { effects: [{ kind: 'choix-type', count: 2 }] }), fullArt: true, special: true },
   // ——— Départ ———
   c('ecras-face', "Écras'Face", 'normal', 'attaque', 'depart', 1, 'ennemi', [dmg(6)], { effects: [dmg(9)] }),
   c('morphing', 'Morphing', 'normal', 'technique', 'commune', 1, 'soi', [addCards(1)], { cost: 0 }),
