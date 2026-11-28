@@ -6,7 +6,7 @@ import { Rng } from './rng';
 import {
   type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier,
 } from './types';
-import { CARD_DEFS, cardDef, ENCHANTS, enchantId, rollEnchant } from '../data/cards';
+import { CARD_DEFS, cardDef, ENCHANTS, enchantId, rollEnchant, scaleX } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { primordialTypes, skinDef } from '../data/skins';
 import { ENEMY_DEFS } from '../data/enemies';
@@ -277,14 +277,15 @@ export class Combat {
     this.drawPile.sort((a, b) => Number(this.hasKw(a, 'innee')) - Number(this.hasKw(b, 'innee')));
 
     // Talents de départ
-    if (ch.id === 'riolu' && !this.pixilate) this.gainAura(3);
-    this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
+    // Skin chromatique : le talent chromatique remplace le talent de base (Justicier, Contestation, Intimidation, Technicien)
     this.shinySkin = opts.skin === 'shiny';
+    if (ch.id === 'riolu' && !this.pixilate && !this.shinySkin) this.gainAura(3);
+    this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
     this.weaver = ch.id === 'vipelierre' && opts.skin === 'tisserand';
     this.moneyStart = opts.money ?? 0;
     // Intimidation (Caninos) ; le Chien de la Lanterne a Feu des Âmes à la place
     this.rockHead = ch.id === 'caninos' && opts.skin === 'hisui';
-    if (ch.id === 'caninos' && !this.soulDog && !this.rockHead) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
+    if (ch.id === 'caninos' && !this.soulDog && !this.rockHead && !this.shinySkin) for (const e of this.enemies) this.addStatus(e, e.uid, 'attaque', -1);
 
     // Reliques de gardien : +1 PA par tour chacune, avec leur contrepartie
     const bossRelics = ['orbe-adamant', 'orbe-platine', 'orbe-perle', 'orbe-toxique', 'orbe-flamme', 'cendre-sacree'].filter((id) => this.has(id));
@@ -464,7 +465,7 @@ export class Combat {
   private playerDamage(base: number, d: CardDef, t: Fighter) {
     const r = computeDamage(base + this.relicFlat(d), this.player, t, d.pokeType);
     // Technicien (Quelorior) : les attaques copiées frappent 25 % plus fort
-    const tech = this.player.character === 'quelorior' && isCopy(d.id) ? 1.25 : 1;
+    const tech = this.player.character === 'quelorior' && !this.shinySkin && isCopy(d.id) ? 1.25 : 1;
     return { amount: Math.floor(r.amount * tech * this.relicMult(r.effectiveness === 'super') * this.fieldMult(d.pokeType, this.has('lunettes-filtre')) + 1e-9), effectiveness: r.effectiveness };
   }
 
@@ -2077,7 +2078,7 @@ export class Combat {
   private addStatus(f: Fighter, who: Who, status: StatusId, stacks: number): void {
     let s = stacks;
     // Contestation (Vipélierre) : ses baisses de stats deviennent des hausses, et inversement
-    if (who === 'player' && this.player.character === 'vipelierre' && !this.weaver && (status === 'attaque' || status === 'defense')) s = -s;
+    if (who === 'player' && this.player.character === 'vipelierre' && !this.weaver && !this.shinySkin && (status === 'attaque' || status === 'defense')) s = -s;
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
     if (s > 0 && this.terrain?.id === 'champ-brumeux' && BAD_STATUSES.includes(status)) return;
     if (who === 'player' && s > 0 && this.has('carapace-mue') && (status === 'peur' || status === 'paralysie')) return void this.relicFired('carapace-mue');
@@ -2213,18 +2214,6 @@ export class Combat {
   }
 }
 
-/** Coût X : multiplie les valeurs des effets par X (le nombre de coups pour une carte à coups multiples). */
-function scaleX(d: CardDef, x: number, amountsOnly = false): CardDef {
-  const effects = d.effects.map((e): Effect => {
-    switch (e.kind) {
-      case 'degats': return e.hits !== undefined && !amountsOnly ? { ...e, hits: e.hits * x, hitsMax: undefined } : { ...e, amount: e.amount * x };
-      case 'protection': case 'pioche': case 'soin': case 'pa': return { ...e, amount: e.amount * x };
-      case 'statut': return { ...e, stacks: e.stacks * x };
-      default: return e;
-    }
-  });
-  return { ...d, effects };
-}
 
 /** Le Bébé Kangourex comme combattant (type Normal), pour le calcul des dégâts. */
 const BABY_FIGHTER: Fighter = { name: 'Bébé', dex: 115, types: ['normal'], hp: 1, maxHp: 1, block: 0, statuses: {} };

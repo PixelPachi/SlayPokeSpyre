@@ -25,21 +25,22 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const text = o.text ?? cardText(d, null, null);
   const enemy = d.id.startsWith('ennemi-') || d.id.includes('copie:');
   // Duo : même cadre que les autres, recoloré (bordeaux / turquoise / bicolore, liserés dorés)
-  const frame = enemy ? frameUrl('ennemi') : frameUrl(d.character === 'duo' ? `duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : d.character);
+  // Carte chromatique : le cadre classique en arc-en-ciel
+  const frame = enemy ? frameUrl('ennemi') : d.chroma ? frameUrl('chroma') : frameUrl(d.character === 'duo' ? `duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : d.character);
   // Duo : d'abord l'illustration Gemini avec Posipi / Négapi (au nom de la carte), sinon l'attaque d'origine
   const art = enemy ? artNoPokemon(d.name) : d.character === 'duo'
     ? artUrl(d.name, 'duo') ?? artUrl(d.artName ?? d.name, 'duo') ?? artNoPokemon(d.artName ?? d.name)
     : artUrl(d.artName ?? d.name, d.character);
   const orb = d.character === 'duo' ? orbUrl(`duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}`) : orbUrl(d.character);
   return `
-    <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+    <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${d.chroma ? 'chroma-card' : ''} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
          style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${frame ? `--frame:url('${frame}');` : ''}${o.style ?? ''}">
       <div class="card-inner">
         <div class="card-window">
           <div class="card-art">${art ? `<img src="${art}" alt="" draggable="false" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src=this.src.split('?')[0]+'?r='+Date.now()}">` : CATEGORY_ART[d.category]}</div>
           <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
         </div>
-        ${frame ? '<div class="card-tint"></div>' : ''}
+        ${frame && !d.chroma ? '<div class="card-tint"></div>' : ''}
         <div class="card-banner"><div class="card-name" style="font-size:${nameSize(d.name)}px">${esc(d.name)}</div></div>
         <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
         <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${withStatusTips(text)}</span></div>

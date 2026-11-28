@@ -1,4 +1,4 @@
-import { CARD_DEFS as CARD_DEFS_ALL } from '../src/data/cards';
+import { CARD_DEFS as CARD_DEFS_ALL, cardDef } from '../src/data/cards';
 import { describe, expect, it } from 'vitest';
 import { Combat, computeDamage, makeDeck, type Fighter } from '../src/core/combat';
 import { typeMultiplier } from '../src/core/types';
@@ -375,10 +375,10 @@ describe('cartes neutres', async () => {
   it('des cartes neutres apparaissent parfois dans les récompenses', () => {
     const run = new Run('NEUTRE', 'riolu');
     let neutrals = 0;
-    for (let i = 0; i < 200; i++) neutrals += run.cardChoices('combat').filter((id) => CARD_DEFS[id].character === 'normal').length;
+    for (let i = 0; i < 200; i++) neutrals += run.cardChoices('combat').filter((id) => cardDef(id).character === 'normal').length;
     expect(neutrals).toBeGreaterThan(20);
     expect(neutrals).toBeLessThan(150);
-    expect(run.neutralChoices(2).every((id) => CARD_DEFS[id].character === 'normal')).toBe(true);
+    expect(run.neutralChoices(2).every((id) => cardDef(id).character === 'normal')).toBe(true);
   });
 
   it('Châtiment double contre une cible qui a un statut', () => {
@@ -440,7 +440,7 @@ describe('cartes de tous les personnages', async () => {
   it('Mew pioche des cartes de tous les personnages', () => {
     const run = new Run('MEW', 'mew');
     const seen = new Set<string>();
-    for (let i = 0; i < 100; i++) for (const id of run.cardChoices('combat')) seen.add(CARD_DEFS[id].character);
+    for (let i = 0; i < 100; i++) for (const id of run.cardChoices('combat')) seen.add(cardDef(id).character);
     expect(seen.size).toBeGreaterThanOrEqual(5);
   });
 });

@@ -53,8 +53,12 @@ const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id
 // Même objectif pour tous : vaincre 5 Pokémon chromatiques en jouant ce Pokémon (cumulé sur toutes ses runs).
 const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouant ce Pokémon');
 // Bonus communs des chromatiques : Étincelles (à 5, la prochaine carte est chromatique : valeurs doublées)
-const SHINY_COMMON = ['Étincelles : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu. À 5, la prochaine carte est chromatique (valeurs doublées).', 'Chromatiques ennemis 3× plus fréquents ; en vaincre un améliore une carte. Boutiques −10 %. Commence avec le Charme Chroma.'];
-const shinyPassive = (passive: string): SkinDef => ({ ...SHINY_GOAL, perks: [passive, ...SHINY_COMMON] });
+const SHINY_COMMON = ['Étincelles : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu. À 5, la prochaine carte est chromatique (valeurs doublées).', 'Chromatiques ennemis 3× plus fréquents ; en vaincre un améliore une carte. Boutiques −10 %.', 'Le Charme Chroma remplace l’objet de départ : cartes chromatiques 2× plus fréquentes.'];
+/** Le talent chromatique remplace le talent de base (« Nom : texte »). */
+const shinyPassive = (passive: string): SkinDef => {
+  const [name, ...rest] = passive.split(' : ');
+  return { ...SHINY_GOAL, talent: { name, text: rest.join(' : ') }, relic: 'charme-chroma', perks: SHINY_COMMON };
+};
 
 // Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.
 const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): SkinDef => ({
@@ -85,7 +89,7 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     talent: { name: 'Soie Astrale', text: 'Perd Contestation. Ses cartes peuvent porter plusieurs enchantements.' },
     perks: ['Peut apprendre toutes les cartes Psy et Ténèbres débloquées.'],
   }],
-  kangourex: [shinyPassive('Bébé Porte-Bonheur : +3 ₽ à chaque attaque du Bébé ; une carte chromatique fait frapper le Bébé deux fois plus.'), primordial('Kangourex', [115], { baby: true }), {
+  kangourex: [shinyPassive('Bébé Porte-Bonheur : le Bébé reste à tes côtés (et Kangourex gagne toujours de la Rage) ; +3 ₽ à chaque attaque du Bébé ; une carte chromatique fait frapper le Bébé deux fois plus.'), primordial('Kangourex', [115], { baby: true }), {
     id: 'oceanique', name: 'Gardien Océanique', stat: 'bosses', goal: 1, bosses: ['roigada'], dex: [115], baby: true,
     goalText: 'Vaincre le gardien du Puits Ramoloss (Roigada) en jouant Kangourex. Il devient de type Eau, le Corail remplace le Lait Meumeu (le Bébé gagne 3 Protection chaque tour), ses attaques de départ deviennent des Écumes (4 dégâts à tous les ennemis) et il peut obtenir toutes les cartes Eau du jeu. Pas de Méga-Évolution avec ce skin.',
     types: ['eau'], relic: 'corail', typeCards: ['eau'],
@@ -111,7 +115,7 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     types: ['feu', 'roche'], relic: 'pierre-dure', typeCards: ['roche'],
     evolutions: [{ act: 2, dex: 59, name: 'Arcanin d’Hisui', types: ['feu', 'roche'], hp: 12 }],
   }],
-  mew: [shinyPassive('Mirage : les cartes créées pendant le combat ont 1 chance sur 4 d’arriver déjà chromatiques.'), primordial('Mew', [151])],
+  mew: [shinyPassive('Mirage : garde l’accès aux cartes de tous les personnages ; les cartes créées pendant le combat ont 1 chance sur 4 d’arriver déjà chromatiques.'), primordial('Mew', [151])],
   duo: [shinyPassive('Pôles Inversés : Posipi donne la Protection et le coût réduit, Négapi les dégâts bonus ; une Surcharge donne 5 Étincelles.')],
   quelorior: [shinyPassive('Chef-d’œuvre : +2 Étincelles par copie de Gribouille ; une copie faite par une carte chromatique est améliorée pour la run.'), primordial('Quelorior', [235]), {
     id: 'flambeur', name: 'Flambeur', stat: 'maxMoney', goal: 500, maxMoney: 500, dex: [235],

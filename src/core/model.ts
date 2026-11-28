@@ -179,6 +179,8 @@ export interface CardDef {
   duoFusion?: boolean;
   /** Coût X : dépense tous les PA restants ; les valeurs des effets sont multipliées par X (le nombre de coups si la carte frappe plusieurs fois). */
   xCost?: boolean;
+  /** Carte chromatique (contour arc-en-ciel) : valeurs doublées. */
+  chroma?: boolean;
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

@@ -1,6 +1,6 @@
 // Toutes les cartes du jeu. Ajouter une carte = ajouter une entrée ici (aucun code à écrire).
 // Règle du GDD : la plupart des cartes portent le nom d'une capacité que le Pokémon peut apprendre dans les jeux.
-import type { CardDef } from '../core/model';
+import type { CardDef, Effect } from '../core/model';
 import { stackEffects, trameDef, weaveDef } from './tissage';
 import { QUELORIOR_CARDS } from './cards-quelorior';
 import { DUO_CARDS } from './cards-duo';
@@ -244,7 +244,15 @@ export function enchantId(enchant: string, defId: string): string {
 /** Carte créée renommée par le joueur : « nom:<nom encodé>:<identifiant> ». */
 export const namedId = (name: string, id: string): string => `nom:${encodeURIComponent(name)}:${id.replace(/^nom:[^:]*:/, '')}`;
 
+/** Carte chromatique : « chroma:<identifiant> » ; toutes les cartes du jeu peuvent l'être (valeurs doublées). */
+export const chromaId = (id: string): string => (id.startsWith('chroma:') ? id : `chroma:${id}`);
+export const isChroma = (id: string): boolean => id.startsWith('chroma:') || id.includes(':chroma:');
+
 export function cardDef(defId: string, upgraded = false): CardDef {
+  if (defId.startsWith('chroma:')) {
+    const inner = cardDef(defId.slice(7), upgraded);
+    return { ...chromaScale(inner), id: defId, artName: inner.artName ?? inner.name.replace(/\+$/, ''), chroma: true };
+  }
   if (defId.startsWith('nom:')) {
     const [, enc, ...rest] = defId.split(':');
     const inner = cardDef(rest.join(':'), upgraded);
@@ -279,4 +287,28 @@ export function neutralPool(): CardDef[] {
 
 export function allCards(): CardDef[] {
   return CARDS;
+}
+
+/** Coût X : multiplie les valeurs des effets par X (le nombre de coups pour une carte à coups multiples). */
+export function scaleX(d: CardDef, x: number, amountsOnly = false): CardDef {
+  const effects = d.effects.map((e): Effect => {
+    switch (e.kind) {
+      case 'degats': return e.hits !== undefined && !amountsOnly ? { ...e, hits: e.hits * x, hitsMax: undefined } : { ...e, amount: e.amount * x };
+      case 'protection': case 'pioche': case 'soin': case 'pa': return { ...e, amount: e.amount * x };
+      case 'statut': return { ...e, stacks: e.stacks * x };
+      default: return e;
+    }
+  });
+  return { ...d, effects };
+}
+
+/** Carte chromatique : double toutes les valeurs des effets (dégâts, Protection, statuts, multiplicateurs, bonus…). */
+const CHROMA_FIELDS = ['amount', 'stacks', 'mult', 'dmg', 'bonus', 'perCard', 'parCopie', 'parBebe', 'siBebe', 'times'] as const;
+function chromaScale(d: CardDef): CardDef {
+  const effects = d.effects.map((e): Effect => {
+    const o = { ...e } as Record<string, unknown>;
+    for (const k of CHROMA_FIELDS) if (typeof o[k] === 'number' && k in e) o[k] = (o[k] as number) * 2;
+    return o as unknown as Effect;
+  });
+  return { ...d, effects };
 }

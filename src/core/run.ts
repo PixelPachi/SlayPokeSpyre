@@ -7,7 +7,7 @@ import type { Form, Card, CardDef, CharacterId, DuoSide } from './model';
 export const runHooks: { relicPicked?: (run: Run, id: string) => void } = {};
 import { Rng } from './rng';
 import { BERRIES, MAX_BERRIES } from '../data/berries';
-import { allCards, CARD_DEFS, cardDef, enchantId, neutralPool, rewardPool, rollEnchant } from '../data/cards';
+import { allCards, cardDef, chromaId, enchantId, neutralPool, rewardPool, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, ZONES, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
@@ -154,8 +154,8 @@ export class Run {
     if (def?.relic) this.relics = [def.relic, ...this.relics.filter((r) => r !== ch.starterRelic)];
     if (def?.firstCard && this.deck.length) this.deck[0] = { ...this.deck[0], defId: def.firstCard, upgraded: false };
     for (const id of def?.extraCards ?? []) this.addCard(id);
-    // Skin chromatique : Charme Chroma en plus de l'objet de départ
-    if (skin === 'shiny' && !this.relics.includes('charme-chroma')) this.relics.push('charme-chroma');
+    // Skin chromatique : le Charme Chroma remplace l'objet de départ
+    if (skin === 'shiny') this.relics = ['charme-chroma', ...this.relics.filter((r) => r !== 'charme-chroma' && r !== (def?.relic ?? ch.starterRelic))];
   }
 
   /** Cartes débloquées par l'EXP du Pokémon (undefined = toutes). */
@@ -483,7 +483,12 @@ export class Run {
       const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id) && c.rarity !== 'rare' && c.rarity !== 'legendaire'));
       if (pick) out.push(pick.id);
     }
-    return out;
+    return out.map((id) => this.maybeChroma(id));
+  }
+
+  /** Carte chromatique (contour arc-en-ciel, valeurs doublées) : 1 chance sur 100, 2 avec le Charme Chroma. */
+  maybeChroma(id: string): string {
+    return this.rng.next() < (this.relics.includes('charme-chroma') ? 0.02 : 0.01) ? chromaId(id) : id;
   }
 
   /** Cartes neutres vendues au Marché Kecleon. */
@@ -505,7 +510,7 @@ export class Run {
       const pick = options.length ? this.rng.pick(options) : this.rng.pick(pool.filter((c) => !out.includes(c.id)));
       if (pick) out.push(pick.id);
     }
-    return out;
+    return out.map((id) => this.maybeChroma(id));
   }
 
   /** Sommet : le dominant qui barre le passage est tiré une fois (Noctunoir ou Massko) pour être annoncé à l'avance. */
@@ -598,8 +603,8 @@ export class Run {
 }
 
 export function cardPrice(defId: string): number {
-  const d = CARD_DEFS[defId];
-  const base = d.rarity === 'legendaire' ? 260 : d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50;
+  const d = cardDef(defId);
+  const base = (d.chroma ? 2 : 1) * (d.rarity === 'legendaire' ? 260 : d.rarity === 'rare' ? 150 : d.rarity === 'peu-commune' ? 75 : 50); // chromatique : prix doublé
   return d.character === 'normal' ? Math.round(base * 1.2) : base; // cartes neutres un peu plus chères
 }
 

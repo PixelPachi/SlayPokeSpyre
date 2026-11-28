@@ -119,16 +119,15 @@ export function renderReward(
   };
   const openCards = (l: typeof loot[number]) => {
     // Charme Chroma : chaque capacité proposée a 1 chance sur 4 d'être déjà améliorée (tiré une seule fois)
-    const ups: boolean[] = ((l as { ups?: boolean[] }).ups ??= o.cards.map(() => run.relics.includes('charme-chroma') && run.rng.next() < 0.25));
     const box = document.createElement('div');
     box.className = 'card-choice';
     box.innerHTML = `<div class="card-choice-title">Choisis une capacité</div>
-      <div class="card-row card-choice-row">${o.cards.map((id, i) => renderCard(cardDef(id, ups[i]), { classes: `pickable ${ups[i] ? 'chroma-up' : ''}` }).replace('<div class="card', `<div data-pick="${id}" data-i="${i}" class="card`)).join('')}</div>
+      <div class="card-row card-choice-row">${o.cards.map((id, i) => renderCard(cardDef(id), { classes: 'pickable' }).replace('<div class="card', `<div data-pick="${id}" data-i="${i}" class="card`)).join('')}</div>
       <button class="btn skip-cards">Passer</button>`;
     box.addEventListener('click', (ev) => {
       const t = ev.target as HTMLElement;
       const c = t.closest<HTMLElement>('[data-pick]');
-      if (c) { run.addCard(c.dataset.pick!, ups[Number(c.dataset.i)]); l.taken = true; sfx('carte'); box.remove(); return draw(); }
+      if (c) { run.addCard(c.dataset.pick!); l.taken = true; sfx('carte'); box.remove(); return draw(); }
       if (t.closest('.skip-cards')) box.remove();
     });
     (layer ?? root.querySelector('.node-screen')!).appendChild(box);
