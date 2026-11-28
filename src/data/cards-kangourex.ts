@@ -5,7 +5,7 @@
 // que Frénésie, Colère, Avalanche, Trépignement, Mâchouille, Dégommage et Rancune exploitent.
 import type { CardDef } from '../core/model';
 import {
-  bebeAtk, bebeHeal, bebeMax, invoc, bebePow, bebeProt, breakBlock, cardMaker, dmg, draw, heal, hpLoss, multi, pa, power, prot, st,
+  bebeAtk, invoc, bebePow, bebeProt, breakBlock, cardMaker, dmg, draw, hpLoss, multi, pa, power, prot, st,
 } from './card-kit';
 
 const c = cardMaker('kangourex', 'kan');

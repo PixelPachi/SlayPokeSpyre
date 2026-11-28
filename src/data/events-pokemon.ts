@@ -6,7 +6,6 @@ import { BERRY_DEFS } from './berries';
 import type { GameEvent } from './events';
 
 const poke = (dex: number) => `sprites/pokemon/front/${dex}.png`;
-const item = (id: string) => `sprites/items/${id}.png`;
 const hurt = (r: Run, n: number) => { r.hp = Math.max(1, r.hp - n); };
 const gainMax = (r: Run, n: number) => { r.maxHp += n; r.hp += n; };
 const loseMax = (r: Run, n: number) => { r.maxHp = Math.max(1, r.maxHp - n); r.hp = Math.min(r.hp, r.maxHp); };

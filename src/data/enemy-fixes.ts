@@ -31,6 +31,6 @@ each(byName('Hypnose', 'Berceuse'), (m) => { m.playerStatus = { status: 'sommeil
 each(byName('Grimace'), (m) => { m.playerStatus = { status: 'peur', stacks: 2 }; });
 // Météo : Tempêtesable et Grêle déclenchent vraiment la météo
 each(byName('Tempêtesable'), (m) => { delete m.playerStatus; m.meteo = 'tempete-sable'; m.block = m.block ?? 10; m.intent = 'boost'; });
-each((id, m) => m.name === 'Grêle' && !m.meteo, (m) => { delete m.playerStatus; m.meteo = 'grele'; m.block = m.block ?? 10; m.intent = 'boost'; });
+each((_, m) => m.name === 'Grêle' && !m.meteo, (m) => { delete m.playerStatus; m.meteo = 'grele'; m.block = m.block ?? 10; m.intent = 'boost'; });
 // Ligotage et Étreinte ligotent (6 PV par tour pendant 3 tours)
 each(byName('Ligotage', 'Étreinte'), (m) => { m.damage = Math.max(4, Math.round((m.damage ?? 4) * 1.2)); delete m.hits; m.playerStatus = { status: 'ligote', stacks: 1 }; });

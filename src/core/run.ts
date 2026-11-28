@@ -145,7 +145,6 @@ export class Run {
   /** Objets tenus (le premier est l'objet de départ). */
   relics: string[] = [];
   private nextUid = 1;
-  private rareBonus = 0; // la chance de rare monte à chaque récompense sans rare
 
   /** Applique le skin équipé : sprite, et (plus tard) deck / objet tenu de départ propres au skin. */
   applySkin(skin: string | undefined, def?: { deck?: string[]; relic?: string; firstCard?: string; extraCards?: string[] }): void {

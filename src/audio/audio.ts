@@ -122,18 +122,9 @@ export function setSoundMode(m: Mode): void {
 }
 
 export function soundMode(): Mode { return mode; }
-export function cycleSound(): Mode {
-  mode = mode === 'tout' ? 'effets' : mode === 'effets' ? 'muet' : 'tout';
-  try { localStorage.setItem(KEY, mode); } catch { /* ignore */ }
-  applyVolumes();
-  return mode;
-}
 export function soundIcon(): string {
   if (mode === 'muet' || (levels.musique === 0 && levels.effets === 0)) return '🔇';
   return mode === 'tout' ? '🔊' : '🔉';
-}
-export function soundLabel(): string {
-  return mode === 'tout' ? 'Son : musique + effets' : mode === 'effets' ? 'Son : effets seulement' : 'Son coupé';
 }
 
 // ——— Moteur ———
@@ -401,11 +392,6 @@ export function playTheme(id: string): void {
   } else start();
 }
 
-export function stopMusic(): void {
-  stopFile();
-  song = null;
-  current = null;
-}
 
 // ——— Bruitages ———
 

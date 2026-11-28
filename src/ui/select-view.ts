@@ -3,13 +3,12 @@ import { equipSkin, equippedSkin, skinDetail, skinProgress, skinUnlocked } from 
 // Écran de sélection du personnage (section 9 du GDD : illustration plein écran + fiche à gauche).
 import type { CharacterId } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
-import { allCards, cardDef, neutralPool } from '../data/cards';
+import { cardDef } from '../data/cards';
 import type { SaveData } from '../core/save';
 import { characterLevel, playableCharacters } from '../core/save';
-import { LEVEL_EXP, MAX_LEVEL, RELIC_UNLOCKS, UNLOCKS } from '../data/unlocks';
-import { renderCard } from './card';
-import { relicCard, relicIcon } from './run-ui';
-import { allRelics, relicDef } from '../data/relics';
+import { LEVEL_EXP, MAX_LEVEL } from '../data/unlocks';
+import { relicIcon } from './run-ui';
+import { relicDef } from '../data/relics';
 import { CHARACTERS } from '../data/characters';
 import { TYPE_COLORS } from './labels';
 import { asset, esc } from './util';
@@ -138,17 +137,6 @@ function expBlock(save: SaveData, c: CharacterId): string {
     </div>`;
 }
 
-export function relicsFor(c: CharacterId, lvl: number): string {
-  const need = new Map<string, number>();
-  for (const [l, ids] of Object.entries(RELIC_UNLOCKS[c] ?? {})) for (const id of ids) need.set(id, Number(l));
-  const mine = allRelics().filter((r) => r.owner === c);
-  const common = allRelics().filter((r) => r.owner === 'commun');
-  return [...mine, ...common].map((r) => {
-    const n = need.get(r.id) ?? 0;
-    const tag = r.rarity === 'depart' ? 'Objet de départ' : r.owner === 'commun' ? 'Commun à tous' : n > lvl ? `Niveau ${n}` : `Débloqué (niveau ${n})`;
-    return `<div class="collect-relic ${n > lvl ? 'locked' : ''}">${relicCard(r.id, `<em>${tag}</em>`)}</div>`;
-  }).join('');
-}
 
 /** Skins du personnage : normal + skins à débloquer (objectifs cumulés sur toutes les runs). */
 function skinBlock(save: SaveData, c: CharacterId): string {

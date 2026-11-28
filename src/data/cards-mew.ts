@@ -1,7 +1,7 @@
 // Cartes de Mew : capacités que Mew apprend (niveau, CT, tuteurs). Mew a aussi accès aux cartes de tous les personnages.
 // Identité : Psy, copie et cartes ajoutées au hasard (Gène ancestral), pioche.
 import type { CardDef } from '../core/model';
-import { addCards, breakBlock, cardMaker, dmg, draw, heal, hpLoss, multi, pa, power, prot, st } from './card-kit';
+import { addCards, breakBlock, cardMaker, dmg, draw, hpLoss, pa, power, prot, st } from './card-kit';
 
 const c = cardMaker('mew', 'mew');
 

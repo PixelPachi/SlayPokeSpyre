@@ -1,10 +1,9 @@
-import { soundIcon, soundLabel } from '../audio/audio';
+import { soundIcon } from '../audio/audio';
 // Éléments communs aux écrans d'une run : barre du haut et fenêtre du deck.
 import { BERRY_DEFS, MAX_BERRIES } from '../data/berries';
 import type { Card } from '../core/model';
 import type { Run } from '../core/run';
 import { cardDef } from '../data/cards';
-import { CHARACTERS } from '../data/characters';
 import { relicDef } from '../data/relics';
 import { asset } from './util';
 import { renderCard } from './card';

@@ -166,8 +166,3 @@ export function zonesOfAct(act: number): ZoneDef[] {
   return ZONES.filter((z) => z.act === act);
 }
 
-export function zoneDef(id: string): ZoneDef {
-  const z = ZONES.find((x) => x.id === id);
-  if (!z) throw new Error(`Zone inconnue : ${id}`);
-  return z;
-}
