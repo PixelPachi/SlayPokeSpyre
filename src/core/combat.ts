@@ -1541,6 +1541,11 @@ export class Combat {
         if (n > 0) this.healPlayer(n);
         return;
       }
+      case 'statut-par-soi': {
+        const v = p.statuses[eff.from] ?? 0;
+        if (v > 0) for (const t of d.target === 'tous' ? this.aliveEnemies() : target ? [target] : []) this.addStatus(t, t.uid, eff.status, v);
+        return;
+      }
       case 'detonation': {
         for (const t of d.target === 'tous' ? this.aliveEnemies() : target ? [target] : []) {
           const v = t.statuses[eff.status] ?? 0;

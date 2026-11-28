@@ -58,3 +58,13 @@ it('Ruines Alpha : les 28 formes de Zarbi n’ont que Puissance Cachée, d’un 
   }
   expect(types.size).toBeGreaterThan(5);
 });
+
+it('Détonation Arcanine : Brûlure égale à l’Élan, puis la détonation consomme la Brûlure (×2 dégâts)', () => {
+  const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: 'can-detonation-arcanine', upgraded: false }));
+  const c = new Combat({ character: 'caninos', deck, enemies: ['rattata'], seed: 'DA', relics: [] } as never);
+  const e = c.enemies[0]; e.hp = e.maxHp = 999; e.statuses = { brulure: 1 }; e.block = 0;
+  c.player.statuses.elan = 5; c.player.energy = 5;
+  c.play(c.hand[0].uid, e.uid);
+  expect(e.statuses.brulure ?? 0).toBe(0);
+  expect(999 - e.hp).toBeGreaterThanOrEqual(12);
+});

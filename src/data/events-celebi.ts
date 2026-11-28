@@ -5,7 +5,7 @@ import { cardDef } from './cards';
 import type { GameEvent } from './events';
 
 /** Carte full art « signature » donnée par la bénédiction de Célébi (les autres Pokémon viendront plus tard). */
-export const SIGNATURE_CARDS: Partial<Record<CharacterId, string>> = { kangourex: 'kan-assaut-du-petit' };
+export const SIGNATURE_CARDS: Partial<Record<CharacterId, string>> = { kangourex: 'kan-assaut-du-petit', caninos: 'can-detonation-arcanine' };
 
 export function celebiEvent(run: Run): GameEvent {
   const sig = SIGNATURE_CARDS[run.character];

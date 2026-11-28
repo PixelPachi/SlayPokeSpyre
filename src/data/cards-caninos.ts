@@ -94,6 +94,8 @@ export const CANINOS_CARDS: CardDef[] = [
   c('vitesse-extreme', 'Vitesse Extrême', 'normal', 'attaque', 'rare', 0, 'ennemi', [dmg(6), st('elan', 2, 'soi'), draw(1)], { effects: [dmg(8), st('elan', 3, 'soi'), draw(1)] }, ['innee']),
   c('boutefeu', 'Boutefeu', 'feu', 'attaque', 'rare', 2, 'ennemi', [dmg(16), smult('brulure', 2), hpLoss(4)], { effects: [dmg(20), smult('brulure', 3), hpLoss(4)] }),
   c('surchauffe', 'Surchauffe', 'feu', 'attaque', 'rare', 2, 'ennemi', [dmg(16, { parStatut: 'brulure', parStatutX: 2 }), st('attaque', -2, 'soi')], { effects: [dmg(20, { parStatut: 'brulure', parStatutX: 3 }), st('attaque', -2, 'soi')] }),
+  // ——— Carte signature full art (bénédiction de Célébi) ———
+  { ...c('detonation-arcanine', 'Détonation Arcanine', 'feu', 'attaque', 'rare', 2, 'ennemi', [{ kind: 'statut-par-soi', status: 'brulure', from: 'elan' }, { kind: 'detonation', status: 'brulure', per: 2 }], { cost: 1 }), fullArt: true, special: true },
   c('deflagration', 'Déflagration', 'feu', 'attaque', 'rare', 3, 'tous', [dmg(10), { kind: 'detonation', status: 'brulure', per: 3 }], { effects: [dmg(14), { kind: 'detonation', status: 'brulure', per: 4 }] }),
   c('zenith', 'Zénith', 'feu', 'talent', 'rare', 2, 'soi', [{ kind: 'meteo', id: 'zenith', turns: 5 }, power('zenith', 2)], { effects: [{ kind: 'meteo', id: 'zenith', turns: 5 }, power('zenith', 3)] }),
   // Soleil Intense : l'Eau s'évapore, le Feu ×1,5 pendant 5 tours

@@ -181,6 +181,7 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
       case 'pioche-par-soi': parts.push(`Pioche 1 carte par ${e.per} ${STATUS_INFO[e.status].label}.`); break;
       case 'protection-par-statut': parts.push(`Gagne ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en Protection.`); break;
       case 'soin-par-statut': parts.push(`Récupère ${e.mult > 1 ? `${e.mult} × ` : ''}la ${STATUS_INFO[e.status].label} de la cible en PV.`); break;
+      case 'statut-par-soi': parts.push(`${STATUS_INFO[e.status].label} égale à ton ${STATUS_INFO[e.from].label}.`); break;
       case 'detonation': parts.push(`Consomme la ${STATUS_INFO[e.status].label} ${d.target === 'tous' ? 'de tous les ennemis' : 'de la cible'} : <b>${e.per}</b> dégâts par point.`); break;
       case 'propage-statut': parts.push(`Copie la ${STATUS_INFO[e.status].label} de la cible sur tous les autres ennemis.`); break;
       case 'pioche-si-statut': parts.push(`Si la cible a de la ${STATUS_INFO[e.status].label}, pioche ${e.amount}.`); break;

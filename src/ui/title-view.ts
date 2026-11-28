@@ -229,7 +229,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
     <div class="deck-grid gl-cards">${cards.map((d) => {
       const need = levelOf.get(d.id) ?? 0;
       const locked = need > lvl;
-      return `<div class="collect ${locked ? 'locked' : ''}">${fc(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
+      return `<div class="collect ${locked ? 'locked' : ''}">${fc(d)}${locked ? `<span class="lock">Niveau ${need}</span>` : d.special ? '<span class="tag celebi-tag">Bénédiction de Célébi</span>' : need === 0 ? '<span class="tag">Départ</span>' : ''}</div>`;
     }).join('')}</div>`;
 }
 

@@ -1811,3 +1811,8 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .node-start.celebi-start img { transform: scale(1.7); image-rendering: pixelated; }
 .map-node.node-start.celebi-start { background: radial-gradient(circle at 35% 30%, #f4fff6, #bff0cc 60%, #6fd39a); border-color: #2f8a52; }
 .map-node.node-start.celebi-start.available { box-shadow: 0 0 0 4px #6fd39a88, 0 0 22px #5fe08f; }
+
+.card.full-art .card-text.long { font-size: 10.5px; height: 64px; }
+.card.full-art .card-text.xlong { font-size: 9.5px; height: 68px; }
+.card.full-art:has(.card-text.long) .card-cat, .card.full-art:has(.card-text.xlong) .card-cat { bottom: 74px; }
+.collect .tag.celebi-tag { background: #2f8a52; color: #eafff0; }
