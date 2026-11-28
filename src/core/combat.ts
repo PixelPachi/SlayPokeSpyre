@@ -330,6 +330,7 @@ export class Combat {
 
     for (const e of this.enemies) if (this.gimmickOf(e) === 'mur-roc') this.gainBlock(e, e.uid, 12);
     if (this.enemies.some((e) => this.gimmickOf(e) === 'tempete-sable')) this.setField('tempete-sable');
+    if (this.enemies.some((e) => this.gimmickOf(e) === 'glaciation')) this.setField('grele');
     for (const e of this.enemies) this.rollIntent(e);
     this.startPlayerTurn();
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
@@ -1015,6 +1016,7 @@ export class Combat {
     if (m.id === 'hurle-temps') this.timeRoar = true;
     this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + this.moveBonus(e, m), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
     if (m.meteo) this.setField(m.meteo);
+    if (m.damage !== undefined && m.pokeType === 'glace' && this.gimmickOf(e) === 'glaciation') this.addStatus(this.player, 'player', 'gel', 1); // Glaciation
     // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
     if (this.gimmickOf(e) === 'miroir-originel' && m.pokeType && e.types[0] !== m.pokeType) {
       e.types = [m.pokeType];
@@ -1981,6 +1983,8 @@ export class Combat {
       this.events.push({ type: 'meteo', id: this.weather.id, name: `${WEATHER[this.weather.id].name} se dissipe.`, ended: true });
       this.weather = null;
     }
+    // Glaciation (Artikodin) : la Grêle revient tant qu'il est en vie
+    if (!this.weather && this.bossAlive('glaciation')) this.setField('grele');
     if (this.terrain && --this.terrain.turns <= 0) {
       this.events.push({ type: 'meteo', id: this.terrain.id, name: `${TERRAINS[this.terrain.id].name} disparaît.`, ended: true });
       this.terrain = null;

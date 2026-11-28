@@ -108,3 +108,13 @@ it('Graine Herbe propage la Vampigraine à tous les ennemis, Piquants donne 2 É
   for (const e of c.enemies) expect(e.statuses.vampigraine ?? 0).toBeGreaterThan(0);
   expect(c.player.statuses.epine ?? 0).toBeGreaterThanOrEqual(2);
 });
+
+it('Îles Écume : Artikodin (Glaciation) installe la Grêle, qui revient tant qu’il est en vie', async () => {
+  const { ZONES } = await import('../src/data/zones');
+  expect(ZONES.find((z) => z.id === 'iles-ecume')?.boss).toBe('artikodin');
+  const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: 'griffe', upgraded: false }));
+  const c = new Combat({ character: 'caninos', deck, enemies: ['artikodin'], seed: 'AK', relics: [] } as never);
+  expect(c.weather?.id).toBe('grele');
+  for (let t = 0; t < 7; t++) { c.endPlayerTurn(); for (const e of c.aliveEnemies()) c.enemyAct(e.uid); c.endEnemyTurn(); if (c.phase !== 'joueur') break; }
+  if (c.phase === 'joueur') expect(c.weather?.id).toBe('grele');
+});

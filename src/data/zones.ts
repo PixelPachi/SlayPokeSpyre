@@ -115,6 +115,14 @@ export const ZONES: ZoneDef[] = [
     season: "Nuit d'orage", weather: 'etincelles',
   },
 
+  {
+    id: 'iles-ecume', name: 'Îles Écume', region: 'Kanto', act: 2,
+    encounters: [['otaria'], ['krabby', 'krabby'], ['akwakwak'], ['poissirene', 'krabby'], ['lippouti'], ['crustabri'], ['kokiyas', 'otaria'], ['lippouti', 'poissirene'], ['crustabri', 'kokiyas'], ['otaria', 'lippouti'], ['akwakwak', 'poissirene', 'krabby']],
+    elites: [['lamantine'], ['lippoutou']], boss: 'artikodin',
+    background: 'backgrounds/iles-ecume.jpg', palette: ['#bfe3f2', '#5d8fb0', '#0e2233'], mood: 'glace',
+    season: 'Grottes gelées battues par la mer', weather: 'neige',
+  },
+
   // ——— Acte 3 : les hauteurs (sommets et lieux légendaires) ———
   {
     id: 'route-victoire', name: 'Route Victoire', region: 'Kanto', act: 3,

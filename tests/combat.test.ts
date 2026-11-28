@@ -493,9 +493,9 @@ describe('acte 2', async () => {
   const { ZONES, zonesOfAct } = await import('../src/data/zones');
   const { ENEMY_DEFS } = await import('../src/data/enemies');
 
-  it('5 zones, une par région, avec des ennemis qui existent', () => {
+  it('6 zones (une par région + les Îles Écume), avec des ennemis qui existent', () => {
     const z2 = zonesOfAct(2);
-    expect(z2).toHaveLength(5);
+    expect(z2).toHaveLength(6);
     expect(new Set(z2.map((z) => z.region)).size).toBe(5);
     for (const z of ZONES) {
       for (const id of [...z.encounters.flat(), ...z.elites.flat(), z.boss]) expect(ENEMY_DEFS[id], `${z.id} ${id}`).toBeDefined();

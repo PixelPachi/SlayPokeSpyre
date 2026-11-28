@@ -81,6 +81,10 @@ const SPECS: Record<string, Spec> = {
     gimmick: { id: 'turbobrasier', name: 'Turbo Brasier', text: 'Ses attaques ignorent la moitié de ta Protection.' },
     moves: [{ id: 'flamme-fusion', name: 'Flamme Fusion', weight: 25, intent: 'attaque', pokeType: 'feu', damage: 22, pierce: true, signature: true, playerStatus: { status: 'brulure', stacks: 2 } }],
   },
+  artikodin: {
+    gimmick: { id: 'glaciation', name: 'Glaciation', text: 'Tant qu’il est en vie, la Grêle tombe en permanence, et chacune de ses attaques Glace t’inflige 1 Gel.' },
+    moves: [{ id: 'blizzard', name: 'Blizzard', weight: 25, intent: 'attaque', pokeType: 'glace', damage: 8, hits: 2, playerStatus: { status: 'gel', stacks: 1 }, signature: true }],
+  },
   girafarig: {
     gimmick: { id: 'double-tete', name: 'Double Tête', text: 'La tête de sa queue veille : chaque fois que tu le frappes, elle te mord (2 dégâts, ignore ta Protection).' },
     moves: [{ id: 'double-laser', name: 'Double Laser', weight: 25, intent: 'attaque', pokeType: 'psy', damage: 6, hits: 2, playerStatus: { status: 'confusion', stacks: 1 }, signature: true }],
