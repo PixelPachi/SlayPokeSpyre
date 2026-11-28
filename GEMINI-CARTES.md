@@ -26,7 +26,7 @@ Puis préciser la couleur :
 
 Quand les cadres seront faits, envoie-les-moi : j'ajusterai la position du nom, du coût et de la description pour qu'ils tombent pile dans les zones du cadre.
 
-## 2. Les illustrations des capacités (418 images)
+## 2. Les illustrations des capacités (419 images)
 
 Dossier : `src/assets/cartes/illustrations/`, format paysage **800 × 600** (4:3), PNG. Une seule image par capacité : elle sert pour tous les Pokémon qui l'apprennent (par exemple, Façade est la même pour Riolu, Vipélierre et Kangourex).
 
@@ -37,7 +37,7 @@ Prompt commun :
 Puis, selon la colonne « Pokémon dans l'image » :
 
 - **Capacité exclusive (252 images)** — un seul personnage l'apprend, il apparaît dans l'image : *« Le Pokémon <nom> lance la capacité <capacité> : <ambiance visuelle>. Le Pokémon est fidèle à son apparence officielle, en pleine action, l'effet de la capacité occupe une grande partie de l'image. »*
-- **Capacité partagée (166 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
+- **Capacité partagée (167 images)** — plusieurs Pokémon l'apprennent, l'image sert pour tous : *« Capacité <capacité> : <ambiance visuelle>. Aucun Pokémon ni personnage : on montre la capacité elle-même (énergie, élément, impact, geste). »*
 
 Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu et Mew apprennent (comme Aurasphère) montre Riolu, et Mew n'apparaît que sur ses propres capacités (Morphing, Métronome…).
 
@@ -195,6 +195,7 @@ Mew utilise les cartes de tous les personnages : une capacité que seuls Riolu e
 | `eclair-fou.png` | Éclair Fou | Électrik · Attaque | Caninos | **Caninos** lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
 | `eclair-plus.png` | Éclair Plus | Électrik · Attaque | Posipi & Négapi | **Posipi & Négapi** lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
 | `eclair-pole-x.png` | Éclair Pôle X | Électrik · Attaque | Posipi & Négapi | **Posipi & Négapi** lance la capacité | éclairs jaunes, étincelles, arcs électriques | ☐ |
+| `eclat-absolu.png` | Éclat Absolu | Fée · Talent | Neutre | Aucun (capacité seule) | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `eclat-magique.png` | Éclat Magique | Fée · Attaque | Neutre | Aucun (capacité seule) | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `eclat-petillant.png` | Éclat Pétillant | Fée · Attaque | Posipi & Négapi | **Posipi & Négapi** lance la capacité | lumière rose et blanche, étoiles, paillettes | ☐ |
 | `eclate-griffe.png` | Éclate Griffe | Normal · Attaque | Kangourex | **Kangourex** (avec son Bébé dans la poche) lance la capacité | impact puissant, traînées de vitesse, onde de choc blanche | ☐ |

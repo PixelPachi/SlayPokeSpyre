@@ -52,6 +52,9 @@ const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id
 
 // Même objectif pour tous : vaincre 5 Pokémon chromatiques en jouant ce Pokémon (cumulé sur toutes ses runs).
 const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouant ce Pokémon');
+// Bonus communs des chromatiques : Étincelles (à 5, la prochaine carte est chromatique : valeurs doublées)
+const SHINY_COMMON = ['Étincelles : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu. À 5, la prochaine carte est chromatique (valeurs doublées).', 'Chromatiques ennemis 3× plus fréquents ; en vaincre un améliore une carte. Boutiques −10 %. Commence avec le Charme Chroma.'];
+const shinyPassive = (passive: string): SkinDef => ({ ...SHINY_GOAL, perks: [passive, ...SHINY_COMMON] });
 
 // Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.
 const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): SkinDef => ({
@@ -60,7 +63,7 @@ const primordial = (name: string, dex: number[], extra: Partial<SkinDef> = {}): 
 });
 
 export const SKINS: Record<CharacterId, SkinDef[]> = {
-  riolu: [SHINY_GOAL, {
+  riolu: [shinyPassive('Aura Dorée : 1 Étincelle par tranche de 3 Aura gagnée ; une Aurasphère chromatique transperce la Protection.'), {
     id: 'magma', name: 'Cramoisi', stat: 'bosses', goal: 2, bosses: ['camerupt', 'heatran'], dex: [447, 448, 10059],
     talent: { name: 'Justicier Cramoisi', text: 'Commence chaque combat avec 3 Aura. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).' },
     goalText: 'Vaincre le gardien du Mont Chimnée (Camérupt) et celui du Mont Abrupt (Heatran) en jouant Riolu. L’Aura ne renforce plus les attaques : elle inflige autant de Brûlure à la cible (sauf Aurasphère et les cartes d’Aura).',
@@ -70,7 +73,7 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     talent: { name: 'Peau Féerique', text: 'Ses attaques de type Normal deviennent de type Fée. Il ne commence plus les combats avec de l’Aura.' },
     types: ['fee'], relic: 'foulard-rose',
   }],
-  vipelierre: [SHINY_GOAL, primordial('Vipélierre', [495, 496, 497]), {
+  vipelierre: [shinyPassive('Vampigraine Scintillante : +1 Étincelle quand Vampigraine te soigne ; tes cartes chromatiques infligent 2 Vampigraine à tous les ennemis.'), primordial('Vipélierre', [495, 496, 497]), {
     id: 'alchimiste', name: 'Alchimiste', stat: 'bosses', goal: 1, bosses: ['brutapode'], dex: [495, 496, 497],
     goalText: 'Vaincre le gardien de la Forêt d’Empoigne (Brutapode) et mettre K.O. 15 Pokémon de type Poison en jouant Vipélierre. Ses Vampigraines deviennent du Poison, il commence avec Catalyse (double le Poison de la cible) et la Plaque Toxik à la place du Grain Miracle (elle transforme les baies en baies empoisonnées).',
     kills: { type: 'poison', goal: 15 }, extraCards: ['vip-catalyse'], relic: 'plaque-toxik',
@@ -82,14 +85,14 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     talent: { name: 'Soie Astrale', text: 'Perd Contestation. Ses cartes peuvent porter plusieurs enchantements.' },
     perks: ['Peut apprendre toutes les cartes Psy et Ténèbres débloquées.'],
   }],
-  kangourex: [SHINY_GOAL, primordial('Kangourex', [115], { baby: true }), {
+  kangourex: [shinyPassive('Bébé Porte-Bonheur : +3 ₽ à chaque attaque du Bébé ; une carte chromatique fait frapper le Bébé deux fois plus.'), primordial('Kangourex', [115], { baby: true }), {
     id: 'oceanique', name: 'Gardien Océanique', stat: 'bosses', goal: 1, bosses: ['roigada'], dex: [115], baby: true,
     goalText: 'Vaincre le gardien du Puits Ramoloss (Roigada) en jouant Kangourex. Il devient de type Eau, le Corail remplace le Lait Meumeu (le Bébé gagne 3 Protection chaque tour), ses attaques de départ deviennent des Écumes (4 dégâts à tous les ennemis) et il peut obtenir toutes les cartes Eau du jeu. Pas de Méga-Évolution avec ce skin.',
     types: ['eau'], relic: 'corail', typeCards: ['eau'],
     perks: ['Peut obtenir toutes les cartes Eau du jeu.', 'Pas de Méga-Évolution avec ce skin.'],
     deck: ['kan-ecume', 'kan-ecume', 'kan-ecume', 'kan-ecume', 'abri', 'abri', 'abri', 'abri', 'kan-coup-main', 'kan-coup-double'],
   }],
-  caninos: [SHINY_GOAL, primordial('Caninos', [58, 59]), {
+  caninos: [shinyPassive('Flamme Dorée : +1 Étincelle par Brûlure infligée ; une carte chromatique fait exploser la Brûlure de sa cible (2 dégâts par cumul, la Brûlure est consommée).'), primordial('Caninos', [58, 59]), {
     id: 'lanterne', name: 'Chien de la Lanterne', stat: 'bosses', goal: 1, bosses: ['ossatueur-gardien'], dex: [58, 59, 9059],
     goalText: 'Vaincre le gardien de la Tour Pokémon de Lavanville (Ossatueur) en jouant Caninos. Feu des Âmes remplace Intimidation (chaque pioche pendant ton tour inflige 2 dégâts à tous les ennemis), la Lanterne Bleue remplace le Charbon (3 Âmes par combat), ses attaques de départ deviennent des Léchouilles des Âmes (Spectre, 2 dégâts, pioche 1) et il peut obtenir toutes les cartes Spectre du jeu.',
     talent: { name: 'Feu des Âmes', text: 'Chaque fois qu’il pioche pendant son tour (pas la main de départ), inflige 2 dégâts à tous les ennemis.' },
@@ -108,9 +111,9 @@ export const SKINS: Record<CharacterId, SkinDef[]> = {
     types: ['feu', 'roche'], relic: 'pierre-dure', typeCards: ['roche'],
     evolutions: [{ act: 2, dex: 59, name: 'Arcanin d’Hisui', types: ['feu', 'roche'], hp: 12 }],
   }],
-  mew: [SHINY_GOAL, primordial('Mew', [151])],
-  duo: [SHINY_GOAL],
-  quelorior: [SHINY_GOAL, primordial('Quelorior', [235]), {
+  mew: [shinyPassive('Mirage : les cartes créées pendant le combat ont 1 chance sur 4 d’arriver déjà chromatiques.'), primordial('Mew', [151])],
+  duo: [shinyPassive('Pôles Inversés : Posipi donne la Protection et le coût réduit, Négapi les dégâts bonus ; une Surcharge donne 5 Étincelles.')],
+  quelorior: [shinyPassive('Chef-d’œuvre : +2 Étincelles par copie de Gribouille ; une copie faite par une carte chromatique est améliorée pour la run.'), primordial('Quelorior', [235]), {
     id: 'flambeur', name: 'Flambeur', stat: 'maxMoney', goal: 500, maxMoney: 500, dex: [235],
     goalText: 'Avoir 500 Pokédollars en réserve pendant une run avec Quelorior. Son deck de départ devient 4 Jackpot (3 dégâts, +5 ₽), 4 Abri, ses Gribouilles et Atout, la Roulette remplace son objet de départ (+2 dégâts par tranche de 100 ₽) et il a −50 % au Marché Kecleon.',
     perks: ['−50 % sur tous les prix du Marché Kecleon.'],

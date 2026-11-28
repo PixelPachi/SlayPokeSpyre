@@ -6,6 +6,7 @@ export type CharacterId = 'riolu' | 'vipelierre' | 'kangourex' | 'caninos' | 'me
 export type DuoSide = 'posipi' | 'negapi';
 
 export type StatusId =
+  | 'etincelle' // skin chromatique : à 5, la prochaine carte est chromatique (valeurs doublées)
   | 'brulure' // perd X PV en début de tour, inflige 25 % de dégâts en moins, -1 par tour
   | 'poison' // perd X PV en début de tour, -1 par tour
   | 'vampigraine' // perd X PV en début de tour, le poseur récupère la moitié, -1 par tour
@@ -38,7 +39,7 @@ export type PowerId =
   | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
   | 'zenith' | 'braises' | 'turbo' | 'elan-persistant' | 'brasier-eternel' // Caninos
   | 'plus-synchro' | 'moins-synchro' // Duo
-  | 'pioche-visible' | 'creation-reduite'
+  | 'pioche-visible' | 'creation-reduite' | 'eclat-absolu'
   | 'coeur-magma' | 'charme-celeste' | 'pierre-philosophale' | 'trame-destin' | 'maree-protectrice' | 'bucher-ames' | 'avalanche' // talents légendaires de skin
   | 'souvenir' | 'telekinesie'; // Mew
 

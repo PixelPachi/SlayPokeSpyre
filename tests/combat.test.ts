@@ -362,14 +362,14 @@ describe('cartes neutres', async () => {
 
   it('66 cartes neutres, avec des types qu’aucun personnage n’a (hors Duo Électrik) et sans doublon de nom', () => {
     const neutral = neutralPool();
-    expect(neutral).toHaveLength(66);
+    expect(neutral).toHaveLength(67);
     const charTypes = new Set(Object.values(CHARACTERS).filter((c) => c.id !== 'duo').flatMap((c) => c.types));
     const otherNames = new Set(Object.values(CARD_DEFS).filter((c) => c.character !== 'normal').map((c) => c.name));
     for (const c of neutral) {
       if (c.id !== 'n-paresse' && !c.requires?.asleep) expect(charTypes.has(c.pokeType), c.name).toBe(false); // les cartes de sommeil gardent leur vrai type
       expect(otherNames.has(c.name), c.name).toBe(false);
     }
-    expect(new Set(neutral.map((c) => c.name)).size).toBe(66);
+    expect(new Set(neutral.map((c) => c.name)).size).toBe(67);
   });
 
   it('des cartes neutres apparaissent parfois dans les récompenses', () => {

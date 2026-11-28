@@ -279,6 +279,7 @@ export class Combat {
     // Talents de départ
     if (ch.id === 'riolu' && !this.pixilate) this.gainAura(3);
     this.soulDog = ch.id === 'caninos' && opts.skin === 'lanterne';
+    this.shinySkin = opts.skin === 'shiny';
     this.weaver = ch.id === 'vipelierre' && opts.skin === 'tisserand';
     this.moneyStart = opts.money ?? 0;
     // Intimidation (Caninos) ; le Chien de la Lanterne a Feu des Âmes à la place
@@ -331,6 +332,24 @@ export class Combat {
     return all.filter((c) => c.defId === d.id || c.defId.endsWith(':' + id) || c.defId === id).length;
   }
 
+  /** Skin chromatique : gagne des Étincelles (à 5, la prochaine carte est chromatique). */
+  private gainSpark(n: number): void {
+    if (!this.shinySkin || n <= 0) return;
+    this.player.statuses.etincelle = Math.min(9, (this.player.statuses.etincelle ?? 0) + n);
+    this.events.push({ type: 'status', target: 'player', status: 'etincelle', stacks: n });
+  }
+
+  /** Carte chromatique : valeurs doublées, plus l'effet propre au Pokémon. */
+  private chromaTransform(d: CardDef): CardDef {
+    let x = scaleX(d, 2, true);
+    const ch = this.player.character;
+    let effects = x.effects.map((e): Effect => (e.kind === 'bebe-attaque' ? { ...e, times: e.times * 2 } : e)); // Kangourex : le Bébé frappe deux fois plus
+    if (ch === 'riolu' && /aurasph/i.test(d.name)) effects = [{ kind: 'casse-protection' }, ...effects]; // Aura Dorée : transperce la Protection
+    if (ch === 'vipelierre') effects = [...effects, { kind: 'statut', status: 'vampigraine', stacks: 2, on: 'tous' }]; // Vampigraine Scintillante
+    x = { ...x, effects };
+    return x;
+  }
+
   has(relic: string): boolean {
     // Duo : un objet tenu n'agit que si son porteur est en première ligne
     if (this.duo) { const o = this.duo.owner[relic]; if (o && o !== this.duo.front) return false; }
@@ -378,8 +397,10 @@ export class Combat {
     const D = this.duo!;
     const side = d.duoSide!;
     const both = this.duoBoth();
-    if (side === 'posipi') {
-      D.posipiTurn++;
+    if (side === 'posipi') D.posipiTurn++;
+    // Pôles Inversés (chromatiques) : Posipi donne la Protection et le coût réduit, Négapi les dégâts bonus
+    const role = this.shinySkin ? this.duoOther(side) : side;
+    if (role === 'posipi') {
       if (d.cost >= 2) D.minus = 0;
       if (both) D.plus += 2 + (this.player.powers['plus-synchro'] ?? 0);
     } else {
@@ -392,6 +413,7 @@ export class Combat {
       const card: Card = { uid: this.nextTempUid++, defId: 'duo-decharge-synchro', upgraded: false };
       if (this.hand.length < MAX_HAND) this.hand.push(card); else this.discardPile.push(card);
       this.events.push({ type: 'player-move', name: 'Surcharge ! Décharge Synchro !' });
+      this.gainSpark(5);
       this.events.push({ type: 'card-added', def: cardDef('duo-decharge-synchro'), to: 'main' });
     }
   }
@@ -421,7 +443,7 @@ export class Combat {
     if (this.has('roulette')) b += 2 * Math.floor((this.moneyStart + this.moneyGained) / 100);
     if (this.has('loupe') && d.target === 'tous') b += 2;
     // Plus (Posipi) : la prochaine carte Négapi frappe plus fort
-    if (this.duo && d.duoSide === 'negapi' && this.duoBoth()) b += this.duo.plus;
+    if (this.duo && d.duoSide === (this.shinySkin ? 'posipi' : 'negapi') && this.duoBoth()) b += this.duo.plus;
     if (this.fused) b += this.fusedPlus;
     const gem = GEMS[d.pokeType];
     if (gem && this.has(gem) && !this.gemsUsed.has(d.pokeType)) b += 5;
@@ -489,7 +511,7 @@ export class Combat {
     // Encens Bizarre (Mew) : la première capacité d'un autre Pokémon de chaque tour coûte 1 PA de moins
     if (cost > 0 && this.has('encens-bizarre') && !this.oddUsed && d.character !== 'mew' && d.character !== 'normal') cost -= 1;
     // Moins (Négapi) : la prochaine carte Posipi à 2 PA ou plus coûte moins cher
-    if (this.duo && d.duoSide === 'posipi' && d.cost >= 2 && this.duo.minus > 0 && this.duoBoth()) cost -= this.duo.minus;
+    if (this.duo && d.duoSide === (this.shinySkin ? 'negapi' : 'posipi') && d.cost >= 2 && this.duo.minus > 0 && this.duoBoth()) cost -= this.duo.minus;
     if (this.fused && d.cost >= 2 && this.fusedMinus > 0) cost -= this.fusedMinus;
     // Créativité (Mew) : les cartes créées pendant le combat coûtent 1 PA de moins
     if (this.player.powers['creation-reduite'] && card.uid >= 100000) cost -= this.player.powers['creation-reduite'];
@@ -639,6 +661,13 @@ export class Combat {
   duo: { front: DuoSide; hp: Record<DuoSide, number>; max: number; plus: number; minus: number; seq: DuoSide[]; surged: boolean; posipiTurn: number; owner: Record<string, DuoSide> } | null = null;
   private duoRelayed = false;
   private doubleWoven = 0;
+  /** Copies de Gribouille à ajouter améliorées au deck. */
+  copiedUpgraded = new Set<string>();
+  /** Skin chromatique : Étincelles et cartes chromatiques. */
+  shinySkin = false;
+  private chromaUids = new Set<number>();
+  private chromaPlaying = false;
+  private auraSpark = 0;
   /** Cartes gratuites jusqu'à la fin du tour (Machination de Mew). */
   private freeUids = new Set<number>();
   /** Prescience : dégâts qui tombent au début de ton prochain tour. */
@@ -702,6 +731,14 @@ export class Combat {
     const paid = this.costOf(card);
     // Coût X : les valeurs de la carte sont multipliées par les PA dépensés
     let xd = d.xCost ? scaleX(d, paid) : d;
+    // Skin chromatique : à 5 Étincelles (ou carte créée déjà chromatique par Mew), la carte devient chromatique
+    this.chromaPlaying = false;
+    if (this.shinySkin && !d.keywords?.includes('injouable') && (this.chromaUids.has(card.uid) || (this.player.statuses.etincelle ?? 0) >= 5)) {
+      if (!this.chromaUids.delete(card.uid)) this.player.statuses.etincelle = (this.player.statuses.etincelle ?? 0) - 5;
+      this.chromaPlaying = true;
+      xd = this.chromaTransform(xd);
+      this.events.push({ type: 'player-move', name: `✨ ${d.name} chromatique !` });
+    }
     // Fil Astral / Toile Onirique : la prochaine carte tissée / enchantée frappe deux fois plus fort
     if (this.doubleWoven > 0 && card.defId.includes('tissage:')) { this.doubleWoven--; xd = scaleX(xd, 2, true); this.events.push({ type: 'player-move', name: 'Fil Astral : valeurs doublées !' }); }
     else if (this.doubleEnchanted > 0 && (d.enchant || d.enchants?.length)) { this.doubleEnchanted--; xd = scaleX(xd, 2, true); this.events.push({ type: 'player-move', name: 'Toile Onirique : valeurs doublées !' }); }
@@ -742,6 +779,18 @@ export class Combat {
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
     if (this.duo && d.duoSide && this.phase === 'joueur') this.duoAfterCard(d);
+    if (this.shinySkin && this.phase === 'joueur') {
+      // Flamme Dorée (Caninos chromatique) : la carte chromatique fait exploser la Brûlure de sa cible
+      if (this.chromaPlaying && this.player.character === 'caninos' && target && target.hp > 0 && (target.statuses.brulure ?? 0) > 0) {
+        const b = target.statuses.brulure!;
+        delete target.statuses.brulure;
+        this.events.push({ type: 'player-move', name: `Flamme Dorée : la Brûlure explose (${b * 2}) !` });
+        this.dealDamage(target, target.uid, b * 2, 'normal');
+        this.checkEnd();
+      }
+      this.gainSpark((paid === 0 ? 1 : 0) + (this.player.powers['eclat-absolu'] ?? 0));
+    }
+    this.chromaPlaying = false;
     // Multipi : chaque carte donne +2 dégâts à la suivante (Plus), +2 Protection et −1 PA à la prochaine carte à 2 PA ou plus (Moins)
     if (this.fused && this.phase === 'joueur') {
       if (d.cost >= 2) this.fusedMinus = 0;
@@ -961,7 +1010,7 @@ export class Combat {
     return {
       uid: this.nextEnemyUid++, defId: id, name: d.name, dex: d.dex, types: [...d.types],
       hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [], flags: {},
-      shiny: this.rng.next() < SHINY_CHANCE, phase: 1, step: 0,
+      shiny: this.rng.next() < SHINY_CHANCE * (this.shinySkin ? 3 : 1), phase: 1, step: 0,
     };
   }
 
@@ -1121,6 +1170,7 @@ export class Combat {
     this.handDraw = true;
     this.draw(HAND_SIZE - (this.has('orbe-platine') ? 1 : 0) + (this.turn === 1 && this.has('pierre-ovale') ? 1 : 0));
     this.handDraw = false;
+    this.gainSpark(1);
     this.fireTrames('debut-tour');
     // Trame du Destin (Tisserand) : une carte de la main est enchantée à chaque tour
     for (let i = 0; i < (this.player.powers['trame-destin'] ?? 0); i++) this.resolve({ kind: 'permucoeur' }, cardDef('vip-permucoeur'), undefined);
@@ -1463,6 +1513,7 @@ export class Combat {
           const pick = this.rng.pick(pool);
           const uid = this.nextTempUid++;
           if (eff.free) this.freeUids.add(uid);
+          if (this.shinySkin && this.player.character === 'mew' && this.rng.next() < 0.25) this.chromaUids.add(uid); // Mirage
           this.hand.push({ uid, defId: pick.id, upgraded: false });
           this.events.push({ type: 'player-move', name: `Nouvelle carte : ${pick.name}` });
         }
@@ -1552,7 +1603,10 @@ export class Combat {
         let id = copyId(target.defId, move.id);
         if (eff.enchant) { const k = rollEnchant(cardDef(id), () => this.rng.next()); if (k) id = enchantId(k, id); }
         this.copiedCards.push(id);
-        this.discardPile.push({ uid: this.nextTempUid++, defId: id, upgraded: false });
+        // Chef-d'œuvre (Quelorior chromatique) : 2 Étincelles, et une copie faite par une carte chromatique est améliorée
+        this.gainSpark(2);
+        if (this.chromaPlaying) this.copiedUpgraded.add(id);
+        this.discardPile.push({ uid: this.nextTempUid++, defId: id, upgraded: this.chromaPlaying });
         this.events.push({ type: 'player-move', name: `Gribouille copie ${cardDef(id).name} !` });
         this.events.push({ type: 'card-added', def: cardDef(id), to: 'deck' });
         return;
@@ -1715,6 +1769,7 @@ export class Combat {
       const { amount, effectiveness } = computeDamage(f.power, baby, t, 'normal');
       this.events.push({ type: 'player-move', name: 'Le Bébé attaque !' });
       this.babyHits++;
+      if (this.shinySkin) this.moneyGained += 3; // Bébé Porte-Bonheur
       this.dealDamage(t, t.uid, amount, effectiveness);
       if (status && stacks && t.hp > 0) this.addStatus(t, t.uid, status, stacks);
       this.checkEnd();
@@ -1917,6 +1972,8 @@ export class Combat {
   private gainAura(n: number, fromCard = false): void {
     if (!fromCard && this.player.character !== 'riolu' && this.player.character !== 'mew') return;
     this.player.aura += n;
+    // Aura Dorée (Riolu chromatique) : 1 Étincelle par tranche de 3 Aura gagnée
+    if (this.shinySkin && n > 0) { this.auraSpark += n; this.gainSpark(Math.floor(this.auraSpark / 3)); this.auraSpark %= 3; }
     if (this.has('ceinture-noire') && n > 0 && this.ceintureBonus) {
       this.player.aura += 1;
     }
@@ -2012,6 +2069,7 @@ export class Combat {
     if (f.hp <= 0) {
       f.hp = 0;
       this.events.push({ type: 'ko', target: who });
+      if (typeof who === 'number') this.gainSpark(2);
       this.checkEnd();
     } else if (typeof who === 'number') this.checkPhase(f as EnemyState);
   }
@@ -2039,6 +2097,7 @@ export class Combat {
     if (v === 0) delete f.statuses[status];
     else f.statuses[status] = v;
     if (status === 'confusion' && s > 0) CONF_TURNS.set(f, 2);
+    if (status === 'brulure' && s > 0 && who !== 'player' && this.phase === 'joueur' && this.player.character === 'caninos') this.gainSpark(1); // Flamme Dorée
     this.events.push({ type: 'status', target: who, status, stacks: s });
   }
 
@@ -2060,6 +2119,7 @@ export class Combat {
       const drained = Math.min(n, Math.max(0, hpBefore - f.hp));
       if (s === 'vampigraine' && who !== 'player') {
         this.healPlayer(Math.floor(drained / 2));
+        if (drained > 0 && this.player.character === 'vipelierre') this.gainSpark(1); // Vampigraine Scintillante
       }
       // Vampigraine posée par un ennemi : c'est lui qui récupère la moitié des PV drainés
       if (s === 'vampigraine' && who === 'player') {

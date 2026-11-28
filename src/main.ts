@@ -1,3 +1,4 @@
+import { cardDef } from './data/cards';
 import { SKINS, skinDef, skinSprite } from './data/skins';
 import { RELIC_DEFS } from './data/relics';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
@@ -432,6 +433,11 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (run.zenFights > 0 && --run.zenFights === 0) run.relics = run.relics.filter((id) => id !== 'encens-zen'); // l'Encens Zen s'est consumé
       if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
       run.shiniesMet += r.shinies;
+      // Skin chromatique : battre un Pokémon chromatique améliore une carte du deck
+      if (r.victory && r.shinies && run.skin === 'shiny') {
+        const pool = run.deck.filter((c) => !c.upgraded && Object.keys(cardDef(c.defId).upgrade ?? {}).length);
+        if (pool.length) { const c = run.rng.pick(pool); c.upgraded = true; setTimeout(() => toast(`✨ Chromatique vaincu : ${cardDef(c.defId).name} est améliorée !`), 900); }
+      }
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'combat') run.combatsWon++;
       if (type === 'boss') {
@@ -512,6 +518,11 @@ function duel(run: Run, f: EventFight): void {
       if (r.fled) return showMap(run);
       run.duelsWon++;
       run.shiniesMet += r.shinies;
+      // Skin chromatique : battre un Pokémon chromatique améliore une carte du deck
+      if (r.victory && r.shinies && run.skin === 'shiny') {
+        const pool = run.deck.filter((c) => !c.upgraded && Object.keys(cardDef(c.defId).upgrade ?? {}).length);
+        if (pool.length) { const c = run.rng.pick(pool); c.upgraded = true; setTimeout(() => toast(`✨ Chromatique vaincu : ${cardDef(c.defId).name} est améliorée !`), 900); }
+      }
       renderReward(
         screen, run,
         { money: run.moneyReward('elite', r.shinies), cards: run.cardChoices('boss'), label: 'Duel', title: 'Duel remporté !', relic: f.relic ? run.rollRelics(1)[0] : undefined },

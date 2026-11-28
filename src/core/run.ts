@@ -154,6 +154,8 @@ export class Run {
     if (def?.relic) this.relics = [def.relic, ...this.relics.filter((r) => r !== ch.starterRelic)];
     if (def?.firstCard && this.deck.length) this.deck[0] = { ...this.deck[0], defId: def.firstCard, upgraded: false };
     for (const id of def?.extraCards ?? []) this.addCard(id);
+    // Skin chromatique : Charme Chroma en plus de l'objet de départ
+    if (skin === 'shiny' && !this.relics.includes('charme-chroma')) this.relics.push('charme-chroma');
   }
 
   /** Cartes débloquées par l'EXP du Pokémon (undefined = toutes). */

@@ -43,6 +43,8 @@ const RELICS: RelicDef[] = [
     text: 'Le Bébé Kangourex commence chaque combat avec 4 PV de plus.' },
   { id: 'pointeau-adn', name: 'Pointeau ADN', sprite: 'dna-splicers', rarity: 'rare', owner: 'duo', free: true,
     text: 'Débloque la fusion au Centre Pokémon : Posipi et Négapi deviennent Multipi (PV réunis, +1 PA par tour, Plus et Moins actifs sur toutes les cartes, cartes de départ fusionnées).' },
+  { id: 'charme-chroma', name: 'Charme Chroma', sprite: 'shiny-charm', rarity: 'quete', owner: 'commun', free: true,
+    text: 'Skin chromatique : les capacités proposées en récompense sont parfois déjà améliorées (1 chance sur 4 chacune).' },
   { id: 'pile-synchro', name: 'Pile Synchro', sprite: 'cell-battery', rarity: 'depart', owner: 'duo',
     text: 'Chaque combat commence sur un Champ Électrifié.' },
   { id: 'charbon', name: 'Charbon', sprite: 'charcoal', rarity: 'depart', owner: 'caninos',

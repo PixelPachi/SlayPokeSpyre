@@ -208,7 +208,7 @@ export class CombatView {
     if (this.ended) return;
     this.ended = true;
     // Gribouille : les capacités copiées restent dans le deck jusqu'à la fin de la run
-    for (const id of this.combat.copiedCards) this.run.addCard(id);
+    for (const id of this.combat.copiedCards) this.run.addCard(id, this.combat.copiedUpgraded.has(id));
     // Jackpot : les Pokédollars gagnés en combat
     if (this.combat.moneyGained) this.run.money += this.combat.moneyGained;
     // Permucœur : l'enchantement reste sur la carte pour la run
@@ -439,7 +439,7 @@ export class CombatView {
     }
     return renderCard(d, {
       uid: card.uid,
-      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff} ${c.duo && d.duoSide && d.duoSide !== c.duo.front && playable ? 'duo-relay' : ''}`,
+      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff} ${c.duo && d.duoSide && d.duoSide !== c.duo.front && playable ? 'duo-relay' : ''} ${c.shinySkin && (c.player.statuses.etincelle ?? 0) >= 5 && playable ? 'chroma-next' : ''}`,
       style: `--rot:${(i - mid) * 4}deg;--lift:${Math.abs(i - mid) * 6}px`,
       text: cardText(d, dmg, base && base.kind === 'degats' ? base.amount : null),
       stab: c.player.types.includes(d.pokeType),

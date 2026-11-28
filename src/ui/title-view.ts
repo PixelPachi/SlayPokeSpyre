@@ -172,7 +172,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   </div>`;
   if (who === 'neutres') {
     return `${chips}<p class="gl-note">Tous les Pokémon peuvent les apprendre : elles apparaissent parfois en récompense et au Marché Kecleon.</p>
-      <div class="deck-grid gl-cards">${neutralPool().map((d) => fc(d)).join('')}</div>`;
+      <div class="deck-grid gl-cards">${neutralPool().filter((d) => !d.skin).map((d) => fc(d)).join('')}</div>`;
   }
   if (who === 'ennemis') {
     const enemies = Object.entries(ENEMY_DEFS).filter(([, e]) => seen.has(e.dex));
@@ -185,7 +185,7 @@ function cardsHtml(save: SaveData, who: CharacterId | 'neutres' | 'ennemis', ski
   }
   const c = who;
   if (!playable.includes(c)) return `${chips}<p class="gl-note">Débloque ce Pokémon pour voir ses cartes.</p>`;
-  const skins = (SKINS[c] ?? []).filter((k) => k.id !== 'shiny');
+  const skins = SKINS[c] ?? [];
   const skinChips = `<div class="glc-skins">
     <button class="glc-skin ${!skinSel ? 'on' : ''}" data-skinsel="">Normal</button>
     ${skins.map((k) => `<button class="glc-skin ${skinSel === k.id ? 'on' : ''}" data-skinsel="${k.id}"><img src="${asset(skinSprite(k.dex?.[0] ?? CHARACTERS[c].dex[0], k.id))}" alt="">${esc(k.name)}</button>`).join('')}

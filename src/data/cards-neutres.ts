@@ -17,7 +17,10 @@ function n(
   return { id: `n-${id}`, name, character: 'normal', pokeType, category, rarity, cost, target, effects, upgrade, keywords };
 }
 
+// Skin chromatique : talent légendaire commun à tous les Pokémon chromatiques
+const ECLAT: CardDef = { ...n('eclat-absolu', 'Éclat Absolu', 'fee', 'talent', 'legendaire', 3, 'soi', [{ kind: 'pouvoir', power: 'eclat-absolu', amount: 1 }], { cost: 2 }), skin: 'shiny' };
 export const NEUTRAL_CARDS: CardDef[] = [
+  ECLAT,
   // ——— Skins primordiaux : le cri de Dialga Primal remplace une carte de départ ———
   n('hurle-temps', 'Hurle-Temps', 'dragon', 'attaque', 'depart', 2, 'ennemi', [dmg(30), { kind: 'recharge', amount: 2 }], { effects: [dmg(40), { kind: 'recharge', amount: 2 }] }),
 

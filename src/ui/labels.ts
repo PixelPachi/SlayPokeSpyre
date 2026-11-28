@@ -36,6 +36,7 @@ export const STATUS_INFO: Record<StatusId, { label: string; color: string; text:
   rage: { label: 'Rage', color: '#e5484d', text: (n) => `${n} Rage. Kangourex en gagne 1 chaque fois qu’il perd des PV ; les cartes de Rage s’en servent.` },
   ligote: { label: 'Ligoté', color: '#c49a6c', text: (n) => `Perd ${6 * n} PV au début du tour (6 par cumul). Chaque cumul disparaît au bout de 3 tours.` },
   epine: { label: 'Épine', color: '#7fbf5a', text: (n) => `Chaque coup reçu d’un ennemi lui inflige ${n} dégât${n > 1 ? 's' : ''}. Dure tout le combat.` },
+  etincelle: { label: 'Étincelles', color: '#ffe066', text: (n) => `${n}/5 — à 5 Étincelles, ta prochaine carte devient <b>chromatique</b> : ses valeurs sont doublées.` },
   elan: { label: 'Élan', color: '#ffb84d', text: (n) => `Au début de ton prochain tour, gagne ${n} Protection. L’Élan est ensuite divisé par deux à la fin de ton tour.` },
 };
 
@@ -54,6 +55,7 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   turbo: { label: 'Turbo', text: (n) => `Au début de chaque tour, gagne ${n} Élan.` },
   'plus-synchro': { label: 'Plus Synchro', text: (n) => `Chaque carte Posipi donne ${n} dégâts de plus à la prochaine carte Négapi.` },
   'moins-synchro': { label: 'Moins Synchro', text: (n) => `Chaque carte Négapi donne ${n} Protection de plus.` },
+  'eclat-absolu': { label: 'Éclat Absolu', text: (n) => `Chaque carte jouée te donne ${n} Étincelle${n > 1 ? 's' : ''} de plus.` },
   'pioche-visible': { label: 'Œil Spectral', text: () => 'Tu vois ta pioche dans l’ordre.' },
   'creation-reduite': { label: 'Créativité', text: (n) => `Les cartes créées pendant le combat coûtent ${n} PA de moins.` },
   'coeur-magma': { label: 'Cœur de Magma', text: (n) => `Au début de chaque tour, gagne ${2 * n} Aura et inflige ${2 * n} Brûlure à tous les ennemis.` },
