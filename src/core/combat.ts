@@ -254,8 +254,8 @@ export class Combat {
     const megaLocked = ch.id === 'kangourex' && !!opts.skin && opts.skin !== 'shiny';
     const mega = !megaLocked && ch.mega && this.relics.has(ch.mega.stone) && (opts.act ?? 1) >= ch.mega.fromAct ? ch.mega : null;
     if (ch.id === 'kangourex') {
-      const hp = 8 + (this.relics.has('lait-meumeu') ? 4 : 0) + (opts.familiarBonus ?? 0);
-      this.player.familiar = { hp, maxHp: hp, power: 3 + (this.relics.has('grelot-zen') ? 2 : 0), block: 0, mega: (!!opts.mega && !megaLocked) || !!mega };
+      const hp = 8 + (this.relics.has('lait-meumeu') ? 4 : 0) + (this.relics.has('poing-chance') ? 4 : 0) + (opts.familiarBonus ?? 0);
+      this.player.familiar = { hp, maxHp: hp, power: 3 + (this.relics.has('grelot-zen') ? 2 : 0) + (this.relics.has('masse-os') ? 2 : 0), block: 0, mega: (!!opts.mega && !megaLocked) || !!mega };
     }
     if (mega) {
       this.player.name = mega.name;
@@ -335,6 +335,15 @@ export class Combat {
     if (this.has('veste-combat')) this.relicFired('veste-combat', () => this.gainBlock(this.player, 'player', 10));
     if (this.has('vive-griffe')) { this.handDraw = true; this.relicFired('vive-griffe', () => this.draw(2)); this.handDraw = false; }
     if (this.has('cuillere-tordue')) this.relicFired('cuillere-tordue', () => this.changeEnergy(1, 'Cuillère Tordue'));
+    if (this.has('pierrallegee')) this.relicFired('pierrallegee', () => this.addStatus(this.player, 'player', 'elan', 5));
+    if (this.has('graine-psy') && this.hand.length < MAX_HAND) this.relicFired('graine-psy', () => {
+      const pool = Object.values(CARD_DEFS).filter((c) => c.rarity !== 'depart' && !c.special && !c.skin && c.category !== 'statut' && !c.effects.some((e) => e.kind === 'ajoute-carte'));
+      const pick = this.rng.pick(pool);
+      const uid = this.nextTempUid++;
+      this.freeUids.add(uid);
+      this.hand.push({ uid, defId: pick.id, upgraded: false });
+      this.events.push({ type: 'player-move', name: `Graine Psy : ${pick.name}` });
+    });
   }
 
   // ——— Objets tenus ———
@@ -400,6 +409,7 @@ export class Combat {
     d.front = to;
     this.player.hp = d.hp[to];
     this.duoForm();
+    if (reason === 'relais' && this.has('aimant')) this.relicFired('aimant', () => this.gainBlock(this.player, 'player', 3)); // Aimant
     this.events.push({ type: 'duo-swap', front: to, ko: reason === 'ko' });
     if (reason === 'ko') return;
     // Entrée en scène : Posipi lance 2 dégâts à un ennemi au hasard, Négapi gagne 3 Protection
@@ -418,13 +428,14 @@ export class Combat {
     const role = this.shinySkin ? this.duoOther(side) : side;
     if (role === 'posipi') {
       if (d.cost >= 2) D.minus = 0;
-      if (both) D.plus += 2 + (this.player.powers['plus-synchro'] ?? 0);
+      if (both) D.plus += 2 + (this.player.powers['plus-synchro'] ?? 0) + (this.has('graine-electrik') ? 1 : 0);
     } else {
       D.plus = 0;
-      if (both) { this.gainBlock(this.player, 'player', 2 + (this.player.powers['moins-synchro'] ?? 0)); D.minus += 1; }
+      if (both) { this.gainBlock(this.player, 'player', 2 + (this.player.powers['moins-synchro'] ?? 0) + (this.has('graine-electrik') ? 1 : 0)); D.minus += 1; }
     }
     D.seq.push(side);
-    if (!D.surged && both && D.seq.slice(-4).join(',') === 'posipi,negapi,posipi,negapi') {
+    const surge = this.has('balle-lumiere') ? ['posipi,negapi,posipi', 'negapi,posipi,negapi'].includes(D.seq.slice(-3).join(',')) : D.seq.slice(-4).join(',') === 'posipi,negapi,posipi,negapi';
+    if (!D.surged && both && surge) {
       D.surged = true;
       const card: Card = { uid: this.nextTempUid++, defId: 'duo-decharge-synchro', upgraded: false };
       if (this.hand.length < MAX_HAND) this.hand.push(card); else this.discardPile.push(card);
@@ -454,6 +465,8 @@ export class Combat {
     for (const [id, t] of PLATES) if (t === d.pokeType && this.has(id)) b += 3;
     if (this.has('gant-punch') && /poing|punch/i.test(d.name)) b += 3;
     if (this.has('griffe-rasoir') && d.cost === 0) b += 3;
+    if (this.has('rosee-ame') && (d.pokeType === 'psy' || d.pokeType === 'dragon')) b += 3;
+    if (this.has('lentille-zoom') && (this.playingCard?.uid ?? 0) >= 100000) b += 3; // carte créée pendant le combat
     if (this.has('metronome')) b += this.attacksThisTurn;
     // Roulette : +2 dégâts par tranche de 100 Pokédollars
     if (this.has('roulette')) b += 2 * Math.floor((this.moneyStart + this.moneyGained) / 100);
@@ -555,6 +568,7 @@ export class Combat {
     if (this.fused && d.cost >= 2 && this.fusedMinus > 0) cost -= this.fusedMinus;
     // Créativité (Mew) : les cartes créées pendant le combat coûtent 1 PA de moins
     if (this.player.powers['creation-reduite'] && card.uid >= 100000) cost -= this.player.powers['creation-reduite'];
+    if (this.has('poudre-vite') && isCopy(d.id)) cost -= 1; // Poudre Vite (Quelorior)
     return Math.max(0, cost);
   }
 
@@ -868,6 +882,11 @@ export class Combat {
     }
     // Grelot Coque : chaque carte Attaque jouée soigne 1 PV
     if (d.category === 'attaque' && this.has('grelot-coque') && this.phase === 'joueur') this.healPlayer(1);
+    // Quelorior : Poudre Métal (Protection) et Encens Veine (Pokédollars) sur les cartes copiées
+    if (isCopy(d.id) && this.phase === 'joueur') {
+      if (d.category === 'attaque' && this.has('poudre-metal')) this.gainBlock(this.player, 'player', 3);
+      if (this.has('encens-veine')) this.moneyGained += 3;
+    }
     this.cardsThisTurn++;
     if (this.phase === 'joueur' && this.cardsThisTurn >= 5 && this.bossAlive('decharge')) {
       this.events.push({ type: 'player-move', name: 'Décharge !' });
@@ -1552,7 +1571,7 @@ export class Combat {
           const v = t.statuses[eff.status] ?? 0;
           if (v <= 0) continue;
           delete t.statuses[eff.status];
-          this.strike(t, v * eff.per, d);
+          this.strike(t, v * (eff.per + (eff.status === 'brulure' && this.has('croc-rasoir') ? 1 : 0)), d);
         }
         this.checkEnd();
         return;
@@ -2162,6 +2181,7 @@ export class Combat {
     // Contestation (Vipélierre) : ses baisses de stats deviennent des hausses, et inversement
     if (who === 'player' && this.player.character === 'vipelierre' && !this.weaver && !this.shinySkin && (status === 'attaque' || status === 'defense')) s = -s;
     if (who !== 'player' && status === 'vampigraine' && s > 0 && this.has('grain-miracle')) s += 2;
+    if (who !== 'player' && status === 'brulure' && s > 0 && this.has('roche-chaude')) s += 1; // Roche Chaude
     if (s > 0 && this.terrain?.id === 'champ-brumeux' && BAD_STATUSES.includes(status)) return;
     if (who === 'player' && s > 0 && this.has('carapace-mue') && (status === 'peur' || status === 'paralysie')) return void this.relicFired('carapace-mue');
     // Herbe Mental : le premier statut négatif du combat est annulé
@@ -2182,6 +2202,8 @@ export class Combat {
     if (status === 'confusion' && s > 0) CONF_TURNS.set(f, 2);
     if (status === 'brulure' && s > 0 && who !== 'player' && this.phase === 'joueur' && this.player.character === 'caninos') this.gainSpark(1); // Flamme Dorée
     this.events.push({ type: 'status', target: who, status, stacks: s });
+    if (who !== 'player' && status === 'vampigraine' && s > 0 && this.phase === 'joueur' && this.has('herbe-miroir')) this.gainBlock(this.player, 'player', 2); // Herbe Miroir
+    if (who === 'player' && status === 'rage' && s > 0 && this.has('balle-fer')) this.gainBlock(this.player, 'player', 2 * s); // Balle Fer
   }
 
   /** Début du tour : Poison, Brûlure, Vampigraine. */
@@ -2197,11 +2219,11 @@ export class Combat {
         continue;
       }
       const hpBefore = f.hp;
-      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0), s);
+      this.loseHp(f, who, n + (s === 'brulure' && who !== 'player' && this.has('charbon') ? 1 : 0) + ((s === 'poison' || s === 'vampigraine') && who !== 'player' && this.has('bande-etreinte') ? 1 : 0) + (s === 'vampigraine' && who !== 'player' && this.has('piquants') ? 2 : 0), s);
       // Vampigraine : on ne récupère que la moitié des PV vraiment perdus par la cible
       const drained = Math.min(n, Math.max(0, hpBefore - f.hp));
       if (s === 'vampigraine' && who !== 'player') {
-        this.healPlayer(Math.floor(drained / 2));
+        this.healPlayer(this.has('graine-herbe') ? drained : Math.floor(drained / 2)); // Graine Herbe : tout le drain
         if (drained > 0 && this.player.character === 'vipelierre') this.gainSpark(1); // Vampigraine Scintillante
       }
       // Vampigraine posée par un ennemi : c'est lui qui récupère la moitié des PV drainés

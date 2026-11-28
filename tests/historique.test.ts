@@ -78,3 +78,21 @@ it('Cœur d’Aura : l’Aura consommée ne retombe qu’à moitié (30 → 15)'
   c.play(c.hand.find((x) => x.defId === 'ruse')!.uid, c.enemies[0].uid);
   expect(c.player.aura).toBe(15);
 });
+
+it('objets d’archétype débloqués par niveau pour chaque Pokémon', async () => {
+  const { unlockedRelics } = await import('../src/data/unlocks');
+  for (const ch of ['vipelierre', 'kangourex', 'caninos', 'mew', 'quelorior', 'duo'] as const) {
+    expect(unlockedRelics(ch, 1)).toHaveLength(0);
+    expect(unlockedRelics(ch, 9).length).toBeGreaterThanOrEqual(3);
+  }
+  const run = new Run('REL', 'caninos', undefined, unlockedRelics('caninos', 9));
+  expect(run.relicPool()).toContain('croc-rasoir');
+  expect(new Run('REL', 'caninos').relicPool()).not.toContain('croc-rasoir');
+  // Roche Chaude : +1 Brûlure ; Croc Rasoir : +1 dégât par Brûlure consommée
+  const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: 'can-detonation-arcanine', upgraded: false }));
+  const c = new Combat({ character: 'caninos', deck, enemies: ['rattata'], seed: 'RC', relics: ['roche-chaude', 'croc-rasoir'] } as never);
+  const e = c.enemies[0]; e.hp = e.maxHp = 999; e.block = 0; e.statuses = {};
+  c.player.statuses.elan = 4; c.player.energy = 5;
+  c.play(c.hand[0].uid, e.uid);
+  expect(999 - e.hp).toBeGreaterThanOrEqual(15); // (4 + 1) Brûlure × 3
+});
