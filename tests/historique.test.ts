@@ -68,3 +68,13 @@ it('Détonation Arcanine : Brûlure égale à l’Élan, puis la détonation con
   expect(e.statuses.brulure ?? 0).toBe(0);
   expect(999 - e.hp).toBeGreaterThanOrEqual(12);
 });
+
+it('Cœur d’Aura : l’Aura consommée ne retombe qu’à moitié (30 → 15)', () => {
+  const deck = Array.from({ length: 6 }, (_, i) => ({ uid: i + 1, defId: i === 0 ? 'coeur-d-aura' : 'ruse', upgraded: false }));
+  const c = new Combat({ character: 'riolu', deck, enemies: ['rattata'], seed: 'CA', relics: [] } as never);
+  c.enemies[0].hp = c.enemies[0].maxHp = 999; c.player.energy = 10;
+  c.play(c.hand.find((x) => x.defId === 'coeur-d-aura')!.uid);
+  c.player.aura = 30;
+  c.play(c.hand.find((x) => x.defId === 'ruse')!.uid, c.enemies[0].uid);
+  expect(c.player.aura).toBe(15);
+});

@@ -1302,8 +1302,9 @@ export class Combat {
     this.cardAuraUsed = true;
     const a = this.player.aura;
     if (a > 0) {
-      this.player.aura = 0;
-      this.events.push({ type: 'aura', amount: 0 });
+      // Cœur d'Aura : l'Aura consommée ne retombe qu'à moitié
+      this.player.aura = this.player.powers['coeur-aura'] ? Math.floor(a / 2) : 0;
+      this.events.push({ type: 'aura', amount: this.player.aura });
     }
     return a;
   }
@@ -1390,8 +1391,8 @@ export class Combat {
       }
       case 'aura-protection': {
         const a = p.aura;
-        p.aura = 0;
-        this.events.push({ type: 'aura', amount: 0 });
+        p.aura = p.powers['coeur-aura'] ? Math.floor(a / 2) : 0; // Cœur d'Aura
+        this.events.push({ type: 'aura', amount: p.aura });
         this.gainBlock(p, 'player', Math.floor(a * eff.mult));
         return;
       }

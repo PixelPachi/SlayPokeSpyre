@@ -56,6 +56,7 @@ export const POWER_INFO: Record<PowerId, { label: string; text: (n: number) => s
   'plus-synchro': { label: 'Plus Synchro', text: (n) => `Chaque carte Posipi donne ${n} dégâts de plus à la prochaine carte Négapi.` },
   'moins-synchro': { label: 'Moins Synchro', text: (n) => `Chaque carte Négapi donne ${n} Protection de plus.` },
   'eclat-absolu': { label: 'Éclat Absolu', text: (n) => `Chaque carte jouée te donne ${n} Étincelle${n > 1 ? 's' : ''} de plus.` },
+  'coeur-aura': { label: 'Cœur d’Aura', text: () => 'Quand ton Aura est consommée, elle ne retombe qu’à moitié.' },
   'pioche-visible': { label: 'Œil Spectral', text: () => 'Tu vois ta pioche dans l’ordre.' },
   'creation-reduite': { label: 'Créativité', text: (n) => `Les cartes créées pendant le combat coûtent ${n} PA de moins.` },
   'coeur-magma': { label: 'Cœur de Magma', text: (n) => `Au début de chaque tour, gagne ${2 * n} Aura et inflige ${2 * n} Brûlure à tous les ennemis.` },

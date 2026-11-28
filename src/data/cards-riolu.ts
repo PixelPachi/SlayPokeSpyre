@@ -98,6 +98,8 @@ export const RIOLU_CARDS: CardDef[] = [
 
   // ——— Rares ———
   c('vitesse-extreme', 'Vitesse Extrême', 'normal', 'attaque', 'rare', 1, 'aleatoire', [dmg(6, { hits: 2 }), draw(1)], { effects: [dmg(8, { hits: 2 }), draw(1)] }),
+  // ——— Carte signature full art (bénédiction de Célébi) ———
+  { ...c('coeur-d-aura', 'Cœur d’Aura', 'combat', 'talent', 'rare', 3, 'soi', [{ kind: 'pouvoir', power: 'coeur-aura', amount: 1 }], { cost: 2 }), fullArt: true, special: true },
   c('plenitude', 'Plénitude', 'psy', 'talent', 'rare', 1, 'soi', [{ kind: 'pouvoir', power: 'plenitude', amount: 3 }], { effects: [{ kind: 'pouvoir', power: 'plenitude', amount: 4 }] }),
   c('lire-esprit', 'Lire-Esprit', 'normal', 'talent', 'rare', 2, 'soi', [{ kind: 'pouvoir', power: 'lire-esprit', amount: 1 }], { cost: 1 }),
   c('machination', 'Machination', 'tenebres', 'technique', 'rare', 1, 'soi', [aura(10), { kind: 'pa', amount: 1 }], { effects: [aura(15), { kind: 'pa', amount: 1 }] }, ['epuisee']),

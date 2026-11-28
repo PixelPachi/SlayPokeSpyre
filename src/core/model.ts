@@ -39,7 +39,7 @@ export type PowerId =
   | 'amour-filial' | 'eveil' | 'rancune' | 'croissance' // Kangourex
   | 'zenith' | 'braises' | 'turbo' | 'elan-persistant' | 'brasier-eternel' // Caninos
   | 'plus-synchro' | 'moins-synchro' // Duo
-  | 'pioche-visible' | 'creation-reduite' | 'eclat-absolu'
+  | 'pioche-visible' | 'creation-reduite' | 'eclat-absolu' | 'coeur-aura'
   | 'coeur-magma' | 'charme-celeste' | 'pierre-philosophale' | 'trame-destin' | 'maree-protectrice' | 'bucher-ames' | 'avalanche' // talents légendaires de skin
   | 'souvenir' | 'telekinesie'; // Mew
 
