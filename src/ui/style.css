@@ -1707,8 +1707,16 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .top-choice-row { flex-wrap: wrap; max-width: 1100px; justify-content: center; gap: 8px; max-height: 470px; overflow-y: auto; }
 .top-choice-row .card { width: 130px; }
 /* Skin chromatique : cartes prêtes à devenir chromatiques, récompenses déjà améliorées */
-.hand .card.chroma-next { box-shadow: 0 0 0 2px #fff6b0, 0 0 18px #ffd84a, 0 0 32px #ff9cf0aa; animation: chromaPulse 1.4s ease-in-out infinite; }
-@keyframes chromaPulse { 50% { filter: brightness(1.15) saturate(1.3); } }
+/* 5 Étincelles : lueur arc-en-ciel qui tourne autour des cartes jouables */
+.hand .card.chroma-next { animation: chromaRainbow 2.4s linear infinite; }
+@keyframes chromaRainbow {
+  0% { filter: drop-shadow(0 0 5px #ff4d4d) drop-shadow(0 0 10px #ffb84d); }
+  20% { filter: drop-shadow(0 0 5px #ffe84d) drop-shadow(0 0 10px #6dff6d); }
+  40% { filter: drop-shadow(0 0 5px #4dffd2) drop-shadow(0 0 10px #4dafff); }
+  60% { filter: drop-shadow(0 0 5px #6d6dff) drop-shadow(0 0 10px #d24dff); }
+  80% { filter: drop-shadow(0 0 5px #ff4dd2) drop-shadow(0 0 10px #ff4d6d); }
+  100% { filter: drop-shadow(0 0 5px #ff4d4d) drop-shadow(0 0 10px #ffb84d); }
+}
 /* Pokémon chromatique vaincu : une capacité de la récompense est déjà améliorée */
 .card.shiny-up { box-shadow: 0 0 0 3px #ffe066, 0 0 16px #ffd84a; }
 .card.shiny-up::before { content: '✨ Améliorée'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border-radius: 8px; background: #ffe066; color: #3a2400; font: 900 11px 'Nunito', sans-serif; z-index: 5; white-space: nowrap; }
@@ -1822,3 +1830,13 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .type-pick { padding: 10px 0; border-radius: 10px; border: 2px solid color-mix(in srgb, var(--tc) 60%, #000); background: var(--tc); color: #fff; font: 900 15px 'Nunito', sans-serif; text-shadow: 0 1px 2px #0009; cursor: pointer; transition: transform .1s; }
 .type-pick:hover { transform: scale(1.08); box-shadow: 0 0 14px var(--tc); }
 .card.full-art .card-text { font-size: 11px; line-height: 1.15; }
+
+/* Compteur d'Étincelles (Charme Chroma) */
+.spark-counter { display: inline-flex; align-items: center; gap: 2px; padding: 2px 7px; border-radius: 10px; background: rgba(20, 18, 8, 0.82); border: 2px solid #8a7330; }
+.sc-star { width: 15px; height: 15px; fill: #3b3424; stroke: #8a7330; stroke-width: 1.4; }
+.sc-star.on { fill: #ffd84a; stroke: #fff3b0; filter: drop-shadow(0 0 3px #ffd84a); }
+.sc-extra { margin-left: 3px; color: #ffe066; font: 900 12px 'Nunito', sans-serif; }
+.spark-counter.full { border-color: transparent; background: linear-gradient(#1a1408, #1a1408) padding-box, linear-gradient(90deg, #ff4d4d, #ffd84a, #4dff88, #4dafff, #c44dff, #ff4d4d) border-box; background-size: 100% 100%, 300% 100%; animation: scBorder 2s linear infinite; }
+.spark-counter.full .sc-star.on { animation: scStar 2s linear infinite; animation-delay: calc(var(--i) * -0.4s); }
+@keyframes scBorder { to { background-position: 0 0, 300% 0; } }
+@keyframes scStar { 0% { fill: #ff6b6b; } 20% { fill: #ffd84a; } 40% { fill: #6dff8f; } 60% { fill: #6dc3ff; } 80% { fill: #d06dff; } 100% { fill: #ff6b6b; } }

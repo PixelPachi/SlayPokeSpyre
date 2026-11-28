@@ -362,8 +362,14 @@ export class CombatView {
       }
       if (this.combat.player.freeTurn) items.push('<span class="status free" data-tip="Lire-Esprit : tes cartes coûtent 0 PA ce tour.">0 PA !</span>');
     }
+    // Compteur d'Étincelles (Charme Chroma) : 5 étoiles qui s'allument, arc-en-ciel quand la prochaine carte est chromatique
+    if (isPlayer && this.combat.chromaCharm) {
+      const n = f.statuses.etincelle ?? 0;
+      const star = (on: boolean, i: number) => `<svg class="sc-star ${on ? 'on' : ''}" style="--i:${i}" viewBox="0 0 24 24"><path d="M12 1.5l2.9 6.9 7.4.6-5.6 4.9 1.7 7.3L12 17.3 5.6 21.2l1.7-7.3L1.7 9l7.4-.6z"/></svg>`;
+      items.push(`<span class="spark-counter ${n >= 5 ? 'full' : ''}" data-tip="<b>Étincelles ${n}/5</b><br>${esc(STATUS_INFO.etincelle.text(n))}">${Array.from({ length: 5 }, (_, i) => star(i < n, i)).join('')}${n > 5 ? `<b class="sc-extra">+${n - 5}</b>` : ''}</span>`);
+    }
     for (const [k, v] of Object.entries(f.statuses) as [StatusId, number][]) {
-      if (!v) continue;
+      if (!v || (k === 'etincelle' && isPlayer && this.combat.chromaCharm)) continue;
       const info = STATUS_INFO[k];
       const n = k === 'attaque' || k === 'defense' ? (v > 0 ? `+${v}` : `−${-v}`) : `${v}`;
       items.push(`<span class="status" style="--c:${info.color}" data-tip="${esc(info.label)} : ${esc(info.text(v))}">${iconImg(k)}${info.label} ${n}</span>`);
