@@ -26,6 +26,7 @@ const FILE_TRACKS: Record<string, string> = {
   'tour-dragospire': 'music/tour-dragospire.mp3', // Dragonspiral Tower
   'foret-d-empoigne': 'music/foret-d-empoigne.mp3', // Pinwheel Forest
   'guilde-grodoudou': 'music/guilde-grodoudou.mp3', // Donjon Mystère : Guilde de Grodoudou
+  'iles-ecume': 'music/iles-ecume.mp3', // Route de Glace (Or HeartGold / Argent SoulSilver)
   'ruines-alpha': 'music/ruines-alpha.mp3', // Ruines d'Alpha (Or / Argent)
   'repaire-rocket': 'music/repaire-rocket.mp3', // Team Rocket Hideout (Rouge Feu / Vert Feuille)
   // Combats de gardiens des actes 1, 2 et 3 : Boss Battle (Explorateurs du Ciel)
