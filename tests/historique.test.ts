@@ -26,3 +26,22 @@ it('l’historique note les cartes jouées, les dégâts et les tours ; les stat
   expect(run.fightStats.fights).toBe(2);
   expect(run.fightStats.dealt).toBe(2 * c.stats.dealt);
 });
+
+it('Repaire Rocket : Jackpot du Persian inflige 3 dégâts par tranche de 10 ₽, Pression renforce Mewtwo à la 3e carte', async () => {
+  const { ZONES } = await import('../src/data/zones');
+  const z = ZONES.find((x) => x.id === 'repaire-rocket')!;
+  expect(z.act).toBe(3);
+  expect(z.boss).toBe('mewtwo');
+  const deck = Array.from({ length: 8 }, (_, i) => ({ uid: i + 1, defId: 'griffe', upgraded: false }));
+  const c = new Combat({ character: 'caninos', deck, enemies: ['persian-rocket'], seed: 'JP', relics: [], money: 120 } as never);
+  const e = c.enemies[0];
+  const { ENEMY_DEFS } = await import('../src/data/enemies');
+  const jp = ENEMY_DEFS[e.defId].moves.find((m) => m.id === 'jackpot-persian')!;
+  expect(c.moveBonus(e, jp)).toBe(36);
+  const m = new Combat({ character: 'caninos', deck, enemies: ['mewtwo'], seed: 'MT', relics: [] } as never);
+  m.player.energy = 10;
+  const mw = m.enemies[0];
+  const atk0 = mw.statuses.attaque ?? 0; // (Intimidation de Caninos : −1 au départ)
+  for (let i = 0; i < 3; i++) m.play(m.hand[0].uid, mw.uid);
+  expect((mw.statuses.attaque ?? 0) - atk0).toBe(1);
+});

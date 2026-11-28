@@ -534,11 +534,11 @@ describe('acte 2', async () => {
 describe('acte 3', async () => {
   const { Run, LAST_ACT } = await import('../src/core/run');
   const { zonesOfAct } = await import('../src/data/zones');
-  it('5 zones, une par région, et on y arrive après l’acte 2', () => {
+  it('6 zones (une par région + le Repaire Rocket), et on y arrive après l’acte 2', () => {
     expect(LAST_ACT).toBe(4);
     const z3 = zonesOfAct(3);
-    expect(z3).toHaveLength(5);
-    expect(new Set(z3.map((z) => z.region)).size).toBe(5);
+    expect(z3).toHaveLength(6);
+    expect(new Set(z3.map((z) => z.region)).size).toBe(6);
     const run = new Run('ACTE3', 'caninos');
     run.nextAct();
     run.nextAct();

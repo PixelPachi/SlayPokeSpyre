@@ -90,6 +90,7 @@ export const THEMES: Record<string, Theme> = {
   'pilier-celeste': T('celeste', 132, 64, LYD, [0, 1, 4, 0, 5, 1, 3, 4], { drums: 'rapide', arp: true, echo: true, leadOct: 1 }),
   'mont-abrupt': T('abrupt', 116, 58, HARM, [0, 5, 3, 4, 0, 5, 6, 4], { lead: 'sawtooth', drums: 'epique', pad: true }),
   'tour-dragospire': T('dragospire', 126, 60, PHR, [0, 1, 6, 0, 5, 1, 6, 4], { lead: 'square', bass: 'sawtooth', drums: 'epique', density: 0.65 }),
+  'repaire-rocket': T('rocket', 120, 57, HARM, [0, 1, 0, 6, 5, 1, 6, 4], { lead: 'square', bass: 'sawtooth', drums: 'marche', density: 0.6, echo: true }),
   // Sommet et gardiens
   'sommet-tour-du-temps': T('sommet', 120, 56, HARM, [0, 5, 1, 4, 0, 5, 6, 4], { lead: 'sawtooth', bass: 'square', drums: 'epique', pad: true, echo: true, density: 0.6 }),
   'gardien-1': T('boss1', 144, 57, HARM, [0, 0, 5, 4, 0, 0, 6, 4], { lead: 'square', bass: 'sawtooth', drums: 'rapide', density: 0.7 }),

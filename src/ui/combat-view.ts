@@ -654,6 +654,7 @@ export class CombatView {
     box.className = 'enemy-card';
     const extra: string[] = [];
     if (m.pierce) extra.push('<b>Ignore ta Protection.</b>');
+    if (m.perMoney) extra.push(`(${m.perMoney} dégâts par tranche de 10 ₽ que tu as)`);
     if (m.addCards) extra.push(`Ajoute ${m.addCards.count} <b>${esc(cardDef(m.addCards.id).name)}</b> à ta ${m.addCards.to === 'main' ? 'main' : m.addCards.to === 'defausse' ? 'défausse' : 'pioche'}.`);
     if (m.discard) extra.push(`Défausse ${m.discard} de tes cartes au hasard.`);
     if (m.summon) extra.push('Appelle une ouvrière en renfort.');

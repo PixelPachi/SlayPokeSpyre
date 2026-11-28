@@ -144,6 +144,14 @@ export const ZONES: ZoneDef[] = [
     season: "Tempête de neige et d'éclairs", weather: 'orage',
   },
 
+  {
+    id: 'repaire-rocket', name: 'Repaire Rocket', region: 'Kanto et de Johto', act: 3,
+    encounters: [['arbok'], ['grotadmorv'], ['nostenfer', 'cornebre'], ['nidoking'], ['nidoqueen', 'nidoking'], ['cornebre', 'cornebre'], ['smogogo', 'arbok'], ['demolosse'], ['grotadmorv', 'nostenfer'], ['demolosse', 'cornebre'], ['nidoqueen']],
+    elites: [['rhinoferos'], ['persian-rocket']], boss: 'mewtwo',
+    background: 'backgrounds/repaire-rocket.jpg', palette: ['#5a2a4a', '#2a2030', '#0c0810'], mood: 'poison',
+    season: 'Laboratoire secret', weather: 'etincelles',
+  },
+
   // ——— Sommet : le combat final ———
   {
     id: 'sommet-tour-du-temps', name: 'Sommet de la Tour du Temps', region: 'Tour du Temps', act: 4,

@@ -253,11 +253,13 @@ export interface EnemyMove {
   recoil?: number;
   /** Dégâts en plus à chaque nouvelle utilisation pendant le combat. */
   escalate?: number;
+  /** Jackpot (Persian du Boss) : dégâts en plus par tranche de 10 ₽ que tu as. */
+  perMoney?: number;
 }
 
 export type GimmickId =
   | 'venin-tenace' | 'cuirasse' | 'ailes' | 'reine' | 'boule-de-neige' | 'clair-de-lune' | 'regard-royal' | 'sol-brulant'
-  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'turbobrasier' | 'distorsion' | 'fantome-inconnu' | 'miroir-originel';
+  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'turbobrasier' | 'distorsion' | 'fantome-inconnu' | 'miroir-originel' | 'pression';
 
 export interface EnemyDef {
   id: string;

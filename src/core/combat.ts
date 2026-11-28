@@ -748,10 +748,15 @@ export class Combat {
     return hasAnyStatus(this.player) || (s.attaque ?? 0) < 0 || (s.defense ?? 0) < 0 || (s.gel ?? 0) > 0;
   }
 
+  /** Dégâts en plus d'une capacité ennemie : montée en puissance, Jackpot (par tranche de 10 ₽ du joueur). */
+  moveBonus(e: EnemyState, m: EnemyMove): number {
+    return (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0) + (m.perMoney ? m.perMoney * Math.floor((this.moneyStart + this.moneyGained) / 10) : 0);
+  }
+
   /** Dégâts par coup annoncés par l'intention d'un ennemi. */
   previewIntentDamage(e: EnemyState): number | null {
     if (e.intent.damage === undefined) return null;
-    const extra = e.intent.escalate ? (e.flags[e.intent.id] ?? 0) * e.intent.escalate : 0;
+    const extra = this.moveBonus(e, e.intent);
     return computeDamage(e.intent.damage + extra, e, this.player, e.intent.pokeType ?? 'normal').amount;
   }
 
@@ -869,6 +874,12 @@ export class Combat {
       this.loseHp(this.player, 'player', 2, 'carte');
     }
     if (d.category === 'technique') for (const e of this.aliveEnemies()) if (this.gimmickOf(e) === 'regard-royal') this.gainBlock(e, e.uid, 3);
+    // Pression (Mewtwo) : ta 3e carte du tour le renforce
+    if (this.phase === 'joueur' && this.cardsThisTurn === 3) for (const e of this.aliveEnemies()) if (this.gimmickOf(e) === 'pression') {
+      this.events.push({ type: 'enemy-move', uid: e.uid, name: 'Pression !' });
+      this.addStatus(e, e.uid, 'attaque', 1);
+      this.gainBlock(e, e.uid, 6);
+    }
     if (d.category === 'technique') {
       this.techsThisTurn++;
       if (this.has('encens-pur') && this.phase === 'joueur') this.relicFired('encens-pur', () => this.gainAura(2, true));
@@ -981,7 +992,7 @@ export class Combat {
   private runMove(e: EnemyState, uid: number, mv: EnemyMove, frozen: boolean): void {
     const m = frozen && this.boss && m0(mv).damage ? { ...mv, damage: Math.floor(mv.damage! / 2) } : mv;
     if (m.id === 'hurle-temps') this.timeRoar = true;
-    this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + (m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
+    this.events.push({ type: 'enemy-move', uid, name: m.name, move: m, damage: m.damage !== undefined ? Math.floor(computeDamage(m.damage + this.moveBonus(e, m), e, this.player, m.pokeType ?? 'normal').amount * this.fieldMult(m.pokeType ?? 'normal', this.has('lunettes-filtre'))) : undefined });
     if (m.meteo) this.setField(m.meteo);
     // Miroir Originel : Arceus prend le type de la carte qu'il vient d'utiliser (et la plaque qui va avec)
     if (this.gimmickOf(e) === 'miroir-originel' && m.pokeType && e.types[0] !== m.pokeType) {
@@ -995,7 +1006,7 @@ export class Combat {
     if (mate) this.events.push({ type: 'enemy-move', uid: mate.uid, name: `Soutenu par ${e.name} !` });
     if (m.block) this.gainBlock(sup, supUid, m.block);
     if (m.heal) this.healEnemy(sup, m.heal);
-    const extra = m.escalate ? (e.flags[m.id] ?? 0) * m.escalate : 0;
+    const extra = this.moveBonus(e, m);
     if (m.escalate) e.flags[m.id] = (e.flags[m.id] ?? 0) + 1;
     if (m.damage !== undefined) {
       // Le Bébé Kangourex peut être visé (3 chances sur 10)
