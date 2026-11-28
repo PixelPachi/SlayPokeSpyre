@@ -44,7 +44,7 @@ const RELICS: RelicDef[] = [
   { id: 'pointeau-adn', name: 'Pointeau ADN', sprite: 'dna-splicers', rarity: 'rare', owner: 'duo', free: true,
     text: 'Débloque la fusion au Centre Pokémon : Posipi et Négapi deviennent Multipi (PV réunis, +1 PA par tour, Plus et Moins actifs sur toutes les cartes, cartes de départ fusionnées).' },
   { id: 'charme-chroma', name: 'Charme Chroma', sprite: 'shiny-charm', rarity: 'depart', owner: 'commun', free: true,
-    text: 'Objet de départ des skins chromatiques. Étincelles : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu ; à 5, ta prochaine carte devient chromatique (valeurs doublées). Cartes chromatiques 2× plus fréquentes en récompense et en boutique. Pokémon chromatiques 3× plus fréquents ; en vaincre un améliore une carte de ton deck. Boutiques −10 %.' },
+    text: 'Objet de départ des skins chromatiques. Étincelles : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu ; à 5, ta prochaine carte devient chromatique (valeurs doublées). Cartes chromatiques 2× plus fréquentes en récompense et en boutique. Pokémon chromatiques 3× plus fréquents. Boutiques −10 %.' },
   { id: 'pile-synchro', name: 'Pile Synchro', sprite: 'cell-battery', rarity: 'depart', owner: 'duo',
     text: 'Chaque combat commence sur un Champ Électrifié.' },
   { id: 'charbon', name: 'Charbon', sprite: 'charcoal', rarity: 'depart', owner: 'caninos',

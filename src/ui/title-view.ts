@@ -8,6 +8,7 @@ import { berryCard, berryIcon, relicCard, relicIcon } from './run-ui';
 import { CHARACTERS } from '../data/characters';
 import { skinSprite } from '../data/skins';
 import { renderCard } from './card';
+import { termsHtml } from './glossary-terms';
 import { allCards, cardDef, CURSES, neutralPool } from '../data/cards';
 import { SKINS } from '../data/skins';
 import { characterLevel, playableCharacters } from '../core/save';
@@ -76,11 +77,12 @@ export function confirmBox(root: HTMLElement, title: string, text: string, ok: s
   root.appendChild(box);
 }
 
-type Tab = 'cartes' | 'objets' | 'baies' | 'pokemon' | 'historique';
+type Tab = 'cartes' | 'motscles' | 'objets' | 'baies' | 'pokemon' | 'historique';
 
 export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => void): void {
   let tab: Tab = 'cartes';
   let openDeck = -1;
+  let termQuery = '';
   // Onglet Cartes : un Pokémon (ou « neutres » / « ennemis ») et un skin
   let who: CharacterId | 'neutres' | 'ennemis' = 'riolu';
   let skinSel = '';
@@ -95,6 +97,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
 
   const body = (): string => {
     if (tab === 'cartes') return cardsHtml(save, who, skinSel, seen, upSet);
+    if (tab === 'motscles') return `<input class="gl-search" type="search" placeholder="Rechercher un mot-clé…" value="${esc(termQuery)}"><div class="gl-terms-wrap">${termsHtml(termQuery)}</div>`;
     if (tab === 'objets') {
       return order.map((r) => {
         const list = relics.filter((x) => x.rarity === r);
@@ -129,11 +132,19 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
           <button class="btn gl-back">← Retour</button>
           <h1>Glossaire</h1>
           <div class="gl-tabs">
-            ${(['cartes', 'objets', 'baies', 'pokemon', 'historique'] as Tab[]).map((t) => `<button class="gl-tab ${t === tab ? 'on' : ''}" data-tab="${t}">${({ cartes: 'Cartes', objets: 'Objets tenus', baies: 'Baies', pokemon: 'Pokémon', historique: 'Historique' })[t]}</button>`).join('')}
+            ${(['cartes', 'motscles', 'objets', 'baies', 'pokemon', 'historique'] as Tab[]).map((t) => `<button class="gl-tab ${t === tab ? 'on' : ''}" data-tab="${t}">${({ cartes: 'Cartes', motscles: 'Mots-clés', objets: 'Objets tenus', baies: 'Baies', pokemon: 'Pokémon', historique: 'Historique' })[t]}</button>`).join('')}
           </div>
         </div>
         <div class="gl-body">${body()}</div>
       </div>`;
+  };
+  // Recherche dans les mots-clés : on ne redessine que la liste (le champ garde le focus)
+  root.oninput = (ev) => {
+    const inp = ev.target as HTMLInputElement;
+    if (!inp.classList.contains('gl-search')) return;
+    termQuery = inp.value;
+    const w = root.querySelector('.gl-terms-wrap');
+    if (w) w.innerHTML = termsHtml(termQuery);
   };
   root.onclick = (ev) => {
     const t = ev.target as HTMLElement;
@@ -147,7 +158,7 @@ export function renderGlossary(root: HTMLElement, save: SaveData, onBack: () => 
     if (sk) { skinSel = sk.dataset.skinsel!; return draw(); }
     const hd = t.closest<HTMLElement>('.hist-deck-btn');
     if (hd) { const i = Number(hd.dataset.i); openDeck = openDeck === i ? -1 : i; return draw(); }
-    if (t.closest('.gl-back')) { root.onclick = null; onBack(); }
+    if (t.closest('.gl-back')) { root.onclick = null; root.oninput = null; onBack(); }
   };
   draw();
 }

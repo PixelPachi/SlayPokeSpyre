@@ -38,7 +38,7 @@ export function bindDeck(root: HTMLElement, run: Run): void {
 
 /** Récompenses après un combat : Pokédollars puis 1 carte parmi 3 (ou passer). */
 export function renderReward(
-  root: HTMLElement, run: Run, o: { money: number; cards: string[]; title: string; label: string; relic?: string; relicChoices?: string[]; berry?: string }, done: Done,
+  root: HTMLElement, run: Run, o: { money: number; cards: string[]; shinyUp?: boolean; title: string; label: string; relic?: string; relicChoices?: string[]; berry?: string }, done: Done,
 ): void {
   // Butin façon Slay the Spire : une liste de récompenses, on clique sur chacune pour la prendre
   const loot: { kind: 'money' | 'relic' | 'relics' | 'berry' | 'cards'; taken: boolean; berry?: string }[] = [];
@@ -48,6 +48,8 @@ export function renderReward(
   // Baies : celle du butin + celles trouvées sans place pendant le combat (Don Naturel…)
   for (const b of [...(o.berry ? [o.berry] : []), ...run.pendingBerries.splice(0)]) loot.push({ kind: 'berry', taken: false, berry: b });
   if (o.cards.length) loot.push({ kind: 'cards', taken: false });
+  // Pokémon chromatique vaincu : une des capacités proposées est déjà améliorée
+  const upIdx = o.shinyUp ? o.cards.findIndex((id) => Object.keys(cardDef(id).upgrade ?? {}).length > 0) : -1;
   const row = (l: typeof loot[number]): string => {
     switch (l.kind) {
       case 'money':
@@ -118,16 +120,15 @@ export function renderReward(
     (layer ?? root.querySelector('.node-screen')!).appendChild(box);
   };
   const openCards = (l: typeof loot[number]) => {
-    // Charme Chroma : chaque capacité proposée a 1 chance sur 4 d'être déjà améliorée (tiré une seule fois)
     const box = document.createElement('div');
     box.className = 'card-choice';
     box.innerHTML = `<div class="card-choice-title">Choisis une capacité</div>
-      <div class="card-row card-choice-row">${o.cards.map((id, i) => renderCard(cardDef(id), { classes: 'pickable' }).replace('<div class="card', `<div data-pick="${id}" data-i="${i}" class="card`)).join('')}</div>
+      <div class="card-row card-choice-row">${o.cards.map((id, i) => renderCard(cardDef(id, i === upIdx), { classes: `pickable ${i === upIdx ? 'shiny-up' : ''}` }).replace('<div class="card', `<div data-pick="${id}" data-i="${i}" class="card`)).join('')}</div>
       <button class="btn skip-cards">Passer</button>`;
     box.addEventListener('click', (ev) => {
       const t = ev.target as HTMLElement;
       const c = t.closest<HTMLElement>('[data-pick]');
-      if (c) { run.addCard(c.dataset.pick!); l.taken = true; sfx('carte'); box.remove(); return draw(); }
+      if (c) { run.addCard(c.dataset.pick!, Number(c.dataset.i) === upIdx); l.taken = true; sfx('carte'); box.remove(); return draw(); }
       if (t.closest('.skip-cards')) box.remove();
     });
     (layer ?? root.querySelector('.node-screen')!).appendChild(box);

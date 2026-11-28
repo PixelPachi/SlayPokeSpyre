@@ -1,4 +1,3 @@
-import { cardDef } from './data/cards';
 import { SKINS, skinDef, skinSprite } from './data/skins';
 import { RELIC_DEFS } from './data/relics';
 import { mysteryScreen, renderBlackMarket, renderChest, renderPension, renderTmShop } from './ui/nodes-extra';
@@ -433,11 +432,6 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (run.zenFights > 0 && --run.zenFights === 0) run.relics = run.relics.filter((id) => id !== 'encens-zen'); // l'Encens Zen s'est consumé
       if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
       run.shiniesMet += r.shinies;
-      // Skin chromatique : battre un Pokémon chromatique améliore une carte du deck
-      if (r.victory && r.shinies && run.relics.includes('charme-chroma')) {
-        const pool = run.deck.filter((c) => !c.upgraded && Object.keys(cardDef(c.defId).upgrade ?? {}).length);
-        if (pool.length) { const c = run.rng.pick(pool); c.upgraded = true; setTimeout(() => toast(`✨ Chromatique vaincu : ${cardDef(c.defId).name} est améliorée !`), 900); }
-      }
       if (type === 'elite') run.elitesDefeated++;
       if (type === 'combat') run.combatsWon++;
       if (type === 'boss') {
@@ -449,7 +443,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
         if (run.act === LAST_ACT) {
           // Les deux Rouages résonnent : un escalier de lumière s'ouvre vers la Salle Originelle
           return renderReward(screen, run, {
-            money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), label: labels.boss,
+            money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), shinyUp: r.shinies > 0, label: labels.boss,
             title: 'Les Rouages résonnent… un escalier de lumière apparaît !', berry: run.rollBerry(),
           }, () => { run.nextAct(); clear(); renderActIntro(screen, run, () => showMap(run)); });
         }
@@ -457,7 +451,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
         return renderReward(
           screen, run,
           {
-            money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), label: labels.boss,
+            money: run.moneyReward('boss', r.shinies), cards: run.cardChoices('boss'), shinyUp: r.shinies > 0, label: labels.boss,
             title: `Gardien de ${run.zone.name} vaincu !`, relicChoices: run.bossRelicChoices(), berry: run.rollBerry(),
           },
           () => {
@@ -471,7 +465,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       renderReward(
         screen, run,
         {
-          money: run.moneyReward(type, r.shinies), cards: run.cardChoices(type), label: labels[type],
+          money: run.moneyReward(type, r.shinies), cards: run.cardChoices(type), shinyUp: r.shinies > 0, label: labels[type],
           title: type === 'elite' ? 'Pokémon dominant vaincu !' : 'Victoire !',
           // Premier Pokémon dominant vaincu : le Rouage de l'Espace (si Dialga a été apaisé avec 3 Pokémon)
           relic: type === 'elite' ? (run.cogsUnlocked && !run.relics.includes('rouage-espace') ? 'rouage-espace' : run.rollRelics(1)[0]) : undefined,
@@ -518,14 +512,9 @@ function duel(run: Run, f: EventFight): void {
       if (r.fled) return showMap(run);
       run.duelsWon++;
       run.shiniesMet += r.shinies;
-      // Skin chromatique : battre un Pokémon chromatique améliore une carte du deck
-      if (r.victory && r.shinies && run.relics.includes('charme-chroma')) {
-        const pool = run.deck.filter((c) => !c.upgraded && Object.keys(cardDef(c.defId).upgrade ?? {}).length);
-        if (pool.length) { const c = run.rng.pick(pool); c.upgraded = true; setTimeout(() => toast(`✨ Chromatique vaincu : ${cardDef(c.defId).name} est améliorée !`), 900); }
-      }
       renderReward(
         screen, run,
-        { money: run.moneyReward('elite', r.shinies), cards: run.cardChoices('boss'), label: 'Duel', title: 'Duel remporté !', relic: f.relic ? run.rollRelics(1)[0] : undefined },
+        { money: run.moneyReward('elite', r.shinies), cards: run.cardChoices('boss'), shinyUp: r.shinies > 0, label: 'Duel', title: 'Duel remporté !', relic: f.relic ? run.rollRelics(1)[0] : undefined },
         () => showMap(run),
       );
     },
