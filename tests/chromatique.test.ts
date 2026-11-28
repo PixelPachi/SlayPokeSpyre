@@ -69,3 +69,10 @@ describe('cartes chromatiques (rareté arc-en-ciel)', () => {
     expect(b).toBeGreaterThan(a);
   });
 });
+
+it('le Charme Chroma peut se trouver en run sans skin chromatique (objet rare)', () => {
+  const plain = new Run('CHARME', 'caninos');
+  expect(plain.relicPool()).toContain('charme-chroma');
+  const shiny = new Run('CHARME', 'caninos'); shiny.applySkin('shiny');
+  expect(shiny.relicPool()).not.toContain('charme-chroma');
+});

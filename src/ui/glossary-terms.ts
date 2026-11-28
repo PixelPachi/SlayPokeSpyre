@@ -84,7 +84,7 @@ export function glossaryTermSections(): { title: string; note?: string; terms: T
       terms: [
         { name: 'Pokémon chromatique', color: '#ffe066', text: 'Ennemi rare aux couleurs différentes : il rapporte plus de Pokédollars, et une des capacités proposées en récompense est déjà améliorée.' },
         { name: 'Étincelles', color: '#ffe066', text: 'Avec le Charme Chroma : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu. À 5, ta prochaine carte devient chromatique pour ce coup-ci (valeurs doublées).' },
-        { name: 'Charme Chroma', color: '#ffe066', text: 'Objet de départ des skins chromatiques : Étincelles, cartes chromatiques 2× plus fréquentes, Pokémon chromatiques 3× plus fréquents, boutiques −10 %.' },
+        { name: 'Charme Chroma', color: '#ffe066', text: 'Objet tenu rare (objet de départ des skins chromatiques) : Étincelles, cartes chromatiques 2× plus fréquentes, Pokémon chromatiques 3× plus fréquents.' },
       ],
     },
     {
