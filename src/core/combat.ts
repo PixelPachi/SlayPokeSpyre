@@ -258,6 +258,11 @@ export class Combat {
     this.alchemist = ch.id === 'vipelierre' && opts.skin === 'alchimiste';
     this.enemyPower = opts.enemyPower;
     this.enemies = opts.enemies.map((id) => this.spawnEnemy(id));
+    // Gardiens renforcés : +20 % de PV et Attaque +2 (+1 par acte au-delà du premier)
+    if (this.boss) for (const e of this.enemies) {
+      e.maxHp = e.hp = Math.round(e.hp * 1.2);
+      e.statuses.attaque = (e.statuses.attaque ?? 0) + 2 + Math.max(0, (opts.act ?? 1) - 1);
+    }
     // Encens Zen (offert par Grodoudou) : les ennemis n'ont qu'1 PV
     if (opts.oneHp) for (const e of this.enemies) e.hp = 1;
     if (opts.enemyPower && opts.enemyPower > 1) {
