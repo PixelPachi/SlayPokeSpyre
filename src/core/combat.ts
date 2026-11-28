@@ -4,7 +4,7 @@ import type { Card, CardDef, CharacterId, DuoSide, EnemyMove, Effect, PowerId, S
 import { copyId, isCopy } from '../data/copies';
 import { Rng } from './rng';
 import {
-  type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier,
+  type Effectiveness, type PokeType, SAME_TYPE_BONUS, effectivenessOf, hasImmunity, typeMultiplier, TYPE_LABELS,
 } from './types';
 import { CARD_DEFS, cardDef, ENCHANTS, enchantId, rollEnchant, scaleX } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
@@ -1137,6 +1137,8 @@ export class Combat {
     const [a, b] = e.history.slice(-2);
     const allowed = a !== undefined && a === b ? moves.filter((m) => m.id !== a) : moves;
     e.intent = this.rng.weighted(allowed.length ? allowed : moves);
+    // Puissance Cachée (Zarbi) : le type est tiré au hasard (annoncé dans l'intention)
+    if (e.intent.randomType) e.intent = { ...e.intent, pokeType: this.rng.pick(ALL_TYPES) };
   }
 
   private startPlayerTurn(): void {
@@ -2073,6 +2075,11 @@ export class Combat {
     if (clone > 0) { f.statuses.clone! -= clone; if (!f.statuses.clone) delete f.statuses.clone; blocked += clone; }
     const rest = amount - blocked;
     this.events.push({ type: 'damage', target: who, amount: rest, blocked, effectiveness });
+    // Double Tête (Girafarig) : la tête de sa queue mord celui qui le frappe
+    if (amount > 0 && typeof who === 'number' && this.phase === 'joueur' && this.gimmickOf(f as EnemyState) === 'double-tete' && this.player.hp > 0) {
+      this.events.push({ type: 'enemy-move', uid: who, name: 'Double Tête : la queue mord !' });
+      this.loseHp(this.player, 'player', 2, 'carte');
+    }
     if (rest > 0 && who === 'player' && this.player.statuses.concentration) {
       delete this.player.statuses.concentration;
       this.focus = null;
@@ -2283,6 +2290,9 @@ export class Combat {
   }
 }
 
+
+/** Tous les types (Puissance Cachée de Zarbi). */
+const ALL_TYPES = Object.keys(TYPE_LABELS) as PokeType[];
 
 /** Le Bébé Kangourex comme combattant (type Normal), pour le calcul des dégâts. */
 const BABY_FIGHTER: Fighter = { name: 'Bébé', dex: 115, types: ['normal'], hp: 1, maxHp: 1, block: 0, statuses: {} };

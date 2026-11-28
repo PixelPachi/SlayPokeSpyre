@@ -442,7 +442,9 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   // Environ 4 événements sur 10 sont des arcanes majeurs, les autres des rencontres Pokémon ; jamais deux fois le même dans une run
   const fresh = (list: GameEvent[]) => list.filter((e) => !run.seenEvents.includes(e.id));
   const tarot = fresh(TAROT_EVENTS), classic = fresh(EVENTS);
-  const pool = tarot.length && (run.rng.next() < 0.4 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
+  // Ruines Alpha : les événements des Zarbi sortent bien plus souvent (1 chance sur 2 tant qu'il en reste)
+  const unown = run.zone.id === 'ruines-alpha' ? classic.filter((e) => e.id === 'zarbi-mots' || e.id === 'miroir-zarbi') : [];
+  const pool = unown.length && run.rng.next() < 0.5 ? unown : tarot.length && (run.rng.next() < 0.4 || !classic.length) ? tarot : classic.length ? classic : EVENTS;
   const forced = forcedId?.replace(/-inverse$/, '');
   const ev: GameEvent = forced === 'accueil' ? welcomeEvent(run) : [...TAROT_EVENTS, ...EVENTS].find((e) => e.id === forced) ?? run.rng.pick(pool);
   run.seenEvents.push(ev.id);

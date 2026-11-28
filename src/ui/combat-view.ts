@@ -377,7 +377,8 @@ export class CombatView {
 
   private enemyHtml(e: EnemyState, targeting: boolean): string {
     if (e.hp <= 0) return `<div class="fighter enemy dead" data-who="${e.uid}"></div>`;
-    const sprite = ENEMY_DEFS[e.defId].look === 'primal' ? 'sprites/pokemon/dialga-primal.png' : e.form ? `sprites/pokemon/${e.shiny ? 'shiny' : 'front'}/arceus/${e.form}.png` : e.shiny ? `sprites/pokemon/shiny/${e.dex}.png` : `sprites/pokemon/front/${e.dex}.png`;
+    const alt = ENEMY_DEFS[e.defId].sprite; // formes de Zarbi
+    const sprite = ENEMY_DEFS[e.defId].look === 'primal' ? 'sprites/pokemon/dialga-primal.png' : alt ? `sprites/pokemon/${e.shiny ? 'shiny' : 'front'}/${alt}.png` : e.form ? `sprites/pokemon/${e.shiny ? 'shiny' : 'front'}/arceus/${e.form}.png` : e.shiny ? `sprites/pokemon/shiny/${e.dex}.png` : `sprites/pokemon/front/${e.dex}.png`;
     return `
       <div class="fighter enemy ${e.block > 0 ? 'has-block' : ''} ${(e.statuses.sommeil ?? 0) > 0 ? 'asleep' : ''} ${targeting ? 'targetable' : ''} ${this.hoverEnemy === e.uid && targeting ? 'hovered' : ''}" data-who="${e.uid}">
         ${this.intentHtml(e)}
@@ -419,7 +420,7 @@ export class CombatView {
     if (mirrors.length) tip = `<b>Miroir Originel</b> : Arceus va jouer ${mirrors.map((d) => `<b>${esc(d.name)}</b>`).join(' puis ')}, avec les mêmes effets que tes cartes.`;
     return `${mirrors.length ? `<div class="mirror-preview n${mirrors.length}" data-tip="${tip}"><small>Va jouer tes cartes</small><div class="mp-row">${mirrors.map((d) => `<div class="mp-card">${renderCard({ ...d, enchants: undefined, enchant: undefined }, { classes: 'no-cost' })}</div>`).join('')}</div></div>` : ''}
       <div class="intent intent-${m.intent}" data-tip="${tip}" style="--tc:${color}">
-        ${iconImg(`intent-${m.intent}`, 'intent-ico') || INTENT_ICONS[m.intent]}<span>${label}</span>
+        ${iconImg(`intent-${m.intent}`, 'intent-ico') || INTENT_ICONS[m.intent]}<span>${label}</span>${m.randomType && m.pokeType ? `<em class="intent-type" style="background:${color}">${TYPE_LABELS[m.pokeType]}</em>` : ''}
       </div>`;
   }
 

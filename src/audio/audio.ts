@@ -83,6 +83,7 @@ export const THEMES: Record<string, Theme> = {
   'foret-de-vestigion': T('vestigion', 88, 62, DOR, [0, 3, 0, 6, 5, 3, 6, 4], { lead: 'triangle', pad: true, density: 0.4, echo: true }),
   'foret-d-empoigne': T('empoigne', 112, 69, MAJ, [0, 4, 5, 3, 0, 4, 3, 4], { drums: 'marche', arp: true }),
   'tour-lavanville': T('lavanville', 76, 64, PHR, [0, 1, 0, 6, 5, 1, 3, 0], { lead: 'triangle', drums: 'aucun', pad: true, arp: true, echo: true, density: 0.35, leadOct: 1 }),
+  'ruines-alpha': T('alpha', 84, 57, DOR, [0, 6, 3, 6, 0, 5, 1, 0], { lead: 'triangle', pad: true, echo: true, drums: 'doux', density: 0.35 }),
   // Acte 2 : grottes et montagnes
   'mont-selenite': T('selenite', 92, 57, DOR, [0, 6, 5, 6, 0, 3, 6, 4], { lead: 'triangle', pad: true, echo: true, drums: 'doux', density: 0.4 }),
   'puits-ramoloss': T('ramoloss', 80, 60, MIX, [0, 3, 0, 4, 0, 3, 6, 0], { lead: 'sine', drums: 'doux', echo: true, density: 0.35, pad: true }),

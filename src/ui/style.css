@@ -1776,3 +1776,6 @@ img.sprite, .roster img { image-rendering: pixelated; }
 /* Événements illustrés : la scène à gauche (format arcane, un peu plus large), les choix à droite */
 .event-panel.has-scene .event-scene { width: 360px; height: 520px; object-fit: cover; }
 .event-panel.has-scene .event-side { width: 600px; }
+
+/* Puissance Cachée (Zarbi) : le type tiré au hasard est affiché à côté de l'intention */
+.intent .intent-type { margin-left: 4px; padding: 0 6px; border-radius: 7px; color: #fff; font: 800 11px 'Nunito', sans-serif; font-style: normal; text-shadow: 0 1px 1px #0008; }

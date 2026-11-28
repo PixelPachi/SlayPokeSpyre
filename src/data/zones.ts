@@ -63,6 +63,14 @@ export const ZONES: ZoneDef[] = [
     season: 'Automne flamboyant', weather: 'feuilles-rouges',
   },
 
+  {
+    id: 'ruines-alpha', name: 'Ruines Alpha', region: 'Johto', act: 1,
+    encounters: [['natu'], ['natu', 'natu'], ['zarbi-a', 'zarbi-l'], ['zarbi-p', 'zarbi-h'], ['zarbi-z', 'zarbi-r'], ['zarbi-o', 'zarbi-k'], ['natu', 'zarbi-question'], ['natu', 'zarbi-exclamation'], ['zarbi-b', 'zarbi-i'], ['zarbi-u', 'zarbi-n'], ['zarbi-e', 'zarbi-s'], ['zarbi-j', 'zarbi-m'], ['zarbi-c', 'zarbi-y'], ['zarbi-t', 'zarbi-v'], ['zarbi-d', 'zarbi-g'], ['zarbi-f', 'zarbi-q'], ['zarbi-w', 'zarbi-x'], ['zarbi-h', 'zarbi-i'], ['natu', 'zarbi-a']],
+    elites: [['xatu'], ['mentali']], boss: 'girafarig',
+    background: 'backgrounds/ruines-alpha.jpg', palette: ['#c9b48a', '#7a6a4a', '#2a2216'], mood: 'psy',
+    season: 'Inscriptions anciennes', weather: 'poussiere',
+  },
+
   // ——— Acte 2 : le cœur de la tour (grottes et montagnes) ———
   {
     id: 'tour-lavanville', name: 'Tour Pokémon de Lavanville', region: 'Kanto', act: 1,

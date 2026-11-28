@@ -81,6 +81,10 @@ const SPECS: Record<string, Spec> = {
     gimmick: { id: 'turbobrasier', name: 'Turbo Brasier', text: 'Ses attaques ignorent la moitié de ta Protection.' },
     moves: [{ id: 'flamme-fusion', name: 'Flamme Fusion', weight: 25, intent: 'attaque', pokeType: 'feu', damage: 22, pierce: true, signature: true, playerStatus: { status: 'brulure', stacks: 2 } }],
   },
+  girafarig: {
+    gimmick: { id: 'double-tete', name: 'Double Tête', text: 'La tête de sa queue veille : chaque fois que tu le frappes, elle te mord (2 dégâts, ignore ta Protection).' },
+    moves: [{ id: 'double-laser', name: 'Double Laser', weight: 25, intent: 'attaque', pokeType: 'psy', damage: 6, hits: 2, playerStatus: { status: 'confusion', stacks: 1 }, signature: true }],
+  },
   mewtwo: {
     gimmick: { id: 'pression', name: 'Pression', text: 'Chaque fois que tu joues ta 3e carte d’un tour, Mewtwo gagne 1 Attaque et 6 Protection.' },
     moves: [{ id: 'frappe-psy', name: 'Frappe Psy', weight: 25, intent: 'attaque', pokeType: 'psy', damage: 22, pierce: true, signature: true }],

@@ -45,3 +45,16 @@ it('Repaire Rocket : Jackpot du Persian inflige 3 dégâts par tranche de 10 ₽
   for (let i = 0; i < 3; i++) m.play(m.hand[0].uid, mw.uid);
   expect((mw.statuses.attaque ?? 0) - atk0).toBe(1);
 });
+
+it('Ruines Alpha : les 28 formes de Zarbi n’ont que Puissance Cachée, d’un type tiré au hasard', async () => {
+  const { ENEMY_DEFS } = await import('../src/data/enemies');
+  const forms = Object.values(ENEMY_DEFS).filter((d) => d.id.startsWith('zarbi-'));
+  expect(forms).toHaveLength(28);
+  for (const f of forms) expect(f.moves.map((m) => m.id)).toEqual(['puissance-cachee']);
+  const types = new Set<string>();
+  for (let i = 0; i < 12; i++) {
+    const c = new Combat({ character: 'riolu', deck: [{ uid: 1, defId: 'ruse', upgraded: false }], enemies: ['zarbi-a', 'zarbi-question'], seed: `Z${i}`, relics: [] } as never);
+    for (const e of c.enemies) { expect(e.intent.damage).toBe(8); types.add(e.intent.pokeType!); }
+  }
+  expect(types.size).toBeGreaterThan(5);
+});

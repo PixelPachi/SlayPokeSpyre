@@ -255,11 +255,13 @@ export interface EnemyMove {
   escalate?: number;
   /** Jackpot (Persian du Boss) : dégâts en plus par tranche de 10 ₽ que tu as. */
   perMoney?: number;
+  /** Puissance Cachée (Zarbi) : un type tiré au hasard à chaque utilisation. */
+  randomType?: boolean;
 }
 
 export type GimmickId =
   | 'venin-tenace' | 'cuirasse' | 'ailes' | 'reine' | 'boule-de-neige' | 'clair-de-lune' | 'regard-royal' | 'sol-brulant'
-  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'turbobrasier' | 'distorsion' | 'fantome-inconnu' | 'miroir-originel' | 'pression';
+  | 'mur-roc' | 'decharge' | 'multiecaille' | 'tempete-sable' | 'air-lock' | 'torche' | 'teravolt' | 'turbobrasier' | 'distorsion' | 'fantome-inconnu' | 'miroir-originel' | 'pression' | 'double-tete';
 
 export interface EnemyDef {
   id: string;
@@ -274,6 +276,8 @@ export interface EnemyDef {
   phase2?: { below: number; name: string; pattern: string[]; selfStatus?: { status: StatusId; stacks: number }; block?: number };
   /** Classe CSS du sprite (ex. « primal » pour Dialga Primal). */
   look?: string;
+  /** Fichier de sprite différent du n° du Pokédex (formes de Zarbi : « 201-b »). */
+  sprite?: string;
   /** Talent propre à un gardien. */
   /** Agit même endormi (un futur gardien Ronflex…). */
   actsAsleep?: boolean;
