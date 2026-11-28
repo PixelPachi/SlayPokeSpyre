@@ -9,6 +9,12 @@ const ARTS = import.meta.glob<string>('../assets/cartes/illustrations/**/*.{png,
 const byName = (files: Record<string, string>) =>
   new Map(Object.entries(files).map(([path, url]) => [path.split('/').pop()!.replace(/\.png$/, ''), url]));
 const FRAME_URLS = byName(FRAMES);
+const FULL = import.meta.glob<string>('../assets/cartes/full/*.{png,webp,jpg}', { eager: true, query: '?url', import: 'default' });
+const FULL_URLS = new Map(Object.entries(FULL).map(([p, u]) => [p.split('/').pop()!.replace(/\.(png|webp|jpg)$/, ''), u]));
+/** Illustration plein cadre d'une carte full art (par identifiant de base). */
+export function fullArtUrl(id: string): string | undefined {
+  return FULL_URLS.get(id.replace(/^.*:/, ''));
+}
 const ORBS = import.meta.glob<string>('../assets/orbes/*.png', { eager: true, query: '?url', import: 'default' });
 const ORB_URLS = byName(ORBS);
 const BACKS = import.meta.glob<string>('../assets/ui/dos-*.png', { eager: true, query: '?url', import: 'default' });

@@ -120,8 +120,9 @@ export function cardText(d: CardDef, dmgIn: number | null, base: number | null):
         if (e.siBebe && dmg === null) parts.push(`+${e.siBebe} si le Bébé est debout.`);
         if (e.parSoi) parts.push(`+${e.parSoiX ?? 1} par ${STATUS_INFO[e.parSoi].label}.`);
         if (e.parPosipi) parts.push('Frappe une fois par carte <b>Posipi</b> jouée ce tour.');
+        if (e.parBebePvMax && dmg === null) parts.push('+ les PV max du Bébé.');
         if (e.parBebe && dmg === null) parts.push(`+${e.parBebe === 1 ? '' : `${e.parBebe} × `}la Puissance du Bébé.`);
-        if ((e.parBebe || e.siBebe) && dmg !== null) parts.push('<i>(Bébé compris)</i>');
+        if ((e.parBebe || e.siBebe || e.parBebePvMax) && dmg !== null) parts.push('<i>(Bébé compris)</i>');
         break;
       }
       case 'degats-aura':

@@ -5,7 +5,7 @@ import type { CardDef } from '../core/model';
 import { TYPE_LABELS } from '../core/types';
 import { CATEGORY_LABELS, CHARACTER_COLORS, STATUS_INFO, TYPE_COLORS, cardText } from './labels';
 import { esc } from './util';
-import { artNoPokemon, artUrl, orbUrl, frameUrl } from './card-assets';
+import { artNoPokemon, artUrl, orbUrl, frameUrl, fullArtUrl } from './card-assets';
 
 export interface CardRenderOptions {
   uid?: number;
@@ -31,6 +31,26 @@ export function renderCard(d: CardDef, o: CardRenderOptions = {}): string {
   const art = enemy ? artNoPokemon(d.name) : d.character === 'duo'
     ? artUrl(d.name, 'duo') ?? artUrl(d.artName ?? d.name, 'duo') ?? artNoPokemon(d.artName ?? d.name)
     : artUrl(d.artName ?? d.name, d.character);
+  // Full art : l'illustration remplit toute la carte, nom en haut et texte en bas sur un dégradé
+  const full = d.fullArt && !enemy ? fullArtUrl(d.id) : undefined;
+  if (full) {
+    const orbF = orbUrl(d.character);
+    return `
+    <div class="card full-art ${d.chroma ? 'chroma-card' : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}
+         style="--tc:${CHARACTER_COLORS[d.character]};--type:${TYPE_COLORS[d.pokeType]};${o.style ?? ''}">
+      <div class="card-inner">
+        <img class="fa-art" src="${full}" alt="" draggable="false">
+        <div class="fa-shade"></div>
+        <div class="card-type">${TYPE_LABELS[d.pokeType]}</div>
+        <div class="card-banner"><div class="card-name" style="font-size:${nameSize(d.name)}px">${esc(d.name)}</div></div>
+        <div class="card-cat">${CATEGORY_LABELS[d.category]}${o.stab && base ? ' <span class="stab" data-tip="Même type que ton Pokémon : dégâts ×1,25">★</span>' : ''}</div>
+        <div class="card-text ${textLen(text) > 115 ? 'xlong' : textLen(text) > 80 ? 'long' : ''}"><span>${withStatusTips(text)}</span></div>
+        ${o.key ? `<div class="card-key">${o.key}</div>` : ''}
+        ${d.enchants?.length ? `<div class="card-ench" data-tip="<b>Enchantement${d.enchants.length > 1 ? 's' : ''}</b>${d.enchants.map((k) => ENCHANTS[k] ? `<br>• <b>${ENCHANTS[k].name}</b> : ${ENCHANTS[k].text}` : '').join('')}">✦${d.enchants.length > 1 ? d.enchants.length : ''}</div>` : ''}
+      </div>
+      <div class="card-cost ${orbF ? 'has-orb' : ''} ${o.costTooHigh ? 'too-much' : ''} ${o.cost !== undefined && o.cost < d.cost ? 'free' : ''}" ${orbF ? `style="--orb:url('${orbF}')"` : ''}>${d.xCost ? 'X' : o.cost ?? d.cost}</div>
+    </div>`;
+  }
   const orb = d.character === 'duo' ? orbUrl(`duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}`) : orbUrl(d.character);
   return `
     <div class="card ${d.character === 'duo' ? `duo-card duo-${d.duoFusion ? 'fusion' : d.duoSide ?? 'both'}` : ''} ${d.enchant ? `enchanted ench-${ENCHANTS[d.enchant]?.rarity ?? 'commun'}` : ''} rarity-${d.rarity} ${d.chroma ? 'chroma-card' : ''} ${frame ? 'has-frame' : ''} ${enemy ? 'enemy-move-card' : ''} ${o.classes ?? ''}" ${o.uid !== undefined ? `data-uid="${o.uid}"` : ''}

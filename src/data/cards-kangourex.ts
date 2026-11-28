@@ -16,6 +16,9 @@ export const KANGOUREX_CARDS: CardDef[] = [
   c('combo-griffe', 'Combo Griffe', 'normal', 'attaque', 'commune', 1, 'ennemi', [dmg(4, { parCopie: 4 })], { effects: [dmg(6, { parCopie: 4 })] }),
   c('coup-double', 'Coup Double', 'normal', 'attaque', 'commune', 1, 'ennemi', [multi(4, 2)], { effects: [multi(6, 2)] }),
 
+  // ——— Carte full art ———
+  { ...c('assaut-du-petit', 'Assaut du Petit', 'normal', 'attaque', 'rare', 1, 'ennemi', [dmg(10, { parBebePvMax: true })], { effects: [dmg(14, { parBebePvMax: true })] }), fullArt: true },
+
   // ——— Communes (28) ———
   c('garde-large', 'Garde Large', 'normal', 'technique', 'commune', 1, 'soi', [prot(5), invoc(4)], { effects: [prot(7), invoc(6)] }),
   c('boul-armure', "Boul'Armure", 'normal', 'technique', 'commune', 0, 'soi', [prot(4), st('rage', 1, 'soi')], { effects: [prot(6), st('rage', 1, 'soi')] }),

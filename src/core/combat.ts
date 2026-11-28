@@ -651,7 +651,7 @@ export class Combat {
   private babyBonus(e: Extract<Effect, { kind: 'degats' }>): number {
     const f = this.player.familiar;
     if (!f || f.hp <= 0) return 0;
-    return (e.siBebe ?? 0) + (e.parBebe ? f.power * e.parBebe : 0);
+    return (e.siBebe ?? 0) + (e.parBebe ? f.power * e.parBebe : 0) + (e.parBebePvMax ? f.maxHp : 0);
   }
 
   /** Blabla Dodo joue une carte même si on dort. */

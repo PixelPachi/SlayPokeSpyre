@@ -57,6 +57,7 @@ export type Effect =
       parProtection?: boolean; // + la Protection actuelle du lanceur
       champ?: string; // dégâts doublés si ce champ est actif
       parCopie?: number; // +parCopie dégâts par exemplaire de cette carte dans le deck (Combo Griffe)
+      parBebePvMax?: boolean; // + les PV max du Bébé Kangourex (s'il est debout)
       cumul?: number; // chaque utilisation donne +cumul dégâts à toutes les cartes du même nom (pour le combat)
       peurChance?: number; // chance d'appliquer 1 Peur à chaque cible touchée
       recul?: number; // le lanceur perd ce nombre de PV si la cible avait de la Protection
@@ -181,6 +182,8 @@ export interface CardDef {
   xCost?: boolean;
   /** Carte chromatique (contour arc-en-ciel) : valeurs doublées. */
   chroma?: boolean;
+  /** Carte « full art » : l'illustration remplit toute la carte (src/assets/cartes/full/<id>.webp). */
+  fullArt?: boolean;
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }
