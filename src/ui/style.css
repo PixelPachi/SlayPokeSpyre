@@ -1809,3 +1809,5 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .celebi-choices:has(.event-result) { bottom: 18px; align-items: center; text-align: center; }
 .celebi-choices:has(.event-result) .event-after { display: flex; align-items: center; gap: 24px; }
 .node-start.celebi-start img { transform: scale(1.7); image-rendering: pixelated; }
+.map-node.node-start.celebi-start { background: radial-gradient(circle at 35% 30%, #f4fff6, #bff0cc 60%, #6fd39a); border-color: #2f8a52; }
+.map-node.node-start.celebi-start.available { box-shadow: 0 0 0 4px #6fd39a88, 0 0 22px #5fe08f; }

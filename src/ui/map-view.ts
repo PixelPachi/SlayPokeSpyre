@@ -87,7 +87,7 @@ export function renderMap(root: HTMLElement, run: Run, onPick: (row: number, col
               data-tip="<b>${NODE_INFO[n.type].label}</b><br>${NODE_INFO[n.type].text}">${nodeIcon(n.type)}</button>`;
   });
   if (START) nodes.unshift(`<button class="map-node node-start ${run.act === 2 ? 'celebi-start' : ''} ${run.needsWelcome ? 'available' : 'visited'}" style="left:${startPos.x}px;top:${startPos.y}px" data-start="1"
-      data-tip="${run.act === 2 ? "<b>Célébi</b><br>Célébi traverse le temps pour t'aider à calmer Dialga." : "<b>La Guilde de Grodoudou</b><br>Grodoudou et Pijako t'accueillent et te proposent leur aide avant l'ascension."}"><img src="${asset(`sprites/pokemon/front/${run.act === 2 ? 251 : 40}.png`)}" alt=""></button>`);
+      data-tip="${run.act === 2 ? "<b>Célébi</b><br>Célébi traverse le temps pour t'aider à calmer Dialga." : "<b>La Guilde de Grodoudou</b><br>Grodoudou et Pijako t'accueillent et te proposent leur aide avant l'ascension."}"><img src="${asset(`sprites/pokemon/${run.act === 2 ? "shiny/251" : "front/40"}.png`)}" alt=""></button>`);
   const bossAvail = avail === 'boss';
   nodes.push(`<button class="map-node node-boss ${bossAvail ? 'available' : ''}" style="left:${BOSS_POS.x}px;top:${BOSS_POS.y}px"
       data-row="${BOSS_ROW}" data-col="0" data-tip="<b>Gardien${bossIds.length > 1 ? "s" : ""} : ${bossName}</b><br>Le boss de la zone ${zone.name}.">${boss.look === 'primal' ? `<img src="${asset('sprites/pokemon/dialga-primal.png')}" alt="">` : bossIds.length > 1 ? `<span class="duo-boss">${bossIds.map((id) => `<img src="${asset(`sprites/pokemon/front/${ENEMY_DEFS[id].dex}.png`)}" alt="">`).join('')}</span>` : nodeIcon('boss', boss.dex)}</button>`);
