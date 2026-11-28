@@ -13,6 +13,9 @@ import type { CharacterId } from '../core/model';
 import { CHARACTERS } from '../data/characters';
 import { EVENTS, type EventFight, type EventPick, type GameEvent } from '../data/events';
 import { TAROT_EVENTS } from '../data/events-tarot';
+/** Illustrations de scène des événements (src/assets/evenements/<id>.webp). */
+const EVENT_SCENES = new Map(Object.entries(import.meta.glob<string>('../assets/evenements/*.{webp,png,jpg}', { eager: true, query: '?url', import: 'default' }))
+  .map(([path, url]) => [path.split('/').pop()!.replace(/\.(webp|png|jpg)$/, ''), url]));
 import { renderCard } from './card';
 import { cardText } from './labels';
 import { ENCHANTS } from '../data/cards';
@@ -488,7 +491,10 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
       root.querySelector('.event-result')!.after(box);
     }
   };
-  const art = ev.tarot
+  // Illustration de scène (Gemini) : à gauche comme un arcane, les choix à droite
+  const scene = ev.tarot ? undefined : EVENT_SCENES.get(ev.id) ?? (ev.image.includes('illustrations/') && !ev.images ? asset(ev.image) : undefined);
+  const art = scene ? `<img class="tarot-card event-scene" src="${scene}" alt="${esc(ev.title)}">`
+    : ev.tarot
     ? (ev.image
       ? `<img class="tarot-card ${reversed ? 'reversed' : ''}" src="${asset(ev.image)}" alt="${esc(ev.title)}">`
       : `<div class="tarot-card tarot-blank"><span>${esc(ev.title.split(' — ')[0])}</span><img src="${asset(ev.sprite ?? '')}" alt=""><b>${esc(ev.title.split(' — ')[1] ?? '')}</b></div>`)
@@ -509,7 +515,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
         </div>
       </div></div>`;
   } else root.innerHTML = shell(run, 'Événement', `
-    <div class="event-panel ${ev.tarot ? 'tarot' : ''} ${reversed ? 'is-reversed' : ''}">
+    <div class="event-panel ${ev.tarot || scene ? 'tarot' : ''} ${scene ? 'has-scene' : ''} ${reversed ? 'is-reversed' : ''}">
       ${art}
       <div class="event-side">
         <h1 class="node-title">${esc(title)}</h1>
