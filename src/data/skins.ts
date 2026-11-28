@@ -53,11 +53,10 @@ const shiny = (stat: SkinStat, goal: number, goalText: string): SkinDef => ({ id
 // Même objectif pour tous : vaincre 5 Pokémon chromatiques en jouant ce Pokémon (cumulé sur toutes ses runs).
 const SHINY_GOAL = shiny('shinies', 5, 'Vaincre 5 Pokémon chromatiques en jouant ce Pokémon');
 // Bonus communs des chromatiques : Étincelles (à 5, la prochaine carte est chromatique : valeurs doublées)
-const SHINY_COMMON = ['Étincelles : +1 par tour, +1 par carte à 0 PA, +2 par ennemi vaincu. À 5, la prochaine carte est chromatique (valeurs doublées).', 'Chromatiques ennemis 3× plus fréquents ; en vaincre un améliore une carte. Boutiques −10 %.', 'Le Charme Chroma remplace l’objet de départ : cartes chromatiques 2× plus fréquentes.'];
 /** Le talent chromatique remplace le talent de base (« Nom : texte »). */
 const shinyPassive = (passive: string): SkinDef => {
   const [name, ...rest] = passive.split(' : ');
-  return { ...SHINY_GOAL, talent: { name, text: rest.join(' : ') }, relic: 'charme-chroma', perks: SHINY_COMMON };
+  return { ...SHINY_GOAL, talent: { name, text: rest.join(' : ') }, relic: 'charme-chroma' };
 };
 
 // Skin primordial : se débloque en apaisant Dialga Primal (victoire finale) avec ce Pokémon.

@@ -439,7 +439,7 @@ export class CombatView {
     }
     return renderCard(d, {
       uid: card.uid,
-      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff} ${c.duo && d.duoSide && d.duoSide !== c.duo.front && playable ? 'duo-relay' : ''} ${c.shinySkin && (c.player.statuses.etincelle ?? 0) >= 5 && playable ? 'chroma-next' : ''}`,
+      classes: `${playable ? 'playable' : 'unplayable'} ${this.selected === card.uid ? 'selected' : ''} ${eff} ${c.duo && d.duoSide && d.duoSide !== c.duo.front && playable ? 'duo-relay' : ''} ${c.chromaCharm && (c.player.statuses.etincelle ?? 0) >= 5 && playable ? 'chroma-next' : ''}`,
       style: `--rot:${(i - mid) * 4}deg;--lift:${Math.abs(i - mid) * 6}px`,
       text: cardText(d, dmg, base && base.kind === 'degats' ? base.amount : null),
       stab: c.player.types.includes(d.pokeType),

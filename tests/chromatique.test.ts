@@ -5,7 +5,7 @@ import { Run } from '../src/core/run';
 
 const mk = (character: string, ids: string[], skin = 'shiny') => {
   const deck = ids.map((defId, i) => ({ uid: i + 1, defId, upgraded: false }));
-  const c = new Combat({ character, deck, enemies: ['rattata'], seed: 'SH', relics: [], skin } as never);
+  const c = new Combat({ character, deck, enemies: ['rattata'], seed: 'SH', relics: skin === 'shiny' ? ['charme-chroma'] : [], skin } as never);
   c.enemies[0].hp = c.enemies[0].maxHp = 999; c.player.energy = 10;
   return c;
 };

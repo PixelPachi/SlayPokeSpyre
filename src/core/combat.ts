@@ -335,7 +335,7 @@ export class Combat {
 
   /** Skin chromatique : gagne des Étincelles (à 5, la prochaine carte est chromatique). */
   private gainSpark(n: number): void {
-    if (!this.shinySkin || n <= 0) return;
+    if (!this.chromaCharm || n <= 0) return;
     this.player.statuses.etincelle = Math.min(9, (this.player.statuses.etincelle ?? 0) + n);
     this.events.push({ type: 'status', target: 'player', status: 'etincelle', stacks: n });
   }
@@ -666,6 +666,8 @@ export class Combat {
   copiedUpgraded = new Set<string>();
   /** Skin chromatique : Étincelles et cartes chromatiques. */
   shinySkin = false;
+  /** Charme Chroma tenu : Étincelles, cartes chromatiques en combat, Pokémon chromatiques 3× plus fréquents. */
+  get chromaCharm(): boolean { return this.has('charme-chroma'); }
   private chromaUids = new Set<number>();
   private chromaPlaying = false;
   private auraSpark = 0;
@@ -734,7 +736,7 @@ export class Combat {
     let xd = d.xCost ? scaleX(d, paid) : d;
     // Skin chromatique : à 5 Étincelles (ou carte créée déjà chromatique par Mew), la carte devient chromatique
     this.chromaPlaying = false;
-    if (this.shinySkin && !d.keywords?.includes('injouable') && (this.chromaUids.has(card.uid) || (this.player.statuses.etincelle ?? 0) >= 5)) {
+    if (this.chromaCharm && !d.keywords?.includes('injouable') && (this.chromaUids.has(card.uid) || (this.player.statuses.etincelle ?? 0) >= 5)) {
       if (!this.chromaUids.delete(card.uid)) this.player.statuses.etincelle = (this.player.statuses.etincelle ?? 0) - 5;
       this.chromaPlaying = true;
       xd = this.chromaTransform(xd);
@@ -780,7 +782,7 @@ export class Combat {
     }
     if (!d.effects.some((e) => e.kind === 'copie')) this.lastPlayed = d;
     if (this.duo && d.duoSide && this.phase === 'joueur') this.duoAfterCard(d);
-    if (this.shinySkin && this.phase === 'joueur') {
+    if (this.chromaCharm && this.phase === 'joueur') {
       // Flamme Dorée (Caninos chromatique) : la carte chromatique fait exploser la Brûlure de sa cible
       if (this.chromaPlaying && this.player.character === 'caninos' && target && target.hp > 0 && (target.statuses.brulure ?? 0) > 0) {
         const b = target.statuses.brulure!;
@@ -1011,7 +1013,7 @@ export class Combat {
     return {
       uid: this.nextEnemyUid++, defId: id, name: d.name, dex: d.dex, types: [...d.types],
       hp, maxHp: hp, block: 0, statuses: {}, intent: d.moves[0], history: [], flags: {},
-      shiny: this.rng.next() < SHINY_CHANCE * (this.shinySkin ? 3 : 1), phase: 1, step: 0,
+      shiny: this.rng.next() < SHINY_CHANCE * (this.chromaCharm ? 3 : 1), phase: 1, step: 0,
     };
   }
 

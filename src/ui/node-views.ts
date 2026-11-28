@@ -243,7 +243,7 @@ export function renderShop(root: HTMLElement, run: Run, done: Done, onAttack?: (
   const shiny = run.rng.next() < SHINY_CHANCE;
   // Kecleon chromatique : moitié prix ; Flambeur : encore -50 %
   // Skin chromatique : les marchands adorent les Pokémon brillants (−10 %)
-  const price = (p: number) => Math.floor(p * (shiny ? 0.5 : 1) * (run.gambler ? 0.5 : 1) * (run.skin === 'shiny' ? 0.9 : 1));
+  const price = (p: number) => Math.floor(p * (shiny ? 0.5 : 1) * (run.gambler ? 0.5 : 1) * (run.relics.includes('charme-chroma') ? 0.9 : 1));
   const offers = [...run.cardChoices('boutique', 5), ...run.neutralChoices(2)].map((id) => ({ id, price: price(cardPrice(id)), sold: false }));
   const items = run.rollRelics(2).map((id) => ({ id, price: price(relicPrice(id)), sold: false }));
   const berries = Array.from({ length: 3 }, () => run.rollBerry()).map((id) => ({ id, price: price(berryPrice(id)), sold: false }));

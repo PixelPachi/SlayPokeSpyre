@@ -434,7 +434,7 @@ function fight(run: Run, type: 'combat' | 'elite' | 'boss'): void {
       if (r.fled) return showMap(run); // Hurlement : les ennemis ont fui, pas de récompense
       run.shiniesMet += r.shinies;
       // Skin chromatique : battre un Pokémon chromatique améliore une carte du deck
-      if (r.victory && r.shinies && run.skin === 'shiny') {
+      if (r.victory && r.shinies && run.relics.includes('charme-chroma')) {
         const pool = run.deck.filter((c) => !c.upgraded && Object.keys(cardDef(c.defId).upgrade ?? {}).length);
         if (pool.length) { const c = run.rng.pick(pool); c.upgraded = true; setTimeout(() => toast(`✨ Chromatique vaincu : ${cardDef(c.defId).name} est améliorée !`), 900); }
       }
@@ -519,7 +519,7 @@ function duel(run: Run, f: EventFight): void {
       run.duelsWon++;
       run.shiniesMet += r.shinies;
       // Skin chromatique : battre un Pokémon chromatique améliore une carte du deck
-      if (r.victory && r.shinies && run.skin === 'shiny') {
+      if (r.victory && r.shinies && run.relics.includes('charme-chroma')) {
         const pool = run.deck.filter((c) => !c.upgraded && Object.keys(cardDef(c.defId).upgrade ?? {}).length);
         if (pool.length) { const c = run.rng.pick(pool); c.upgraded = true; setTimeout(() => toast(`✨ Chromatique vaincu : ${cardDef(c.defId).name} est améliorée !`), 900); }
       }
