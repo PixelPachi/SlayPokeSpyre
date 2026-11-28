@@ -35,7 +35,7 @@ export const UNLOCKS: Partial<Record<CharacterId, Record<number, string[]>>> = {
     10: ['vip-blabla-dodo', 'vip-force'],
   },
   kangourex: {
-    1: ['kan-combo-griffe', 'kan-assaut-du-petit', 'kan-bulles-marines', 'kan-aqua-queue', 'kan-vague-protectrice', 'kan-deferlante', 'kan-maree-protectrice', 'kan-coup-main', 'kan-coup-double', 'kan-garde-large', 'kan-boul-armure', 'kan-protection', 'kan-mur-de-fer', 'kan-mega-evolution', 'kan-puissance', 'kan-machouille', 'kan-tenacite', 'kan-contre', 'kan-mimi-queue', 'kan-rugissement', 'kan-bluff', 'kan-morsure', 'kan-ecrasement', 'kan-coup-d-boule', 'kan-tomberoche', 'kan-aeropique', 'kan-facade'],
+    1: ['kan-combo-griffe', 'kan-bulles-marines', 'kan-aqua-queue', 'kan-vague-protectrice', 'kan-deferlante', 'kan-maree-protectrice', 'kan-coup-main', 'kan-coup-double', 'kan-garde-large', 'kan-boul-armure', 'kan-protection', 'kan-mur-de-fer', 'kan-mega-evolution', 'kan-puissance', 'kan-machouille', 'kan-tenacite', 'kan-contre', 'kan-mimi-queue', 'kan-rugissement', 'kan-bluff', 'kan-morsure', 'kan-ecrasement', 'kan-coup-d-boule', 'kan-tomberoche', 'kan-aeropique', 'kan-facade'],
     2: ['kan-colere', 'kan-hurlement', 'kan-queue-de-fer', 'kan-tunnel', 'kan-coupe', 'kan-eclate-roc', 'kan-pietisol', 'kan-calinerie', 'kan-vibraqua'],
     3: ['kan-dynamo-poing', 'kan-ball-ombre', 'kan-casse-brique', 'kan-lance-flammes', 'kan-repos', 'kan-griffe-ombre', 'kan-poing-comete', 'kan-uppercut'],
     4: ['kan-dernier-recours', 'kan-larcin', 'kan-degommage', 'kan-vampi-poing', 'kan-avalanche', 'kan-frenesie', 'kan-plaquage', 'kan-balayage'],

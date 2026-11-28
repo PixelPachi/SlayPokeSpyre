@@ -283,7 +283,7 @@ export function cardDef(defId: string, upgraded = false): CardDef {
 
 /** Cartes qu'un personnage peut obtenir en récompense (hors cartes de départ), limitées aux cartes débloquées. */
 export function rewardPool(character: string, unlocked?: string[]): CardDef[] {
-  return CARDS.filter((c) => c.character === character && c.rarity !== 'depart' && (!unlocked || unlocked.includes(c.id)));
+  return CARDS.filter((c) => c.character === character && c.rarity !== 'depart' && !c.special && (!unlocked || unlocked.includes(c.id)));
 }
 
 /** Cartes neutres que tous les Pokémon peuvent apprendre. */

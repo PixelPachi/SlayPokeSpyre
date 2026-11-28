@@ -38,7 +38,7 @@ const OPTIONS: Option[] = [
     available: (r) => r.hp > 10,
     apply: (r) => {
       r.hp -= 10;
-      const pool = allCards().filter((c) => c.rarity === 'rare' && (c.character === r.character || (r.character === 'mew' && c.character !== 'normal')));
+      const pool = allCards().filter((c) => c.rarity === 'rare' && !c.special && (c.character === r.character || (r.character === 'mew' && c.character !== 'normal')));
       const id = r.rng.pick(pool).id;
       r.addCard(id);
       return `Grodoudou t'apprend une technique secrète : ${cardDef(id).name} !`;

@@ -517,7 +517,7 @@ export class Run {
   offerable<T extends { category: string; duoFusion?: boolean; duoSide?: string; skin?: string }>(pool: T[]): T[] {
     // Duo : les cartes de Multipi n'arrivent qu'après la fusion
     // Cartes de skin : seulement avec le skin porté
-    pool = pool.filter((c) => !c.skin || c.skin === this.skin);
+    pool = pool.filter((c) => (!c.skin || c.skin === this.skin) && !(c as { special?: boolean }).special);
     if (this.character === 'duo') return pool.filter((c) => !c.duoFusion || this.duoFused);
     return this.character === 'quelorior' ? pool.filter((c) => c.category !== 'attaque') : pool;
   }

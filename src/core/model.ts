@@ -184,6 +184,8 @@ export interface CardDef {
   chroma?: boolean;
   /** Carte « full art » : l'illustration remplit toute la carte (src/assets/cartes/full/<id>.webp). */
   fullArt?: boolean;
+  /** Carte spéciale : jamais proposée en récompense ni en boutique (condition d'obtention unique, à venir). */
+  special?: boolean;
   /** Version améliorée (Centre Pokémon). */
   upgrade: Partial<Pick<CardDef, 'cost' | 'effects' | 'keywords'>>;
 }

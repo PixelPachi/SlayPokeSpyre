@@ -1578,7 +1578,7 @@ export class Combat {
         return;
       }
       case 'ajoute-carte': {
-        const pool = Object.values(CARD_DEFS).filter((c) => c.rarity !== 'depart'
+        const pool = Object.values(CARD_DEFS).filter((c) => c.rarity !== 'depart' && !c.special
           && (eff.from === 'neutre' ? c.character === 'normal' : true)
           && !c.effects.some((e) => e.kind === 'ajoute-carte'));
         for (let i = 0; i < eff.count && this.hand.length < MAX_HAND; i++) {
@@ -1811,7 +1811,7 @@ export class Combat {
       }
       case 'metronome': {
         const pool = Object.values(CARD_DEFS).filter((c) =>
-          c.character === p.character && c.category !== 'talent' && !c.requires && !c.effects.some((e) => ['metronome', 'copie', 'fuite', 'fin-tour', 'concentration', 'double-jeu'].includes(e.kind)));
+          c.character === p.character && c.category !== 'talent' && !c.requires && !c.special && !c.effects.some((e) => ['metronome', 'copie', 'fuite', 'fin-tour', 'concentration', 'double-jeu'].includes(e.kind)));
         const pick = this.rng.pick(pool);
         this.events.push({ type: 'player-move', name: `Métronome : ${pick.name}` });
         this.events.push({ type: 'show-card', def: pick, label: 'Métronome tire' });
