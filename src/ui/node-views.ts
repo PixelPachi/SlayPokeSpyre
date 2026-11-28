@@ -525,9 +525,12 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
   bindDeck(root, run);
   const results: string[] = [];
   const doPick = (p: EventPick, left: number) => {
-    const cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && !CURSES.includes(c.defId))
+    let cards = p.pick === 'ameliorer' ? run.deck.filter((c) => !c.upgraded && !CURSES.includes(c.defId))
+      : p.pick === 'enchanter' && p.enchant ? run.deck.filter((c) => ENCHANTS[p.enchant!]?.ok(cardDef(c.defId, c.upgraded)) && !cardDef(c.defId, c.upgraded).enchants?.includes(p.enchant!))
       : p.pick === 'enchanter' ? run.deck.filter((c) => { const d = cardDef(c.defId, c.upgraded); return (!d.enchant || run.weaver) && d.category !== 'statut' && !d.keywords?.includes('injouable'); })
       : run.deck;
+    if (p.filter === 'enchantee') cards = cards.filter((c) => !!cardDef(c.defId, c.upgraded).enchants?.length);
+    if (p.filter === 'epuisee') cards = cards.filter((c) => !!cardDef(c.defId, c.upgraded).keywords?.includes('epuisee'));
     if (!cards.length) return showResult([...results, 'Aucune carte ne convient.'].join(' '));
     openDeckOverlay(root, {
       title: p.text, cards, upgradePreview: p.pick === 'ameliorer', cancelLabel: results.length || p.pick === 'monde' ? 'Terminer' : 'Annuler',
@@ -538,7 +541,7 @@ export function renderEvent(root: HTMLElement, run: Run, done: Done, forcedId?: 
         else if (p.pick === 'retirer') { run.removeCard(uid); results.push(`Tu as oublié ${name}.`); }
         else if (p.pick === 'dupliquer') { run.addCard(card.defId, card.upgraded); results.push(`${name} est dupliquée.`); }
         else if (p.pick === 'enchanter') {
-          const k = run.enchantCard(uid);
+          const k = run.enchantCard(uid, { force: p.enchant, min: p.minRarity });
           const tier = k ? (ENCHANTS[k].rarity === 'legendaire' ? ' ★ LÉGENDAIRE !' : ENCHANTS[k].rarity === 'epique' ? ' ◆ Épique !' : ENCHANTS[k].rarity === 'rare' ? ' ◆ Rare !' : '') : '';
           results.push(k ? `${name} est enchantée : ✦ ${ENCHANTS[k].name} (${ENCHANTS[k].text})${tier}` : `${name} ne peut pas être enchantée.`);
         }
@@ -602,6 +605,7 @@ export function renderRunEnd(
         <div><b>${run.elitesDefeated}</b><span>dominants vaincus</span></div>
         <div><b>${run.deck.length}</b><span>cartes dans le deck</span></div>
       </div>
+      ${fightStatsHtml(run)}
       <div class="exp-box">
         <div class="exp-detail">${xp.lines.map((l, i) => `
           <div class="exp-row" style="--d:${i}">
@@ -627,6 +631,29 @@ export function renderRunEnd(
   root.querySelector('.retry')!.addEventListener('click', onRetry);
   root.querySelector('.menu')!.addEventListener('click', onMenu);
   animateExp(root, xp.lines.length, startTotal, xp.total, () => { if (xp.after > xp.before) showLevelUp(root, run.character, xp); });
+}
+
+/** Statistiques de la run : dégâts, soins, plus gros coup, cartes les plus jouées et les plus destructrices. */
+function fightStatsHtml(run: Run): string {
+  const f = run.fightStats;
+  if (!f || !f.fights) return '';
+  const cards = Object.entries(f.cards);
+  const most = [...cards].sort((a, b) => b[1].n - a[1].n)[0];
+  const top = [...cards].filter(([, v]) => v.dmg > 0).sort((a, b) => b[1].dmg - a[1].dmg).slice(0, 5);
+  const max = top[0]?.[1].dmg ?? 1;
+  return `<div class="fight-stats">
+      <div class="fs-grid">
+        <div><b>${f.dealt}</b><span>dégâts infligés</span></div>
+        <div><b>${f.taken}</b><span>dégâts subis</span></div>
+        <div><b>${f.blocked}</b><span>absorbés par la Protection</span></div>
+        <div><b>${f.healed}</b><span>PV récupérés</span></div>
+        <div><b>${f.maxHit}</b><span>plus gros coup${f.maxHitCard ? ` (${esc(f.maxHitCard)})` : ''}</span></div>
+        <div><b>${f.fights}</b><span>combats · ${f.turns} tours</span></div>
+        <div><b>${cards.reduce((n, [, v]) => n + v.n, 0)}</b><span>cartes jouées${most ? ` · favorite : ${esc(most[0])} (×${most[1].n})` : ''}</span></div>
+      </div>
+      ${top.length ? `<div class="fs-top"><div class="fs-title">Cartes les plus destructrices</div>${top.map(([k, v]) => `
+        <div class="fs-bar"><span class="fs-name">${esc(k)}</span><div class="fs-track"><div class="fs-fill" style="width:${Math.round((v.dmg / max) * 100)}%"></div></div><b>${v.dmg}</b><small>×${v.n}</small></div>`).join('')}</div>` : ''}
+    </div>`;
 }
 
 /** Barre d'EXP animée : les lignes apparaissent une à une, le total compte, puis la barre se remplit (niveau par niveau). */

@@ -1,6 +1,7 @@
 // Événements mystères (nœuds « ? » de la carte).
 import type { Run } from '../core/run';
 import { POKEMON_EVENTS } from './events-pokemon';
+import { PSY_EVENTS } from './events-psy';
 
 export interface EventChoice {
   label: string;
@@ -13,7 +14,13 @@ export interface EventChoice {
 }
 
 export type PickKind = 'retirer' | 'ameliorer' | 'dupliquer' | 'transformer' | 'monde' | 'enchanter';
-export interface EventPick { pick: PickKind; text: string; count?: number; then?: PickKind }
+export interface EventPick {
+  pick: PickKind; text: string; count?: number; then?: PickKind;
+  /** Enchanter : un enchantement précis (ex. Pérenne), ou une rareté minimale. */
+  enchant?: string; minRarity?: 'rare' | 'epique';
+  /** Seulement certaines cartes du deck. */
+  filter?: 'enchantee' | 'epuisee';
+}
 /** Duel : lance un combat contre ce Pokémon ; victoire = une carte rare au choix et des ₽. */
 export interface EventFight { fight: string; text: string; /** PV et Attaque de l'adversaire multipliés en plus. */ power?: number; /** La victoire rapporte aussi un objet tenu. */ relic?: boolean }
 
@@ -51,4 +58,5 @@ export const EVENTS: GameEvent[] = [
     ],
   },
   ...POKEMON_EVENTS,
+  ...PSY_EVENTS,
 ];

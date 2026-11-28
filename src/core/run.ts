@@ -7,7 +7,7 @@ import type { Form, Card, CardDef, CharacterId, DuoSide } from './model';
 export const runHooks: { relicPicked?: (run: Run, id: string) => void } = {};
 import { Rng } from './rng';
 import { BERRIES, MAX_BERRIES } from '../data/berries';
-import { allCards, cardDef, chromaId, enchantId, neutralPool, rewardPool, rollEnchant } from '../data/cards';
+import { allCards, cardDef, chromaId, ENCHANTS, enchantId, neutralPool, rewardPool, rollEnchant } from '../data/cards';
 import { CHARACTERS } from '../data/characters';
 import { type ZoneDef, ZONES, zonesOfAct } from '../data/zones';
 import { allRelics, type RelicRarity } from '../data/relics';
@@ -142,6 +142,16 @@ export class Run {
   typeKills: Partial<Record<PokeType, number>> = {};
   eventsSeen = 0;
   shiniesMet = 0;
+  /** Statistiques cumulées des combats (écran de fin de run). */
+  fightStats: { cards: Record<string, { n: number; dmg: number }>; dealt: number; taken: number; blocked: number; healed: number; maxHit: number; maxHitCard: string; turns: number; fights: number } =
+    { cards: {}, dealt: 0, taken: 0, blocked: 0, healed: 0, maxHit: 0, maxHitCard: '', turns: 0, fights: 0 };
+
+  addFightStats(f: { cards: Record<string, { n: number; dmg: number }>; dealt: number; taken: number; blocked: number; healed: number; maxHit: number; maxHitCard: string }, turns: number): void {
+    const s = this.fightStats;
+    for (const [k, v] of Object.entries(f.cards)) { const c = (s.cards[k] ??= { n: 0, dmg: 0 }); c.n += v.n; c.dmg += v.dmg; }
+    s.dealt += f.dealt; s.taken += f.taken; s.blocked += f.blocked; s.healed += f.healed; s.turns += turns; s.fights++;
+    if (f.maxHit > s.maxHit) { s.maxHit = f.maxHit; s.maxHitCard = f.maxHitCard; }
+  }
   /** Objets tenus (le premier est l'objet de départ). */
   relics: string[] = [];
   private nextUid = 1;
@@ -352,11 +362,22 @@ export class Run {
   }
 
   /** Enchante une carte du deck (enchantement au hasard parmi ceux qui lui conviennent). Renvoie l'enchantement. */
-  enchantCard(uid: number): string | null {
+  enchantCard(uid: number, opts: { force?: string; min?: 'rare' | 'epique' } = {}): string | null {
     const c = this.deck.find((x) => x.uid === uid);
-    if (!c || (c.defId.startsWith('ench:') && !this.weaver)) return null;
+    if (!c || (c.defId.startsWith('ench:') && !this.weaver && !opts.force)) return null;
     const d = cardDef(c.defId, c.upgraded);
-    const k = rollEnchant(d, () => this.rng.next(), d.enchants ?? []);
+    let k: string | null = null;
+    if (opts.force) k = ENCHANTS[opts.force]?.ok(d) ? opts.force : null;
+    else if (opts.min) {
+      // Enchantement d'une rareté minimale (événements Psy) : rare, épique ou légendaire
+      const rank: Record<string, number> = { commun: 0, rare: 1, epique: 2, legendaire: 3 };
+      const ok = Object.keys(ENCHANTS).filter((x) => ENCHANTS[x].ok(d) && !(d.enchants ?? []).includes(x) && rank[ENCHANTS[x].rarity ?? 'commun'] >= rank[opts.min!]);
+      const x = this.rng.next();
+      const want = x < 0.12 ? 'legendaire' : x < 0.4 ? 'epique' : 'rare';
+      const pool = ok.filter((y) => (ENCHANTS[y].rarity ?? 'commun') === want);
+      k = pool.length ? this.rng.pick(pool) : ok.length ? this.rng.pick(ok) : null;
+    }
+    else k = rollEnchant(d, () => this.rng.next(), d.enchants ?? []);
     if (!k) return null;
     c.defId = enchantId(k, c.defId);
     return k;

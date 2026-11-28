@@ -1538,6 +1538,15 @@ img.sprite, .roster img { image-rendering: pixelated; }
   font: 900 11px 'Nunito', sans-serif; color: #3a2a00; background: #ffe36b; padding: 1px 7px; border-radius: 8px; box-shadow: 0 2px 6px #0008; }
 .hand .card.not-eff::before { content: 'Pas très efficace…'; position: absolute; top: -14px; right: auto; bottom: auto; left: 50%; transform: translateX(-50%); z-index: 8; white-space: nowrap;
   font: 900 11px 'Nunito', sans-serif; color: #fff; background: #c8322a; padding: 1px 7px; border-radius: 8px; box-shadow: 0 2px 6px #0008; }
+/* Immunité (ex. Normal sur Spectre) : les dégâts sont divisés par deux */
+.hand .card.imm-eff { box-shadow: 0 0 0 3px #8a8fa0, 0 0 14px 3px #5d6274cc; }
+.hand .card.imm-eff::before { content: 'Peu d’effet…'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); z-index: 8; white-space: nowrap;
+  font: 900 11px 'Nunito', sans-serif; color: #fff; background: #5d6274; padding: 1px 7px; border-radius: 8px; box-shadow: 0 2px 6px #0008; }
+/* Plusieurs ennemis qui ne réagissent pas pareil */
+.hand .card.super-eff.part-eff { animation: none; box-shadow: 0 0 0 2px #ffe36b, 0 0 12px 2px #ffd84a99; }
+.hand .card.super-eff.part-eff::before { content: 'Super efficace sur certains'; }
+.hand .card.not-eff.part-eff { box-shadow: 0 0 0 2px #ff5a4a, 0 0 10px 2px #ff3b2e99; }
+.hand .card.not-eff.part-eff::before { content: 'Peu efficace sur certains'; }
 @keyframes superEff { 50% { box-shadow: 0 0 0 3px #fff3a8, 0 0 26px 8px #ffd84add, 0 0 44px #fff3a8cc; } }
 /* ——— Contour des cartes légendaires ——— */
 .legend-deco { position: absolute; inset: 0; pointer-events: none; z-index: 5; border-radius: inherit; overflow: hidden; }
@@ -1715,3 +1724,51 @@ img.sprite, .roster img { image-rendering: pixelated; }
 .gl-term { display: flex; flex-direction: column; gap: 3px; padding: 8px 11px; border-radius: 10px; background: rgba(20, 26, 40, 0.85); border-left: 4px solid var(--c, #8892a6); }
 .gl-term b { color: var(--c, #fff); font-size: 15px; }
 .gl-term span { color: #d6dbe6; font-size: 13px; line-height: 1.35; }
+
+/* Historique du combat (bouton 📜 de la barre du haut, seulement en combat) */
+.tb-log { display: none; margin-left: 10px; width: 34px; height: 30px; border-radius: 8px; border: 2px solid #8892a6; background: #1a2030; color: #fff; font-size: 15px; cursor: pointer; }
+.combat .tb-log { display: inline-block; }
+.tb-log:hover { border-color: var(--gold); }
+.combat-log { position: absolute; inset: 0; z-index: 60; background: rgba(5, 8, 16, 0.6); display: flex; align-items: center; justify-content: center; }
+.cl-panel { width: min(620px, 92%); height: 82%; display: flex; flex-direction: column; background: #121826; border: 2px solid #3a4560; border-radius: 14px; box-shadow: 0 10px 40px #000a; }
+.cl-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #2a3348; color: var(--gold); font-size: 18px; }
+.cl-close { padding: 4px 12px; font-size: 14px; }
+.cl-body { flex: 1; overflow-y: auto; padding: 8px 14px 14px; font-size: 14px; color: #d6dbe6; }
+.lg-turn-head { margin: 12px 0 4px; color: var(--gold); font-weight: 900; font-size: 15px; border-bottom: 1px solid #2a3348; }
+.lg-row { padding: 2px 0 2px 10px; border-left: 3px solid transparent; line-height: 1.35; }
+.lg-row.lg-turn { margin-top: 6px; padding-left: 0; color: #8fa0c0; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.lg-play { border-left-color: #4aa8ff; }
+.lg-enemy { border-left-color: #ff7a5c; }
+.lg-dmg b { color: #ffd166; }
+.lg-hurt b:last-of-type { color: #ff6b6b; }
+.lg-heal b:last-of-type { color: #6bdc7a; }
+.lg-block b:last-of-type { color: #7cc6ff; }
+.lg-ko { color: #ff9b9b; font-weight: 800; }
+.lg-note { color: #aab3c5; font-style: italic; }
+.lg-super { color: #ffe36b; font-style: normal; font-weight: 800; }
+.lg-weak { color: #ff8f85; font-style: normal; font-weight: 800; }
+
+/* Écran de fin : statistiques de la run */
+.fight-stats { width: min(760px, 94%); margin: 6px auto 10px; padding: 10px 14px; border-radius: 12px; background: rgba(12, 16, 28, 0.75); border: 1px solid #2f3a52; }
+.fs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
+.fs-grid div { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.fs-grid b { font-size: 20px; color: var(--gold); }
+.fs-grid span { font-size: 12px; color: #c3cad8; }
+.fs-top { margin-top: 10px; }
+.fs-title { font-weight: 900; color: #fff; font-size: 13px; margin-bottom: 4px; }
+.fs-bar { display: grid; grid-template-columns: 140px 1fr 50px 34px; align-items: center; gap: 8px; font-size: 13px; color: #d6dbe6; margin: 2px 0; }
+.fs-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fs-track { height: 9px; border-radius: 5px; background: #222a3c; overflow: hidden; }
+.fs-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, #ff9b4a, #ffd166); }
+.fs-bar b { color: #ffd166; text-align: right; }
+.fs-bar small { color: #8fa0c0; }
+
+/* Vue du deck : tri et filtres */
+.deck-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 4px 0 10px; }
+.deck-sort { padding: 5px 8px; border-radius: 8px; border: 2px solid #3a4560; background: #121826; color: #fff; font: 700 13px 'Nunito', sans-serif; cursor: pointer; }
+.deck-chip { padding: 4px 10px; border-radius: 14px; border: 2px solid #3a4560; background: #161d2d; color: #c3cad8; font: 800 12px 'Nunito', sans-serif; cursor: pointer; }
+.deck-chip:hover { border-color: #8892a6; }
+.deck-chip.on { background: var(--gold); border-color: var(--gold); color: #2a1d00; }
+.deck-sep { width: 10px; }
+.deck-count { color: #8fa0c0; font-size: 12px; font-weight: 800; margin-left: 6px; }
+.deck-empty { color: #aab3c5; font-style: italic; grid-column: 1 / -1; text-align: center; }

@@ -318,7 +318,8 @@ function startRun(character: CharacterId): void {
   if (params.has('boutique')) { clear(); return renderShop(screen, run, () => showMap(run), (onWin) => kecleonFight(run, onWin)); }
   // Pour tester l'écran de fin : ?fin=victoire ou ?fin=defaite (avec des statistiques d'exemple)
   if (params.get('fin')) {
-    run.act = 3; Object.assign(run, { combatsWon: 14, elitesDefeated: 3, duelsWon: 1, eventsSeen: 6, shiniesMet: 1, bossesDefeated: 3, bossNames: ['Dardargnan', 'Camérupt', 'Rayquaza'], lastEnemies: ['heatran'] });
+    run.act = 3; Object.assign(run, { combatsWon: 14, elitesDefeated: 3, duelsWon: 1, eventsSeen: 6, shiniesMet: 1, bossesDefeated: 3, bossNames: ['Dardargnan', 'Camérupt', 'Rayquaza'], lastEnemies: ['heatran'],
+      fightStats: { cards: { 'Aurasphère': { n: 18, dmg: 412 }, 'Ruse': { n: 40, dmg: 236 }, 'Poing-Karaté': { n: 12, dmg: 190 }, 'Détection': { n: 35, dmg: 0 } }, dealt: 1290, taken: 410, blocked: 380, healed: 95, maxHit: 58, maxHitCard: 'Aurasphère', turns: 96, fights: 17 } });
     return endRun(run, params.get('fin') === 'victoire');
   }
   // Pour tester : ?noeud=coffre | pension | ct

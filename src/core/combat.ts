@@ -102,6 +102,15 @@ export type CombatEvent =
   | { type: 'power'; power: PowerId; amount: number }
   | { type: 'ko'; target: Who };
 
+/** Repères de l'historique en plus des événements. */
+export type LogMark = { type: 'play'; name: string; target?: string } | { type: 'turn'; who: 'joueur' | 'ennemi' };
+
+/** Statistiques d'un combat (et cumulées sur la run). */
+export interface FightStats {
+  cards: Record<string, { n: number; dmg: number }>;
+  dealt: number; taken: number; blocked: number; healed: number; maxHit: number; maxHitCard: string;
+}
+
 export type Phase = 'joueur' | 'ennemi' | 'victoire' | 'defaite';
 
 export interface CombatOptions {
@@ -176,6 +185,12 @@ export class Combat {
   turn = 0;
   phase: Phase = 'joueur';
   private events: CombatEvent[] = [];
+  /** Historique du combat (bouton de la barre du haut) : les événements, les cartes jouées et les débuts de tour. */
+  readonly log: { turn: number; entry: CombatEvent | LogMark }[] = [];
+  private logged = 0;
+  /** Statistiques du combat, ajoutées à celles de la run (écran de fin). */
+  readonly stats: FightStats = { cards: {}, dealt: 0, taken: 0, blocked: 0, healed: 0, maxHit: 0, maxHitCard: '' };
+  private statCard = '';
   private nextEnemyUid = 1;
   private cardAuraUsed = false;
   private nextTempUid = 100000;
@@ -490,9 +505,33 @@ export class Combat {
 
   /** Vide et renvoie les événements produits depuis le dernier appel (pour les animations). */
   drainEvents(): CombatEvent[] {
+    this.syncLog();
     const out = this.events;
     this.events = [];
+    this.logged = 0;
     return out;
+  }
+
+  /** Recopie dans l'historique les événements pas encore notés, et compte les statistiques. */
+  private syncLog(): void {
+    for (; this.logged < this.events.length; this.logged++) {
+      const ev = this.events[this.logged];
+      if (ev.type === 'damage') {
+        if (ev.target === 'player' || ev.target === 'bebe') { this.stats.taken += ev.amount; this.stats.blocked += ev.blocked; }
+        else {
+          this.stats.dealt += ev.amount;
+          if (this.statCard) { const c = (this.stats.cards[this.statCard] ??= { n: 0, dmg: 0 }); c.dmg += ev.amount; }
+          if (ev.amount > this.stats.maxHit) { this.stats.maxHit = ev.amount; this.stats.maxHitCard = this.statCard; }
+        }
+      }
+      if (ev.type === 'heal' && ev.target === 'player') this.stats.healed += ev.amount;
+      this.log.push({ turn: this.turn, entry: ev });
+    }
+  }
+
+  private logMark(m: LogMark): void {
+    this.syncLog();
+    this.log.push({ turn: this.turn, entry: m });
   }
 
   needsTarget(card: Card): boolean {
@@ -719,6 +758,21 @@ export class Combat {
   // ——— Actions du joueur ———
 
   play(cardUid: number, targetUid?: number): boolean {
+    const card = this.hand.find((c) => c.uid === cardUid);
+    if (!card || !this.canPlay(card)) return this.playCard(cardUid, targetUid);
+    const name = baseName(this.def(card).name);
+    const tgt = targetUid !== undefined ? this.enemy(targetUid)?.name : undefined;
+    this.logMark({ type: 'play', name: this.def(card).name, target: this.def(card).target === 'ennemi' ? tgt ?? this.aliveEnemies()[0]?.name : undefined });
+    const prev = this.statCard; // Blabla Dodo joue une carte pendant une autre
+    this.statCard = name;
+    (this.stats.cards[name] ??= { n: 0, dmg: 0 }).n++;
+    const ok = this.playCard(cardUid, targetUid);
+    this.syncLog();
+    this.statCard = prev;
+    return ok;
+  }
+
+  private playCard(cardUid: number, targetUid?: number): boolean {
     const idx = this.hand.findIndex((c) => c.uid === cardUid);
     if (idx < 0) return false;
     const card = this.hand[idx];
@@ -886,6 +940,7 @@ export class Combat {
       if (this.player.statuses.sommeil! <= 0) { delete this.player.statuses.sommeil; this.events.push({ type: 'player-move', name: 'Tu te réveilles !' }); }
     }
     this.phase = 'ennemi';
+    this.logMark({ type: 'turn', who: 'ennemi' });
     this.player.freeTurn = false;
     this.player.hpLostEnemyTurn = 0;
     for (const e of this.aliveEnemies()) e.block = this.gimmickOf(e) === 'mur-roc' ? Math.floor(e.block / 2) : 0;
@@ -1075,6 +1130,7 @@ export class Combat {
 
   private startPlayerTurn(): void {
     this.turn++;
+    this.logMark({ type: 'turn', who: 'joueur' });
     this.phase = 'joueur';
     this.attacksThisTurn = 0;
     this.cardsThisTurn = 0;

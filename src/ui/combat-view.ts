@@ -11,13 +11,14 @@ import { backUrl, iconImg, iconUrl, orbUrl } from './card-assets';
 import { ENEMY_DEFS } from '../data/enemies';
 import { Combat, type CombatEvent, type EnemyState, type Fighter, type Who } from '../core/combat';
 import type { Card, CardDef, Effect, EnemyMove, PowerId, StatusId } from '../core/model';
-import { TYPE_LABELS, typeMultiplier, type PokeType } from '../core/types';
+import { hasImmunity, TYPE_LABELS, typeMultiplier, type PokeType } from '../core/types';
 import type { Run } from '../core/run';
 import { renderCard } from './card';
 import { cardDef } from '../data/cards';
 import { POWER_INFO, STATUS_INFO, TYPE_COLORS, cardText } from './labels';
 import { openDeckOverlay, topbar } from './run-ui';
 import { relicDef } from '../data/relics';
+import { openCombatLog } from './combat-log-view';
 import { asset, esc, sleep } from './util';
 
 const ENEMY_STEP_MS = 700;
@@ -215,6 +216,7 @@ export class CombatView {
     for (const ch of this.combat.enchantedCards) { const c = this.run.deck.find((x) => x.uid === ch.uid); if (c) c.defId = ch.defId; }
     // K.O. par type (objectifs de skins)
     for (const e of this.combat.enemies) if (e.hp <= 0) for (const t of e.types) this.run.typeKills[t] = (this.run.typeKills[t] ?? 0) + 1;
+    this.run.addFightStats(this.combat.stats, this.combat.turn);
     // Duo : on garde les PV de chacun pour la suite de la run
     if (this.combat.duo && this.run.duoHp) this.run.duoHp = this.combat.duoHp();
     this.onEnd({
@@ -429,13 +431,18 @@ export class CombatView {
     const target = this.selected === card.uid && this.hoverEnemy !== null ? this.hoverEnemy : undefined;
     const dmg = c.previewCardDamage(card, target);
     const mid = (n - 1) / 2;
-    // Efficacité du type : brille si un ennemi y est faible, lueur rouge si tous y résistent
+    // Efficacité du type, ennemi par ennemi (sur l'ennemi visé s'il y en a un) :
+    // tous pareils → Super efficace / Pas très efficace / Peu d'effet (immunité) ; sinon « … sur certains »
     let eff = '';
     if (d.category === 'attaque' && (dmg !== null || base)) {
       const foes = target !== undefined ? c.aliveEnemies().filter((e) => e.uid === target) : c.aliveEnemies();
-      const mults = foes.map((e) => typeMultiplier(d.pokeType, e.types));
-      if (mults.some((m) => m > 1)) eff = 'super-eff';
-      else if (mults.length && mults.every((m) => m < 1)) eff = 'not-eff';
+      const res = foes.map((e) => (hasImmunity(d.pokeType, e.types) ? 'imm' : typeMultiplier(d.pokeType, e.types) > 1 ? 'super' : typeMultiplier(d.pokeType, e.types) < 1 ? 'weak' : 'neutre'));
+      const all = (k: string) => res.length > 0 && res.every((r) => r === k);
+      if (all('super')) eff = 'super-eff';
+      else if (all('imm')) eff = 'imm-eff';
+      else if (res.length && res.every((r) => r === 'weak' || r === 'imm')) eff = 'not-eff';
+      else if (res.includes('super')) eff = 'super-eff part-eff';
+      else if (res.includes('weak') || res.includes('imm')) eff = 'not-eff part-eff';
     }
     return renderCard(d, {
       uid: card.uid,
@@ -903,7 +910,7 @@ export class CombatView {
       if (!p || !el) continue;
       const b = document.createElement('div');
       b.className = `dmg-preview ${p.eff}`;
-      const effTxt = p.eff === 'super' ? 'Super efficace !' : p.eff === 'faible' ? 'Peu efficace' : p.eff === 'immunite' ? 'Peu d’effet…' : '';
+      const effTxt = p.eff === 'super' ? 'Super efficace !' : p.eff === 'faible' ? 'Pas très efficace…' : p.eff === 'immunite' ? 'Peu d’effet…' : '';
       b.innerHTML = `<b>−${p.perHit}${p.hits !== '1' ? ` × ${p.hits}` : ''}</b>${effTxt ? `<small>${effTxt}</small>` : ''}${p.blocked ? `<small class="blk">${p.blocked} absorbé${p.blocked > 1 ? 's' : ''} par la Protection</small>` : ''}`;
       el.appendChild(b);
     }
@@ -1106,6 +1113,7 @@ export class CombatView {
       if (t.closest('.end-turn')) return void this.endTurn();
       if (t.closest('.next') && !this.ended) return this.finish();
       if (t.closest('.tb-deck')) return openDeckOverlay(this.root, { title: 'Ton deck' }, this.run);
+      if (t.closest('.tb-log')) return openCombatLog(this.root, this.combat);
       // Piles : la pioche est montrée triée (pas dans l'ordre où elle sera piochée)
       const c = this.combat;
       // Œil Spectral : la pioche est montrée dans l'ordre (la prochaine carte en premier)

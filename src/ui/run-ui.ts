@@ -20,6 +20,7 @@ export function topbar(run: Run, label: string, hp = run.hp, duo?: { posipi: num
       <span class="tb-floor" data-tip="Étage de la Tour du Temps">Étage ${run.floor}</span>
       <button class="tb-deck" data-tip="Voir ton deck">Deck ${run.deck.length}</button>
       <span class="tb-berries">${berrySlots(run)}</span>
+      <button class="tb-log" data-tip="Historique du combat">📜</button>
       <button class="tb-sound" data-tip="Régler le son">${soundIcon()}</button>
       <button class="tb-menu" data-tip="Menu : sauvegarder et quitter">☰</button>
     </div>
@@ -84,26 +85,72 @@ export interface DeckPickOptions {
 
 /** Fenêtre qui montre des cartes du deck ; un clic sur une carte la choisit. */
 export function openDeckOverlay(host: HTMLElement, o: DeckPickOptions, run: Run): void {
-  const cards = o.keepOrder ? [...(o.cards ?? run.deck)] : [...(o.cards ?? run.deck)].sort((a, b) => cardDef(a.defId).name.localeCompare(cardDef(b.defId).name));
+  const all = [...(o.cards ?? run.deck)];
+  let cards = all;
+  // Tri et filtres de la vue du deck
+  let sort = o.keepOrder ? 'ordre' : 'nom';
+  let cat = '';
+  let up = false;
+  const flags = new Set<string>();
+  const RAR: Record<string, number> = { depart: 0, commune: 1, 'peu-commune': 2, rare: 3, legendaire: 4 };
+  const apply = () => {
+    let list = all.filter((c) => {
+      const d = cardDef(c.defId, c.upgraded);
+      if (cat && d.category !== cat) return false;
+      if (flags.has('up') && !c.upgraded) return false;
+      if (flags.has('ench') && !d.enchants?.length) return false;
+      if (flags.has('chroma') && !d.chroma) return false;
+      return true;
+    });
+    const key = (c: typeof all[number]) => cardDef(c.defId, c.upgraded);
+    const byName = (a: typeof all[number], b: typeof all[number]) => key(a).name.localeCompare(key(b).name);
+    if (sort === 'nom') list = list.sort(byName);
+    if (sort === 'cout') list = list.sort((a, b) => (key(a).xCost ? 99 : key(a).cost) - (key(b).xCost ? 99 : key(b).cost) || byName(a, b));
+    if (sort === 'type') list = list.sort((a, b) => key(a).pokeType.localeCompare(key(b).pokeType) || byName(a, b));
+    if (sort === 'categorie') list = list.sort((a, b) => key(a).category.localeCompare(key(b).category) || byName(a, b));
+    if (sort === 'rarete') list = list.sort((a, b) => (RAR[key(b).rarity] ?? 0) - (RAR[key(a).rarity] ?? 0) || byName(a, b));
+    cards = list;
+  };
+  apply();
+  const gridHtml = () => cards.length
+    ? cards.map((c) => renderCard(cardDef(c.defId, up || c.upgraded), { uid: c.uid, classes: o.onPick ? 'pickable' : up && !c.upgraded ? 'preview-up' : '' })).join('')
+    : '<p class="deck-empty">Aucune carte ne correspond à ces filtres.</p>';
+  const chip = (k: string, label: string, on: boolean, attr: string) => `<button class="deck-chip ${on ? 'on' : ''}" data-${attr}="${k}">${label}</button>`;
+  const tools = () => `
+      <select class="deck-sort">${[...(o.keepOrder ? [['ordre', 'Ordre de pioche']] : []), ['nom', 'Nom'], ['cout', 'Coût'], ['type', 'Type'], ['categorie', 'Catégorie'], ['rarete', 'Rareté']].map(([k, l]) => `<option value="${k}" ${k === sort ? 'selected' : ''}>Trier : ${l}</option>`).join('')}</select>
+      ${chip('', 'Toutes', cat === '', 'cat')}${chip('attaque', 'Attaques', cat === 'attaque', 'cat')}${chip('technique', 'Techniques', cat === 'technique', 'cat')}${chip('talent', 'Talents', cat === 'talent', 'cat')}${chip('statut', 'Statuts', cat === 'statut', 'cat')}
+      <span class="deck-sep"></span>
+      ${chip('up', '+ Améliorées', flags.has('up'), 'flag')}${chip('ench', '✦ Enchantées', flags.has('ench'), 'flag')}${chip('chroma', '🌈 Chromatiques', flags.has('chroma'), 'flag')}
+      <span class="deck-count">${cards.length} / ${all.length}</span>`;
+  const redraw = () => { apply(); el.querySelector('.deck-tools')!.innerHTML = tools(); el.querySelector('.deck-grid')!.innerHTML = gridHtml(); };
   const el = document.createElement('div');
   el.className = 'overlay deck-overlay';
   el.innerHTML = `
     <div class="deck-panel">
       <h2>${esc(o.title)}</h2>
       ${o.onPick ? '' : '<label class="deck-up-toggle"><input type="checkbox"> Voir les versions améliorées</label>'}
-      <div class="deck-grid">
-        ${cards.map((c) => renderCard(cardDef(c.defId, c.upgraded), { uid: c.uid, classes: o.onPick ? 'pickable' : '' })).join('')}
-      </div>
+      ${all.length > 1 ? `<div class="deck-tools">${tools()}</div>` : ''}
+      <div class="deck-grid">${gridHtml()}</div>
       <button class="btn close">${esc(o.cancelLabel ?? 'Fermer')}</button>
     </div>`;
   host.appendChild(el);
   // Aperçu des améliorations : chaque carte montre sa version + (pour envisager un entraînement)
   el.querySelector<HTMLInputElement>('.deck-up-toggle input')?.addEventListener('change', (ev) => {
-    const up = (ev.target as HTMLInputElement).checked;
-    el.querySelector('.deck-grid')!.innerHTML = cards.map((c) => renderCard(cardDef(c.defId, up || c.upgraded), { uid: c.uid, classes: up && !c.upgraded ? 'preview-up' : '' })).join('');
+    up = (ev.target as HTMLInputElement).checked;
+    el.querySelector('.deck-grid')!.innerHTML = gridHtml();
+  });
+  el.addEventListener('change', (ev) => {
+    const t = ev.target as HTMLElement;
+    if (t.classList.contains('deck-sort')) { sort = (t as HTMLSelectElement).value; redraw(); }
   });
   el.addEventListener('click', (ev) => {
     const t = ev.target as HTMLElement;
+    const ch = t.closest<HTMLElement>('.deck-chip');
+    if (ch) {
+      if (ch.dataset.cat !== undefined) cat = ch.dataset.cat;
+      if (ch.dataset.flag) { const k = ch.dataset.flag; if (flags.has(k)) flags.delete(k); else flags.add(k); }
+      return redraw();
+    }
     // Amélioration : on montre la carte de base à gauche et sa version améliorée à droite avant de confirmer
     if (t.closest('.up-confirm')) {
       const uid = Number((t.closest('.up-compare') as HTMLElement).dataset.uid);
