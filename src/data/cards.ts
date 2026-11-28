@@ -163,7 +163,7 @@ function fusionDef(defId: string, upgraded: boolean): CardDef {
 }
 
 /** Enchantements du Marché noir : un bonus ajouté à une carte. */
-export type EnchantRarity = 'commun' | 'rare' | 'legendaire';
+export type EnchantRarity = 'commun' | 'rare' | 'epique' | 'legendaire';
 export const ENCHANTS: Record<string, { name: string; text: string; rarity?: EnchantRarity; ok: (d: CardDef) => boolean; apply: (d: CardDef) => CardDef }> = {
   vif: { name: 'Vif', text: 'coûte 1 PA de moins', ok: (d) => d.cost > 0, apply: (d) => ({ ...d, cost: d.cost - 1 }) },
   force: {
@@ -204,6 +204,11 @@ export const ENCHANTS: Record<string, { name: string; text: string; rarity?: Enc
     apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'attraction', stacks: 1, on: 'cible' }] }),
   },
   fortifiant: { name: 'Fortifiant', rarity: 'rare', text: '+1 Attaque', ok: () => true, apply: (d) => ({ ...d, effects: [...d.effects, { kind: 'statut', status: 'attaque', stacks: 1, on: 'soi' }] }) },
+  // ——— Épiques (violets) ———
+  perenne: {
+    name: 'Pérenne', rarity: 'epique', text: 'annule l’effet Épuisée de la carte', ok: (d) => !!d.keywords?.includes('epuisee'),
+    apply: (d) => { const kw = (d.keywords ?? []).filter((k) => k !== 'epuisee'); return { ...d, keywords: kw.length ? kw : undefined }; },
+  },
   // ——— Légendaires ———
   echo: { name: 'Écho', rarity: 'legendaire', text: 'se joue deux fois à sa première utilisation de chaque combat', ok: (d) => !d.effects.some((e) => e.kind === 'decouverte') && !d.keywords?.includes('echo'), apply: (d) => ({ ...d, keywords: [...(d.keywords ?? []), 'echo'] }) },
   etreinte: {
@@ -221,15 +226,16 @@ export const ENCHANTS: Record<string, { name: string; text: string; rarity?: Enc
 };
 
 /** Chances d'obtenir un enchantement de chaque rareté. */
-export const ENCHANT_ODDS: Record<EnchantRarity, number> = { commun: 0.85, rare: 0.13, legendaire: 0.02 };
+export const ENCHANT_ODDS: Record<EnchantRarity, number> = { commun: 0.8, rare: 0.13, epique: 0.05, legendaire: 0.02 };
 
 /** Tire un enchantement qui convient à la carte : les rares et légendaires sont bien plus rares. */
 export function rollEnchant(d: CardDef, rand: () => number, exclude: string[] = []): string | null {
   const ok = Object.keys(ENCHANTS).filter((k) => ENCHANTS[k].ok(d) && !exclude.includes(k));
   if (!ok.length) return null;
   const x = rand();
-  const want: EnchantRarity = x < ENCHANT_ODDS.legendaire ? 'legendaire' : x < ENCHANT_ODDS.legendaire + ENCHANT_ODDS.rare ? 'rare' : 'commun';
-  const order: EnchantRarity[] = want === 'legendaire' ? ['legendaire', 'rare', 'commun'] : want === 'rare' ? ['rare', 'commun'] : ['commun', 'rare'];
+  const L = ENCHANT_ODDS.legendaire, E = L + ENCHANT_ODDS.epique, R = E + ENCHANT_ODDS.rare;
+  const want: EnchantRarity = x < L ? 'legendaire' : x < E ? 'epique' : x < R ? 'rare' : 'commun';
+  const order: EnchantRarity[] = want === 'legendaire' ? ['legendaire', 'epique', 'rare', 'commun'] : want === 'epique' ? ['epique', 'commun', 'rare'] : want === 'rare' ? ['rare', 'commun'] : ['commun', 'rare'];
   for (const r of order) {
     const pool = ok.filter((k) => (ENCHANTS[k].rarity ?? 'commun') === r);
     if (pool.length) return pool[Math.floor(rand() * pool.length)];
@@ -304,7 +310,7 @@ export function scaleX(d: CardDef, x: number, amountsOnly = false): CardDef {
 
 /** Carte chromatique : double toutes les valeurs des effets (dégâts, Protection, statuts, multiplicateurs, bonus…). */
 const CHROMA_FIELDS = ['amount', 'stacks', 'mult', 'dmg', 'bonus', 'perCard', 'parCopie', 'parBebe', 'siBebe', 'times'] as const;
-function chromaScale(d: CardDef): CardDef {
+export function chromaScale(d: CardDef): CardDef {
   const effects = d.effects.map((e): Effect => {
     const o = { ...e } as Record<string, unknown>;
     for (const k of CHROMA_FIELDS) if (typeof o[k] === 'number' && k in e) o[k] = (o[k] as number) * 2;

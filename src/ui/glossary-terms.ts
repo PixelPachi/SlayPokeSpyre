@@ -102,7 +102,7 @@ export function glossaryTermSections(): { title: string; note?: string; terms: T
     },
     {
       title: 'Enchantements',
-      terms: Object.values(ENCHANTS).map((e) => ({ name: e.name, color: e.rarity === 'legendaire' ? '#ffb300' : e.rarity === 'rare' ? '#c9a0ff' : undefined, text: e.text.charAt(0).toUpperCase() + e.text.slice(1) + '.' })),
+      terms: Object.values(ENCHANTS).map((e) => ({ name: e.name, color: e.rarity === 'legendaire' ? '#ffb300' : e.rarity === 'epique' ? '#b46bff' : e.rarity === 'rare' ? '#4aa8ff' : undefined, text: e.text.charAt(0).toUpperCase() + e.text.slice(1) + '.' })),
     },
   ];
 }

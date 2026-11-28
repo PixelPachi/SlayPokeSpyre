@@ -173,7 +173,7 @@ export function renderBlackMarket(root: HTMLElement, run: Run, done: Done): void
         <div class="shop-item ${o.sold ? 'sold' : ''} ${!o.sold && run.money < o.price ? 'poor' : ''}" data-i="${i}">
           ${renderCard(cardDef(o.id))}
           <div class="price">${o.sold ? 'Vendu' : `${o.price} ₽`}</div>
-          <small class="ench-tag ${ENCHANTS[o.k].rarity ?? 'commun'}">${ENCHANTS[o.k].rarity === 'legendaire' ? '★ Légendaire — ' : ENCHANTS[o.k].rarity === 'rare' ? '◆ Rare — ' : ''}✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
+          <small class="ench-tag ${ENCHANTS[o.k].rarity ?? 'commun'}">${ENCHANTS[o.k].rarity === 'legendaire' ? '★ Légendaire — ' : ENCHANTS[o.k].rarity === 'epique' ? '◆ Épique — ' : ENCHANTS[o.k].rarity === 'rare' ? '◆ Rare — ' : ''}✦ ${esc(ENCHANTS[o.k].name)} : ${esc(ENCHANTS[o.k].text)}</small>
         </div>`).join('')}</div>`;
     root.innerHTML = shell(run, label, shopScene({
       keeper: asset('sprites/pokemon/kecleon-violet.png'), keeperCls: 'hd', theme: 'dark', title: 'Marché noir', bg: 'backgrounds/marche-noir.jpg', hero: asset(skinSprite(run.form.dex, run.skin)),

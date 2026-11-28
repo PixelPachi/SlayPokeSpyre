@@ -76,3 +76,12 @@ it('le Charme Chroma peut se trouver en run sans skin chromatique (objet rare)',
   const shiny = new Run('CHARME', 'caninos'); shiny.applySkin('shiny');
   expect(shiny.relicPool()).not.toContain('charme-chroma');
 });
+
+it('Pérenne (enchantement violet) retire Épuisée et ne va que sur les cartes épuisées', async () => {
+  const { ENCHANTS, cardDef, enchantId, allCards } = await import('../src/data/cards');
+  const ex = allCards().find((c) => c.keywords?.includes('epuisee'))!;
+  const plain = allCards().find((c) => !c.keywords?.includes('epuisee'))!;
+  expect(ENCHANTS.perenne.ok(ex)).toBe(true);
+  expect(ENCHANTS.perenne.ok(plain)).toBe(false);
+  expect(cardDef(enchantId('perenne', ex.id)).keywords ?? []).not.toContain('epuisee');
+});
